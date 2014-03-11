@@ -1,4 +1,6 @@
 <?php
+# Inspired by http://phpstylist.sourceforge.net/
+#
 # Copyright (c) 2014, Carlos C
 # All rights reserved.
 #
