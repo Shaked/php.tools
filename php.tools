@@ -1,0 +1,114 @@
+#!/bin/bash
+# Copyright (c) 2014, Carlos C
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+DIRS="`find -maxdepth 1 -type d | egrep -iv "cover|vendor|web|^\.$" | xargs realpath | tr "\\n" " "`"
+
+function execute(){
+	echo "$0 [command]"
+	echo "	test - execute PHPUnit"
+	echo "	cover - execute PHPUnit with cover output"
+	echo "	watch test - execute PHPUnit, but keeps watching for file changes to trigger the test automatically"
+	echo "	watch test - execute PHPUnit with cover output, but keeps watching for file changes to trigger the test automatically"
+	echo "	fmt [filename] - format output according to project formatting rules"
+}
+
+function update_phpunit_xml(){
+	phpunit_xml_template="\
+	<phpunit\
+	         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\
+	         xsi:noNamespaceSchemaLocation=\"http://schema.phpunit.de/3.7/phpunit.xsd\"\
+	         colors=\"true\"\
+	         processIsolation=\"true\"\
+	         verbose=\"false\">\
+	         <testsuite>\
+	"
+	for i in $DIRS;
+	do
+		phpunit_xml_template="$phpunit_xml_template<directory suffix=\"_test.php\">$i</directory>"
+	done;
+	phpunit_xml_template="$phpunit_xml_template</testsuite></phpunit>"
+
+	echo $phpunit_xml_template > phpunit.xml
+}
+
+if [ "test" == "$1" ] || [ "test" == "$2" ];
+then
+	update_phpunit_xml
+	function execute(){
+		vendor/bin/phpunit
+	}
+fi;
+
+if [ "cover" == "$1" ] || [ "cover" == "$2" ];
+then
+	update_phpunit_xml
+	function execute(){
+		vendor/bin/phpunit --coverage-html=cover/
+	}
+fi;
+
+if [ "fmt" == "$1" ];
+then
+	if [ "" == "$2" ];
+	then
+		function execute(){
+			for i in $DIRS;
+			do
+				find $DIRS -ipath "*.php" | while read line;
+				do
+					(php -l $line &> /dev/null) && (cp $line $line~; php codeFormatter.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line"
+				done;
+			done;
+		}
+	else
+		line=$2
+		function execute(){
+			(php -l $line &> /dev/null) && (cp $line $line~; php codeFormatter.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line"
+		}
+	fi
+
+fi
+
+sha=0
+previous_sha=0
+update_sha () {
+	command="ls -lR $DIRS | sha1sum"
+	sha=`bash -c "$command"`
+}
+changed () {
+	echo "Running... $1 $2";
+	execute
+	previous_sha=$sha
+}
+compare () {
+	update_sha
+	if [[ $sha != $previous_sha ]] ;
+	then
+		changed;
+	fi
+}
+watch () {
+	while true; do
+		compare
+		read -s -t 1 && (
+			execute
+		)
+	done
+}
+
+if [ "watch" == "$1" ];
+then
+	watch
+else
+	execute
+fi
