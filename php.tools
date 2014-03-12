@@ -25,12 +25,12 @@ function execute(){
 }
 
 function update_phpunit_xml(){
+	#processIsolation=\"true\"\
 	phpunit_xml_template="\
 	<phpunit\
 	         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\
 	         xsi:noNamespaceSchemaLocation=\"http://schema.phpunit.de/3.7/phpunit.xsd\"\
 	         colors=\"true\"\
-	         processIsolation=\"true\"\
 	         verbose=\"false\">\
 	         <testsuite>\
 	"
@@ -40,12 +40,20 @@ function update_phpunit_xml(){
 	done;
 	phpunit_xml_template="$phpunit_xml_template</testsuite>"
 
-	phpunit_xml_template="$phpunit_xml_template<filter><blacklist>"
+	phpunit_xml_template="$phpunit_xml_template<filter>"
+	phpunit_xml_template="$phpunit_xml_template<blacklist>"
 	for i in $DIRS;
 	do
 		phpunit_xml_template="$phpunit_xml_template<directory suffix=\"_test.php\">$i</directory>"
 	done;
-	phpunit_xml_template="$phpunit_xml_template</blacklist></filter></phpunit>"
+	phpunit_xml_template="$phpunit_xml_template</blacklist>"
+	phpunit_xml_template="$phpunit_xml_template<whitelist processUncoveredFilesFromWhitelist=\"true\" >"
+	for i in $DIRS;
+	do
+		phpunit_xml_template="$phpunit_xml_template<directory suffix=\".php\">$i</directory>"
+	done;
+	phpunit_xml_template="$phpunit_xml_template</whitelist>"
+	phpunit_xml_template="$phpunit_xml_template</filter></phpunit>"
 
 	echo $phpunit_xml_template > phpunit.xml
 }
