@@ -77,7 +77,7 @@ if [ "cover" == "$1" ] ;
 then
 	update_phpunit_xml
 	function execute(){
-		vendor/bin/phpunit --coverage-html=cover/
+		vendor/bin/phpunit --coverage-text --coverage-html=cover/
 	}
 fi;
 
