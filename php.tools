@@ -119,7 +119,7 @@ update_sha () {
 }
 changed () {
 	echo "Running... $1 $2";
-	execute
+	time execute
 	previous_sha=$sha
 }
 compare () {
@@ -142,5 +142,5 @@ if [ "watch" == "$WATCH" ];
 then
 	watch
 else
-	execute
+	time execute
 fi
