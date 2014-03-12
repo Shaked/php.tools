@@ -68,7 +68,7 @@ class CodeFormatter {
 		"SPACE_AROUND_COMPARISON" => false,
 		"SPACE_AROUND_CONCAT" => false,
 		"SPACE_AROUND_DOUBLE_ARROW" => true,
-		"SPACE_AROUND_DOUBLE_COLON" => true,
+		"SPACE_AROUND_DOUBLE_COLON" => false,
 		"SPACE_AROUND_LOGICAL" => true,
 		"SPACE_AROUND_OBJ_OPERATOR" => false,
 		"SPACE_INSIDE_FOR" => false,
@@ -481,10 +481,15 @@ class CodeFormatter {
 							$arr_parentheses["i".$array_level] = 0;
 						}
 					}
+				case T_VARIABLE:
+					if($this->is_token(array(T_STRING), true)){
+						$this->append_code(' ', false);
+					}
+					$this->append_code($text, false);
+					break;
 				case T_STRING:
 				case T_CONSTANT_ENCAPSED_STRING:
 				case T_ENCAPSED_AND_WHITESPACE:
-				case T_VARIABLE:
 				case T_CHARACTER:
 				case T_STRING_VARNAME:
 				case ST_AT:
