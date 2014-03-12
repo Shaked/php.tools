@@ -41,17 +41,17 @@ function update_phpunit_xml(){
 	phpunit_xml_template="$phpunit_xml_template</testsuite>"
 
 	phpunit_xml_template="$phpunit_xml_template<filter>"
-	phpunit_xml_template="$phpunit_xml_template<blacklist>"
-	for i in $DIRS;
-	do
-		phpunit_xml_template="$phpunit_xml_template<directory suffix=\"_test.php\">$i</directory>"
-	done;
-	phpunit_xml_template="$phpunit_xml_template</blacklist>"
 	phpunit_xml_template="$phpunit_xml_template<whitelist processUncoveredFilesFromWhitelist=\"true\" >"
 	for i in $DIRS;
 	do
 		phpunit_xml_template="$phpunit_xml_template<directory suffix=\".php\">$i</directory>"
 	done;
+	phpunit_xml_template="$phpunit_xml_template<exclude>"
+	for i in $DIRS;
+	do
+		phpunit_xml_template="$phpunit_xml_template<directory suffix=\"_test.php\">$i</directory>"
+	done;
+	phpunit_xml_template="$phpunit_xml_template</exclude>"
 	phpunit_xml_template="$phpunit_xml_template</whitelist>"
 	phpunit_xml_template="$phpunit_xml_template</filter></phpunit>"
 
