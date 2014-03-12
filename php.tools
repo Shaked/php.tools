@@ -94,12 +94,28 @@ then
 	elif [ "all" == "$2" ];
 	then
 		function execute(){
+			J=""
 			for i in $DIRS;
 			do
-				find $DIRS -ipath "*.php" | while read line;
+				files=`find $i -ipath "*.php"`
+				for line in $files
 				do
-					(php -l $line &> /dev/null) && (cp $line $line~; php codeFormatter.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line"
+					( (php -l $line &> /dev/null) && (cp $line $line~; php codeFormatter.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line" ) &
+					J="$J $!"
+					JCNT=`echo $J | wc -w`
+					if [ $JCNT -gt 10 ];
+					then
+						for jj in $J;
+						do
+							wait $jj;
+						done;
+						J=""
+					fi
 				done;
+			done;
+			for jj in $J;
+			do
+				wait $jj;
 			done;
 		}
 	else
