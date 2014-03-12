@@ -18,8 +18,10 @@ function execute(){
 	echo "	test - execute PHPUnit"
 	echo "	cover - execute PHPUnit with cover output"
 	echo "	watch test - execute PHPUnit, but keeps watching for file changes to trigger the test automatically"
-	echo "	watch test - execute PHPUnit with cover output, but keeps watching for file changes to trigger the test automatically"
-	echo "	fmt [filename] - format output according to project formatting rules"
+	echo "	watch cover - execute PHPUnit with cover output, but keeps watching for file changes to trigger the test automatically"
+	echo "	fmt [filename] - format filename according to project formatting rules"
+	echo "	fmt all - format all files according to project formatting rules"
+	echo "	watch fmt [all|filename] - watch for changes and format according to project formatting rules"
 }
 
 function update_phpunit_xml(){
