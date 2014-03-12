@@ -38,7 +38,14 @@ function update_phpunit_xml(){
 	do
 		phpunit_xml_template="$phpunit_xml_template<directory suffix=\"_test.php\">$i</directory>"
 	done;
-	phpunit_xml_template="$phpunit_xml_template</testsuite></phpunit>"
+	phpunit_xml_template="$phpunit_xml_template</testsuite>"
+
+	phpunit_xml_template="$phpunit_xml_template<filter><blacklist>"
+	for i in $DIRS;
+	do
+		phpunit_xml_template="$phpunit_xml_template<directory suffix=\"_test.php\">$i</directory>"
+	done;
+	phpunit_xml_template="$phpunit_xml_template</blacklist></filter></phpunit>"
 
 	echo $phpunit_xml_template > phpunit.xml
 }
