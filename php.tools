@@ -41,7 +41,14 @@ function update_phpunit_xml(){
 	echo $phpunit_xml_template > phpunit.xml
 }
 
-if [ "test" == "$1" ] || [ "test" == "$2" ];
+WATCH=""
+if [ "watch" == "$1" ];
+then
+	WATCH="watch"
+	shift
+fi
+
+if [ "test" == "$1" ] ;
 then
 	update_phpunit_xml
 	function execute(){
@@ -49,7 +56,7 @@ then
 	}
 fi;
 
-if [ "cover" == "$1" ] || [ "cover" == "$2" ];
+if [ "cover" == "$1" ] ;
 then
 	update_phpunit_xml
 	function execute(){
@@ -114,7 +121,7 @@ watch () {
 	done
 }
 
-if [ "watch" == "$1" ];
+if [ "watch" == "$WATCH" ];
 then
 	watch
 else
