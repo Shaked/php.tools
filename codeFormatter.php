@@ -68,7 +68,7 @@ class CodeFormatter {
 		"SPACE_AROUND_COMPARISON" => false,
 		"SPACE_AROUND_CONCAT" => false,
 		"SPACE_AROUND_DOUBLE_ARROW" => true,
-		"SPACE_AROUND_DOUBLE_COLON" => true,
+		"SPACE_AROUND_DOUBLE_COLON" => false,
 		"SPACE_AROUND_LOGICAL" => true,
 		"SPACE_AROUND_OBJ_OPERATOR" => false,
 		"SPACE_INSIDE_FOR" => false,
@@ -105,6 +105,7 @@ class CodeFormatter {
 		$switch_arr = array();
 		$halt_parser = false;
 		$after = false;
+		$space_after_t_use = false;
 		foreach ($this->tkns as $index => $token) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -200,8 +201,10 @@ class CodeFormatter {
 							break;
 						}
 					}
-					$this->append_code($this->get_space($this->options["SPACE_OUTSIDE_PARENTHESES"] || $space_after).$text.$this->get_space($this->options["SPACE_INSIDE_PARENTHESES"]));
+					$break_line_after_semicolon = $this->is_token(ST_SEMI_COLON, true)?$this->get_crlf_indent():'';
+					$this->append_code($break_line_after_semicolon.$this->get_space($this->options["SPACE_OUTSIDE_PARENTHESES"] || $space_after || $space_after_t_use).$text.$this->get_space($this->options["SPACE_INSIDE_PARENTHESES"]));
 					$space_after = false;
+					$space_after_t_use = false;
 					break;
 				case ST_PARENTHESES_CLOSE:
 					if ($array_level>0) {
@@ -376,6 +379,11 @@ class CodeFormatter {
 					$if_level++;
 					$if_parentheses["i".$if_level] = 0;
 					break;
+				case T_USE:
+					$space_after_t_use = true;
+					$space_before_t_use = $this->is_token(ST_PARENTHESES_CLOSE, true);
+					$this->append_code($this->get_space($space_before_t_use).$text.$this->get_space(), false);
+					break;
 				case T_FUNCTION:
 				case T_CLASS:
 				case T_INTERFACE:
@@ -481,10 +489,15 @@ class CodeFormatter {
 							$arr_parentheses["i".$array_level] = 0;
 						}
 					}
+				case T_VARIABLE:
+					if ($this->is_token(array(T_STRING, T_ARRAY), true)) {
+						$this->append_code(' ', false);
+					}
+					$this->append_code($text, false);
+					break;
 				case T_STRING:
 				case T_CONSTANT_ENCAPSED_STRING:
 				case T_ENCAPSED_AND_WHITESPACE:
-				case T_VARIABLE:
 				case T_CHARACTER:
 				case T_STRING_VARNAME:
 				case ST_AT:
@@ -492,6 +505,7 @@ class CodeFormatter {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
 				case T_NS_SEPARATOR:
+					$space_after_t_use = false;
 					$this->append_code($text, false);
 					break;
 				case T_CLOSE_TAG:
