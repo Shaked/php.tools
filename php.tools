@@ -62,6 +62,14 @@ then
 	if [ "" == "$2" ];
 	then
 		function execute(){
+			git status -s | grep -iv '??' | grep -i "\.php$" | awk -F ' ' '{ print $2 } ' | while read line;
+			do
+				(php -l $line &> /dev/null) && (cp $line $line~; php codeFormatter.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line"
+			done;
+		}
+	elif [ "all" == "$2" ];
+	then
+		function execute(){
 			for i in $DIRS;
 			do
 				find $DIRS -ipath "*.php" | while read line;
