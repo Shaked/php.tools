@@ -94,7 +94,7 @@ class CodeFormatter {
 		$in_concat = false;
 		$space_after = false;
 		$curly_open = false;
-		$space_after_bracket = false;
+		$space_before_bracket = false;
 		$array_level = 0;
 		$arr_parentheses = array();
 		$switch_level = 0;
@@ -106,6 +106,7 @@ class CodeFormatter {
 		$halt_parser = false;
 		$after = false;
 		$space_after_t_use = false;
+		$bracket_level = 0;
 		foreach ($this->tkns as $index => $token) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -183,10 +184,15 @@ class CodeFormatter {
 					$in_function = false;
 					break;
 				case ST_BRACKET_OPEN:
-					$this->append_code($this->get_space($space_after_bracket).$text);
-					$space_after_bracket = false;
+					if ($this->is_token(array(T_DOUBLE_ARROW, T_RETURN), true)) {
+						$space_before_bracket = true;
+					}
+					$bracket_level++;
+					$this->append_code($this->get_space($space_before_bracket).$text);
+					$space_before_bracket = false;
 					break;
 				case ST_BRACKET_CLOSE:
+					$bracket_level--;
 					$this->append_code($text);
 					break;
 				case ST_PARENTHESES_OPEN:
@@ -234,7 +240,7 @@ class CodeFormatter {
 					}
 					break;
 				case ST_COMMA:
-					if ($array_level>0) {
+					if ($array_level>0 && 0 == $bracket_level) {
 						$this->append_code($text.$this->get_crlf_indent($in_for));
 					} else {
 						$this->append_code($text.$this->get_space($this->options["SPACE_AFTER_COMMA"]));
@@ -275,7 +281,7 @@ class CodeFormatter {
 						$space_after = $condition;
 					}
 					if ($this->is_token(ST_BRACKET_OPEN)) {
-						$space_after_bracket = $condition;
+						$space_before_bracket = $condition;
 					}
 					$this->append_code($this->get_space($condition).$text.$this->get_space($condition));
 					break;
