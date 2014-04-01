@@ -11,12 +11,15 @@
 # 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-DIRS="`find -maxdepth 1 -type d | egrep -iv "cover|vendor|web|^\.$" | xargs -l1 readlink -f | tr "\\n" " "`"
+CURPWD="`readlink -f .`"
+DIRS="`find -maxdepth 1 -type d | egrep -iv "cover|vendor|web|^\.$" | xargs -l1 readlink -f | tr "\\n" " " | sed "s|$CURPWD/|./|g"`"
 
 function execute(){
 	echo "$0 [command]"
+	echo "	ctags - generate ctags"
 	echo "	test - execute PHPUnit"
 	echo "	cover - execute PHPUnit with cover output"
+	echo "	watch ctags - execute PHPUnit, but keeps watching for file changes to trigger ctags generator"
 	echo "	watch test - execute PHPUnit, but keeps watching for file changes to trigger the test automatically"
 	echo "	watch cover - execute PHPUnit with cover output, but keeps watching for file changes to trigger the test automatically"
 	echo "	fmt [filename] - format filename according to project formatting rules"
@@ -64,6 +67,25 @@ then
 	WATCH="watch"
 	shift
 fi
+
+if [ "ctags" == "$1" ] ;
+then
+	function execute(){
+		echo $DIRS;
+		nice -n 20 ionice -c3 ctags --PHP-kinds=+cf \
+		--regex-PHP='/define\("([^ ]*)"/\1/d/' \
+		--regex-PHP="/define\('([^ ]*)'/\1/d/" \
+		--regex-PHP="/const ([^ ]*)/\1/d/" \
+		--regex-PHP='/trait ([^ ]*)/\1/c/' \
+		--regex-PHP='/final class ([^ ]*)/\1/c/' \
+		--regex-PHP='/final abstract class ([^ ]*)/\1/c/' \
+		--regex-PHP='/abstract class ([^ ]*)/\1/c/' \
+		--regex-PHP='/interface ([^ ]*)/\1/c/' \
+		--regex-PHP='/(public |static |abstract |protected |private |final public )+function ([^ (]*)/\2/f/' -R -f .tags-new $DIRS;
+		(cat .tags-new | sort -k1) &> .tags_sorted_by_file
+		mv .tags-new .tags;
+	}
+fi;
 
 if [ "test" == "$1" ] ;
 then
