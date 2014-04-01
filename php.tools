@@ -107,6 +107,11 @@ then
 				wait $jj;
 			done;
 		}
+	elif [ "clean" == "$2" ];
+	then
+		function execute(){
+			find -iwholename '*~' -delete
+		}
 	elif [ "all" == "$2" ];
 	then
 		function execute(){
