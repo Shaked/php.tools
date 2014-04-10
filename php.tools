@@ -13,6 +13,7 @@
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 CURPWD="`readlink -f .`"
 DIRS="`find -maxdepth 1 -type d | egrep -iv "cover|vendor|web|^\.$" | xargs -l1 readlink -f | tr "\\n" " " | sed "s|$CURPWD/|./|g"`"
+FMTWORKERS=10
 
 function execute(){
 	echo "$0 [command]"
@@ -110,6 +111,7 @@ then
 	if [ "" == "$2" ];
 	then
 		function execute(){
+			echo "Starting $FMTWORKERS workers..."
 			J=""
 			files=$( git status -s | grep -iv '??' | grep -i "\.php$" | awk -F ' ' '{ print $2 } ' )
 			for line in $files
@@ -117,7 +119,7 @@ then
 				(php -l $line &> /dev/null) && (cp $line $line~; php codeFormatter.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line" &
 				J="$J $!"
 				JCNT=`echo $J | wc -w`
-				if [ $JCNT -gt 10 ];
+				if [ $JCNT -gt $FMTWORKERS ];
 				then
 					for jj in $J;
 					do
@@ -139,6 +141,7 @@ then
 	elif [ "all" == "$2" ];
 	then
 		function execute(){
+			echo "Starting $FMTWORKERS workers..."
 			J=""
 			for i in $DIRS;
 			do
@@ -148,7 +151,7 @@ then
 					( (php -l $line &> /dev/null) && (cp $line $line~; php codeFormatter.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line" ) &
 					J="$J $!"
 					JCNT=`echo $J | wc -w`
-					if [ $JCNT -gt 10 ];
+					if [ $JCNT -gt $FMTWORKERS ];
 					then
 						for jj in $J;
 						do
