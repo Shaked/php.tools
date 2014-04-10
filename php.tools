@@ -90,16 +90,18 @@ fi;
 if [ "test" == "$1" ] ;
 then
 	update_phpunit_xml
+	shift
 	function execute(){
-		vendor/bin/phpunit
+		vendor/bin/phpunit "$@"
 	}
 fi;
 
 if [ "cover" == "$1" ] ;
 then
 	update_phpunit_xml
+	shift
 	function execute(){
-		vendor/bin/phpunit --coverage-text --coverage-html=cover/
+		vendor/bin/phpunit --coverage-text --coverage-html=cover/ --coverage-clover=clover.xml --log-junit=junit.xml "$@"
 	}
 fi;
 
@@ -192,14 +194,14 @@ watch () {
 	while true; do
 		compare
 		read -s -t 1 && (
-			execute
+			execute "$@"
 		)
 	done
 }
 
 if [ "watch" == "$WATCH" ];
 then
-	watch
+	watch "$@"
 else
-	time execute
+	time execute "$@"
 fi
