@@ -60,12 +60,13 @@ class CodeFormatter {
 		"LINE_BEFORE_CURLY" => false,
 		"LINE_BEFORE_CURLY_FUNCTION" => false,
 		"LINE_BEFORE_FUNCTION" => false,
+		"ORDER_USE" => true,
 		"SPACE_AFTER_COMMA" => true,
 		"SPACE_AFTER_IF" => true,
 		"SPACE_AROUND_ARITHMETIC" => false,
 		"SPACE_AROUND_ASSIGNMENT" => true,
 		"SPACE_AROUND_COLON_QUESTION" => false,
-		"SPACE_AROUND_COMPARISON" => false,
+		"SPACE_AROUND_COMPARISON" => true,
 		"SPACE_AROUND_CONCAT" => false,
 		"SPACE_AROUND_DOUBLE_ARROW" => true,
 		"SPACE_AROUND_DOUBLE_COLON" => false,
@@ -86,7 +87,50 @@ class CodeFormatter {
 	private $code = '';
 	private $ptr = 0;
 	private $tkns = 0;
+	private function orderUseClauses($source = ''){
+		$use_stack = [];
+		$tokens = token_get_all($source);
+		$new_tokens = [];
+		while(list(, $token) = each($tokens)){
+			list($id, $text) = $this->get_token($token);
+			if(T_CLASS == $id || T_FUNCTION == $id){
+				break;
+			}elseif(T_USE == $id){
+				$use_item = $text;
+				while(list(, $token) = each($tokens)){
+					list($id, $text) = $this->get_token($token);
+					$use_item .= $text;
+					if(ST_SEMI_COLON == $id){
+						break;
+					}
+				}
+				$use_stack[] = $use_item;
+				$token = new SurrogateToken();
+			}
+			$new_tokens[] = $token;
+		}
+		sort($use_stack);
+		$return = '';
+		foreach($new_tokens as $token){
+			if($token instanceof SurrogateToken){
+				$return .= array_shift($use_stack);
+			}elseif(is_array($token)){
+				$return .= $token[1];
+			}else{
+				$return .= $token;
+			}
+		}
+		prev($tokens);
+		while(list(, $token) = each($tokens)){
+			list($id, $text) = $this->get_token($token);
+			$return .= $text;
+		}
+		return $return;
+	}
 	public function formatCode($source = '') {
+		if($this->options['ORDER_USE']){
+			$source = $this->orderUseClauses($source);
+		}
 		$this->tkns = token_get_all($source);
 		$in_for = false;
 		$in_break = false;
@@ -730,3 +774,4 @@ class CodeFormatter {
 		}
 	}
 }
+class SurrogateToken {}
