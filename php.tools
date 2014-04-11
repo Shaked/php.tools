@@ -25,6 +25,7 @@ function execute(){
 	echo "	watch cover - execute PHPUnit with cover output, but keeps watching for file changes to trigger the test automatically"
 	echo "	fmt [filename] - format filename according to project formatting rules"
 	echo "	fmt all - format all files according to project formatting rules"
+	echo "	fmt clean - remove all backup files - *~"
 	echo "	watch fmt [all|filename] - watch for changes and format according to project formatting rules"
 }
 
