@@ -92,23 +92,35 @@ class CodeFormatter {
 		$use_stack = [];
 		$tokens = token_get_all($source);
 		$new_tokens = [];
-		while (list(, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
-			if (T_CLASS == $id || T_FUNCTION == $id) {
-				break;
-			} elseif (T_USE == $id) {
-				$use_item = $text;
-				while (list(, $token) = each($tokens)) {
-					list($id, $text) = $this->get_token($token);
-					$use_item .= $text;
-					if (ST_SEMI_COLON == $id) {
-						break;
+		$next_tokens = [];
+		while (list(, $pop_token) = each($tokens)) {
+			$next_tokens[] = $pop_token;
+			while(($token = array_shift($next_tokens))){
+				list($id, $text) = $this->get_token($token);
+				if (T_USE == $id) {
+					$use_item = $text;
+					while (list(, $token) = each($tokens)) {
+						list($id, $text) = $this->get_token($token);
+
+						if (ST_SEMI_COLON == $id) {
+							$use_item .= $text;
+							break;
+						}elseif (ST_COMMA == $id) {
+							$use_item .= ST_SEMI_COLON;
+							$next_tokens[] = [T_USE,'use'];
+							break;
+						}else{
+							$use_item .= $text;
+						}
 					}
+					$use_stack[] = $use_item;
+					$token = new SurrogateToken();
 				}
-				$use_stack[] = $use_item;
-				$token = new SurrogateToken();
+				$new_tokens[] = $token;
+				if (T_CLASS == $id || T_FUNCTION == $id) {
+					break 2;
+				}
 			}
-			$new_tokens[] = $token;
 		}
 		natcasesort($use_stack);
 		$alias_list = [];
@@ -119,6 +131,7 @@ class CodeFormatter {
 			} else {
 				$alias = basename(str_replace('\\', '/', trim(substr($use, strlen('use'),-1))));
 			}
+			$alias = strtolower($alias);
 			$alias_list[$alias] = strtolower($use);
 			$alias_count[$alias] = 0;
 		}
@@ -135,7 +148,7 @@ class CodeFormatter {
 				$return .= $text;
 			}
 		}
-		prev($tokens);
+		//prev($tokens);
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
 			$lower_text = strtolower($text);
@@ -149,7 +162,7 @@ class CodeFormatter {
 				return 0 == $v;
 			}));
 			foreach ($unused_import as $v) {
-				$return = str_replace($alias_list[$v], null, $return);
+				$return = str_ireplace($alias_list[$v], null, $return);
 			}
 		}
 		return $return;
