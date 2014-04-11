@@ -119,7 +119,7 @@ class CodeFormatter {
 			} else {
 				$alias = basename(str_replace('\\', '/', trim(substr($use, strlen('use'),-1))));
 			}
-			$alias_list[$alias] = $use;
+			$alias_list[$alias] = strtolower($use);
 			$alias_count[$alias] = 0;
 		}
 		$return = '';
@@ -128,8 +128,9 @@ class CodeFormatter {
 				$return .= array_shift($use_stack);
 			} else {
 				list($id, $text) = $this->get_token($token);
-				if (T_STRING == $id && isset($alias_list[$text])) {
-					$alias_count[$text]++;
+				$lower_text = strtolower($text);
+				if (T_STRING == $id && isset($alias_list[$lower_text])) {
+					$alias_count[$lower_text]++;
 				}
 				$return .= $text;
 			}
@@ -137,8 +138,9 @@ class CodeFormatter {
 		prev($tokens);
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
-			if (T_STRING == $id && isset($alias_list[$text])) {
-				$alias_count[$text]++;
+			$lower_text = strtolower($text);
+			if (T_STRING == $id && isset($alias_list[$lower_text])) {
+				$alias_count[$lower_text]++;
 			}
 			$return .= $text;
 		}
