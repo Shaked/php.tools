@@ -15,10 +15,10 @@
 ARCH=${BASH_VERSINFO[5]}
 CURPWD=$(php -r "echo realpath('.');")
 if [[ $ARCH == *apple* ]]; then
-DIRS="`find . -depth 1 -type d | egrep -iv "cover|vendor|web|fixtures|^\.$" | php -r "echo implode(' ', array_map(function(\\\$v){return str_replace('$CURPWD', '.',realpath(\\\$v)); }, array_filter(explode(PHP_EOL, file_get_contents('php://stdin')))));"`"
+DIRS="`find . -depth 1 -type d | egrep -iv "cover|vendor|web|fixtures|docs|^\.$" | php -r "echo implode(' ', array_map(function(\\\$v){return str_replace('$CURPWD', '.',realpath(\\\$v)); }, array_filter(explode(PHP_EOL, file_get_contents('php://stdin')))));"`"
 FMT_CLEAN="find . -ipath '*~' -delete"
 else
-DIRS="`find -maxdepth 1 -type d | egrep -iv "cover|vendor|web|fixtures|^\.$" | xargs -l1 readlink -f | tr "\\n" " " | sed "s|$CURPWD/|./|g"`"
+DIRS="`find -maxdepth 1 -type d | egrep -iv "cover|vendor|web|fixtures|docs|^\.$" | xargs -l1 readlink -f | tr "\\n" " " | sed "s|$CURPWD/|./|g"`"
 FMT_CLEAN="find -iwholename '*~' -delete"
 fi
 FMTWORKERS=2
@@ -47,18 +47,27 @@ then
 	FMT=true
 fi
 
+PHPDOC=false
+if [ -e vendor/bin/phpdoc.php ];
+then
+	PHPDOC=true
+fi
+
 function execute(){
 	echo "$0 [command]"
 	$CTAGS && echo "	ctags - generate ctags"
 	$PHPUNIT && echo "	test - execute PHPUnit"
 	$PHPUNIT && echo "	cover - execute PHPUnit with cover output"
+	$PHPDOC && echo "	doc - execute phpDocumentor"
 	$CTAGS && echo "	watch ctags - execute PHPUnit, but keeps watching for file changes to trigger ctags generator"
 	$PHPUNIT && echo "	watch test - execute PHPUnit, but keeps watching for file changes to trigger the test automatically"
 	$PHPUNIT && echo "	watch cover - execute PHPUnit with cover output, but keeps watching for file changes to trigger the test automatically"
+	$PHPDOC && echo "	watch doc - execute phpDocumentor, but keeps watching for file changes to trigger the generation automatically"
 	$FMT && echo "	fmt [filename] - format filename according to project formatting rules"
 	$FMT && echo "	fmt all - format all files according to project formatting rules"
 	$FMT && echo "	fmt clean - remove all backup files - *~"
 	$FMT && echo "	watch fmt [all|filename] - watch for changes and format according to project formatting rules"
+
 	exit 0
 }
 
@@ -146,6 +155,19 @@ then
 	shift
 	function execute(){
 		vendor/bin/phpunit --coverage-text --coverage-html=cover/ --coverage-clover=clover.xml --log-junit=junit.xml "$@"
+	}
+fi;
+
+
+$PHPDOC && if [ "doc" == "$1" ] ;
+then
+	function execute(){
+		NEW_DIRS=""
+		for i in $DIRS;
+		do
+			NEW_DIRS="-d $i $NEW_DIRS"
+		done;
+		php vendor/bin/phpdoc.php $NEW_DIRS -t docs/
 	}
 fi;
 
