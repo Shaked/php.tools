@@ -154,6 +154,15 @@ then
 	update_phpunit_xml
 	shift
 	function execute(){
+		TEST=""
+		if [[ $1 == */* ]]; then
+			TEST="$1Test $1_test.php"
+			shift
+		elif [[ $1 == *\\* ]]; then
+			FN=${1//\\/\/}
+			TEST="$1Test ${FN}_test.php"
+			shift
+		fi
 		vendor/bin/phpunit --coverage-text --coverage-html=cover/ --coverage-clover=clover.xml --log-junit=junit.xml "$@"
 	}
 fi;
