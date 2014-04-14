@@ -178,7 +178,7 @@ then
 		function execute(){
 			echo "Starting $FMTWORKERS workers..."
 			J=""
-			files=$( git status -s | grep -iv '??' | grep -i "\.php$" | awk -F ' ' '{ print $2 } ' )
+			files=$( git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 } ' )
 			for line in $files
 			do
 				(php -l $line &> /dev/null) && (cp $line $line~; php codeFormatter.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line" &
