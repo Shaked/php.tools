@@ -163,7 +163,7 @@ then
 			TEST="$1Test ${FN}_test.php"
 			shift
 		fi
-		vendor/bin/phpunit --coverage-text --coverage-html=cover/ --coverage-clover=clover.xml --log-junit=junit.xml "$@"
+		vendor/bin/phpunit --coverage-text --coverage-html=cover/ --coverage-clover=clover.xml --log-junit=junit.xml $TEST "$@"
 	}
 fi;
 
