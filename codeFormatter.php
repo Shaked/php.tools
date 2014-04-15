@@ -47,6 +47,7 @@ class CodeFormatter {
 		"ADD_MISSING_BRACES" => true,
 		"ALIGN_ARRAY_ASSIGNMENT" => true,
 		"ALIGN_VAR_ASSIGNMENT" => true,
+		"CATCH_ALONG_CURLY" => true,
 		"ELSE_ALONG_CURLY" => true,
 		"INDENT_CASE" => true,
 		"KEEP_REDUNDANT_LINES" => false,
@@ -78,6 +79,7 @@ class CodeFormatter {
 		"SPACE_OUTSIDE_PARENTHESES" => false,
 		"VERTICAL_ARRAY" => true,
 		"VERTICAL_CONCAT" => false,
+		"WHILE_ALONG_CURLY" => true,
 	);
 	private $indent_size = 1;
 	private $indent_char = "\t";
@@ -454,7 +456,6 @@ class CodeFormatter {
 				case T_FOR:
 					$in_for = true;
 				case T_FOREACH:
-				case T_WHILE:
 				case T_DO:
 				case T_IF:
 				case T_SWITCH:
@@ -468,6 +469,11 @@ class CodeFormatter {
 					}
 					$if_level++;
 					$if_parentheses["i".$if_level] = 0;
+					break;
+				case T_WHILE:
+					$space_after = $this->options["SPACE_AFTER_IF"];
+					$condition = $this->options['WHILE_ALONG_CURLY'] && $this->is_token(ST_CURLY_CLOSE, true);
+					$this->append_code($this->get_space($condition).$text.$this->get_space($space_after), $condition);
 					break;
 				case T_USE:
 					$space_after_t_use = true;
@@ -664,6 +670,10 @@ class CodeFormatter {
 						$this->append_code((!$this->options["LINE_BEFORE_CURLY"] || $text == ""?' ':$this->get_crlf_indent(false,-1)).$text.$this->get_crlf_indent());
 						$if_pending++;
 					}
+					break;
+				case T_CATCH:
+					$condition = $this->options['CATCH_ALONG_CURLY'] && $this->is_token(ST_CURLY_CLOSE, true);
+					$this->append_code($this->get_space($condition).$text, $condition);
 					break;
 				default:
 					$this->append_code($text.' ', false);
