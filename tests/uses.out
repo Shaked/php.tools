@@ -1,0 +1,7 @@
+<?php
+
+use B;
+use C;
+new B;
+new C;
+?>

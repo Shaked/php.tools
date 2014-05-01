@@ -37,11 +37,13 @@ define("ST_QUOTE", '"');
 define("ST_REFERENCE", "&");
 define("ST_SEMI_COLON", ";");
 define("ST_TIMES", "*");
-$fmt = new CodeFormatter();
-if (!isset($argv[1])) {
-	exit();
+if (!isset($testEnv)) {
+	$fmt = new CodeFormatter();
+	if (!isset($argv[1])) {
+		exit();
+	}
+	echo $fmt->formatCode(file_get_contents($argv[1]));
 }
-echo $fmt->formatCode(file_get_contents($argv[1]));
 class CodeFormatter {
 	private $options = array(
 		"ADD_MISSING_BRACES" => true,
