@@ -586,7 +586,7 @@ class CodeFormatter {
 						}
 					}
 				case T_VARIABLE:
-					if ($this->is_token(array(T_STRING, T_ARRAY), true)) {
+					if ($this->is_token(array(T_STRING, T_ARRAY), true) && !$this->is_token(array(T_OPEN_TAG), true)) {
 						$this->append_code(' ', false);
 					}
 					$this->append_code($text, false);
