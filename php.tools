@@ -35,6 +35,20 @@ FMT_CLEAN="find -iwholename '*~' -delete"
 fi
 FMTWORKERS=2
 
+CLOC=false
+which cloc &> /dev/null
+if [ 0 == $? ];
+then
+	CLOC=true
+	CLOCBIN=`which cloc`
+fi
+which ./cloc &> /dev/null
+if [ 0 == $? ];
+then
+	CLOC=true
+	CLOCBIN=`which ./cloc`
+fi
+
 CTAGS=false
 which ctags &> /dev/null
 if [ 0 == $? ];
@@ -71,14 +85,40 @@ function execute(){
 	$PHPUNIT && echo "	test - execute PHPUnit"
 	$PHPUNIT && echo "	cover - execute PHPUnit with cover output"
 	$PHPDOC && echo "	doc - execute phpDocumentor"
+	$CLOC && echo "	cloc - execute script to count lines of code"
 	$CTAGS && echo "	watch ctags - execute PHPUnit, but keeps watching for file changes to trigger ctags generator"
 	$PHPUNIT && echo "	watch test - execute PHPUnit, but keeps watching for file changes to trigger the test automatically"
 	$PHPUNIT && echo "	watch cover - execute PHPUnit with cover output, but keeps watching for file changes to trigger the test automatically"
 	$PHPDOC && echo "	watch doc - execute phpDocumentor, but keeps watching for file changes to trigger the generation automatically"
+	$CLOC && echo "	watch doc - execute script to count lines of code, but keeps watching for file changes to trigger the count automatically"
 	$FMT && echo "	fmt [filename] - format filename according to project formatting rules"
 	$FMT && echo "	fmt all - format all files according to project formatting rules"
 	$FMT && echo "	fmt clean - remove all backup files - *~"
 	$FMT && echo "	watch fmt [all|filename] - watch for changes and format according to project formatting rules"
+
+	if [ !$CLOC ];
+	then
+		echo ""
+		echo "	download cloc from http://cloc.sourceforge.net/"
+	fi
+	if [ !$PHPUNIT ];
+	then
+		echo ""
+		echo "	add phpunit to composer.json:"
+		echo '	phpunit/phpunit": "4.0.*"'
+	fi
+	if [ !$PHPDOC ];
+	then
+		echo ""
+		echo "	add phpdoc to composer.json:"
+		echo '	"phpdocumentor/phpdocumentor": "2.4.*"'
+	fi
+	if [ !$CTAGS ];
+	then
+		echo ""
+		echo "	install exuberant ctags:"
+		echo "	http://ctags.sourceforge.net/"
+	fi
 
 	exit 0
 }
@@ -123,6 +163,14 @@ then
 	WATCH="watch"
 	shift
 fi
+
+$CLOC && if [ "cloc" == "$1" ] ;
+then
+	function execute(){
+		echo $DIRS;
+		nice -n 20 $CLOCBIN $DIRS;
+	}
+fi;
 
 $CTAGS && if [ "ctags" == "$1" ] ;
 then
