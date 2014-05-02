@@ -1,11 +1,23 @@
 <?php
-do {
-	$a = 0;
-} while ();
-while () {
-	$a = 0;
+while (true) {
+}
+while (true) {
+}
+try {
+} catch(Exception $e) {
 }
 while () {
-	$a = 0;
+}
+for ($i = 0;$i < 1;$i++) {
+}
+while () {
+}
+while () {
+	while () {
+	}
+	while () {
+	}
+	do {
+	} while ();
 }
 ?>

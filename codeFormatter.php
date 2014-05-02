@@ -187,7 +187,9 @@ class CodeFormatter {
 		$if_pending = 0;
 		$in_break = false;
 		$in_concat = false;
+		$in_do_context = false;
 		$in_for = false;
+		$in_for_context = false;
 		$in_function = false;
 		$inside_array_dereference = false;
 		$space_after = false;
@@ -484,8 +486,10 @@ class CodeFormatter {
 					break;
 				case T_FOR:
 					$in_for = true;
+					$in_for_context = true;
 				case T_FOREACH:
 				case T_DO:
+					$in_do_context = true;
 				case T_IF:
 				case T_SWITCH:
 					$space_after = $this->options["SPACE_AFTER_IF"];
@@ -501,7 +505,9 @@ class CodeFormatter {
 					break;
 				case T_WHILE:
 					$space_after = $this->options["SPACE_AFTER_IF"];
-					$condition = $this->options['WHILE_ALONG_CURLY'] && $this->is_token(ST_CURLY_CLOSE, true);
+					$condition = !$in_for_context && $in_do_context && $this->options['WHILE_ALONG_CURLY'] && $this->is_token(ST_CURLY_CLOSE, true);
+					$in_do_context = false;
+					$in_for_context = false;
 					$this->append_code($this->get_space($condition).$text.$this->get_space($space_after), $condition);
 					break;
 				case T_USE:

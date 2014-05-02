@@ -1,0 +1,9 @@
+<?php
+while(true){}
+while(true){}
+try{}catch(Exception $e){}
+while(){}
+for($i=0;$i<1;$i++){}
+while(){}
+while(){while(){}while(){}do{}while();}
+?>
