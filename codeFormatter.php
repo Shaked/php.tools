@@ -48,7 +48,7 @@ class CodeFormatter {
 	private $options = array(
 		"ADD_MISSING_BRACES" => true,
 		"ALIGN_ARRAY_ASSIGNMENT" => true,
-		"ALIGN_VAR_ASSIGNMENT" => true,
+		"ALIGN_VAR_ASSIGNMENT" => false,
 		"CATCH_ALONG_CURLY" => true,
 		"ELSE_ALONG_CURLY" => true,
 		"INDENT_CASE" => true,
