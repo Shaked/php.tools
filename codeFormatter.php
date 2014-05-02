@@ -191,6 +191,7 @@ class CodeFormatter {
 		$in_for = false;
 		$in_for_context = false;
 		$in_function = false;
+		$in_heredoc_context = false;
 		$inside_array_dereference = 0;
 		$space_after = false;
 		$space_after_t_use = false;
@@ -252,7 +253,7 @@ class CodeFormatter {
 						$this->set_indent(-1);
 						$in_concat = false;
 					}
-					$this->append_code($text.$this->get_crlf($this->options["LINE_AFTER_BREAK"] && $in_break).$this->get_crlf_indent($in_for));
+					$this->append_code($this->get_crlf($in_heredoc_context).$text.$this->get_crlf($this->options["LINE_AFTER_BREAK"] && $in_break).$this->get_crlf_indent($in_for));
 					while ($if_pending > 0) {
 						$text = $this->options["ADD_MISSING_BRACES"]?"}":"";
 						$this->set_indent(-1);
@@ -265,6 +266,9 @@ class CodeFormatter {
 						if ($this->is_token(array(T_ELSE, T_ELSEIF))) {
 							break;
 						}
+					}
+					if ($in_heredoc_context) {
+						$in_heredoc_context = false;
 					}
 					if ($this->for_idx == 0) {
 						$in_for = false;
@@ -344,7 +348,7 @@ class CodeFormatter {
 							}
 						}
 					}
-					$this->append_code($this->get_space($this->options["SPACE_INSIDE_PARENTHESES"]).$text.$this->get_space($this->options["SPACE_OUTSIDE_PARENTHESES"]));
+					$this->append_code($this->get_crlf($in_heredoc_context).$this->get_space($this->options["SPACE_INSIDE_PARENTHESES"]).$text.$this->get_space($this->options["SPACE_OUTSIDE_PARENTHESES"]));
 					if ($if_level > 0) {
 						if (isset($arr_parentheses["i".$array_level])) {
 							$if_parentheses["i".$if_level]--;
@@ -359,6 +363,9 @@ class CodeFormatter {
 								$if_level--;
 							}
 						}
+					}
+					if ($in_heredoc_context) {
+						$in_heredoc_context = false;
 					}
 					break;
 				case ST_COMMA:
@@ -541,7 +548,8 @@ class CodeFormatter {
 					$this->append_code($this->get_space($this->options["SPACE_AROUND_ASSIGNMENT"]).$text);
 					break;
 				case T_END_HEREDOC:
-					$this->append_code($this->get_crlf().$text.$this->get_crlf_indent());
+					$this->append_code($this->get_crlf().$text.$this->get_crlf().$this->get_crlf_indent(), false);
+					$in_heredoc_context = true;
 					break;
 				case T_COMMENT:
 					if ('//' == substr($text, 0, 2)) {
