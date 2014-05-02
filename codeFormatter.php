@@ -543,6 +543,9 @@ class CodeFormatter {
 					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
+					if ($this->is_token(ST_CURLY_OPEN)) {
+						break;
+					}
 					if (is_array($this->tkns[$index-1])) {
 						$pad = $this->tkns[$index-1][1];
 						$i = strlen($pad)-1;
