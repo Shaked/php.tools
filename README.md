@@ -5,7 +5,7 @@ php.tools
 - Master: [![Build Status](https://travis-ci.org/dericofilho/php.tools.svg?branch=master)](https://travis-ci.org/dericofilho/php.tools)
 
 ## Requirements
-
+- Git
 - PHP >= 5.4.0 to run the formatter. Note that the formatter can parse even a PHP file version 4 in case needed.
 - Optionally, if Exuberant Ctags, vendored PHPUnit and phpDocumentos are available, the functions for unit testing, code coverage and document generation are enabled.
 
