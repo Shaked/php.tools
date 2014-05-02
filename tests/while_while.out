@@ -6,18 +6,18 @@ while (true) {
 try {
 } catch(Exception $e) {
 }
-while () {
+while (true) {
 }
 for ($i = 0;$i < 1;$i++) {
 }
-while () {
+while (true) {
 }
-while () {
-	while () {
+while (true) {
+	while (true) {
 	}
-	while () {
+	while (true) {
 	}
 	do {
-	} while ();
+	} while (true);
 }
 ?>

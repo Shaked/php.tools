@@ -29,7 +29,7 @@ $a = [
 		'b',
 	]),
 ];
-function $a() {
+function a() {
 	return [$a];
 }
 $a = [];

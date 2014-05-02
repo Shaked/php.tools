@@ -2,8 +2,8 @@
 while(true){}
 while(true){}
 try{}catch(Exception $e){}
-while(){}
+while(true){}
 for($i=0;$i<1;$i++){}
-while(){}
-while(){while(){}while(){}do{}while();}
+while(true){}
+while(true){while(true){}while(true){}do{}while(true);}
 ?>

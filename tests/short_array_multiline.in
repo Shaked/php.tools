@@ -10,7 +10,7 @@ $a = ['a' => getId(), 'b' => getId('a')];
 $a = ['a' => getId(), 'b' => getId(['a'])];
 $a = ['a' => getId(), 'b' => getId(['a','b'])];
 
-function $a(){
+function a(){
 	return [$a];
 }
 
