@@ -191,7 +191,7 @@ class CodeFormatter {
 		$in_for = false;
 		$in_for_context = false;
 		$in_function = false;
-		$inside_array_dereference = false;
+		$inside_array_dereference = 0;
 		$space_after = false;
 		$space_after_t_use = false;
 		$space_before_bracket = false;
@@ -285,7 +285,7 @@ class CodeFormatter {
 							break;
 						}
 					} else {
-						$inside_array_dereference = true;
+						$inside_array_dereference++;
 					}
 					if ($this->is_token(array(T_DOUBLE_ARROW, T_RETURN), true) || $this->is_token(ST_EQUAL, true)) {
 						$space_before_bracket = true;
@@ -295,10 +295,10 @@ class CodeFormatter {
 					$space_before_bracket = false;
 					break;
 				case ST_BRACKET_CLOSE:
-					if (!$inside_array_dereference && $array_level > 0) {
+					if (0 == $inside_array_dereference && $array_level > 0) {
 						$arr_bracket["i".$array_level]--;
 						if ($arr_bracket["i".$array_level] == 0) {
-							$comma = substr(trim($this->code),-1) != "," && substr(trim($this->code),-1) != "[" && $this->options['VERTICAL_ARRAY']?",":"";
+							$comma = !$this->is_token(array(T_COMMENT, T_DOC_COMMENT), true) && substr(trim($this->code),-1) != "," && substr(trim($this->code),-1) != "[" && $this->options['VERTICAL_ARRAY']?",":"";
 							$this->set_indent(-1);
 							$this->append_code($comma.$this->get_crlf_indent().$text.$this->get_crlf_indent());
 							unset($arr_bracket["i".$array_level]);
@@ -306,7 +306,9 @@ class CodeFormatter {
 							break;
 						}
 					}
-					$inside_array_dereference = false;
+					if ($inside_array_dereference > 0) {
+						$inside_array_dereference--;
+					}
 					$this->append_code($this->get_space($this->options["SPACE_INSIDE_PARENTHESES"]).$text.$this->get_space($this->options["SPACE_OUTSIDE_PARENTHESES"]));
 					break;
 				case ST_PARENTHESES_OPEN:
