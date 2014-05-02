@@ -1,6 +1,9 @@
 php.tools
 =========
 
+## Build statuses
+- Master: [![Build Status](https://travis-ci.org/dericofilho/php.tools.svg?branch=master)](https://travis-ci.org/dericofilho/php.tools)
+
 ## Requirements
 
 - PHP >= 5.4.0 to run the formatter. Note that the formatter can parse even a PHP file version 4 in case needed.
