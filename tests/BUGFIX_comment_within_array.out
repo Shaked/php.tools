@@ -4,4 +4,14 @@ $array = array(
 	/*TODO*/
 	'k' => 'v',
 	/*TODO*/
+	'k' => 'v',
+	/*TODO*/
 );
+$array = [
+	'a',
+	/*TODO*/
+	'k' => 'v',
+	/*TODO*/
+	'k' => 'v',
+	/*TODO*/
+];

@@ -544,6 +544,8 @@ class CodeFormatter {
 				case T_COMMENT:
 					if ('//' == substr($text, 0, 2)) {
 						$text = '/*'.trim(str_replace(['/*', '*/'], '', substr($text, 2))).'*/';
+					} elseif ('#' == substr($text, 0, 1)) {
+						$text = '/*'.trim(str_replace(['/*', '*/'], '', substr($text, 1))).'*/';
 					}
 				case T_DOC_COMMENT:
 					if (is_array($this->tkns[$index-1])) {
