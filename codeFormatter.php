@@ -333,7 +333,7 @@ class CodeFormatter {
 						if (isset($arr_parentheses["i".$array_level])) {
 							$arr_parentheses["i".$array_level]--;
 							if ($arr_parentheses["i".$array_level] == 0) {
-								$comma = substr(trim($this->code),-1) != "," && $this->options['VERTICAL_ARRAY']?",":"";
+								$comma = !$this->is_token(array(T_COMMENT, T_DOC_COMMENT), true) && substr(trim($this->code),-1) != "," && $this->options['VERTICAL_ARRAY']?",":"";
 								$this->set_indent(-1);
 								$this->append_code($comma.$this->get_crlf_indent().$text.$this->get_crlf_indent());
 								unset($arr_parentheses["i".$array_level]);
@@ -542,7 +542,9 @@ class CodeFormatter {
 					$this->append_code($this->get_crlf().$text.$this->get_crlf_indent());
 					break;
 				case T_COMMENT:
-					$text = '/*'.trim(substr($text, 2)).'*/';
+					if ('//' == substr($text, 0, 2)) {
+						$text = '/*'.trim(str_replace(['/*', '*/'], '', substr($text, 2))).'*/';
+					}
 				case T_DOC_COMMENT:
 					if (is_array($this->tkns[$index-1])) {
 						$pad = $this->tkns[$index-1][1];

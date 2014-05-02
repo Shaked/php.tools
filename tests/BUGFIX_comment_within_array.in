@@ -1,0 +1,6 @@
+<?php
+$array = array(
+'a',
+// TODO
+'k' => 'v', //TODO
+);

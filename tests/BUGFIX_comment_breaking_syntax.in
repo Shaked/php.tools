@@ -1,0 +1,22 @@
+<?php
+class Test
+{
+	protected function func($hotel_id, $force_etb = false)
+	{
+		$loader->get_needs()
+			->set_needed(ETB_Hotel_Loader_Needs::NEED_360)
+			->set_needed(ETB_Hotel_Loader_Needs::NEED_VIDEO)
+			->set_needed(ETB_Hotel_Loader_Needs::NEED_DESCRIPTIONS)
+			->set_needed(ETB_Hotel_Loader_Needs::NEED_FACILITIES)
+			->set_needed(ETB_Hotel_Loader_Needs::NEED_POLICIES)
+			->set_needed(ETB_Hotel_Loader_Needs::NEED_IMAGES)
+			->set_needed(ETB_Hotel_Loader_Needs::NEED_RATINGS)
+			->set_needed(ETB_Hotel_Loader_Needs::NEED_ROOMS)
+			->set_needed(ETB_Hotel_Loader_Needs::NEED_EXTRA_FIELDS)
+			->set_needed(ETB_Hotel_Loader_Needs::NEED_LESS_OCCUPANCY_HOTELS) //TODO: Remove this need when user came from Search OR to smart thing after the product team's research
+			->set_needed(ETB_Hotel_Loader_Needs::NEED_GROUP, ETB_Hotel_Group_Config::group_content())
+		;
+		return $loader;
+	}
+
+}
