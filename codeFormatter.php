@@ -47,7 +47,7 @@ if (!isset($testEnv)) {
 class CodeFormatter {
 	private $options = array(
 		"ADD_MISSING_BRACES" => true,
-		"ALIGN_ARRAY_ASSIGNMENT" => true,
+		"ALIGN_ARRAY_ASSIGNMENT" => false,
 		"ALIGN_VAR_ASSIGNMENT" => false,
 		"CATCH_ALONG_CURLY" => true,
 		"ELSE_ALONG_CURLY" => true,
