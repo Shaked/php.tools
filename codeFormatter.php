@@ -706,7 +706,7 @@ class CodeFormatter {
 					$added_braces = $this->is_token(ST_SEMI_COLON, true) && $this->options["ADD_MISSING_BRACES"];
 					$condition = $this->options['ELSE_ALONG_CURLY'] && ($this->is_token(ST_CURLY_CLOSE, true) || $added_braces);
 					$this->append_code($this->get_space($condition).$text, $condition);
-					if (!$this->is_token(ST_CURLY_OPEN) && !$this->is_token(array(T_IF))) {
+					if (!$this->is_token(ST_COLON) && !$this->is_token(ST_CURLY_OPEN) && !$this->is_token(array(T_IF))) {
 						$text = $this->options["ADD_MISSING_BRACES"]?"{":"";
 						$this->set_indent(+1);
 						$this->append_code((!$this->options["LINE_BEFORE_CURLY"] || $text == ""?' ':$this->get_crlf_indent(false,-1)).$text.$this->get_crlf_indent());
