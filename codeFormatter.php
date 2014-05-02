@@ -273,7 +273,7 @@ class CodeFormatter {
 					$in_function = false;
 					break;
 				case ST_BRACKET_OPEN:
-					if (!$this->is_token(array(T_VARIABLE), true) && !$this->is_token(ST_BRACKET_CLOSE, true)) {
+					if (!$this->is_token(array(T_VARIABLE, T_STRING), true) && !$this->is_token(ST_BRACKET_CLOSE, true)) {
 						if ($this->is_token(ST_EQUAL, true) && !$this->is_token(ST_BRACKET_CLOSE) || $array_level > 0) {
 							$array_level++;
 							$arr_bracket["i".$array_level] = 0;
