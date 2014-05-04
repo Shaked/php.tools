@@ -5,7 +5,7 @@ $array = array(
 	'k' => 'v',
 	//TODO
 	'k' => 'v',
-	#TODO
+	/*TODO*/
 );
 $array = [
 	'a',
@@ -13,5 +13,7 @@ $array = [
 	'k' => 'v',
 	//TODO
 	'k' => 'v',
-	#TODO
+	/*TODO*/
 ];
+func($a/*comment*/);
+$a->m1()->m2()/*comment*/->m3();

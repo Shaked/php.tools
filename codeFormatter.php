@@ -554,7 +554,7 @@ class CodeFormatter {
 					$in_heredoc_context = true;
 					break;
 				case T_COMMENT:
-					if ($this->is_token(ST_CURLY_OPEN) || $this->is_token(array(T_OBJECT_OPERATOR))) {
+					if ($this->is_token(ST_COMMA) || $this->is_token(ST_CONCAT) || $this->is_token(ST_CURLY_OPEN) || $this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_BRACKET_OPEN) || $this->is_token(ST_BRACKET_CLOSE) || $this->is_token(ST_PARENTHESES_OPEN) || $this->is_token(ST_PARENTHESES_CLOSE) || $this->is_token(array(T_OBJECT_OPERATOR))) {
 						if ('//' == substr($text, 0, 2)) {
 							$text = '/*'.trim(str_replace(['/*', '*/'], '', substr($text, 2))).'*/';
 						} elseif ('#' == substr($text, 0, 1)) {
