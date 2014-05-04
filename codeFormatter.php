@@ -1,4 +1,5 @@
 <?php
+/*
 # Inspired by http://phpstylist.sourceforge.net/
 #
 # Copyright (c) 2014, Carlos C
@@ -13,6 +14,7 @@
 # 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 define("ST_AT", "@");
 define("ST_BRACKET_CLOSE", "]");
 define("ST_BRACKET_OPEN", "[");
@@ -47,8 +49,7 @@ if (!isset($testEnv)) {
 class CodeFormatter {
 	private $options = array(
 		"ADD_MISSING_BRACES" => true,
-		"ALIGN_ARRAY_ASSIGNMENT" => false,
-		"ALIGN_VAR_ASSIGNMENT" => false,
+		"ALIGN_ASSIGNMENTS" => true,
 		"CATCH_ALONG_CURLY" => true,
 		"ELSE_ALONG_CURLY" => true,
 		"INDENT_CASE" => true,
@@ -110,7 +111,10 @@ class CodeFormatter {
 							break;
 						} elseif (ST_COMMA == $id) {
 							$use_item .= ST_SEMI_COLON;
-							$next_tokens[] = [T_USE, 'use'];
+							$next_tokens[] = [
+								T_USE,
+								'use',
+							];
 							break;
 						} else {
 							$use_item .= $text;
@@ -151,7 +155,7 @@ class CodeFormatter {
 				$return .= $text;
 			}
 		}
-		//prev($tokens);
+		/*prev($tokens);*/
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
 			$lower_text = strtolower($text);
@@ -810,68 +814,92 @@ class CodeFormatter {
 		}
 		return false;
 	}
-	private function pad_operators($found) {
-		global $quotes;
-		$pad_size = 0;
-		$result = "";
-		$source = explode($this->new_line, $found[0]);
-		$position = array();
-		array_pop($source);
-		foreach ($source as $k => $line) {
-			if (preg_match("/'quote[0-9]+'/", $line)) {
-				preg_match_all("/'quote([0-9]+)'/", $line, $holders);
-				for ($i = 0;$i < sizeof($holders[1]);$i++) {
-					$line = preg_replace("/".$holders[0][$i]."/", str_repeat(" ", strlen($quotes[0][$holders[1][$i]])), $line);
-				}
+	private function process_block($current_block_name) {
+		if (!is_null($current_block_name)) {
+			$matches = null;
+			preg_match_all('/\$.+'.preg_quote($current_block_name).'/', $this->code, $matches);
+			$biggest = 0;
+			foreach ($matches[0] as $match) {
+				$len = strlen(str_replace($current_block_name, '', $match));
+				$biggest = max($biggest, $len);
 			}
-			if (strpos($line, "=") > $pad_size) {
-				$pad_size = strpos($line, "=");
+			foreach ($matches[0] as $match) {
+				$len = strlen($match)-strlen($current_block_name);
+				$ws = str_repeat(' ', $biggest-$len+1);
+				$this->code = preg_replace('/'.preg_quote($current_block_name).'/', $ws, $this->code, 1);
 			}
-			$position[$k] = strpos($line, "=");
+			$this->code = str_replace($current_block_name, '', $this->code);
 		}
-		foreach ($source as $k => $line) {
-			$padding = str_repeat(" ", $pad_size-$position[$k]);
-			$padded = preg_replace("/^([^=]+?)([\.\+\*\/\-\%]?=)(.*)$/", "\\1{$padding}\\2\\3".$this->new_line, $line);
-			$result .= $padded;
-		}
-		return $result;
-	}
-	private function parse_block($blocks) {
-		global $quotes;
-		$pad_chars = "";
-		$holders = array();
-		if ($this->options['ALIGN_ARRAY_ASSIGNMENT']) {
-			$pad_chars .= ",";
-		}
-		if ($this->options['ALIGN_VAR_ASSIGNMENT']) {
-			$pad_chars .= ";";
-		}
-		$php_code = $blocks[0];
-		preg_match_all("/\/\*.*?\*\/|\/\/[^\n]*|#[^\n]|([\"'])[^\\\\]*?(?:\\\\.[^\\\\]*?)*?\\1/s", $php_code, $quotes);
-		$quotes[0] = array_values(array_unique($quotes[0]));
-		for ($i = 0;$i < sizeof($quotes[0]);$i++) {
-			$patterns[] = "/".preg_quote($quotes[0][$i], '/')."/";
-			$holders[] = "'quote$i'";
-			$quotes[0][$i] = str_replace('\\\\', '\\\\\\\\', $quotes[0][$i]);
-		}
-		if (sizeof($holders) > 0) {
-			$php_code = preg_replace($patterns, $holders, $php_code);
-		}
-		$php_code = preg_replace_callback("/(?:.+=.+[".$pad_chars."]\r?\n){".$this->block_size.",}/", array($this, "pad_operators"), $php_code);
-		for ($i = sizeof($holders)-1;$i >= 0;$i--) {
-			$holders[$i] = "/".$holders[$i]."/";
-		}
-		if (sizeof($holders) > 0) {
-			$php_code = preg_replace($holders, $quotes[0], $php_code);
-		}
-		return $php_code;
 	}
 	private function align_operators() {
-		if ($this->options['ALIGN_ARRAY_ASSIGNMENT'] || $this->options['ALIGN_VAR_ASSIGNMENT']) {
-			return preg_replace_callback("/<\?.*?\?".">/s", array($this, "parse_block"), $this->code);
-		} else {
+		if (!$this->options['ALIGN_ASSIGNMENTS']) {
 			return $this->code;
 		}
+		$this->tkns = token_get_all($this->code);
+		$this->code = '';
+		$bracket_context_counter = 0;
+		$current_block_name = null;
+		$parentheses_context_counter = 0;
+		foreach ($this->tkns as $index => $token) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case ST_EQUAL:
+					if (!is_null($current_block_name) && 0 == $parentheses_context_counter && 0 == $bracket_context_counter) {
+						$this->append_code($current_block_name, false);
+					}
+					$this->append_code($text, false);
+					break;
+				case ST_BRACKET_OPEN:
+					$bracket_context_counter++;
+					$this->append_code($text, false);
+					break;
+				case ST_BRACKET_CLOSE:
+					$bracket_context_counter--;
+					$this->append_code($text, false);
+					break;
+				case T_COMMENT:
+				case T_DOC_COMMENT:
+					$this->process_block($current_block_name);
+					$current_block_name = null;
+					$this->append_code($text, false);
+					break;
+				case T_IF:
+				case T_SWITCH:
+				case T_FOR:
+				case T_FUNCTION:
+					if (0 == $bracket_context_counter) {
+						$parentheses_context_counter++;
+						$this->process_block($current_block_name);
+						$current_block_name = null;
+					}
+					$this->append_code($text, false);
+					break;
+				case ST_PARENTHESES_CLOSE:
+					if (0 == $bracket_context_counter) {
+						$parentheses_context_counter--;
+					}
+					$this->append_code($text, false);
+					break;
+				case T_VARIABLE:
+					if (0 == $parentheses_context_counter && 0 == $bracket_context_counter) {
+						if (is_null($current_block_name)) {
+							$current_block_name = "\0\0\0".uniqid()."\0\0\0";
+						}
+					}
+					$this->append_code($text, false);
+					break;
+				case T_WHITESPACE:
+					if (!is_null($current_block_name) && $this->is_token(ST_EQUAL) && 0 == $parentheses_context_counter && 0 == $bracket_context_counter) {
+						break;
+					}
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		$this->process_block($current_block_name);
+		return $this->code;
 	}
 }
 class SurrogateToken {
