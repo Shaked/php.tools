@@ -1,17 +1,17 @@
 <?php
 $array = array(
 	'a',
-	/*TODO*/
+	// TODO
 	'k' => 'v',
-	/*TODO*/
+	//TODO
 	'k' => 'v',
-	/*TODO*/
+	#TODO
 );
 $array = [
 	'a',
-	/*TODO*/
+	// TODO
 	'k' => 'v',
-	/*TODO*/
+	//TODO
 	'k' => 'v',
-	/*TODO*/
+	#TODO
 ];
