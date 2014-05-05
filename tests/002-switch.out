@@ -1,0 +1,96 @@
+<?php
+switch ($a) {
+	case 1:
+		echo 1;
+	break;
+	default:
+		echo 2;
+	break;
+}
+switch ($a) {
+	case 1:
+		echo 1;
+		echo 2;
+		echo 3;
+		echo 4;
+	break;
+	default:
+		echo 2;
+		echo 3;
+		echo 4;
+		echo 5;
+	break;
+}
+switch ($a) {
+	case 1:
+	case 2:
+	case 3:
+		echo 1;
+		echo 2;
+		echo 3;
+		echo 4;
+	break;
+	case 4:
+	default:
+		echo 2;
+		echo 3;
+		echo 4;
+		echo 5;
+	break;
+}
+if ($a)
+switch ($a) {
+	case 1:
+	case 2:
+	case 3:
+		echo 1;
+		echo 2;
+		echo 3;
+		echo 4;
+	break;
+	case 4:
+	default:
+		echo 2;
+		echo 3;
+		echo 4;
+		echo 5;
+	break;
+}
+while ($a) {
+	switch ($a) {
+		case 1:
+		case 2:
+		case 3:
+			echo 1;
+			echo 2;
+			echo 3;
+			echo 4;
+		break;
+		case 4:
+		default:
+			echo 2;
+			echo 3;
+			echo 4;
+			echo 5;
+		break;
+	}
+}
+if ($a) {
+	switch ($a) {
+		case 1:
+		case 2:
+		case 3:
+			echo 1;
+			echo 2;
+			echo 3;
+			echo 4;
+		break;
+		case 4:
+		default:
+			echo 2;
+			echo 3;
+			echo 4;
+			echo 5;
+		break;
+	}
+}

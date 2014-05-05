@@ -2,12 +2,10 @@
 define('HEREDOC', <<<EOS
 CONTENT
 
-
 EOS
 );
 $a = <<<EOS
 CONTENT
-
 
 EOS
 ;

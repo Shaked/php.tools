@@ -1,5 +1,8 @@
 <?php
 if (true)//comment
-/*comment*/ {
+//comment
+ {
+
 } else {
+
 }

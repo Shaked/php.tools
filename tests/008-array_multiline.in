@@ -1,4 +1,4 @@
 <?php
 $a = array(1,2);
-array(1,2);
+func(array(1,2));
 ?>
