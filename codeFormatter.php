@@ -191,10 +191,15 @@ class CodeFormatter {
 				case T_INTERFACE:
 				case T_THROW:
 				case T_ABSTRACT:
+				case T_INCLUDE:
+				case T_REQUIRE:
+				case T_INCLUDE_ONCE:
+				case T_REQUIRE_ONCE:
 					$this->append_code($text.$this->get_space(), false);
 					break;
 				case T_EXTENDS:
 				case T_IMPLEMENTS:
+				case T_INSTANCEOF:
 					$this->append_code($this->get_space().$text.$this->get_space(), false);
 					break;
 				case T_DOUBLE_ARROW:
@@ -217,12 +222,19 @@ class CodeFormatter {
 					$this->append_code(trim($text).$this->get_crlf_indent(), false);
 					break;
 				case T_ARRAY:
-					if ($in_array_counter > 0) {
+					if ($this->is_token(array(T_VARIABLE))) {
+						$this->append_code($text.$this->get_space(), false);
+						break;
+					} elseif ($this->is_token(array(T_RETURN, T_YIELD, T_COMMENT, T_DOC_COMMENT), true)) {
+						$this->append_code($text, false);
+						break;
+					} elseif ($in_array_counter > 0) {
 						$in_array_counter++;
 						$this->append_code($this->get_crlf_indent().$text);
 						break;
 					} elseif ($in_function_counter > 0) {
-						$this->append_code($text.$this->get_space());
+						$condition = $this->is_token(ST_EQUAL, true);
+						$this->append_code($this->get_space($condition).$text.$this->get_space(!$condition));
 						break;
 					} elseif ($in_attribution_counter > 0) {
 						$in_array_counter++;
@@ -418,6 +430,9 @@ class CodeFormatter {
 						$if_pending++;
 					} elseif ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION))) {
 						$this->append_code($text.$this->get_space(), false);
+					} elseif ($in_array_counter > 0 && $in_attribution_counter > 0) {
+						$this->append_code($text, false);
+						$in_array_counter--;
 					} else {
 						$this->append_code($text, false);
 					}
