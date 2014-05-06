@@ -7,7 +7,7 @@ function func($a, $b, $c) {
 	// Comment 2
 	$cm->method(array('a' => $a));
 	$res = $mtd->run($b, array($req), 0, 'en');
-	if (!empty($a)&&!empty($b)) {
+	if (!empty($a) && !empty($b)) {
 		$this->assertArrayHasKey(1, $res);
 	} else {
 		$this->assertEquals($c, $res);

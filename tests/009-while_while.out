@@ -23,7 +23,7 @@ try {
 while (true) {
 
 }
-for ($i = 0;$i<1;$i++) {
+for ($i = 0;$i < 1;$i++) {
 
 }
 while (true) {

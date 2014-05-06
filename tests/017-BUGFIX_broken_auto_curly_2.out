@@ -2,9 +2,9 @@
 do {
 	$cmd = cmd();
 } while (true);
-if ($count_spaces>0) {
-	for ($i = 1;$i<=$count_spaces;$i++) {
-		$new_txt.="&nbsp;";
+if ($count_spaces > 0) {
+	for ($i = 1;$i <= $count_spaces;$i++) {
+		$new_txt .= "&nbsp;";
 	}
 }
 do {

@@ -80,10 +80,7 @@ class CodeFormatter {
 							break;
 						} elseif (ST_COMMA == $id) {
 							$use_item .= ST_SEMI_COLON;
-							$next_tokens[] = [
-								T_USE,
-								'use',
-							];
+							$next_tokens[] = [T_USE, 'use', ];
 							break;
 						} else {
 							$use_item .= $text;
@@ -98,14 +95,16 @@ class CodeFormatter {
 				}
 			}
 		}
+
 		natcasesort($use_stack);
 		$alias_list = [];
 		$alias_count = [];
 		foreach ($use_stack as $use) {
 			if (false !== stripos($use, ' as ')) {
-				$alias = substr(strstr($use, ' as '), strlen(' as '),-1);
-			} else {
-				$alias = basename(str_replace('\\', '/', trim(substr($use, strlen('use'),-1))));
+				$alias = substr(strstr($use, ' as '), strlen(' as '), -1);
+			}
+			else {
+				$alias = basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 			}
 			$alias = strtolower($alias);
 			$alias_list[$alias] = strtolower($use);
@@ -134,9 +133,10 @@ class CodeFormatter {
 			$return .= $text;
 		}
 		if ($this->options['REMOVE_UNUSED_USE_STATEMENTS']) {
-			$unused_import = array_keys(array_filter($alias_count, function($v) {
+			$unused_import = array_keys(array_filter($alias_count, function ($v) {
 				return 0 == $v;
-			}));
+			}
+			));
 			foreach ($unused_import as $v) {
 				$return = str_ireplace($alias_list[$v], null, $return);
 			}
@@ -217,6 +217,29 @@ class CodeFormatter {
 				case T_LOGICAL_AND:
 				case T_LOGICAL_OR:
 				case T_LOGICAL_XOR:
+				case T_AND_EQUAL:
+				case T_BOOLEAN_AND:
+				case T_BOOLEAN_OR:
+				case T_CONCAT_EQUAL:
+				case T_DIV_EQUAL:
+				case T_IS_EQUAL:
+				case T_IS_GREATER_OR_EQUAL:
+				case T_IS_IDENTICAL:
+				case T_IS_NOT_EQUAL:
+				case T_IS_NOT_IDENTICAL:
+				case T_IS_SMALLER_OR_EQUAL:
+				case T_MINUS_EQUAL:
+				case T_MOD_EQUAL:
+				case T_MUL_EQUAL:
+				case T_OR_EQUAL:
+				case T_PLUS_EQUAL:
+				case T_SL:
+				case T_SL_EQUAL:
+				case T_SR:
+				case T_SR_EQUAL:
+				case T_XOR_EQUAL:
+				case ST_IS_GREATER:
+				case ST_IS_SMALLER:
 					$this->append_code($this->get_space().$text.$this->get_space(), false);
 					break;
 				case T_DOUBLE_ARROW:
@@ -590,13 +613,13 @@ class CodeFormatter {
 					} elseif ($in_array_counter > 0 && $in_parentheses_counter < $in_array_counter) {
 						$this->set_indent(-1);
 						$tmp_code = trim($this->code);
-						if (!$this->is_token(array(T_DOC_COMMENT, T_COMMENT), true) && ',' != substr($tmp_code,-1, 1) && '(' != substr($tmp_code,-1, 1) && ')' != substr($tmp_code,-1, 1)) {
+						if (!$this->is_token(array(T_DOC_COMMENT, T_COMMENT), true) && ',' != substr($tmp_code, -1, 1) && '(' != substr($tmp_code, -1, 1) && ')' != substr($tmp_code, -1, 1)) {
 							$this->append_code(',');
-							$this->append_code($this->get_crlf_indent().$text.$this->debug('[).Arr>0.,:"'.substr($tmp_code,-1, 1).'"]'), false);
-						} elseif ('(' == substr($tmp_code,-1, 1)) {
-							$this->append_code($text.$this->debug('[).Arr>0.substr")":"'.substr($tmp_code,-1, 1).'"]'), true);
+							$this->append_code($this->get_crlf_indent().$text.$this->debug('[).Arr>0.,:"'.substr($tmp_code, -1, 1).'"]'), false);
+						} elseif ('(' == substr($tmp_code, -1, 1)) {
+							$this->append_code($text.$this->debug('[).Arr>0.substr")":"'.substr($tmp_code, -1, 1).'"]'), true);
 						} else {
-							$this->append_code($this->get_crlf_indent().$text.$this->debug('[).Arr>0:"'.substr($tmp_code,-1, 1).'"]'), true);
+							$this->append_code($this->get_crlf_indent().$text.$this->debug('[).Arr>0:"'.substr($tmp_code, -1, 1).'"]'), true);
 						}
 						$in_array_counter--;
 						break;
@@ -665,7 +688,7 @@ class CodeFormatter {
 			}
 		}
 		$ret = $this->align_operators();
-		return implode($this->new_line, array_map(function($v) {
+		return implode($this->new_line, array_map(function ($v) {
 			return rtrim($v);
 		}, explode($this->new_line, $ret)));
 	}
@@ -841,4 +864,5 @@ class CodeFormatter {
 	}
 }
 class SurrogateToken {
+
 }

@@ -68,20 +68,20 @@ switch ($a) {
 			}
 		}
 	case 5:
-		for ($i = 0;$i<10;$i++) {
+		for ($i = 0;$i < 10;$i++) {
 			$a;
 		}
 	case 6:
 		if ($a) {
-			for ($i = 0;$i<10;$i++) {
+			for ($i = 0;$i < 10;$i++) {
 				$a;
 			}
 		} elseif ($b) {
-			for ($i = 0;$i<10;$i++) {
+			for ($i = 0;$i < 10;$i++) {
 				$a;
 			}
 		} else {
-			for ($i = 0;$i<10;$i++) {
+			for ($i = 0;$i < 10;$i++) {
 				$a;
 			}
 		}

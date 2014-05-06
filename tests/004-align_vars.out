@@ -30,7 +30,7 @@ while (false) {
 		'ba' => 1,
 	);
 }
-for ($i = 0;$i<10;$i++) {
+for ($i = 0;$i < 10;$i++) {
 	$aa = 2;
 	$a[$b] = array(
 		'a' => 1,
