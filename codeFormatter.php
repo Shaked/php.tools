@@ -201,6 +201,7 @@ class CodeFormatter {
 				case T_TRAIT:
 				case T_INTERFACE:
 				case T_THROW:
+				case T_GLOBAL:
 				case T_ABSTRACT:
 				case T_INCLUDE:
 				case T_REQUIRE:
@@ -518,25 +519,25 @@ class CodeFormatter {
 					$in_parentheses_counter--;
 					if ($in_call_context && $in_parentheses_counter == $in_call_counter) {
 						$in_call_context = false;
-						$this->append_code($text.$this->debug('[OFF.'.$in_call_counter.']'), false);
+						$this->append_code($text.$this->debug('[).CC.OFF.'.$in_call_counter.']'), false);
 						if ($in_function_counter > 0) {
 							$in_function_counter--;
-							$this->append_code($this->debug('[InFunc--]'), false);
+							$this->append_code($this->debug('[).CC.InFunc--]'), false);
 						} elseif ($in_if_counter > 0 && $this->is_token(array(T_VARIABLE, T_STRING, T_DOC_COMMENT, T_COMMENT))) {
 							$this->set_indent(+1);
-							$this->append_code(' {'.$this->debug('[).Artif{]').$this->get_crlf_indent(), false);
+							$this->append_code(' {'.$this->debug('[).CC.Artif{]').$this->get_crlf_indent(), false);
 							$artificial_curly_open = true;
 							$if_pending++;
 							$in_if_counter--;
 						} elseif ($in_elseif_counter > 0 && $this->is_token(array(T_VARIABLE, T_STRING, T_DOC_COMMENT, T_COMMENT))) {
-							$this->append_code(' {');
+							$this->append_code(' {'.$this->debug("[).CC.ElseIf>0($,str,//).Artif{"));
 							$artificial_curly_open = true;
 							$if_pending++;
 							$in_elseif_counter--;
 							$this->set_indent(+1);
 							$this->append_code($this->get_crlf_indent(), false);
 						} elseif ($in_if_counter > 0 && $this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION, T_RETURN))) {
-							$this->append_code($this->debug('[).next:LOOP.IF:'.$in_if_counter.']').$this->get_space(), false);
+							$this->append_code($this->debug('[).CC.next:LOOP.IF:'.$in_if_counter.']').$this->get_space(), false);
 							$in_if_counter--;
 						} elseif ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION, T_RETURN))) {
 							$this->append_code($this->get_space(), false);
@@ -573,11 +574,11 @@ class CodeFormatter {
 						$in_for_counter--;
 					} elseif ($in_elseif_counter > 0 && $this->is_token(array(T_VARIABLE, T_STRING, T_DOC_COMMENT, T_COMMENT))) {
 						$this->set_indent(+1);
-						$this->append_code($text.' {'.$this->get_crlf_indent(), false);
+						$this->append_code($text.$this->debug('[).ElseIf>0($,str,//).Artif{]').' {'.$this.$this->get_crlf_indent(), false);
 						$artificial_curly_open = true;
-					} elseif ($in_if_counter > 0 && $this->is_token(array(T_VARIABLE, T_STRING, T_DOC_COMMENT, T_COMMENT))) {
+					} elseif (0 == $in_parentheses_counter && $in_if_counter > 0 && $this->is_token(array(T_VARIABLE, T_STRING, T_DOC_COMMENT, T_COMMENT))) {
 						$this->set_indent(+1);
-						$this->append_code($text.' {'.$this->get_crlf_indent(), false);
+						$this->append_code($text.$this->debug('[).If>0($,str,//).Artif{]').' {'.$this->get_crlf_indent(), false);
 						$artificial_curly_open = true;
 						$if_pending++;
 					} elseif ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION))) {
