@@ -1,9 +1,7 @@
 <?php
 abstract class GenericContent {
-	public $delivery_info = array(
-	);
-	private $properties = array(
-	);
+	public $delivery_info = array();
+	private $properties = array();
 	protected static $PROPERTIES = array(
 		"dummy" => "shortstr",
 	);
@@ -13,7 +11,6 @@ abstract class GenericContent {
 		} else {
 			$this->prop_types = self::$PROPERTIES;
 		}
-		$d = array(
-		);
+		$d = array();
 	}
 }

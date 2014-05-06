@@ -225,11 +225,24 @@ class CodeFormatter {
 				case T_OBJECT_CAST:
 				case T_STRING_CAST:
 				case T_UNSET_CAST:
-					$this->append_code($text.$this->get_space());
+					if ($this->is_token(array(T_DOUBLE_ARROW), true) || $this->is_token(ST_EQUAL, true)) {
+						$this->append_code($this->get_space().$text.$this->get_space());
+					} else {
+						$this->append_code($text.$this->get_space());
+					}
 					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					$this->append_code(trim($text).$this->get_crlf_indent(), false);
+					if ($this->is_token(ST_COMMA, true)) {
+						if ('//' == substr($text, 0, 2)) {
+							$text = '/*'.trim(substr($text, 2)).'*/';
+						} elseif ('#' == substr($text, 0, 1)) {
+							$text = '/*'.trim(substr($text, 1)).'*/';
+						}
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[//.comma]').$this->get_crlf_indent(), false);
+					} else {
+						$this->append_code(trim($text).$this->debug('[//.else]').$this->get_crlf_indent(), false);
+					}
 					break;
 				case T_ARRAY:
 					if ($in_call_context) {
@@ -424,7 +437,11 @@ class CodeFormatter {
 					$this->append_code($text.$this->debug('[;.else]').$this->get_crlf_indent(), true);
 					break;
 				case ST_CURLY_OPEN:
-					if ($in_for_counter > 0) {
+					if ($in_if_counter > 0) {
+						$in_if_counter--;
+						$this->set_indent(+1);
+						$this->append_code($this->get_space().$text.$this->get_crlf_indent(), false);
+					} elseif ($in_for_counter > 0) {
 						$in_for_counter--;
 						$this->set_indent(+1);
 						$this->append_code($this->get_space().$text.$this->get_crlf_indent(), false);
@@ -452,7 +469,6 @@ class CodeFormatter {
 						$in_while_counter--;
 					} elseif ($in_foreach_counter > 0) {
 						$this->append_code($this->get_crlf_indent().$this->debug('[}.Foreach]'), false);
-						$this->set_indent(-1);
 						$in_foreach_counter--;
 					} elseif ($in_switch_counter > 0) {
 						$in_switch_counter--;
@@ -461,7 +477,7 @@ class CodeFormatter {
 						$this->append_code($this->get_space().$this->debug('[}.CatchElseElseIf]'), false);
 					} elseif ($in_if_counter > 0) {
 						$in_if_counter--;
-						$this->append_code($this->get_crlf_indent().$this->debug('[}.IfCounter]'), true);
+						$this->append_code($this->get_crlf_indent().$this->debug('[}.IfCounter:'.$in_if_counter.']'), true);
 					} else {
 						$this->append_code($this->get_crlf_indent().$this->debug('[}.Else]'), false);
 					}
@@ -491,7 +507,7 @@ class CodeFormatter {
 							$this->append_code($this->debug('[InFunc--]'), false);
 						} elseif ($in_if_counter > 0 && $this->is_token(array(T_VARIABLE, T_STRING, T_DOC_COMMENT, T_COMMENT))) {
 							$this->set_indent(+1);
-							$this->append_code(' {'.$this->get_crlf_indent(), false);
+							$this->append_code(' {'.$this->debug('[).Artif{]').$this->get_crlf_indent(), false);
 							$artificial_curly_open = true;
 							$if_pending++;
 							$in_if_counter--;
@@ -514,18 +530,21 @@ class CodeFormatter {
 						break;
 					} elseif ($in_function_counter > 0) {
 						$in_function_counter--;
-						$this->append_code($text.$this->debug('[InFunc--]'), false);
+						$this->append_code($text.$this->debug('[).InFunc--]'), false);
 						if ($in_attribution_counter > 0) {
 							$in_attribution_counter--;
 						}
 						break;
 					} elseif ($in_array_counter > 0 && $in_parentheses_counter < $in_array_counter) {
 						$this->set_indent(-1);
-						if (!$this->is_token(array(T_DOC_COMMENT, T_COMMENT), true) && ',' != substr(trim($this->code),-1, 1) && '(' != substr(trim($this->code),-1, 1) && ')' != substr(trim($this->code),-1, 1)) {
+						$tmp_code = trim($this->code);
+						if (!$this->is_token(array(T_DOC_COMMENT, T_COMMENT), true) && ',' != substr($tmp_code,-1, 1) && '(' != substr($tmp_code,-1, 1) && ')' != substr($tmp_code,-1, 1)) {
 							$this->append_code(',');
-							$this->append_code($this->get_crlf_indent().$text, false);
+							$this->append_code($this->get_crlf_indent().$text.$this->debug('[).Arr>0.,:"'.substr($tmp_code,-1, 1).'"]'), false);
+						} elseif ('(' == substr($tmp_code,-1, 1)) {
+							$this->append_code($text.$this->debug('[).Arr>0.substr")":"'.substr($tmp_code,-1, 1).'"]'), true);
 						} else {
-							$this->append_code($this->get_crlf_indent().$text, true);
+							$this->append_code($this->get_crlf_indent().$text.$this->debug('[).Arr>0:"'.substr($tmp_code,-1, 1).'"]'), true);
 						}
 						$in_array_counter--;
 						break;
@@ -581,6 +600,9 @@ class CodeFormatter {
 						$artificial_curly_close = false;
 					}
 					$this->append_code($this->get_crlf_indent().$text.$this->get_space());
+					break;
+				case T_OBJECT_OPERATOR:
+					$this->append_code($text.$this->debug("[ObjOp]"), false);
 					break;
 				default:
 					$this->append_code($text.$this->debug("[Default]"), false);

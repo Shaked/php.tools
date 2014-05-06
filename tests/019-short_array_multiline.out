@@ -14,8 +14,7 @@ function a() {
 $a = [];
 $a = [[]];
 $a = array(
-	array(
-	)
+	array()
 );
 $c = [[1], [2]];
 $d = array(
