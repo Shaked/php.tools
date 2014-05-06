@@ -2,10 +2,10 @@
 switch ($a) {
 	case 1:
 		echo 1;
-	break;
+		break;
 	default:
 		echo 2;
-	break;
+		break;
 }
 switch ($a) {
 	case 1:
@@ -13,13 +13,13 @@ switch ($a) {
 		echo 2;
 		echo 3;
 		echo 4;
-	break;
+		break;
 	default:
 		echo 2;
 		echo 3;
 		echo 4;
 		echo 5;
-	break;
+		break;
 }
 switch ($a) {
 	case 1:
@@ -29,14 +29,14 @@ switch ($a) {
 		echo 2;
 		echo 3;
 		echo 4;
-	break;
+		break;
 	case 4:
 	default:
 		echo 2;
 		echo 3;
 		echo 4;
 		echo 5;
-	break;
+		break;
 }
 if ($a)
 switch ($a) {
@@ -47,14 +47,14 @@ switch ($a) {
 		echo 2;
 		echo 3;
 		echo 4;
-	break;
+		break;
 	case 4:
 	default:
 		echo 2;
 		echo 3;
 		echo 4;
 		echo 5;
-	break;
+		break;
 }
 while ($a) {
 	switch ($a) {
@@ -65,14 +65,14 @@ while ($a) {
 			echo 2;
 			echo 3;
 			echo 4;
-		break;
+			break;
 		case 4:
 		default:
 			echo 2;
 			echo 3;
 			echo 4;
 			echo 5;
-		break;
+			break;
 	}
 }
 if ($a) {
@@ -84,13 +84,13 @@ if ($a) {
 			echo 2;
 			echo 3;
 			echo 4;
-		break;
+			break;
 		case 4:
 		default:
 			echo 2;
 			echo 3;
 			echo 4;
 			echo 5;
-		break;
+			break;
 	}
 }

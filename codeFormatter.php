@@ -161,10 +161,12 @@ class CodeFormatter {
 		$in_for_counter = 0;
 		$in_foreach_counter = 0;
 		$in_function_counter = 0;
+		$in_curly_block = 0;
 		$in_if_counter = 0;
 		$in_parentheses_counter = 0;
 		$in_question_counter = 0;
 		$in_switch_counter = 0;
+		$in_switch_curly_block = array();
 		$in_while_counter = 0;
 		$way_clear = true;
 		while (list($index, $token) = each($this->tkns)) {
@@ -306,11 +308,11 @@ class CodeFormatter {
 						break;
 					}
 				case T_BREAK:
-					if ($in_case_counter > 0) {
-						$this->set_indent(-1);
-						$this->append_code($this->get_crlf_indent().$text);
-						break;
+					$this->append_code($this->get_crlf_indent().$text.$this->debug('[break]'));
+					if (!$this->is_token(ST_SEMI_COLON)) {
+						$this->append_code($this->get_space(), false);
 					}
+					break;
 				case ST_COLON:
 					if ($in_question_counter > 0) {
 						$this->append_code($text);
@@ -326,21 +328,25 @@ class CodeFormatter {
 					break;
 				case T_SWITCH:
 					$in_switch_counter++;
+					array_unshift($in_switch_curly_block, $in_curly_block);
+					$in_case_counter = 0;
 					$this->append_code($this->get_crlf_indent().$text.$this->get_space(), true);
 					break;
 				case T_DEFAULT:
-					$in_case_counter++;
-					if ($this->is_token(ST_COLON, true)) {
+					if ($in_case_counter > 0) {
+						$in_case_counter--;
 						$this->set_indent(-1);
 					}
+					$in_case_counter++;
 					$this->append_code($this->get_crlf_indent().$text, true);
 					break;
 				case T_CASE:
-					$in_case_counter++;
-					if ($this->is_token(ST_COLON, true)) {
+					if ($in_case_counter > 0) {
+						$in_case_counter--;
 						$this->set_indent(-1);
 					}
-					$this->append_code($this->get_crlf_indent().$text.$this->get_space(), true);
+					$in_case_counter++;
+					$this->append_code($this->get_crlf_indent().$text.$this->debug('[{}:'.$in_curly_block.':case]').$this->get_space(), true);
 					break;
 				case ST_EQUAL:
 					$in_attribution_counter++;
@@ -368,18 +374,24 @@ class CodeFormatter {
 					$this->append_code($this->get_space().$text.$this->get_space(), false);
 					break;
 				case T_WHILE:
+					if (!$this->is_token(ST_CURLY_CLOSE, true)) {
+						$in_curly_block++;
+					}
 					$in_while_counter++;
 					$this->append_code($text.$this->get_space(), false);
 					break;
 				case T_FOR:
+					$in_curly_block++;
 					$in_for_counter++;
 					$this->append_code($text.$this->get_space(), false);
 					break;
 				case T_FOREACH:
+					$in_curly_block++;
 					$in_foreach_counter++;
 					$this->append_code($text.$this->get_space(), false);
 					break;
 				case T_DO:
+					$in_curly_block++;
 					$in_do_counter++;
 					if ($this->is_token(ST_CURLY_CLOSE, true)) {
 						$this->append_code($this->get_crlf_indent());
@@ -454,7 +466,7 @@ class CodeFormatter {
 					if ($in_if_counter > 0) {
 						$in_if_counter--;
 						$this->set_indent(+1);
-						$this->append_code($this->get_space().$text.$this->get_crlf_indent(), false);
+						$this->append_code($this->get_space().$text.$this->debug('[{.if]').$this->get_crlf_indent(), false);
 					} elseif ($in_elseif_counter > 0) {
 						$in_elseif_counter--;
 						$this->set_indent(+1);
@@ -476,26 +488,45 @@ class CodeFormatter {
 					break;
 				case ST_CURLY_CLOSE:
 					$this->set_indent(-1);
+					if ($in_switch_counter > 0 && isset($in_switch_curly_block[0]) && $in_switch_curly_block[0] == $in_curly_block) {
+						$this->set_indent(-1);
+						array_shift($in_switch_curly_block);
+					}
 					if (!$this->is_token(ST_CURLY_CLOSE, true) && !$this->is_token(ST_SEMI_COLON, true)) {
-						$this->append_code($this->get_crlf_indent().$text, false);
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[{}:'.$in_curly_block.':a]'), false);
 					} else {
-						$this->append_code($this->get_crlf_indent().$text, true);
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[{}:'.$in_curly_block.':b]'), true);
 					}
 					if ($in_do_counter > 0 && $this->is_token(array(T_WHILE))) {
 						$this->append_code($this->get_space().$this->debug('[}.DoWhile]'), false);
 						$in_do_counter--;
 						$in_while_counter--;
+						if ($in_curly_block > 0) {
+							$in_curly_block--;
+						}
 					} elseif ($in_foreach_counter > 0) {
 						$this->append_code($this->get_crlf_indent().$this->debug('[}.Foreach]'), false);
 						$in_foreach_counter--;
+					} elseif ($this->is_token(array(T_CATCH, T_ELSE, T_ELSEIF))) {
+						if ($in_curly_block > 0) {
+							$in_curly_block--;
+						}
+						$this->append_code($this->get_space().$this->debug('[}.CatchElseElseIf]'), false);
+					} elseif ($in_elseif_counter > 0) {
+						$in_elseif_counter--;
+						if ($in_curly_block > 0) {
+							$in_curly_block--;
+						}
+						$this->append_code($this->get_crlf_indent().$this->debug('[}.ElseIfCounter:'.$in_elseif_counter.']'), true);
+					} elseif ($in_if_counter > 0 || $in_curly_block > 0) {
+						$in_if_counter--;
+						if ($in_curly_block > 0) {
+							$in_curly_block--;
+						}
+						$this->append_code($this->get_crlf_indent().$this->debug('[}.IfCounter:'.$in_if_counter.']'), true);
 					} elseif ($in_switch_counter > 0) {
 						$in_switch_counter--;
-						$this->append_code($this->get_crlf_indent().$this->debug('[}.Switch]'), true);
-					} elseif ($this->is_token(array(T_CATCH, T_ELSE, T_ELSEIF))) {
-						$this->append_code($this->get_space().$this->debug('[}.CatchElseElseIf]'), false);
-					} elseif ($in_if_counter > 0) {
-						$in_if_counter--;
-						$this->append_code($this->get_crlf_indent().$this->debug('[}.IfCounter:'.$in_if_counter.']'), true);
+						$this->append_code($this->get_crlf_indent().$this->debug('[}.Switch:'.$in_switch_counter.$in_if_counter.$in_elseif_counter.']'), true);
 					} else {
 						$this->append_code($this->get_crlf_indent().$this->debug('[}.Else]'), false);
 					}
@@ -539,8 +570,9 @@ class CodeFormatter {
 						} elseif ($in_if_counter > 0 && $this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION, T_RETURN))) {
 							$this->append_code($this->debug('[).CC.next:LOOP.IF:'.$in_if_counter.']').$this->get_space(), false);
 							$in_if_counter--;
-						} elseif ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION, T_RETURN))) {
+						} elseif ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION, T_RETURN, T_SWITCH))) {
 							$this->append_code($this->get_space(), false);
+							$in_curly_block--;
 						} elseif ($in_for_counter > 0) {
 							$this->append_code($this->debug("[).CC.For--]"));
 							$in_for_counter--;
@@ -593,6 +625,7 @@ class CodeFormatter {
 					break;
 				case T_ELSEIF:
 					$way_clear = true;
+					$in_curly_block++;
 					if ($artificial_curly_close) {
 						$artificial_curly_close = false;
 					}
@@ -601,6 +634,7 @@ class CodeFormatter {
 					break;
 				case T_ELSE:
 					$way_clear = true;
+					$in_curly_block++;
 					$this->append_code($text, false);
 					if ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_THROW, T_ECHO, T_CONTINUE, T_RETURN))) {
 						$this->append_code($this->get_space());
@@ -612,6 +646,7 @@ class CodeFormatter {
 					break;
 				case T_IF:
 					$way_clear = true;
+					$in_curly_block++;
 					$in_if_counter++;
 					if ($artificial_curly_close) {
 						$this->append_code($this->get_crlf_indent(), false);
@@ -760,8 +795,8 @@ class CodeFormatter {
 					$current_block_name = null;
 					$this->append_code($text, false);
 					break;
-				case T_IF:
 				case T_SWITCH:
+				case T_IF:
 				case T_FOR:
 				case T_FUNCTION:
 					if (0 == $bracket_context_counter) {
