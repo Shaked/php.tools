@@ -519,11 +519,13 @@ class CodeFormatter {
 						}
 						$this->append_code($this->get_crlf_indent().$this->debug('[}.ElseIfCounter:'.$in_elseif_counter.']'), true);
 					} elseif ($in_if_counter > 0 || $in_curly_block > 0) {
-						$in_if_counter--;
+						if ($in_if_counter > 0) {
+							$in_if_counter--;
+						}
 						if ($in_curly_block > 0) {
 							$in_curly_block--;
 						}
-						$this->append_code($this->get_crlf_indent().$this->debug('[}.IfCounter:'.$in_if_counter.']'), true);
+						$this->append_code($this->get_crlf_indent().$this->debug('[}.IfCounter:'.$in_if_counter.$in_curly_block.']'), true);
 					} elseif ($in_switch_counter > 0) {
 						$in_switch_counter--;
 						$this->append_code($this->get_crlf_indent().$this->debug('[}.Switch:'.$in_switch_counter.$in_if_counter.$in_elseif_counter.']'), true);
