@@ -188,7 +188,10 @@ class CodeFormatter {
 				case T_NEW:
 				case T_CONST:
 				case T_FINAL:
-					$this->append_code($text.$this->get_space(), false);
+					if ($artificial_curly_close) {
+						$artificial_curly_close = false;
+					}
+					$this->append_code($text.$this->debug('[RetYield]').$this->get_space(), false);
 					break;
 				case T_PUBLIC:
 				case T_PRIVATE:
@@ -417,9 +420,11 @@ class CodeFormatter {
 						$in_elseif_counter--;
 						if ($this->is_token(ST_CURLY_CLOSE)) {
 							$this->append_code($text.$this->debug('[;.ElseIf}]'), false);
-						} else {
+						} elseif ($this->is_token(array(T_VARIABLE))) {
 							$this->set_indent(-1);
 							$this->append_code($text.$this->debug('[;.ElseIfArtif}]').$this->get_crlf_indent().'} ', false);
+						} else {
+							$this->append_code($text.$this->debug('[;.Else}]').$this->get_crlf_indent(), false);
 						}
 						$artificial_curly_close = true;
 						break;
@@ -533,7 +538,7 @@ class CodeFormatter {
 						} elseif ($in_if_counter > 0 && $this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION, T_RETURN))) {
 							$this->append_code($this->debug('[).next:LOOP.IF:'.$in_if_counter.']').$this->get_space(), false);
 							$in_if_counter--;
-						} elseif ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION))) {
+						} elseif ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION, T_RETURN))) {
 							$this->append_code($this->get_space(), false);
 						} elseif ($in_for_counter > 0) {
 							$this->append_code($this->debug("[).CC.For--]"));
