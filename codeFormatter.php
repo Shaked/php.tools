@@ -683,7 +683,7 @@ class CodeFormatter {
 					$this->append_code($text.$this->debug("[ObjOp]"), false);
 					break;
 				default:
-					$this->append_code($text.$this->debug("[Default]"), false);
+					$this->append_code($text.$this->debug("[Default:".$id.":".(is_numeric($id)?token_name($id):$id)."]"), false);
 					break;
 			}
 		}
