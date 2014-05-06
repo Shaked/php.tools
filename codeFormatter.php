@@ -13,6 +13,7 @@
 //3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 //
 //THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+define("DEBUG", false);
 define("ST_AT", "@");
 define("ST_BRACKET_CLOSE", "]");
 define("ST_BRACKET_OPEN", "[");
@@ -60,6 +61,7 @@ class CodeFormatter {
 	private $code = '';
 	private $ptr = 0;
 	private $tkns = 0;
+	private $debug = DEBUG;
 	private function orderUseClauses($source = '') {
 		$use_stack = [];
 		$tokens = token_get_all($source);
@@ -147,18 +149,23 @@ class CodeFormatter {
 		}
 		$this->tkns = token_get_all($source);
 		$artificial_curly_close = false;
+		$artificial_curly_open = false;
 		$if_pending = 0;
 		$in_array_counter = 0;
 		$in_attribution_counter = 0;
+		$in_call_context = false;
+		$in_call_counter = 0;
 		$in_case_counter = 0;
 		$in_do_counter = 0;
+		$in_elseif_counter = 0;
 		$in_for_counter = 0;
+		$in_foreach_counter = 0;
 		$in_function_counter = 0;
 		$in_if_counter = 0;
 		$in_parentheses_counter = 0;
+		$in_question_counter = 0;
 		$in_switch_counter = 0;
 		$in_while_counter = 0;
-		$in_question_counter = 0;
 		$way_clear = true;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -173,12 +180,12 @@ class CodeFormatter {
 					$this->append_code($text, false);
 					$in_question_counter++;
 					break;
+				case T_RETURN:
+				case T_YIELD:
 				case T_ECHO:
 				case T_NAMESPACE:
 				case T_USE:
 				case T_NEW:
-				case T_RETURN:
-				case T_YIELD:
 				case T_CONST:
 				case T_FINAL:
 					$this->append_code($text.$this->get_space(), false);
@@ -200,6 +207,9 @@ class CodeFormatter {
 				case T_EXTENDS:
 				case T_IMPLEMENTS:
 				case T_INSTANCEOF:
+				case T_LOGICAL_AND:
+				case T_LOGICAL_OR:
+				case T_LOGICAL_XOR:
 					$this->append_code($this->get_space().$text.$this->get_space(), false);
 					break;
 				case T_DOUBLE_ARROW:
@@ -222,7 +232,18 @@ class CodeFormatter {
 					$this->append_code(trim($text).$this->get_crlf_indent(), false);
 					break;
 				case T_ARRAY:
-					if ($this->is_token(array(T_VARIABLE))) {
+					if ($in_call_context) {
+						if ($this->is_token(ST_COMMA, true) && $this->is_token(array(T_VARIABLE))) {
+							$this->append_code($this->get_space().$text.$this->debug('[Arr.Cast]').$this->get_space());
+						} elseif ($this->is_token(ST_PARENTHESES_OPEN, true) && $this->is_token(ST_PARENTHESES_OPEN)) {
+							$this->append_code($text.$this->debug('[Arr.(ar(]'));
+						} elseif ($this->is_token(ST_EQUAL, true) || $this->is_token(ST_PARENTHESES_OPEN)) {
+							$this->append_code($this->get_space().$text.$this->debug('[Arr.=]'));
+						} else {
+							$this->append_code($text.$this->debug('[Arr.Else]'));
+						}
+						break;
+					} elseif ($this->is_token(array(T_VARIABLE))) {
 						$this->append_code($text.$this->get_space(), false);
 						break;
 					} elseif ($this->is_token(array(T_RETURN, T_YIELD, T_COMMENT, T_DOC_COMMENT), true)) {
@@ -234,11 +255,19 @@ class CodeFormatter {
 						break;
 					} elseif ($in_function_counter > 0) {
 						$condition = $this->is_token(ST_EQUAL, true);
-						$this->append_code($this->get_space($condition).$text.$this->get_space(!$condition));
+						$this->append_code($this->get_space($condition).$text.$this->debug('[InFunc]').$this->get_space(!$condition));
 						break;
 					} elseif ($in_attribution_counter > 0) {
 						$in_array_counter++;
-						$this->append_code($this->get_space().$text);
+						if ($this->is_token(ST_PARENTHESES_OPEN, true)) {
+							$this->append_code($text);
+						} else {
+							$this->append_code($this->get_space().$text);
+						}
+						break;
+					} elseif (0 == $in_array_counter && $this->is_token(ST_PARENTHESES_OPEN)) {
+						$in_array_counter++;
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[AR.++]'));
 						break;
 					}
 					$this->append_code($text);
@@ -290,25 +319,25 @@ class CodeFormatter {
 					break;
 				case ST_EQUAL:
 					$in_attribution_counter++;
-					$this->append_code($this->get_space().$text.$this->get_space(), true);
+					$this->append_code($this->get_space().$text.$this->debug('[ON.at]').$this->get_space(), true);
 					break;
 				case T_STRING:
 					if ($this->is_token(array(T_VARIABLE))) {
-						$this->append_code($text.$this->get_space(), true);
+						$this->append_code($text.$this->debug('[str.VAR]').$this->get_space(), true);
 						break;
 					} elseif ($this->is_token(ST_CURLY_CLOSE, true)) {
-						$this->append_code($this->get_crlf_indent().$text, false);
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[str.}]'), false);
 						break;
 					} elseif ($artificial_curly_close) {
-						$this->append_code($this->get_crlf_indent().$text, false);
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[str.Artif}]'), false);
 						$artificial_curly_close = false;
 						break;
 					}
-					$this->append_code($text, false);
+					$this->append_code($text.$this->debug('[str.Else]'), false);
 					break;
 				case T_FUNCTION:
 					$in_function_counter++;
-					$this->append_code($text.$this->get_space(), false);
+					$this->append_code($text.$this->debug('[InFunc++]').$this->get_space(), false);
 					break;
 				case T_AS:
 					$this->append_code($this->get_space().$text.$this->get_space(), false);
@@ -322,6 +351,7 @@ class CodeFormatter {
 					$this->append_code($text.$this->get_space(), false);
 					break;
 				case T_FOREACH:
+					$in_foreach_counter++;
 					$this->append_code($text.$this->get_space(), false);
 					break;
 				case T_DO:
@@ -342,34 +372,72 @@ class CodeFormatter {
 						break;
 					} elseif (0 == $in_for_counter && $in_attribution_counter > 0) {
 						$in_attribution_counter--;
-						$this->append_code($text.$this->get_crlf_indent(), false);
+						$this->append_code($text.$this->debug('[OFF.at]').$this->get_crlf_indent(), false);
+						if ($this->is_token(array(T_ELSE, T_ELSEIF))) {
+							$if_pending--;
+							$this->set_indent(-1);
+							$this->append_code($this->get_crlf_indent().'}'.$this->debug('[;.Artif}.ElseElseIf]').$this->get_space());
+						} elseif ($if_pending > 0) {
+							$if_pending--;
+							$this->set_indent(-1);
+							$this->append_code($this->get_crlf_indent().'}'.$this->debug('[;.Artif}.Else]').$this->get_crlf_indent());
+						}
 						break;
-					} elseif ($in_for_counter > 0) {
-						$this->append_code($text, false);
+					} elseif ($in_for_counter > 0 && $in_attribution_counter > 0) {
+						$this->append_code($text.$this->debug('[;.For}]'), false);
 						break;
 					} elseif ($if_pending > 0 && $way_clear) {
 						$if_pending--;
 						$this->set_indent(-1);
-						$this->append_code($text.$this->get_crlf_indent().'} ', false);
+						$this->append_code($text.$this->debug('[;.IfArtif}]').$this->get_crlf_indent().'}'.$this->get_space(), false);
+						$artificial_curly_close = true;
+						break;
+					} elseif ($in_elseif_counter > 0 && $way_clear) {
+						$in_elseif_counter--;
+						if ($this->is_token(ST_CURLY_CLOSE)) {
+							$this->append_code($text.$this->debug('[;.ElseIf}]'), false);
+						} else {
+							$this->set_indent(-1);
+							$this->append_code($text.$this->debug('[;.ElseIfArtif}]').$this->get_crlf_indent().'} ', false);
+						}
 						$artificial_curly_close = true;
 						break;
 					} elseif ($in_while_counter > 0 && $in_do_counter == $in_while_counter) {
 						$in_while_counter--;
 						$in_do_counter--;
-						$this->append_code($text.$this->get_crlf_indent(), false);
+						$this->append_code($text.$this->debug('[;.DoWhile]').$this->get_crlf_indent(), false);
+						break;
+					} elseif ($in_foreach_counter > 0) {
+						$in_foreach_counter--;
+						$this->append_code($text.$this->debug('[;.Foreach]').$this->get_crlf_indent(), false);
 						break;
 					} elseif ($in_switch_counter > 0 && $this->is_token(array(T_BREAK, T_CASE))) {
-						$this->append_code($text);
+						$this->append_code($text.$this->debug('[;.Switch]'));
 						break;
 					} elseif ($in_case_counter > 0 && !($this->is_token(array(T_BREAK, T_CASE)) || $this->is_token(ST_CURLY_CLOSE))) {
-						$this->append_code($text.$this->get_crlf_indent());
+						$this->append_code($text.$this->debug('[;.Case]').$this->get_crlf_indent());
+						break;
+					} elseif ($in_call_context) {
+						$this->append_code($text.$this->debug('[;.InCall]'), true);
 						break;
 					}
-					$this->append_code($text.$this->get_crlf_indent(), true);
+					$this->append_code($text.$this->debug('[;.else]').$this->get_crlf_indent(), true);
 					break;
 				case ST_CURLY_OPEN:
-					$this->set_indent(+1);
-					$this->append_code($this->get_space().$text.$this->get_crlf_indent(), false);
+					if ($in_for_counter > 0) {
+						$in_for_counter--;
+						$this->set_indent(+1);
+						$this->append_code($this->get_space().$text.$this->get_crlf_indent(), false);
+					} elseif ($this->is_token(array(T_COMMENT, T_DOC_COMMENT), true) && $artificial_curly_open) {
+						$artificial_curly_open = false;
+						$this->append_code($this->get_crlf_indent(), false);
+						if ($if_pending > 0) {
+							$if_pending--;
+						}
+					} else {
+						$this->set_indent(+1);
+						$this->append_code($this->get_space().$text.$this->get_crlf_indent(), false);
+					}
 					break;
 				case ST_CURLY_CLOSE:
 					$this->set_indent(-1);
@@ -379,38 +447,81 @@ class CodeFormatter {
 						$this->append_code($this->get_crlf_indent().$text, true);
 					}
 					if ($in_do_counter > 0 && $this->is_token(array(T_WHILE))) {
-						$this->append_code($this->get_space(), false);
+						$this->append_code($this->get_space().$this->debug('[}.DoWhile]'), false);
 						$in_do_counter--;
 						$in_while_counter--;
+					} elseif ($in_foreach_counter > 0) {
+						$this->append_code($this->get_crlf_indent().$this->debug('[}.Foreach]'), false);
+						$this->set_indent(-1);
+						$in_foreach_counter--;
 					} elseif ($in_switch_counter > 0) {
 						$in_switch_counter--;
-						$this->append_code($this->get_crlf_indent(), true);
+						$this->append_code($this->get_crlf_indent().$this->debug('[}.Switch]'), true);
 					} elseif ($this->is_token(array(T_CATCH, T_ELSE, T_ELSEIF))) {
-						$this->append_code($this->get_space(), false);
+						$this->append_code($this->get_space().$this->debug('[}.CatchElseElseIf]'), false);
 					} elseif ($in_if_counter > 0) {
 						$in_if_counter--;
-						$this->append_code($this->get_crlf_indent(), true);
+						$this->append_code($this->get_crlf_indent().$this->debug('[}.IfCounter]'), true);
 					} else {
-						$this->append_code($this->get_crlf_indent(), false);
+						$this->append_code($this->get_crlf_indent().$this->debug('[}.Else]'), false);
 					}
 					break;
 				case ST_PARENTHESES_OPEN:
 					$in_parentheses_counter++;
-					$this->append_code($text, false);
-					if ($in_array_counter > 0 && $in_parentheses_counter <= $in_array_counter) {
+					$this->append_code($text.$this->debug('[CC.'.(1*$in_call_context).']').$this->debug('[AR.'.(1*$in_array_counter).']'), false);
+					if (!$in_call_context && $this->is_token(array(T_STRING, T_FOR, T_FOREACH, T_WHILE, T_IF, T_ELSEIF), true)) {
+						$in_call_context = true;
+						$in_call_counter = $in_parentheses_counter-1;
+						$this->append_code($this->debug('[ON.'.$in_call_counter.']'), false);
+					} elseif (!$in_call_context && $in_array_counter > 0 && $in_parentheses_counter <= $in_array_counter) {
 						$this->set_indent(+1);
 						$this->append_code($this->get_crlf_indent());
+					}
+					if ($artificial_curly_close) {
+						$artificial_curly_close = false;
 					}
 					break;
 				case ST_PARENTHESES_CLOSE:
 					$in_parentheses_counter--;
-					if ($in_function_counter > 0) {
+					if ($in_call_context && $in_parentheses_counter == $in_call_counter) {
+						$in_call_context = false;
+						$this->append_code($text.$this->debug('[OFF.'.$in_call_counter.']'), false);
+						if ($in_function_counter > 0) {
+							$in_function_counter--;
+							$this->append_code($this->debug('[InFunc--]'), false);
+						} elseif ($in_if_counter > 0 && $this->is_token(array(T_VARIABLE, T_STRING, T_DOC_COMMENT, T_COMMENT))) {
+							$this->set_indent(+1);
+							$this->append_code(' {'.$this->get_crlf_indent(), false);
+							$artificial_curly_open = true;
+							$if_pending++;
+							$in_if_counter--;
+						} elseif ($in_elseif_counter > 0 && $this->is_token(array(T_VARIABLE, T_STRING, T_DOC_COMMENT, T_COMMENT))) {
+							$this->append_code(' {');
+							$artificial_curly_open = true;
+							$if_pending++;
+							$in_elseif_counter--;
+							$this->set_indent(+1);
+							$this->append_code($this->get_crlf_indent(), false);
+						} elseif ($in_if_counter > 0 && $this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION, T_RETURN))) {
+							$this->append_code($this->debug('[).next:LOOP.IF:'.$in_if_counter.']').$this->get_space(), false);
+							$in_if_counter--;
+						} elseif ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION))) {
+							$this->append_code($this->get_space(), false);
+						} elseif ($in_for_counter > 0) {
+							$this->append_code($this->debug("[).CC.For--]"));
+							$in_for_counter--;
+						}
+						break;
+					} elseif ($in_function_counter > 0) {
 						$in_function_counter--;
-						$this->append_code($text, false);
+						$this->append_code($text.$this->debug('[InFunc--]'), false);
+						if ($in_attribution_counter > 0) {
+							$in_attribution_counter--;
+						}
 						break;
 					} elseif ($in_array_counter > 0 && $in_parentheses_counter < $in_array_counter) {
 						$this->set_indent(-1);
-						if (',' != substr(trim($this->code),-1, 1) && '(' != substr(trim($this->code),-1, 1) && ')' != substr(trim($this->code),-1, 1)) {
+						if (!$this->is_token(array(T_DOC_COMMENT, T_COMMENT), true) && ',' != substr(trim($this->code),-1, 1) && '(' != substr(trim($this->code),-1, 1) && ')' != substr(trim($this->code),-1, 1)) {
 							$this->append_code(',');
 							$this->append_code($this->get_crlf_indent().$text, false);
 						} else {
@@ -419,33 +530,42 @@ class CodeFormatter {
 						$in_array_counter--;
 						break;
 					} elseif ($in_for_counter > 0) {
-						$this->append_code($text);
+						$this->append_code($text.$this->debug("[).For--]"));
 						if (!$this->is_token(ST_CURLY_OPEN)) {
 							$this->append_code($this->get_space());
 						}
 						$in_for_counter--;
-					} elseif ($in_if_counter > 0 && $this->is_token(array(T_VARIABLE, T_STRING))) {
+					} elseif ($in_elseif_counter > 0 && $this->is_token(array(T_VARIABLE, T_STRING, T_DOC_COMMENT, T_COMMENT))) {
 						$this->set_indent(+1);
 						$this->append_code($text.' {'.$this->get_crlf_indent(), false);
+						$artificial_curly_open = true;
+					} elseif ($in_if_counter > 0 && $this->is_token(array(T_VARIABLE, T_STRING, T_DOC_COMMENT, T_COMMENT))) {
+						$this->set_indent(+1);
+						$this->append_code($text.' {'.$this->get_crlf_indent(), false);
+						$artificial_curly_open = true;
 						$if_pending++;
 					} elseif ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_FUNCTION))) {
 						$this->append_code($text.$this->get_space(), false);
-					} elseif ($in_array_counter > 0 && $in_attribution_counter > 0) {
-						$this->append_code($text, false);
+					} elseif ($in_array_counter > 0 && $in_attribution_counter > 0 && !$this->is_token(ST_QUESTION)) {
+						$this->set_indent(-1);
+						$this->append_code($text.$this->get_crlf_indent(), false);
 						$in_array_counter--;
 					} else {
 						$this->append_code($text, false);
 					}
 					break;
 				case T_ELSEIF:
+					$way_clear = true;
 					if ($artificial_curly_close) {
 						$artificial_curly_close = false;
 					}
 					$this->append_code($text.$this->get_space(), false);
+					$in_elseif_counter++;
 					break;
 				case T_ELSE:
+					$way_clear = true;
 					$this->append_code($text, false);
-					if ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE))) {
+					if ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_THROW, T_ECHO, T_CONTINUE))) {
 						$this->append_code($this->get_space());
 					} elseif ($this->is_token(array(T_VARIABLE, T_STRING))) {
 						$this->set_indent(+1);
@@ -454,6 +574,7 @@ class CodeFormatter {
 					}
 					break;
 				case T_IF:
+					$way_clear = true;
 					$in_if_counter++;
 					if ($artificial_curly_close) {
 						$this->append_code($this->get_crlf_indent(), false);
@@ -462,7 +583,7 @@ class CodeFormatter {
 					$this->append_code($this->get_crlf_indent().$text.$this->get_space());
 					break;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text.$this->debug("[Default]"), false);
 					break;
 			}
 		}
@@ -560,7 +681,7 @@ class CodeFormatter {
 			}
 			foreach ($matches[0] as $match) {
 				$len = strlen($match)-strlen($current_block_name);
-				$ws = str_repeat(' ', $biggest-$len+1);
+				$ws = str_repeat(' ', max($biggest-$len+1, 0));
 				$this->code = preg_replace('/'.preg_quote($current_block_name).'/', $ws, $this->code, 1);
 			}
 			$this->code = str_replace($current_block_name, '', $this->code);
@@ -635,6 +756,11 @@ class CodeFormatter {
 		}
 		$this->process_block($current_block_name);
 		return $this->code;
+	}
+	private function debug($str) {
+		if ($this->debug) {
+			return $str;
+		}
 	}
 }
 class SurrogateToken {

@@ -1,8 +1,9 @@
 <?php
-if (true)//comment
-//comment
- {
+if (true) {
+	//comment
+	//comment
 
+	$a;
 } else {
-
+	$b;
 }

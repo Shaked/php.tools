@@ -25,10 +25,10 @@ if ($a) foreach ($a as $b) {
 if ($a) while (false) {
 	$b;
 }
-if ($a) function f($a, $b) {
+if ($a) function ($a, $b) {
 	$a;
 	$b;
-}
+};
 if ($a) {
 	$b;
 }

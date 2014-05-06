@@ -5,7 +5,7 @@ $array = array(
 	'k' => 'v',
 	//TODO
 	'k' => 'v',
-	#TODO,
+	#TODO
 );
 $array = ['a', // TODO
 'k' => 'v', //TODO

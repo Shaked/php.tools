@@ -20,7 +20,7 @@ function a($a = 1, $b = 2, $c = 3){
 	$ab[$bc = 1] = 1;
 	$abc[$bcd = 1] = 1;
 }
-function a(
+function b(
 	$a = 1,
 	$b = 2,
 	$c = 3
