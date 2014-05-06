@@ -195,6 +195,7 @@ class CodeFormatter {
 				case T_PROTECTED:
 				case T_STATIC:
 				case T_CLASS:
+				case T_TRAIT:
 				case T_INTERFACE:
 				case T_THROW:
 				case T_ABSTRACT:
@@ -234,6 +235,13 @@ class CodeFormatter {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
 					if ($this->is_token(ST_COMMA, true)) {
+						if ('//' == substr($text, 0, 2)) {
+							$text = '/*'.trim(substr($text, 2)).'*/';
+						} elseif ('#' == substr($text, 0, 1)) {
+							$text = '/*'.trim(substr($text, 1)).'*/';
+						}
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[//.comma]').$this->get_crlf_indent(), false);
+					} elseif ($this->is_token(ST_COMMA)) {
 						if ('//' == substr($text, 0, 2)) {
 							$text = '/*'.trim(substr($text, 2)).'*/';
 						} elseif ('#' == substr($text, 0, 1)) {
@@ -386,7 +394,7 @@ class CodeFormatter {
 					} elseif (0 == $in_for_counter && $in_attribution_counter > 0) {
 						$in_attribution_counter--;
 						$this->append_code($text.$this->debug('[OFF.at]').$this->get_crlf_indent(), false);
-						if ($this->is_token(array(T_ELSE, T_ELSEIF))) {
+						if ($this->is_token(array(T_ELSE, T_ELSEIF)) && $if_pending > 0) {
 							$if_pending--;
 							$this->set_indent(-1);
 							$this->append_code($this->get_crlf_indent().'}'.$this->debug('[;.Artif}.ElseElseIf]').$this->get_space());
@@ -439,6 +447,10 @@ class CodeFormatter {
 				case ST_CURLY_OPEN:
 					if ($in_if_counter > 0) {
 						$in_if_counter--;
+						$this->set_indent(+1);
+						$this->append_code($this->get_space().$text.$this->get_crlf_indent(), false);
+					} elseif ($in_elseif_counter > 0) {
+						$in_elseif_counter--;
 						$this->set_indent(+1);
 						$this->append_code($this->get_space().$text.$this->get_crlf_indent(), false);
 					} elseif ($in_for_counter > 0) {
@@ -584,7 +596,7 @@ class CodeFormatter {
 				case T_ELSE:
 					$way_clear = true;
 					$this->append_code($text, false);
-					if ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_THROW, T_ECHO, T_CONTINUE))) {
+					if ($this->is_token(array(T_DO, T_FOR, T_FOREACH, T_WHILE, T_THROW, T_ECHO, T_CONTINUE, T_RETURN))) {
 						$this->append_code($this->get_space());
 					} elseif ($this->is_token(array(T_VARIABLE, T_STRING))) {
 						$this->set_indent(+1);
