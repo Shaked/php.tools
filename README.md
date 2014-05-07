@@ -27,3 +27,43 @@ php.tools
 	watch fmt [all|filename] - watch for changes and format according to project formatting rules
 ```
 
+# Code Formatter's restrictions
+- It doesn't parse properly ancient constructs like IF: ELSE: ENDIF; / SWITCH ... ENDSWITCH; and so on.
+- It has a hard time looking ahead for tokens which disrupts the flow of the staments like:
+```
+	if // comment
+	($condition) // comment
+	// comment
+	{
+		doSomething();
+	}
+
+	or
+
+	if // comment
+	($condition) // comment
+	// comment
+	doSomething();
+```
+- It does not add implicit curly braces for block statements, like do..while, while, for and foreach
+```
+	if ($condition)
+		$a;
+	becomes
+	if ($condition) {
+		$a;
+	}
+
+	but
+
+	if ($condition)
+		do{
+			doSomething()
+		}while($condition2);
+	does NOT become:
+	if ($condition) {
+		do{
+			doSomething()
+		}while($condition2);
+	}
+```
