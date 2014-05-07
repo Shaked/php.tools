@@ -524,7 +524,10 @@ class CodeFormatter {
 						$this->set_indent(-1);
 						array_shift($in_switch_curly_block);
 					}
-					if (!$this->is_token(ST_CURLY_CLOSE, true) && !$this->is_token(ST_SEMI_COLON, true)) {
+					if ($this->is_token(ST_COMMA)) {
+						$this->set_indent(+1);
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[{}:'.$in_curly_block.':,]'), false);
+					} elseif (!$this->is_token(ST_CURLY_CLOSE, true) && !$this->is_token(ST_SEMI_COLON, true)) {
 						$this->append_code($this->get_crlf_indent().$text.$this->debug('[{}:'.$in_curly_block.':a]'), false);
 					} else {
 						$this->append_code($this->get_crlf_indent().$text.$this->debug('[{}:'.$in_curly_block.':b]'), true);
