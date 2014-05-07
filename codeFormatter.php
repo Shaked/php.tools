@@ -50,7 +50,6 @@ class CodeFormatter {
 		"ALIGN_ASSIGNMENTS" => true,
 		"ORDER_USE" => true,
 		"REMOVE_UNUSED_USE_STATEMENTS" => true,
-		"SPACE_INSIDE_FOR" => false,
 	);
 	private $indent_size = 1;
 	private $indent_char = "\t";
@@ -716,7 +715,7 @@ class CodeFormatter {
 		if ($this->for_idx == 0 || !$in_for) {
 			return $this->get_crlf().$this->get_indent($increment);
 		} else {
-			return $this->get_space($this->options["SPACE_INSIDE_FOR"]);
+			return $this->get_space(false);
 		}
 	}
 	private function get_crlf($true = true) {
