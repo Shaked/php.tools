@@ -10,6 +10,7 @@ $array = array(
 
 	/*TODO*/
 );
+
 $array = ['a',
 /*TODO*/
 'k' => 'v',
@@ -17,7 +18,9 @@ $array = ['a',
 'k' => 'v',
 /*TODO*/
 ];
+
 func($a// comment
 );
+
 $a->m1()->m2()// comment
 ->m3();

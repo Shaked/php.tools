@@ -6,6 +6,7 @@ function func() {
 		)
 	);
 	$found_props = new ClassObject($crit);
+
 	$found_props = new ClassObject(array(array('k' => 1)));
 	$expected1 = $this->create(3, 456, 99, array());
 	return array(//Comment1
@@ -24,6 +25,7 @@ function func2() {
 		)
 	);
 	$found_props = new ClassObject($crit);
+
 	$found_props = new ClassObject(array(array('k' => 1)));
 	$expected1 = $this->create(3, 456, 99, array());
 	//Comment 1

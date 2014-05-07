@@ -4,6 +4,7 @@ CONTENT
 
 EOS
 );
+
 $a = <<<EOS
 CONTENT
 

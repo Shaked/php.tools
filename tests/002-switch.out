@@ -56,6 +56,7 @@ switch ($a) {
 		echo 5;
 		break;
 }
+
 while ($a) {
 	switch ($a) {
 		case 1:
