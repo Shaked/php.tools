@@ -1,8 +1,0 @@
-<?php
-switch ($a) {
-	case 1:
-		$a = implode('', array_map(function ($v) {
-			return v;
-		}, $arr));
-	break;
-}
