@@ -14,7 +14,8 @@ function func() {
 				$tt = 1;
 			}
 			$obj = new ClassObject();
-			$obj->set_sku(htmlentities($arr['s']))->set_quantity(1)// Comment 2
+			$obj->set_sku(htmlentities($arr['s']))->set_quantity(1)
+			// Comment 2
 			->set_amount($tt)// Comment 3
 			// Comment 4
 			->set_product_name(htmlentities($arr['p'].'_'.$arr['q']));

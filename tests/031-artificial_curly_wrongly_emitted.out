@@ -12,12 +12,10 @@ Comment 2 */
 		if (($cm === 'RCDATA' || $cm === 'CDATA') && $es === false && $tch >= 3 && charfunc($tch-4, 4) === '<!--') {
 			$es = true;
 		}
-
 		/*
 Multiline comment
 Comment 3 */
 		func(array('type' => 'CHAR', 'data' => $ch));
-
 		/*
 Multiline comment
 Comment 4 */
@@ -27,7 +25,6 @@ Comment 4 */
 Multiline comment
 Comment 5 */
 		$state = 'tO';
-
 		/*
 Multiline comment
 Comment 6 */
@@ -39,7 +36,6 @@ Comment 7 */
 		if (($cm === 'RCDATA' || $cm === 'CDATA') && $es === true && charfunc($tch, 3) === '-->') {
 			$es = false;
 		}
-
 		/*
 Multiline comment
 Comment 8 */

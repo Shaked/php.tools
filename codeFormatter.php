@@ -263,7 +263,9 @@ class CodeFormatter {
 				case T_OBJECT_CAST:
 				case T_STRING_CAST:
 				case T_UNSET_CAST:
-					if ($this->is_token(array(T_DOUBLE_ARROW), true) || $this->is_token(ST_EQUAL, true)) {
+					if ($this->is_token(array(T_COMMENT, T_DOC_COMMENT), true)) {
+						$this->append_code($this->get_crlf_indent().$text.$this->get_space());
+					} elseif ($this->is_token(array(T_DOUBLE_ARROW), true) || $this->is_token(ST_EQUAL, true)) {
 						$this->append_code($this->get_space().$text.$this->get_space());
 					} else {
 						$this->append_code($text.$this->get_space());
@@ -271,23 +273,12 @@ class CodeFormatter {
 					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					if ($this->is_token(ST_COMMA, true)) {
-						if ('//' == substr($text, 0, 2)) {
-							$text = '/*'.trim(substr($text, 2)).'*/';
-						} elseif ('#' == substr($text, 0, 1)) {
-							$text = '/*'.trim(substr($text, 1)).'*/';
-						}
-						$this->append_code($this->get_crlf_indent().$text.$this->debug('[//.comma]').$this->get_crlf_indent(), false);
-					} elseif ($this->is_token(ST_COMMA)) {
-						if ('//' == substr($text, 0, 2)) {
-							$text = '/*'.trim(substr($text, 2)).'*/';
-						} elseif ('#' == substr($text, 0, 1)) {
-							$text = '/*'.trim(substr($text, 1)).'*/';
-						}
-						$this->append_code($this->get_crlf_indent().$text.$this->debug('[//.comma]').$this->get_crlf_indent(), false);
-					} else {
-						$this->append_code(trim($text).$this->debug('[//.else]').$this->get_crlf_indent(), false);
+					list($pt_id, $pt_text) = $this->inspect_token(-1);
+					if (T_WHITESPACE == $pt_id && substr_count($pt_text, PHP_EOL) > 0 && substr_count($text, PHP_EOL) > 0) {
+						$this->append_code($this->get_crlf_indent().rtrim($text).$this->debug('[//.alone]').$this->get_crlf_indent(), true);
+						break;
 					}
+					$this->append_code(trim($text).$this->debug('[//.else]').$this->get_crlf_indent(), false);
 					break;
 				case T_ARRAY:
 					if ($in_call_context) {
@@ -331,7 +322,10 @@ class CodeFormatter {
 					$this->append_code($text);
 					break;
 				case ST_COMMA:
-					if ($in_array_counter > 0 && 0 == $in_bracket_counter) {
+					if ($this->is_token(array(T_COMMENT, T_DOC_COMMENT), true)) {
+						$this->append_code($this->get_crlf_indent().$text.$this->get_space());
+						break;
+					} elseif ($in_array_counter > 0 && 0 == $in_bracket_counter) {
 						$this->append_code($text.$this->get_crlf_indent());
 						break;
 					} else {
@@ -755,6 +749,9 @@ class CodeFormatter {
 		if ($this->indent < 0) {
 			$this->indent = 0;
 		}
+	}
+	private function inspect_token($delta = 1) {
+		return $this->get_token($this->tkns[$this->ptr+$delta]);
 	}
 	private function is_token($token, $prev = false, $i = 99999, $idx = false) {
 		if ($i == 99999) {

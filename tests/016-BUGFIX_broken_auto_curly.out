@@ -27,12 +27,10 @@ if (true) {
 		$cmd = cmd();
 	} while (true);
 }
-
 //This case is IF without the curly brace + do...while
 if (true) do {
 	$cmd = cmd();
 } while (true);
-
 //This case is IF without the curly brace + do...while + if
 if (true) do {
 	if ($a) {
