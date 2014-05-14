@@ -788,92 +788,42 @@ class CodeFormatter {
 		}
 		return false;
 	}
-	private function process_block($current_block_name) {
-		if (!is_null($current_block_name)) {
-			$matches = null;
-			preg_match_all('/\$.+'.preg_quote($current_block_name).'/', $this->code, $matches);
-			$biggest = 0;
-			foreach ($matches[0] as $match) {
-				$len = strlen(str_replace($current_block_name, '', $match));
-				$biggest = max($biggest, $len);
-			}
-			foreach ($matches[0] as $match) {
-				$len = strlen($match)-strlen($current_block_name);
-				$ws = str_repeat(' ', max($biggest-$len+1, 0));
-				$this->code = preg_replace('/'.preg_quote($current_block_name).'/', $ws, $this->code, 1);
-			}
-			$this->code = str_replace($current_block_name, '', $this->code);
-		}
-	}
 	private function align_operators() {
 		if (!$this->options['ALIGN_ASSIGNMENTS']) {
 			return $this->code;
 		}
-		$this->tkns = token_get_all($this->code);
-		$this->code = '';
-		$bracket_context_counter = 0;
-		$current_block_name = null;
-		$parentheses_context_counter = 0;
-		foreach ($this->tkns as $index => $token) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case ST_EQUAL:
-					if (!is_null($current_block_name) && 0 == $parentheses_context_counter && 0 == $bracket_context_counter) {
-						$this->append_code($current_block_name, false);
-					}
-					$this->append_code($text, false);
-					break;
-				case ST_BRACKET_OPEN:
-					$bracket_context_counter++;
-					$this->append_code($text, false);
-					break;
-				case ST_BRACKET_CLOSE:
-					$bracket_context_counter--;
-					$this->append_code($text, false);
-					break;
-				case T_COMMENT:
-				case T_DOC_COMMENT:
-					$this->process_block($current_block_name);
-					$current_block_name = null;
-					$this->append_code($text, false);
-					break;
-				case T_SWITCH:
-				case T_IF:
-				case T_FOR:
-				case T_FUNCTION:
-					if (0 == $bracket_context_counter) {
-						$parentheses_context_counter++;
-						$this->process_block($current_block_name);
-						$current_block_name = null;
-					}
-					$this->append_code($text, false);
-					break;
-				case ST_PARENTHESES_CLOSE:
-					if (0 == $bracket_context_counter) {
-						$parentheses_context_counter--;
-					}
-					$this->append_code($text, false);
-					break;
-				case T_VARIABLE:
-					if (0 == $parentheses_context_counter && 0 == $bracket_context_counter) {
-						if (is_null($current_block_name)) {
-							$current_block_name = "\0\0\0".uniqid()."\0\0\0";
-						}
-					}
-					$this->append_code($text, false);
-					break;
-				case T_WHITESPACE:
-					if (!is_null($current_block_name) && $this->is_token(ST_EQUAL) && 0 == $parentheses_context_counter && 0 == $bracket_context_counter) {
-						break;
-					}
-				default:
-					$this->append_code($text, false);
-					break;
+		$lines = explode($this->new_line, $this->code);
+		$lines_with_equals = [];
+		$block_count = 0;
+		foreach ($lines as $idx => $line) {
+			if (1 == substr_count($line, '=') && 0 == substr_count($line, '==') && 0 == substr_count($line, '(')) {
+				$lines_with_equals[$block_count][] = $idx;
+			}
+			else {
+				$block_count++;
 			}
 		}
-		$this->process_block($current_block_name);
-		return $this->code;
+
+		foreach ($lines_with_equals as $group) {
+			if (1 == sizeof($group)) {
+				continue;
+			}
+			$farthest_equals_sign = 0;
+			foreach ($group as $idx) {
+				$farthest_equals_sign = max($farthest_equals_sign, strpos($lines[$idx], '='));
+			}
+			foreach ($group as $idx) {
+				$line = $lines[$idx];
+				$current_equals = strpos($line, '=');
+				$delta = abs($farthest_equals_sign-$current_equals);
+				if ($delta > 0) {
+					$line = preg_replace('/=/', str_repeat(' ', $delta).'=', $line, 1);
+					$lines[$idx] = $line;
+				}
+			}
+		}
+
+		return implode($this->new_line, $lines);
 	}
 	private function debug($str) {
 		if ($this->debug) {
