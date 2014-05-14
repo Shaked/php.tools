@@ -47,24 +47,24 @@ if (!isset($testEnv)) {
 }
 class CodeFormatter {
 	private $options = array(
-		"ALIGN_ASSIGNMENTS" => true,
-		"ORDER_USE" => true,
+		"ALIGN_ASSIGNMENTS"            => true,
+		"ORDER_USE"                    => true,
 		"REMOVE_UNUSED_USE_STATEMENTS" => true,
 	);
 	private $indent_size = 1;
 	private $indent_char = "\t";
-	private $block_size = 1;
-	private $new_line = "\n";
-	private $indent = 0;
-	private $for_idx = 0;
-	private $code = '';
-	private $ptr = 0;
-	private $tkns = 0;
-	private $debug = DEBUG;
+	private $block_size  = 1;
+	private $new_line    = "\n";
+	private $indent      = 0;
+	private $for_idx     = 0;
+	private $code        = '';
+	private $ptr         = 0;
+	private $tkns        = 0;
+	private $debug       = DEBUG;
 	private function orderUseClauses($source = '') {
 		$use_stack = [];
 		$tokens = token_get_all($source);
-		$new_tokens = [];
+		$new_tokens  = [];
 		$next_tokens = [];
 		while (list(, $pop_token) = each($tokens)) {
 			$next_tokens[] = $pop_token;
@@ -95,14 +95,14 @@ class CodeFormatter {
 			}
 		}
 
+
 		natcasesort($use_stack);
-		$alias_list = [];
+		$alias_list  = [];
 		$alias_count = [];
 		foreach ($use_stack as $use) {
 			if (false !== stripos($use, ' as ')) {
 				$alias = substr(strstr($use, ' as '), strlen(' as '), -1);
-			}
-			else {
+			} else {
 				$alias = basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 			}
 			$alias = strtolower($alias);
@@ -148,27 +148,27 @@ class CodeFormatter {
 		}
 		$this->tkns = token_get_all($source);
 		$artificial_curly_close = false;
-		$artificial_curly_open = false;
-		$if_pending = 0;
-		$in_array_counter = 0;
+		$artificial_curly_open  = false;
+		$if_pending             = 0;
+		$in_array_counter       = 0;
 		$in_attribution_counter = 0;
-		$in_bracket_counter = 0;
-		$in_call_context = false;
-		$in_call_counter = 0;
-		$in_case_counter = 0;
-		$in_do_counter = 0;
-		$in_elseif_counter = 0;
-		$in_for_counter = 0;
-		$in_foreach_counter = 0;
-		$in_function_counter = 0;
-		$in_curly_block = 0;
-		$in_if_counter = 0;
+		$in_bracket_counter     = 0;
+		$in_call_context        = false;
+		$in_call_counter        = 0;
+		$in_case_counter        = 0;
+		$in_do_counter          = 0;
+		$in_elseif_counter      = 0;
+		$in_for_counter         = 0;
+		$in_foreach_counter     = 0;
+		$in_function_counter    = 0;
+		$in_curly_block         = 0;
+		$in_if_counter          = 0;
 		$in_parentheses_counter = 0;
-		$in_question_counter = 0;
-		$in_switch_counter = 0;
+		$in_question_counter    = 0;
+		$in_switch_counter      = 0;
 		$in_switch_curly_block = array();
 		$in_while_counter = 0;
-		$way_clear = true;
+		$way_clear        = true;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -428,7 +428,7 @@ class CodeFormatter {
 					break;
 				case T_WHITESPACE:
 					$redundant = "";
-					$matches = 0;
+					$matches   = 0;
 					$lines = preg_match_all("/\r?\n/", $text, $matches);
 					$lines = $lines > 1?1:0;
 					$redundant = $lines > 0?str_repeat($this->new_line, $lines):"";
@@ -706,7 +706,7 @@ class CodeFormatter {
 		$ret = $this->align_operators();
 		return implode($this->new_line, array_map(function ($v) {
 			return rtrim($v);
-			}, explode($this->new_line, $ret)));
+		}, explode($this->new_line, $ret)));
 	}
 	private function get_token($token) {
 		if (is_string($token)) {
@@ -795,12 +795,11 @@ class CodeFormatter {
 		}
 		$lines = explode($this->new_line, $this->code);
 		$lines_with_equals = [];
-		$block_count = 0;
+		$block_count       = 0;
 		foreach ($lines as $idx => $line) {
 			if (1 == substr_count($line, '=') && 0 == substr_count($line, '==') && 0 == substr_count($line, '(') && 0 == substr_count($line, '.=') && 0 == substr_count($line, '+=') && 0 == substr_count($line, '-=') && 0 == substr_count($line, '*=') && 0 == substr_count($line, '&=') && 0 == substr_count($line, '|=') && 0 == substr_count($line, '>=') && 0 == substr_count($line, '!=') && 0 == substr_count($line, '<=') && 0 == substr_count($line, '<<=') && 0 == substr_count($line, '>>=') && 0 == substr_count($line, '^=') && 0 == substr_count($line, '%=')) {
 				$lines_with_equals[$block_count][] = $idx;
-			}
-			else {
+			} else {
 				$block_count++;
 			}
 		}
@@ -833,5 +832,6 @@ class CodeFormatter {
 	}
 }
 class SurrogateToken {
+
 
 }
