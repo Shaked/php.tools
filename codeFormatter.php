@@ -293,14 +293,14 @@ class CodeFormatter {
 						}
 						break;
 					} elseif ($this->is_token(array(T_VARIABLE))) {
-						$this->append_code($text.$this->get_space(), false);
+						$this->append_code($text.$this->debug('[Arr.Var]').$this->get_space(), false);
 						break;
 					} elseif ($this->is_token(array(T_RETURN, T_YIELD, T_COMMENT, T_DOC_COMMENT), true)) {
-						$this->append_code($text, false);
+						$this->append_code($text.$this->debug('[Arr.Ret]'), false);
 						break;
-					} elseif ($in_array_counter > 0) {
+					} elseif ($in_array_counter > 0 && !$this->is_token(array(T_DOUBLE_ARROW), true)) {
 						$in_array_counter++;
-						$this->append_code($this->get_crlf_indent().$text);
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[Arr.ArrCounter>0]'));
 						break;
 					} elseif ($in_function_counter > 0) {
 						$condition = $this->is_token(ST_EQUAL, true);
