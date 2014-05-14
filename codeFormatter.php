@@ -511,11 +511,15 @@ class CodeFormatter {
 					} elseif ($in_elseif_counter > 0) {
 						$in_elseif_counter--;
 						$this->set_indent(+1);
-						$this->append_code($this->get_space().$text.$this->get_crlf_indent(), false);
+						$this->append_code($this->get_space().$text.$this->debug('[{.elseif]').$this->get_crlf_indent(), false);
 					} elseif ($in_for_counter > 0) {
 						$in_for_counter--;
 						$this->set_indent(+1);
-						$this->append_code($this->get_space().$text.$this->get_crlf_indent(), false);
+						$this->append_code($this->get_space().$text.$this->debug('[{.for]').$this->get_crlf_indent(), false);
+					} elseif ($in_foreach_counter > 0) {
+						$in_foreach_counter--;
+						$this->set_indent(+1);
+						$this->append_code($this->get_space().$text.$this->debug('[{.foreach]').$this->get_crlf_indent(), false);
 					} elseif ($this->is_token(array(T_COMMENT, T_DOC_COMMENT), true) && $artificial_curly_open) {
 						$artificial_curly_open = false;
 						$this->append_code($this->get_crlf_indent(), false);
@@ -524,7 +528,7 @@ class CodeFormatter {
 						}
 					} else {
 						$this->set_indent(+1);
-						$this->append_code($this->get_space().$text.$this->get_crlf_indent(), false);
+						$this->append_code($this->get_space().$text.$this->debug('[{.else]').$this->get_crlf_indent(), false);
 					}
 					break;
 				case ST_CURLY_CLOSE:
