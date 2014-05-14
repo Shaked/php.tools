@@ -152,6 +152,7 @@ class CodeFormatter {
 		$if_pending = 0;
 		$in_array_counter = 0;
 		$in_attribution_counter = 0;
+		$in_bracket_counter = 0;
 		$in_call_context = false;
 		$in_call_counter = 0;
 		$in_case_counter = 0;
@@ -177,6 +178,14 @@ class CodeFormatter {
 				}
 			}
 			switch ($id) {
+				case ST_BRACKET_OPEN:
+					$this->append_code($text, false);
+					$in_bracket_counter++;
+					break;
+				case ST_BRACKET_CLOSE:
+					$this->append_code($text, false);
+					$in_bracket_counter--;
+					break;
 				case ST_QUESTION:
 					$this->append_code($text, false);
 					$in_question_counter++;
@@ -322,7 +331,7 @@ class CodeFormatter {
 					$this->append_code($text);
 					break;
 				case ST_COMMA:
-					if ($in_array_counter > 0) {
+					if ($in_array_counter > 0 && 0 == $in_bracket_counter) {
 						$this->append_code($text.$this->get_crlf_indent());
 						break;
 					} else {
