@@ -1,17 +1,28 @@
 <?php
-$request = new ETB_Vendor_Orbitz_Connector_Request_Shopping();
-$request->set_hotel_id([12, 15, 50, 1219891, 1194981, 1187361, 1174531, 1173531])
-        ->set_check_in('20140723')
-        ->set_check_out('20140728')
-        ->set_room(['2,0'])
-        ->set_rate_details('all')
-        ->set_content_details('all')
-        ->set_include('taxesAndFees');
+$request = new ClassObject();
+$request->cmd1([1, 2, 3, 4, 5, 6, 7])
+   ->cmd2('a')
+   ->cm3('b')
+   ->cmd4(['2,0'])
+   ->cmd5('a')
+   ->cmd6('a')
+   ->cmd7('c');
 
-$request = new ETB_Vendor_Orbitz_Connector_Request_Shopping();
-$request->set_hotel_id([12, 15, 50, 1219891, 1194981, 1187361, 1174531, 1173531])->set_check_in('20140723')
-        ->set_check_out('20140728')
-        ->set_room(['2,0'])
-        ->set_rate_details('all')
-        ->set_content_details('all')
-        ->set_include('taxesAndFees');
+$request = new ClassObject();
+$request->cmd1([1, 2, 3, 4, 5, 6, 7])->cmd2('a')
+   ->cm3('b')
+   ->cmd4(['2,0'])
+   ->cmd5('a')
+   ->cmd6('a')
+   ->cmd7('c');
+
+function aa() {
+	$request = new ClassObject();
+	$request->cmd1([1, 2, 3, 4, 5, 6, 7])
+	   ->cmd2('a')
+	   ->cm3('b')
+	   ->cmd4(['2,0'])
+	   ->cmd5('a')
+	   ->cmd6('a')
+	   ->cmd7('c');
+}

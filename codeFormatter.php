@@ -728,7 +728,14 @@ class CodeFormatter {
 					$this->append_code($this->get_crlf_indent().$text.$this->get_space());
 					break;
 				case T_OBJECT_OPERATOR:
-					$this->append_code($text.$this->debug("[ObjOp]"), false);
+					$pt_id   = null;
+					$pt_text = null;
+					list($pt_id, $pt_text) = $this->inspect_token(-1);
+					$prev_text = '';
+					if (T_WHITESPACE == $pt_id && substr_count($pt_text, PHP_EOL) > 0) {
+						$prev_text = $this->get_crlf_indent().str_replace([PHP_EOL, "\n", "\r\n"], '', $pt_text);
+					}
+					$this->append_code($prev_text.$text.$this->debug("[ObjOp]"), false);
 					break;
 				default:
 					$this->append_code($text.$this->debug("[Default:".$id.":".(is_numeric($id)?token_name($id):$id)."]"), false);
