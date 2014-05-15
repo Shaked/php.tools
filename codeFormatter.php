@@ -733,7 +733,8 @@ class CodeFormatter {
 					list($pt_id, $pt_text) = $this->inspect_token(-1);
 					$prev_text = '';
 					if (T_WHITESPACE == $pt_id && substr_count($pt_text, PHP_EOL) > 0) {
-						$prev_text = $this->get_crlf_indent().str_replace([PHP_EOL, "\n", "\r\n"], '', $pt_text);
+						$tmp = ltrim(str_replace([PHP_EOL, "\n", "\r\n", "\r"], '', $pt_text));
+						$prev_text = $this->get_crlf_indent().$tmp;
 					}
 					$this->append_code($prev_text.$text.$this->debug("[ObjOp]"), false);
 					break;
@@ -862,6 +863,33 @@ class CodeFormatter {
 			}
 		}
 
+		$lines_with_obj_operator = [];
+		$block_count             = 0;
+		foreach ($lines as $idx => $line) {
+			if (substr_count($line, '->') > 0 && 0 == substr_count($line, '{') && 0 == substr_count($line, '=>')) {
+				$lines_with_obj_operator[$block_count][] = $idx;
+			} else {
+				$block_count++;
+			}
+		}
+		foreach ($lines_with_obj_operator as $group) {
+			if (1 == sizeof($group)) {
+				continue;
+			}
+			$farthest_obj_op = 0;
+			foreach ($group as $idx) {
+				$farthest_obj_op = max($farthest_obj_op, strpos($lines[$idx], '->'));
+			}
+			foreach ($group as $idx) {
+				$line = $lines[$idx];
+				$current_equals = strpos($line, '->');
+				$delta = abs($farthest_obj_op-$current_equals);
+				if ($delta > 0) {
+					$line = preg_replace('/->/', str_repeat(' ', $delta).'->', $line, 1);
+					$lines[$idx] = $line;
+				}
+			}
+		}
 		return implode($this->new_line, $lines);
 	}
 	private function debug($str) {
