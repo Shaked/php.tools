@@ -95,7 +95,6 @@ class CodeFormatter {
 			}
 		}
 
-
 		natcasesort($use_stack);
 		$alias_list  = [];
 		$alias_count = [];
@@ -743,10 +742,11 @@ class CodeFormatter {
 					break;
 			}
 		}
-		$ret = $this->align_operators();
+		$this->code = $this->align_operators();
+		$this->code = $this->eliminate_duplicated_empty_lines();
 		return implode($this->new_line, array_map(function ($v) {
 			return rtrim($v);
-		}, explode($this->new_line, $ret)));
+		}, explode($this->new_line, $this->code)));
 	}
 	private function get_token($token) {
 		if (is_string($token)) {
@@ -829,6 +829,30 @@ class CodeFormatter {
 		}
 		return false;
 	}
+	private function eliminate_duplicated_empty_lines() {
+		$lines = explode($this->new_line, $this->code);
+		$empty_lines_chunks = [];
+		$block_count        = 0;
+		foreach ($lines as $idx => $line) {
+			if ('' == trim($line)) {
+				$empty_lines_chunks[$block_count][] = $idx;
+			} else {
+				$block_count++;
+			}
+		}
+		foreach ($empty_lines_chunks as $group) {
+			if (1 == sizeof($group)) {
+				continue;
+			}
+
+			array_shift($group);
+			foreach ($group as $idx) {
+				unset($lines[$idx]);
+			}
+		}
+
+		return implode($this->new_line, $lines);
+	}
 	private function align_operators() {
 		if (!$this->options['ALIGN_ASSIGNMENTS']) {
 			return $this->code;
@@ -872,6 +896,7 @@ class CodeFormatter {
 				$block_count++;
 			}
 		}
+
 		foreach ($lines_with_obj_operator as $group) {
 			if (1 == sizeof($group)) {
 				continue;
@@ -890,6 +915,7 @@ class CodeFormatter {
 				}
 			}
 		}
+
 		return implode($this->new_line, $lines);
 	}
 	private function debug($str) {
@@ -899,6 +925,5 @@ class CodeFormatter {
 	}
 }
 class SurrogateToken {
-
 
 }
