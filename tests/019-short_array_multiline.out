@@ -15,35 +15,16 @@ function a() {
 
 $a = [];
 $a = [[]];
-$a = array(
-	array()
-);
+$a = array(array());
 
 $c = [[1], [2]];
-$d = array(
-	array(
-		1,
-	),
-	array(
-		2,
-	)
-);
-$c = [ array(
-	1,
-), array(
-	2,
-)];
-$d = array(
-	[1],
-	[2],
-);
+$d = array(array(1), array(2));
+$c = [array(1), array(2)];
+$d = array([1], [2]);
 
 $a = [1, 2];
 func([1, 2]);
-$b = array(
-	1,
-	2,
-);
+$b = array(1, 2);
 func(array(1, 2));
 
 ?>

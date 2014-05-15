@@ -15,10 +15,7 @@ try {
 } catch(Exception $e) {
 	$c;
 	func();
-	$c = array(
-		1,
-		2,
-	);
+	$c = array(1, 2);
 }
 while (true) {
 

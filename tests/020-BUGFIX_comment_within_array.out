@@ -1,9 +1,7 @@
 <?php
 function func() {
 	$crit = array(
-		array(
-			'k' => 1,
-		)
+		array('k' => 1)
 	);
 	$found_props = new ClassObject($crit);
 
@@ -17,9 +15,7 @@ function func() {
 }
 function func2() {
 	$crit = array(
-		array(
-			'k' => 1,
-		)
+		array('k' => 1)
 	);
 	$found_props = new ClassObject($crit);
 
@@ -27,35 +23,9 @@ function func2() {
 	$expected1 = $this->create(3, 456, 99, array());
 	//Comment 1
 	return array(
-	array(1.22,
-	32.56,
-	0,
-	$expected1,
-	$found_props,
-	new Mock(array())),
-	array(
-		0,
-		0,
-		0,
-		null,
-		new Mock(array()),
-		new Mock(array())
-	),
-	array(
-		0,
-		0,
-		85,
-		null,
-		new Mock(array()),
-		new Mock(array())
-	),
-	array(
-		0,
-		0,
-		85,
-		$expected1,
-		new Mock(array()),
-		$found_props,
-	),
+	array(1.22, 32.56, 0, $expected1, $found_props, new Mock(array())),
+	array(0, 0, 0, null, new Mock(array()), new Mock(array())),
+	array(0, 0, 85, null, new Mock(array()), new Mock(array())),
+	array(0, 0, 85, $expected1, new Mock(array()), $found_props),
 );
 }

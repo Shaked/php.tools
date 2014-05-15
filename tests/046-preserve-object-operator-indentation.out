@@ -1,0 +1,17 @@
+<?php
+$request = new ETB_Vendor_Orbitz_Connector_Request_Shopping();
+$request->set_hotel_id([12, 15, 50, 1219891, 1194981, 1187361, 1174531, 1173531])
+        ->set_check_in('20140723')
+        ->set_check_out('20140728')
+        ->set_room(['2,0'])
+        ->set_rate_details('all')
+        ->set_content_details('all')
+        ->set_include('taxesAndFees');
+
+$request = new ETB_Vendor_Orbitz_Connector_Request_Shopping();
+$request->set_hotel_id([12, 15, 50, 1219891, 1194981, 1187361, 1174531, 1173531])->set_check_in('20140723')
+        ->set_check_out('20140728')
+        ->set_room(['2,0'])
+        ->set_rate_details('all')
+        ->set_content_details('all')
+        ->set_include('taxesAndFees');
