@@ -1,4 +1,4 @@
-<?
+<?php
 class Object {
 	/**
 	 * Comment
@@ -6,9 +6,6 @@ class Object {
 	public function a() {
 		return true
 	}
-
-
-
 	/**
 	 * Comment 2
 	 */
