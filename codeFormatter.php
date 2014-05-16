@@ -519,6 +519,9 @@ class CodeFormatter {
 					} elseif ($in_call_context) {
 						$this->append_code($text.$this->debug('[;.InCall]'), true);
 						break;
+					} elseif ($this->is_token(array(T_COMMENT, T_DOC_COMMENT)) && (T_WHITESPACE != $nt_id || (T_WHITESPACE == $nt_id && 0 == substr_count($nt_text, PHP_EOL)))) {
+						$this->append_code($text.$this->debug('[;.//]').$this->get_space(), false);
+						break;
 					}
 					$this->append_code($text.$this->debug('[;.else]').$this->get_crlf_indent(), true);
 					break;
