@@ -12,8 +12,7 @@ $array = ['a',
 'k' => 'v', #TODO
 ];
 
-func($a
-// comment
+func($a // comment
 );
 
 $a->m1()
