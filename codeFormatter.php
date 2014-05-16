@@ -46,7 +46,7 @@ if (!isset($testEnv)) {
 	echo $fmt->formatCode(file_get_contents($argv[1]));
 }
 class CodeFormatter {
-	const ALIGNABLE_COMMENT = "//\0\0\0FMT.ALIGN\0\0\0";
+	const ALIGNABLE_COMMENT = "\x2 FMT \x3";
 	private $options = array(
 		"ALIGN_ASSIGNMENTS"            => true,
 		"ORDER_USE"                    => true,
