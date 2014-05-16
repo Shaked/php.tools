@@ -46,6 +46,7 @@ if (!isset($testEnv)) {
 	echo $fmt->formatCode(file_get_contents($argv[1]));
 }
 class CodeFormatter {
+	const ALIGNABLE_COMMENT = "//\0\0\0FMT.ALIGN\0\0\0";
 	private $options = array(
 		"ALIGN_ASSIGNMENTS"            => true,
 		"ORDER_USE"                    => true,
@@ -94,7 +95,6 @@ class CodeFormatter {
 				}
 			}
 		}
-
 
 		natcasesort($use_stack);
 		$alias_list  = [];
@@ -273,6 +273,9 @@ class CodeFormatter {
 					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
+					if ($this->options['ALIGN_ASSIGNMENTS'] && '//' == substr($text, 0, 2)) {
+						$text = self::ALIGNABLE_COMMENT.substr($text, 2);
+					}
 					list($pt_id, $pt_text) = $this->inspect_token(-1);
 					if ($this->is_token(ST_COMMA, true) && T_WHITESPACE == $pt_id && substr_count($pt_text, PHP_EOL) > 0 && substr_count($text, PHP_EOL) > 0) {
 						$this->append_code($this->get_crlf_indent().trim($text).$this->debug('[//.comma]').$this->get_crlf_indent(), true);
@@ -861,7 +864,6 @@ class CodeFormatter {
 				continue;
 			}
 
-
 			array_shift($group);
 			foreach ($group as $idx) {
 				unset($lines[$idx]);
@@ -926,8 +928,8 @@ class CodeFormatter {
 			}
 			foreach ($group as $idx) {
 				$line = $lines[$idx];
-				$current_equals = strpos($line, '->');
-				$delta = abs($farthest_obj_op-$current_equals);
+				$current_obj_op = strpos($line, '->');
+				$delta = abs($farthest_obj_op-$current_obj_op);
 				if ($delta > 0) {
 					$line = preg_replace('/->/', str_repeat(' ', $delta).'->', $line, 1);
 					$lines[$idx] = $line;
@@ -935,7 +937,36 @@ class CodeFormatter {
 			}
 		}
 
-		return implode($this->new_line, $lines);
+		$lines_with_alignable_comments = [];
+		$block_count                   = 0;
+		foreach ($lines as $idx => $line) {
+			if (substr_count($line, self::ALIGNABLE_COMMENT) > 0 && strpos($line, self::ALIGNABLE_COMMENT) > 0) {
+				$lines_with_alignable_comments[$block_count][] = $idx;
+			} else {
+				$block_count++;
+			}
+		}
+
+		foreach ($lines_with_alignable_comments as $group) {
+			if (1 == sizeof($group)) {
+				continue;
+			}
+			$farthest_comment = 0;
+			foreach ($group as $idx) {
+				$farthest_comment = max($farthest_comment, strpos($lines[$idx], self::ALIGNABLE_COMMENT));
+			}
+			foreach ($group as $idx) {
+				$line = $lines[$idx];
+				$current_comment = strpos($line, self::ALIGNABLE_COMMENT);
+				$delta = abs($farthest_comment-$current_comment);
+				if ($delta > 0) {
+					$line = str_replace(self::ALIGNABLE_COMMENT, str_repeat(' ', $delta).self::ALIGNABLE_COMMENT, $line);
+					$lines[$idx] = $line;
+				}
+			}
+		}
+		$ret = implode($this->new_line, $lines);
+		return str_replace(self::ALIGNABLE_COMMENT, '//', $ret);
 	}
 	private function debug($str) {
 		if ($this->debug) {
@@ -944,6 +975,5 @@ class CodeFormatter {
 	}
 }
 class SurrogateToken {
-
 
 }
