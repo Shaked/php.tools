@@ -462,7 +462,11 @@ class CodeFormatter {
 					if (substr($this->code, strlen($current_indent)*-1) == $current_indent && $lines > 0) {
 						$redundant .= $current_indent;
 					}
-					$this->append_code($redundant.trim($text).$this->debug("[WS:".$lines."]"), false);
+					if (!($this->is_token(ST_CURLY_OPEN, true) && $this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_PARENTHESES_OPEN, true) && $this->is_token(ST_PARENTHESES_CLOSE))) {
+						$this->append_code($redundant.trim($text).$this->debug("[WS:".$lines."]"), false);
+					} else {
+						$this->append_code($this->get_space(), true);
+					}
 					break;
 				case ST_SEMI_COLON:
 					$nt_id   = null;
