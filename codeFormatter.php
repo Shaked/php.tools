@@ -534,6 +534,9 @@ class CodeFormatter {
 					} elseif ($this->is_token(array(T_COMMENT, T_DOC_COMMENT)) && (T_WHITESPACE != $nt_id || (T_WHITESPACE == $nt_id && 0 == substr_count($nt_text, PHP_EOL)))) {
 						$this->append_code($text.$this->debug('[;.//]').$this->get_space(), false);
 						break;
+					} elseif ($this->is_token(array(T_COMMENT, T_DOC_COMMENT), true) && T_WHITESPACE == $nt_id && substr_count($nt_text, PHP_EOL) > 0) {
+						$this->append_code($text.$this->debug('[;.//(prev+ws)]').$this->get_crlf_indent(), false);
+						break;
 					}
 					$this->append_code($text.$this->debug('[;.else]').$this->get_crlf_indent(), true);
 					break;
@@ -1012,5 +1015,4 @@ class CodeFormatter {
 	}
 }
 class SurrogateToken {
-
 }
