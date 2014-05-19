@@ -1,5 +1,6 @@
 <?php
 if ($count_spaces > 0) for ($i = 1;$i <= $count_spaces;$i++)$new_txt .= "&nbsp;";
+
 if ($count_spaces > 0) {
 	$a;
 }
@@ -52,11 +53,13 @@ if ($count_spaces > 0) {
 } else {
 	foreach ($a as $v)$b;
 }
+
 if (true) {
 	do {
 		$cmd = cmd();
 	} while (true);
 }
+
 if ($count_spaces > 0) {
 	for ($i = 1;$i <= $count_spaces;$i++) {
 		$new_txt .= "&nbsp;1";
@@ -68,6 +71,7 @@ if ($count_spaces > 0) {
 if ($count_spaces > 0) for ($i = 1;$i <= $count_spaces;$i++) {
 	$new_txt .= "&nbsp;3";
 }
+
 if ($count_spaces > 0) {
 	func($a);
 } elseif (true) {

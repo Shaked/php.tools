@@ -38,6 +38,7 @@ switch ($a) {
 		echo 5;
 		break;
 }
+
 if ($a)
 switch ($a) {
 	case 1:

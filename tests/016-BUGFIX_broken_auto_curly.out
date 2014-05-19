@@ -8,6 +8,7 @@ if (true) {
 		$cmd = cmd();
 	} while (true);
 }
+
 if ($a) return false;
 else {
 	$a;
@@ -15,10 +16,12 @@ else {
 do {
 	$cmd = cmd();
 } while (true);
+
 if ($a) return false;
 do {
 	$cmd = cmd();
 } while (true);
+
 if ($count_spaces > 0) {
 	$a;
 }
@@ -39,10 +42,13 @@ if (true) do {
 		$cmd = cmd();
 	}
 } while (true);
-if ($count_spaces > 0) for ($i = 1;$i <= $count_spaces;$i++)$new_txt .= "&nbsp;";
+
+if ($count_spaces > 0) for ($i = 1;$i <= $count_spaces;$i++)$new_txt .= "&nbsp;1";
+
 if (true) {
 	do {
 		$cmd = cmd();
 	} while (true);
 }
-if ($count_spaces > 0) for ($i = 1;$i <= $count_spaces;$i++)$new_txt .= "&nbsp;";
+
+if ($count_spaces > 0) for ($i = 1;$i <= $count_spaces;$i++)$new_txt .= "&nbsp;2";

@@ -3,7 +3,6 @@
 if (($a || $b) && !($c || $d || $e)// comment 2
 ) {
 	// comment 4
-
 } else {
 	$f = $a;
 }
