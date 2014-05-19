@@ -944,7 +944,7 @@ class CodeFormatter {
 		$lines_with_obj_operator = [];
 		$block_count             = 0;
 		foreach ($lines as $idx => $line) {
-			if (substr_count($line, '->') > 0 && 0 == substr_count($line, '//') && 0 == substr_count($line, '/*') && 0 == substr_count($line, '||') && 0 == substr_count($line, '&&') && 0 == substr_count($line, '=>') && 0 == substr_count($line, '=')) {
+			if (substr_count($line, '->') > 0 && 0 == substr_count($line, '{') && 0 == substr_count($line, '//') && 0 == substr_count($line, '/*') && 0 == substr_count($line, '||') && 0 == substr_count($line, '&&') && 0 == substr_count($line, '=>') && 0 == substr_count($line, '=')) {
 				$lines_with_obj_operator[$block_count][] = $idx;
 			} else {
 				$block_count++;
