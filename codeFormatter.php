@@ -267,6 +267,8 @@ class CodeFormatter {
 						$this->append_code($this->get_crlf_indent().$text.$this->get_space());
 					} elseif ($this->is_token(array(T_DOUBLE_ARROW), true) || $this->is_token(ST_EQUAL, true)) {
 						$this->append_code($this->get_space().$text.$this->get_space());
+					} elseif ($in_call_context > 0 && $this->is_token(ST_PARENTHESES_OPEN, true) && $this->has_ln_before()) {
+						$this->append_code($this->get_crlf_indent().$text.$this->get_space(), false);
 					} else {
 						$this->append_code($text.$this->get_space());
 					}
@@ -405,7 +407,8 @@ class CodeFormatter {
 					break;
 				case T_STRING:
 					if ($this->is_token(array(T_VARIABLE))) {
-						$this->append_code($text.$this->debug('[str.VAR]').$this->get_space(), true);
+						$space_before = $this->is_token(ST_COMMA, true);
+						$this->append_code($this->get_space($space_before).$text.$this->debug('[str.VAR]').$this->get_space(), true);
 						break;
 					} elseif ($this->is_token(ST_CURLY_CLOSE, true)) {
 						$this->append_code($this->get_crlf_indent().$text.$this->debug('[str.}]'), false);
@@ -413,6 +416,9 @@ class CodeFormatter {
 					} elseif ($artificial_curly_close) {
 						$this->append_code($this->get_crlf_indent().$text.$this->debug('[str.Artif}]'), false);
 						$artificial_curly_close = false;
+						break;
+					} elseif ($in_call_context > 0 && $this->is_token(ST_PARENTHESES_OPEN, true) && $this->has_ln_before()) {
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[str.Else]'), false);
 						break;
 					}
 					$this->append_code($text.$this->debug('[str.Else]'), false);
@@ -793,6 +799,13 @@ class CodeFormatter {
 					}
 					$this->append_code($prev_text.$text.$this->debug("[Try]"), false);
 					break;
+				case T_VARIABLE:
+					if ($in_call_context > 0 && $this->is_token(ST_PARENTHESES_OPEN, true) && $this->has_ln_before()) {
+						$this->append_code($this->get_crlf_indent().$text.$this->debug("[VAR.ln]"));
+					} else {
+						$this->append_code($text.$this->debug("[VAR.!ln]"), false);
+					}
+					break;
 				default:
 					$this->append_code($text.$this->debug("[Default:".$id.":".(is_numeric($id)?token_name($id):$id)."]"), false);
 					break;
@@ -887,6 +900,29 @@ class CodeFormatter {
 			return true;
 		}
 		return false;
+	}
+	private function has_ln_after() {
+		$id   = null;
+		$text = null;
+		list($id, $text) = $this->inspect_token();
+		return T_WHITESPACE == $id && substr_count($text, PHP_EOL) > 0;
+	}
+	private function has_ln_before() {
+		$id   = null;
+		$text = null;
+		list($id, $text) = $this->inspect_token(-1);
+		return T_WHITESPACE == $id && substr_count($text, PHP_EOL) > 0;
+	}
+	private function count_ln_before() {
+		$id   = null;
+		$text = null;
+		list($id, $text) = $this->inspect_token(-1);
+		$count_ln = substr_count($text, PHP_EOL);
+		if (T_WHITESPACE == $id && $count_ln > 0) {
+			return $count_ln;
+		} else {
+			return false;
+		}
 	}
 	private function eliminate_duplicated_empty_lines() {
 		$lines = explode($this->new_line, $this->code);
