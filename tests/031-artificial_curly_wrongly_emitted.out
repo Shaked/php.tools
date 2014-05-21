@@ -16,7 +16,10 @@ Comment 2 */
 		/*
 Multiline comment
 Comment 3 */
-		func(array('type' => 'CHAR', 'data' => $ch));
+		func(array(
+			'type' => 'CHAR',
+			'data' => $ch
+		));
 
 		/*
 Multiline comment
@@ -43,7 +46,10 @@ Comment 7 */
 		/*
 Multiline comment
 Comment 8 */
-		func(array('type' => 'CHAR', 'data' => $ch));
+		func(array(
+			'type' => 'CHAR',
+			'data' => $ch
+		));
 	} elseif ($tch === $this->EOF) {
 		/*
 Multiline comment
@@ -53,7 +59,10 @@ Comment 8 */
 		/*
 Multiline comment
 Comment 9 */
-		func(array('type' => 'CHAR', 'data' => substr($dt, $tch)));
+		func(array(
+			'type' => 'CHAR',
+			'data' => substr($dt, $tch)
+		));
 
 		$this->EOF();
 	} else {
@@ -64,7 +73,10 @@ Comment 10 */
 		$ch = substr($dt, $tch, $len);
 		$tch += $len-1;
 
-		func(array('type' => 'CHAR', 'data' => $ch));
+		func(array(
+			'type' => 'CHAR',
+			'data' => $ch
+		));
 
 		$state = 'd';
 	}

@@ -11,7 +11,8 @@ function func() {
 	array(1.22, 32.56, 0, $expected1, $found_props, new Mock(array())), //Comment2
 	array(0, 0, 0, null, new Mock(array()), new Mock(array())),         //Comment3
 	array(0, 0, 85, null, new Mock(array()), new Mock(array())),        //Comment4
-	array(0, 0, 85, $expected1, new Mock(array()), $found_props), );
+	array(0, 0, 85, $expected1, new Mock(array()), $found_props),
+	);
 }
 function func2() {
 	$crit = array(

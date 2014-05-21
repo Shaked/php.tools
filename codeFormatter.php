@@ -263,12 +263,22 @@ class CodeFormatter {
 				case T_OBJECT_CAST:
 				case T_STRING_CAST:
 				case T_UNSET_CAST:
-					if ($this->is_token(array(T_COMMENT, T_DOC_COMMENT), true)) {
+					if ($this->is_token(array(T_COMMENT, T_DOC_COMMENT), true) && $this->has_ln_prev_token()) {
+						$this->set_indent(+1);
+						$this->append_code($this->get_crlf_indent().$text.$this->get_space());
+						$this->set_indent(-1);
+					} elseif ($this->is_token(array(T_COMMENT, T_DOC_COMMENT), true)) {
 						$this->append_code($this->get_crlf_indent().$text.$this->get_space());
 					} elseif ($this->is_token(array(T_DOUBLE_ARROW), true) || $this->is_token(ST_EQUAL, true)) {
 						$this->append_code($this->get_space().$text.$this->get_space());
 					} elseif ($in_call_context > 0 && $this->is_token(ST_PARENTHESES_OPEN, true) && $this->has_ln_before()) {
+						$this->set_indent(+1);
 						$this->append_code($this->get_crlf_indent().$text.$this->get_space(), false);
+						$this->set_indent(-1);
+					} elseif ($in_call_context > 0 && $this->is_token(ST_COMMA, true) && $this->has_ln_before()) {
+						$this->set_indent(+1);
+						$this->append_code($this->get_crlf_indent().$text.$this->get_space(), false);
+						$this->set_indent(-1);
 					} else {
 						$this->append_code($text.$this->get_space());
 					}
@@ -278,23 +288,31 @@ class CodeFormatter {
 					if ($this->options['ALIGN_ASSIGNMENTS'] && '//' == substr($text, 0, 2)) {
 						$text = self::ALIGNABLE_COMMENT.substr($text, 2);
 					}
-					if ($this->is_token(ST_COMMA, true) && $this->has_ln_before() && substr_count($text, PHP_EOL) > 0) {
+					if ($in_call_context && $this->is_token(ST_COMMA, true) && ($this->has_ln_before() || $this->has_ln_prev_token()) && substr_count($text, PHP_EOL) > 0) {
+						$this->set_indent(+1);
+						$this->append_code($this->get_crlf_indent().trim($text).$this->debug('[//.comma.CC]').$this->get_crlf_indent(), true);
+						$this->set_indent(-1);
+						break;
+					} elseif ($this->is_token(ST_COMMA, true) && $this->has_ln_before() && substr_count($text, PHP_EOL) > 0) {
 						$this->append_code($this->get_crlf_indent().trim($text).$this->debug('[//.comma]').$this->get_crlf_indent(), true);
+						break;
+					} elseif ($this->is_token(ST_COMMA) && '*/' == substr(trim($text), -2, 2)) {
+						$this->append_code(trim($text).$this->debug('[//.*/]'), true);
 						break;
 					} elseif ($this->is_token(array(T_VARIABLE), true) && $this->has_ln_before() && substr_count($text, PHP_EOL) > 0) {
 						$this->append_code($this->get_space().trim($text).$this->debug('[//.var]').$this->get_crlf_indent(), true);
 						break;
 					} elseif ($this->is_token(ST_PARENTHESES_CLOSE, true) && $this->has_ln_before() && substr_count($text, PHP_EOL) > 0) {
-						$this->append_code($this->get_crlf_indent().trim($text).$this->debug('[//.var]').$this->get_crlf_indent(), true);
+						$this->append_code($this->get_crlf_indent().trim($text).$this->debug('[//.)]').$this->get_crlf_indent(), true);
 						break;
-					} elseif ($this->has_ln_before() && substr_count($text, PHP_EOL) > 0) {
+					} elseif (($this->has_ln_before() || $this->has_ln_prev_token()) && substr_count($text, PHP_EOL) > 0) {
 						$this->append_code(rtrim($text).$this->debug('[//.alone]').$this->get_crlf_indent(), false);
 						break;
 					} elseif ($this->has_ln_after()) {
 						$this->append_code($text.$this->debug('[//.ln.after]').$this->get_crlf_indent(), false);
 						break;
 					}
-					$this->append_code(trim($text).$this->debug('[//.else]').$this->get_crlf_indent(), false);
+					$this->append_code(trim($text).$this->debug('[//.else.'.($this->has_ln_before()*1).($this->has_ln_prev_token()*1).']').$this->get_crlf_indent(), false);
 					break;
 				case T_ARRAY:
 					if ($in_call_context) {
@@ -347,13 +365,13 @@ class CodeFormatter {
 					$pt_text = null;
 					list($pt_id, $pt_text) = $this->inspect_token(-1);
 					if ($this->is_token(array(T_COMMENT, T_DOC_COMMENT), true) && '*/' != substr(trim($pt_text), -2, 2)) {
-						$this->append_code($this->get_crlf_indent().$text.$this->get_space());
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[comma.*/]').$this->get_space());
 						break;
 					} elseif ($in_array_counter > 0 && 0 == $in_bracket_counter && $this->has_ln_after()) {
-						$this->append_code($text.$this->get_crlf_indent());
+						$this->append_code($text.$this->debug('[comma.arr]').$this->get_crlf_indent());
 						break;
 					} else {
-						$this->append_code($text.$this->get_space());
+						$this->append_code($text.$this->debug('[comma.else]').$this->get_space(), false);
 						break;
 					}
 				case T_BREAK:
@@ -414,7 +432,19 @@ class CodeFormatter {
 						$artificial_curly_close = false;
 						break;
 					} elseif ($in_call_context > 0 && $this->is_token(ST_PARENTHESES_OPEN, true) && $this->has_ln_before()) {
-						$this->append_code($this->get_crlf_indent().$text.$this->debug('[str.Else]'), false);
+						$this->set_indent(+1);
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[str.(]'), false);
+						$this->set_indent(-1);
+						break;
+					} elseif ($in_call_context > 0 && $this->is_token(ST_COMMA, true) && $this->has_ln_before()) {
+						$this->set_indent(+1);
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[str.,]'), false);
+						$this->set_indent(-1);
+						break;
+					} elseif ($in_call_context > 0 && $this->has_ln_before()) {
+						$this->set_indent(+1);
+						$this->append_code($this->get_crlf_indent().$text.$this->debug('[str.ln]'), false);
+						$this->set_indent(-1);
 						break;
 					}
 					$this->append_code($text.$this->debug('[str.Else]'), false);
@@ -636,7 +666,11 @@ class CodeFormatter {
 					$in_parentheses_counter--;
 					if ($in_call_context && $in_parentheses_counter == $in_call_counter) {
 						$in_call_context = false;
-						$this->append_code($text.$this->debug('[).CC.OFF.'.$in_call_counter.']'), false);
+						if ($this->has_ln_before() || $this->has_ln_prev_token()) {
+							$this->append_code($this->get_crlf_indent().$text.$this->debug('[).CC.OFF.'.$in_call_counter.'.ln]'), false);
+						} else {
+							$this->append_code($text.$this->debug('[).CC.OFF.'.$in_call_counter.'.!ln]'), false);
+						}
 						if ($in_function_counter > 0) {
 							$in_function_counter--;
 							$this->append_code($this->debug('[).CC.InFunc--]'), false);
@@ -676,11 +710,11 @@ class CodeFormatter {
 						$tmp_code = trim($this->code);
 						if (!$this->is_token(array(T_DOC_COMMENT, T_COMMENT), true) && ',' != substr($tmp_code, -1, 1) && '(' != substr($tmp_code, -1, 1) && ')' != substr($tmp_code, -1, 1)) {
 							$this->append_code(',');
-							$this->append_code($this->get_crlf_indent().$text.$this->debug('[).Arr>0.ln.,:"'.substr($tmp_code, -1, 1).'"]'), false);
+							$this->append_code($this->get_crlf_indent().$text.$this->debug('[).Arr>0.ln.!:"'.substr($tmp_code, -1, 1).'"]'), false);
 						} elseif ('(' == substr($tmp_code, -1, 1)) {
 							$this->append_code($text.$this->debug('[).Arr>0.ln.substr")":"'.substr($tmp_code, -1, 1).'"]'), true);
 						} else {
-							$this->append_code($this->get_crlf_indent().$text.$this->debug('[).Arr>0.ln:"'.substr($tmp_code, -1, 1).'"]'), true);
+							$this->append_code($this->get_crlf_indent().$text.$this->debug('[).Arr>0.ln.else:"'.substr($tmp_code, -1, 1).'"]'), true);
 						}
 						$in_array_counter--;
 						break;
@@ -721,8 +755,10 @@ class CodeFormatter {
 						$this->set_indent(-1);
 						$this->append_code($text.$this->get_crlf_indent(), false);
 						$in_array_counter--;
+						//} elseif (!$this->is_token(array(T_COMMENT, T_DOC_COMMENT), true) && $this->has_ln_before() || $this->has_ln_prev_token()) {
+						//	$this->append_code($this->get_crlf_indent().$text.$this->debug('[).ln]'), false);
 					} else {
-						$this->append_code($text, false);
+						$this->append_code($text.$this->debug('[).else]'), false);
 					}
 					break;
 				case T_ELSEIF:
@@ -781,9 +817,53 @@ class CodeFormatter {
 					break;
 				case T_VARIABLE:
 					if ($in_call_context > 0 && $this->is_token(ST_PARENTHESES_OPEN, true) && $this->has_ln_before()) {
-						$this->append_code($this->get_crlf_indent().$text.$this->debug("[VAR.ln]"));
+						$this->set_indent(+1);
+						$this->append_code($this->get_crlf_indent().$text.$this->debug("[VAR.(.ln]"));
+						$this->set_indent(-1);
+					} elseif ($in_call_context > 0 && $this->is_token(ST_COMMA, true) && $this->has_ln_before()) {
+						$this->set_indent(+1);
+						$this->append_code($this->get_crlf_indent().$text.$this->debug("[VAR.,.ln]"));
+						$this->set_indent(-1);
+					} elseif ($in_call_context > 0 && $this->has_ln_before()) {
+						$this->set_indent(+1);
+						$this->append_code($this->get_crlf_indent().$text.$this->debug("[VAR.,.ln]"));
+						$this->set_indent(-1);
 					} else {
 						$this->append_code($text.$this->debug("[VAR.!ln]"), false);
+					}
+					break;
+				case T_CONSTANT_ENCAPSED_STRING:
+					$prev_text  = '';
+					$debug_flag = '';
+					list($pt_id, $pt_text) = $this->inspect_token(-1);
+					if ($this->has_ln_before() || $this->has_ln_prev_token()) {
+						$debug_flag = 'ln';
+						$this->set_indent(+1);
+						//$tmp = ltrim(str_replace([PHP_EOL, "\n", "\r\n", "\r"], '', $pt_text));
+						//$prev_text = $this->get_crlf_indent().$tmp;
+						$prev_text = $this->get_crlf_indent();
+					} elseif ($this->is_token(array(T_IS_IDENTICAL, T_STRING, T_CONCAT_EQUAL, T_ECHO, T_DOUBLE_ARROW), true) || $this->is_token(ST_EQUAL, true) || $this->is_token(ST_COMMA, true)) {
+						$debug_flag = 'ws';
+						$prev_text = $this->get_space();
+					}
+					$this->append_code($prev_text.$text.$this->debug("[Encapsed.".$debug_flag.$this->get_indent_level().$in_call_counter.$in_array_counter."]"), true);
+					if ($this->has_ln_before() || $this->has_ln_prev_token()) {
+						$this->set_indent(-1);
+					}
+					break;
+				case T_LNUMBER:
+				case T_DNUMBER:
+					$prev_text = '';
+					list($pt_id, $pt_text) = $this->inspect_token(-1);
+					if ($this->has_ln_before() || $this->has_ln_prev_token()) {
+						$this->set_indent(+1);
+						//$tmp = ltrim(str_replace([PHP_EOL, "\n", "\r\n", "\r"], '', $pt_text));
+						//$prev_text = $this->get_crlf_indent().$tmp;
+						$prev_text = $this->get_indent();
+					}
+					$this->append_code($prev_text.$text.$this->debug("[Number]"), false);
+					if ($this->has_ln_before() || $this->has_ln_prev_token()) {
+						$this->set_indent(-1);
 					}
 					break;
 				default:
@@ -830,6 +910,9 @@ class CodeFormatter {
 	private function get_space($true = true) {
 		return $true?" ":"";
 	}
+	private function get_indent_level() {
+		return $this->indent;
+	}
 	private function get_indent($increment = 0) {
 		return str_repeat($this->indent_char, ($this->indent+$increment)*$this->indent_size);
 	}
@@ -865,6 +948,11 @@ class CodeFormatter {
 		}
 		return false;
 	}
+	private function prev_token() {
+		$i = $this->ptr;
+		while (--$i >= 0 && is_array($this->tkns[$i]) && $this->tkns[$i][0] == T_WHITESPACE);
+		return $this->tkns[$i];
+	}
 	private function is_token_lf($prev = false, $i = 99999) {
 		if ($i == 99999) {
 			$i = $this->ptr;
@@ -892,6 +980,10 @@ class CodeFormatter {
 		$text = null;
 		list($id, $text) = $this->inspect_token(-1);
 		return T_WHITESPACE == $id && substr_count($text, PHP_EOL) > 0;
+	}
+	private function has_ln_prev_token() {
+		list($id, $text) = $this->get_token($this->prev_token());
+		return substr_count($text, PHP_EOL) > 0;
 	}
 	private function count_ln_before() {
 		$id   = null;
