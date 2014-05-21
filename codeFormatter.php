@@ -160,7 +160,7 @@ class CodeFormatter {
 		//$source = $this->merge_curly_close_and_do_while($source);
 		//$source = $this->merge_double_arrow_and_array($source);
 		$source = $this->reindent($source);
-		//$source = $this->reindent_colon_blocks($source);
+		$source = $this->reindent_colon_blocks($source);
 		if ($this->options['ORDER_USE']) {
 			$source = $this->orderUseClauses($source);
 		}
@@ -291,7 +291,38 @@ class CodeFormatter {
 		}
 		return $this->code;
 	}
+	private function reindent_colon_blocks($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$case_level = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_DEFAULT:
+				case T_CASE:
+					$this->append_code($text, false);
+					$case_level = 1;
+					break;
+				case ST_CURLY_CLOSE:
+					$this->append_code($text, false);
+					$case_level = 0;
+					break;
+				default:
+					if (substr_count($text, $this->new_line) > 0 && !$this->is_token(array(T_CASE, T_DEFAULT)) && !$this->is_token(ST_CURLY_CLOSE)) {
+						$this->append_code($text.$this->get_indent($case_level), false);
+					} elseif (substr_count($text, $this->new_line) > 0 && $this->is_token(array(T_CASE, T_DEFAULT))) {
+						$case_level = 0;
+						$this->append_code($text.$this->get_indent($case_level), false);
+					} else {
+						$this->append_code($text, false);
+					}
+					break;
+			}
+		}
 
+		return $this->code;
+	}
 	private function two_commands_in_same_line($source) {
 		$lines = explode($this->new_line, $source);
 		foreach ($lines as $idx => $line) {
@@ -334,9 +365,7 @@ class CodeFormatter {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
-				//case T_FOR: TODO
-				case T_IF:
-				case T_ELSEIF:
+				case T_FOR:
 					$this->append_code($text, false);
 					$paren_count = null;
 					while (list($index, $token) = each($this->tkns)) {
@@ -355,9 +384,9 @@ class CodeFormatter {
 					if (!$this->is_token(ST_CURLY_OPEN) && !$this->is_token(ST_COLON)) {
 						$ignore_count = 0;
 						if (!$this->is_token(array(T_COMMENT, T_DOC_COMMENT), true)) {
-							$this->append_code($this->new_line.'{'.$this->new_line);
+							$this->append_code($this->new_line.'{');
 						} else {
-							$this->append_code('{'.$this->new_line);
+							$this->append_code('{');
 						}
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
@@ -374,6 +403,49 @@ class CodeFormatter {
 						}
 						$this->append_code($this->get_crlf_indent().'}'.$this->get_crlf_indent(), false);
 						break 2;
+				}
+				break;
+			case T_IF:
+			case T_ELSEIF:
+				$this->append_code($text, false);
+				$paren_count = null;
+				while (list($index, $token) = each($this->tkns)) {
+					list($id, $text) = $this->get_token($token);
+					$this->ptr = $index;
+					if (ST_PARENTHESES_OPEN == $id) {
+						$paren_count++;
+					} elseif (ST_PARENTHESES_CLOSE == $id) {
+						$paren_count--;
+					}
+					$this->append_code($text, false);
+					if (0 === $paren_count && !$this->is_token(array(T_COMMENT, T_DOC_COMMENT))) {
+						break;
+					}
+				}
+				if (!$this->is_token(ST_CURLY_OPEN) && !$this->is_token(ST_COLON)) {
+					$ignore_count = 0;
+					if (!$this->is_token(array(T_COMMENT, T_DOC_COMMENT), true)) {
+						// $this->append_code($this->new_line.'{'.$this->new_line);
+						$this->append_code($this->new_line.'{');
+					} else {
+						// $this->append_code('{'.$this->new_line);
+						$this->append_code('{');
+					}
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr = $index;
+						if (ST_PARENTHESES_OPEN == $id || ST_CURLY_OPEN == $id || ST_BRACKET_OPEN == $id) {
+							$ignore_count++;
+						} elseif (ST_PARENTHESES_CLOSE == $id || ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id) {
+							$ignore_count--;
+						}
+						$this->append_code($text, false);
+						if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON) || $this->is_token(array(T_WHILE))) && (ST_CURLY_CLOSE == $id || ST_SEMI_COLON == $id || T_ELSE == $id || T_ELSEIF == $id)) {
+							break;
+						}
+					}
+					$this->append_code($this->get_crlf_indent().'}'.$this->get_crlf_indent(), false);
+					break 2;
 				}
 				break;
 			case T_ELSE:
@@ -712,7 +784,12 @@ class CodeFormatter {
 				case T_FINAL:
 				case T_CASE:
 				case T_BREAK:
-					$this->append_code($text.$this->get_space(), false);
+					if ($this->is_token(ST_SEMI_COLON)) {
+						$this->append_code($text, false);
+					} else {
+
+						$this->append_code($text.$this->get_space(), false);
+					}
 					break;
 				case T_WHILE:
 					if ($this->is_token(ST_SEMI_COLON)) {
