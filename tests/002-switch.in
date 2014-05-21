@@ -1,5 +1,6 @@
 <?php
-switch($a){
+switch($a)
+{
 case 1:
 	echo 1;
 break;
