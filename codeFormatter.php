@@ -165,7 +165,7 @@ class CodeFormatter {
 			$source = $this->align_operators($source);
 		}
 		$source = $this->eliminate_duplicated_empty_lines($source);
-		//$source = $this->resize_spaces($source);
+		$source = $this->resize_spaces($source);
 		return implode($this->new_line, array_map(function ($v) {
 			return rtrim($v);
 		}, explode($this->new_line, $source)));
@@ -213,6 +213,11 @@ class CodeFormatter {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_WHILE:
+					if ($this->is_token(ST_CURLY_CLOSE, true)) {
+						$this->append_code($text, true);
+						break;
+					}
 				case ST_CURLY_OPEN:
 					if ($this->is_token(ST_PARENTHESES_CLOSE, true)) {
 						$this->append_code($text, true);
@@ -290,8 +295,10 @@ class CodeFormatter {
 	private function two_commands_in_same_line($source) {
 		$lines = explode($this->new_line, $source);
 		foreach ($lines as $idx => $line) {
-			$new_line     = '';
-			$ignore_stack = 0;
+			$new_line           = '';
+			$ignore_stack       = 0;
+			$double_quote_state = false;
+			$single_quote_state = false;
 			$len = strlen($line);
 			for ($i = 0;$i < $len;$i++) {
 				$char = substr($line, $i, 1);
@@ -301,8 +308,14 @@ class CodeFormatter {
 				if (ST_PARENTHESES_CLOSE == $char || ST_CURLY_CLOSE == $char || ST_BRACKET_CLOSE == $char) {
 					$ignore_stack--;
 				}
+				if ('"' == $char) {
+					$double_quote_state = !$double_quote_state;
+				}
+				if ("'" == $char) {
+					$single_quote_state = !$single_quote_state;
+				}
 				$new_line .= $char;
-				if (0 == $ignore_stack && ST_SEMI_COLON == $char && $i+1 < $len) {
+				if ($single_quote_state && $double_quote_state && 0 == $ignore_stack && ST_SEMI_COLON == $char && $i+1 < $len) {
 					$new_line .= $this->new_line;
 				}
 			}
@@ -618,6 +631,130 @@ class CodeFormatter {
 		}
 		$ret = implode($this->new_line, $lines);
 		return str_replace(self::ALIGNABLE_COMMENT, '//', $ret);
+	}
+	public function resize_spaces($source) {
+		$new_tokens = [];
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_WHITESPACE:
+					if (0 == substr_count($text, $this->new_line)) {
+						break;
+					}
+				default:
+					$new_tokens[] = $token;
+			}
+		}
+		$this->tkns = $new_tokens;
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case ST_SEMI_COLON:
+					if ($this->is_token(array(T_VARIABLE))) {
+						$this->append_code($text.$this->get_space(), false);
+						break;
+					}
+				case ST_PARENTHESES_CLOSE:
+					if ($this->is_token(ST_CURLY_OPEN)) {
+						$this->append_code($text.$this->get_space(), false);
+						break;
+					} elseif ($this->is_token(ST_SEMI_COLON) || $this->is_token(ST_PARENTHESES_CLOSE)) {
+						$this->append_code($text, false);
+						break;
+					}
+				case T_RETURN:
+				case T_YIELD:
+				case T_ECHO:
+				case T_NAMESPACE:
+				case T_USE:
+				case T_NEW:
+				case T_CONST:
+				case T_FINAL:
+					$this->append_code($text.$this->get_space(), false);
+					break;
+				case T_WHILE:
+					if ($this->is_token(ST_SEMI_COLON)) {
+						$this->append_code($text.$this->get_space(), false);
+						break;
+					}
+				case T_PUBLIC:
+				case T_PRIVATE:
+				case T_PROTECTED:
+				case T_STATIC:
+				case T_CLASS:
+				case T_TRAIT:
+				case T_INTERFACE:
+				case T_THROW:
+				case T_GLOBAL:
+				case T_ABSTRACT:
+				case T_INCLUDE:
+				case T_REQUIRE:
+				case T_INCLUDE_ONCE:
+				case T_REQUIRE_ONCE:
+				case T_DOUBLE_ARROW:
+				case T_FUNCTION:
+				case T_IF:
+				case T_FOR:
+				case T_SWITCH:
+				case ST_COMMA:
+					$this->append_code($text.$this->get_space(), false);
+					break;
+				case T_EXTENDS:
+				case T_IMPLEMENTS:
+				case T_INSTANCEOF:
+				case T_LOGICAL_AND:
+				case T_LOGICAL_OR:
+				case T_LOGICAL_XOR:
+				case T_AND_EQUAL:
+				case T_BOOLEAN_AND:
+				case T_BOOLEAN_OR:
+				case T_CONCAT_EQUAL:
+				case T_DIV_EQUAL:
+				case T_IS_EQUAL:
+				case T_IS_GREATER_OR_EQUAL:
+				case T_IS_IDENTICAL:
+				case T_IS_NOT_EQUAL:
+				case T_IS_NOT_IDENTICAL:
+				case T_IS_SMALLER_OR_EQUAL:
+				case T_MINUS_EQUAL:
+				case T_MOD_EQUAL:
+				case T_MUL_EQUAL:
+				case T_OR_EQUAL:
+				case T_PLUS_EQUAL:
+				case T_SL:
+				case T_SL_EQUAL:
+				case T_SR:
+				case T_SR_EQUAL:
+				case T_XOR_EQUAL:
+				case ST_IS_GREATER:
+				case ST_IS_SMALLER:
+				case T_AS:
+				case T_ELSE:
+				case T_ELSEIF:
+				case ST_EQUAL:
+					$this->append_code($this->get_space().$text.$this->get_space(), false);
+					break;
+				case T_ARRAY_CAST:
+				case T_BOOL_CAST:
+				case T_DOUBLE_CAST:
+				case T_INT_CAST:
+				case T_OBJECT_CAST:
+				case T_STRING_CAST:
+				case T_UNSET_CAST:
+					$this->append_code($text.$this->get_space());
+					break;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+
+		return $this->code;
 	}
 	private function substr_count_trailing($haystack, $needle) {
 		$cnt = 0;
