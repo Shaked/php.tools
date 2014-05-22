@@ -347,7 +347,7 @@ class CodeFormatter {
 				default:
 					if ($in_array_counter > 0 && $this->is_token(ST_PARENTHESES_CLOSE)) {
 						$in_array_counter--;
-						if (ST_COMMA == $id || !$this->has_ln_after()) {
+						if (ST_COMMA == $id || T_COMMENT == $id || T_DOC_COMMENT == $id || !$this->has_ln_after()) {
 							$this->append_code($text, false);
 						} else {
 							$this->append_code($text.',', false);
