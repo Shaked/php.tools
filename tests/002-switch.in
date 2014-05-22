@@ -104,6 +104,8 @@ break;
 }
 
 switch ($id) {
+case 2:
+echo 1;
 case ST_CURLY_OPEN:
 if (is_token(ST_PARENTHESES_CLOSE, true)) {
 append_code($text, true);
