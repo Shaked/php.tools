@@ -4,7 +4,7 @@ $bb  = 1;
 $a   = 1;
 /*
 Others alignments
-*/
+ */
 $a[$b = 1] = 1;
 $ab[$bc = 1] = 1;
 $abc[$bcd = 1] = 1;
@@ -39,11 +39,11 @@ while (false) {
 		'ba' => 1,
 	);
 }
-for ($i = 0;$i < 10;$i++) {
+for ($i = 0; $i < 10; $i++) {
 	$aa = 2;
 	$a[$b] = array(
 		'a'   => 1,
 		'ba'  => 1,
-		'bca' => 1,
+		'bca' => 1
 	);
 }

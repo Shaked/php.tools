@@ -7,6 +7,7 @@ switch ($a) {
 		echo 2;
 		break;
 }
+
 switch ($a) {
 	case 1:
 		echo 1;
@@ -21,6 +22,7 @@ switch ($a) {
 		echo 5;
 		break;
 }
+
 switch ($a) {
 	case 1:
 	case 2:
@@ -39,44 +41,6 @@ switch ($a) {
 		break;
 }
 
-if ($a)
-switch ($a) {
-	case 1:
-	case 2:
-	case 3:
-		echo 1;
-		echo 2;
-		echo 3;
-		echo 4;
-		break;
-	case 4:
-	default:
-		echo 2;
-		echo 3;
-		echo 4;
-		echo 5;
-		break;
-}
-
-while ($a) {
-	switch ($a) {
-		case 1:
-		case 2:
-		case 3:
-			echo 1;
-			echo 2;
-			echo 3;
-			echo 4;
-			break;
-		case 4:
-		default:
-			echo 2;
-			echo 3;
-			echo 4;
-			echo 5;
-			break;
-	}
-}
 if ($a) {
 	switch ($a) {
 		case 1:
@@ -95,4 +59,57 @@ if ($a) {
 			echo 5;
 			break;
 	}
+
+	while ($a) {
+		switch ($a) {
+			case 1:
+			case 2:
+			case 3:
+				echo 1;
+				echo 2;
+				echo 3;
+				echo 4;
+				break;
+			case 4:
+			default:
+				echo 2;
+				echo 3;
+				echo 4;
+				echo 5;
+				break;
+		}
+	}
+}
+
+if ($a) {
+	switch ($a) {
+		case 1:
+		case 2:
+		case 3:
+			echo 1;
+			echo 2;
+			echo 3;
+			echo 4;
+			break;
+		case 4:
+		default:
+			echo 2;
+			echo 3;
+			echo 4;
+			echo 5;
+			break;
+	}
+}
+
+switch ($id) {
+	case 2:
+		echo 1;
+	case ST_CURLY_OPEN:
+		if (is_token(ST_PARENTHESES_CLOSE, true)) {
+			append_code($text, true);
+		} elseif (is_token(array(T_ELSE), true)) {
+			append_code($text, true);
+		} else {
+			append_code($text, false);
+		}
 }

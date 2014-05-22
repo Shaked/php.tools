@@ -10,6 +10,7 @@ switch ($a) {
 		$a;
 		$b;
 		break;
+
 }
 switch ($a) {
 	case -1:
@@ -68,20 +69,20 @@ switch ($a) {
 			}
 		}
 	case 5:
-		for ($i = 0;$i < 10;$i++) {
+		for ($i = 0; $i < 10; $i++) {
 			$a;
 		}
 	case 6:
 		if ($a) {
-			for ($i = 0;$i < 10;$i++) {
+			for ($i = 0; $i < 10; $i++) {
 				$a;
 			}
 		} elseif ($b) {
-			for ($i = 0;$i < 10;$i++) {
+			for ($i = 0; $i < 10; $i++) {
 				$a;
 			}
 		} else {
-			for ($i = 0;$i < 10;$i++) {
+			for ($i = 0; $i < 10; $i++) {
 				$a;
 			}
 		}
@@ -104,51 +105,44 @@ switch ($a) {
 			}
 		}
 	case 9:
-		foreach ($vs as $v) {
+		foreach($vs as $v) {
 			$a;
 		}
 	case 10:
 		if ($a) {
-			foreach ($vs as $v) {
+			foreach($vs as $v) {
 				$a;
 			}
 		} elseif ($b) {
-			foreach ($vs as $v) {
+			foreach($vs as $v) {
 				$a;
 			}
 		} else {
-			foreach ($vs as $v) {
+			foreach($vs as $v) {
 				$a;
 			}
 		}
 	case 10:
-		do {
+		do{
 			$a;
-		} while (false);
+		}while (false);
 	case 11:
 		if ($a) {
-			do {
+			do{
 				$a;
-			} while (false);
+			}while (false);
 		} elseif ($b) {
-			do {
+			do{
 				$a;
-			} while (false);
+			}while (false);
 		} else {
-			do {
+			do{
 				$a;
-			} while (false);
+			}while (false);
 		}
 	default:
 		$a;
 		$b;
-		if ($a) {
-			$a;
-		} elseif ($b) {
-			$b;
-		} else {
-			$c;
-			break;
-		}
+		if ($a) {$a;	} elseif ($b) {$b;	} else { $c;break;	}
 		break;
 }

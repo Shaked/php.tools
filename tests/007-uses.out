@@ -1,6 +1,7 @@
 <?php
-use B;
-use C;
+
+use Z\B;
+use Z\C;
 new B;
 new C;
 ?>

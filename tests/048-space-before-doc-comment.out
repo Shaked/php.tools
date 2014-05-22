@@ -1,8 +1,8 @@
 <?php
 $a = 1;
 /*
- Others alignments
-*/
+Others alignments
+ */
 class Object {
 	/**
 	 * Doc block
