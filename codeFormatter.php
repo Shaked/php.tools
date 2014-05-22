@@ -370,6 +370,9 @@ class CodeFormatter {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CONSTANT_ENCAPSED_STRING:
+				case T_ENCAPSED_AND_WHITESPACE:
+				case T_STRING_VARNAME:
+				case T_NUM_STRING:
 					$this->append_code($text, false);
 					break;
 				case T_START_HEREDOC:
@@ -387,6 +390,7 @@ class CodeFormatter {
 						}
 					}
 					break;
+				case T_CURLY_OPEN:
 				case ST_CURLY_OPEN:
 				case ST_PARENTHESES_OPEN:
 				case ST_BRACKET_OPEN:
@@ -921,6 +925,7 @@ class CodeFormatter {
 				case T_ECHO:
 				case T_NAMESPACE:
 				case T_USE:
+				case T_VAR:
 				case T_NEW:
 				case T_CONST:
 				case T_FINAL:
@@ -929,7 +934,6 @@ class CodeFormatter {
 					if ($this->is_token(ST_SEMI_COLON)) {
 						$this->append_code($text, false);
 					} else {
-
 						$this->append_code($text.$this->get_space(), false);
 					}
 					break;
