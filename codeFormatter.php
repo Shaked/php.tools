@@ -804,7 +804,7 @@ class CodeFormatter {
 						break;
 					}
 				case ST_CURLY_OPEN:
-					if ($this->is_token(array(T_STRING), true) || $this->is_token(ST_PARENTHESES_CLOSE, true)) {
+					if ($this->is_token(array(T_STRING, T_DO), true) || $this->is_token(ST_PARENTHESES_CLOSE, true)) {
 						$this->append_code($this->get_space().$text, false);
 						break;
 					} elseif ($this->is_token(ST_CURLY_CLOSE)) {
@@ -840,6 +840,9 @@ class CodeFormatter {
 				case T_WHILE:
 					if ($this->is_token(ST_SEMI_COLON)) {
 						$this->append_code($text.$this->get_space(), false);
+						break;
+					} elseif ($this->is_token(ST_CURLY_CLOSE, true) && !$this->has_ln_before()) {
+						$this->append_code($this->get_space().$text.$this->get_space(), false);
 						break;
 					}
 				case T_DOUBLE_ARROW:

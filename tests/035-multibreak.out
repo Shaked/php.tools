@@ -123,22 +123,22 @@ switch ($a) {
 			}
 		}
 	case 10:
-		do{
+		do {
 			$a;
-		}while (false);
+		} while (false);
 	case 11:
 		if ($a) {
-			do{
+			do {
 				$a;
-			}while (false);
+			} while (false);
 		} elseif ($b) {
-			do{
+			do {
 				$a;
-			}while (false);
+			} while (false);
 		} else {
-			do{
+			do {
 				$a;
-			}while (false);
+			} while (false);
 		}
 	default:
 		$a;

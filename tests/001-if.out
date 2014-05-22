@@ -15,7 +15,7 @@ if ($a) {
 	$c;
 }
 
-if ($a) {do{ $a;}while (true);
+if ($a) {do {$a;} while (true);
 }
 
 if ($a) {for ($i;false; $i++) {$a;}

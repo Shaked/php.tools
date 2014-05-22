@@ -18,36 +18,36 @@ if ($count_spaces > 0) {func($a);
 
 if ($count_spaces > 0) {func($a);
 } else {
-	do{ $a;}while (false);
+	do {$a;} while (false);
 }
 
 if ($count_spaces > 0) {func($a);
 } else {
-	do{ $a;}while (false);
+	do {$a;} while (false);
 }
 
 if ($count_spaces > 0) {func($a);
-} elseif (true) {do{ $a;}while (false);
+} elseif (true) {do {$a;} while (false);
 }
 
 if ($count_spaces > 0) {func($a);
-} elseif (true) {do{ $a;}while (false);
+} elseif (true) {do {$a;} while (false);
 } else {
 	foreach($a as $v) {$b;}
 }
 
 if ($count_spaces > 0) {func($a);
-} elseif (true) {do{ $b;}while (false);} else {
+} elseif (true) {do {$b;} while (false);} else {
 	foreach($a as $v)$b;
 }
 
 if ($count_spaces > 0) {func($a);
-} elseif (true) {do{ $c;}while (false);} else {foreach($a as $v)$b;}
+} elseif (true) {do {$c;} while (false);} else {foreach($a as $v)$b;}
 
 if (true) {
-	do{
+	do {
 		$cmd = cmd();
-	}while (true);
+	} while (true);
 }
 
 if ($count_spaces > 0) {
@@ -67,5 +67,5 @@ if ($count_spaces > 0) {
 	}
 }
 
-if ($count_spaces > 0) {func($a);} elseif (true) {do{ $c;}while (false);} else {foreach($a as $v)$b;}
-if ($count_spaces > 0) {func($a);} elseif (true) {do{ $c;}while (false);} else {foreach($a as $v) {$b;}}
+if ($count_spaces > 0) {func($a);} elseif (true) {do {$c;} while (false);} else {foreach($a as $v)$b;}
+if ($count_spaces > 0) {func($a);} elseif (true) {do {$c;} while (false);} else {foreach($a as $v) {$b;}}

@@ -1,12 +1,12 @@
 <?php
 echo "OK";
-do{
+do {
 	$cmd = cmd();
-}while (true);
+} while (true);
 if (true) {
-	do{
+	do {
 		$cmd = cmd();
-	}while (true);
+	} while (true);
 }
 
 if ($a) {
@@ -16,41 +16,41 @@ if ($a) {
 	$a;
 }
 
-do{
+do {
 	$cmd = cmd();
-}while (true);
+} while (true);
 
 if ($a) {return false;
 }
 
-do{
+do {
 	$cmd = cmd();
-}while (true);
+} while (true);
 
 if ($count_spaces > 0) {
 	$a;
 }
 
 if (true) {
-	do{
+	do {
 		$cmd = cmd();
-	}while (true);
+	} while (true);
 }
 
 //This case is IF without the curly brace + do...while
 if (true) {
-	do{
+	do {
 		$cmd = cmd();
-	}while (true);
+	} while (true);
 }
 
 //This case is IF without the curly brace + do...while + if
 if (true) {
-	do{
+	do {
 		if ($a) {
 			$cmd = cmd();
 		}
-	}while (true);
+	} while (true);
 }
 
 if ($count_spaces > 0) {
@@ -60,9 +60,9 @@ if ($count_spaces > 0) {
 }
 
 if (true) {
-	do{
+	do {
 		$cmd = cmd();
-	}while (true);
+	} while (true);
 }
 
 if ($count_spaces > 0) {

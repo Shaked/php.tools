@@ -9,6 +9,6 @@ while (true) {}
 while (true) {
 	while (true) {$a;}
 	while (true) {$b;}
-	do{ $c;}while (true);
+	do {$c;} while (true);
 }
 ?>
