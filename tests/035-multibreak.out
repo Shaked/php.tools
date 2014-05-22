@@ -105,20 +105,20 @@ switch ($a) {
 			}
 		}
 	case 9:
-		foreach($vs as $v) {
+		foreach ($vs as $v) {
 			$a;
 		}
 	case 10:
 		if ($a) {
-			foreach($vs as $v) {
+			foreach ($vs as $v) {
 				$a;
 			}
 		} elseif ($b) {
-			foreach($vs as $v) {
+			foreach ($vs as $v) {
 				$a;
 			}
 		} else {
-			foreach($vs as $v) {
+			foreach ($vs as $v) {
 				$a;
 			}
 		}

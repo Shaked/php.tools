@@ -1,6 +1,6 @@
 <?php
 function align_operators() {
-	foreach($lines as $idx => $line) {
+	foreach ($lines as $idx => $line) {
 		if (true) {
 			$a = $b;
 		} elseif (false) {

@@ -967,6 +967,7 @@ class CodeFormatter {
 				case T_FUNCTION:
 				case T_IF:
 				case T_FOR:
+				case T_FOREACH:
 				case T_SWITCH:
 				case ST_COMMA:
 					$this->append_code($text.$this->get_space(), false);
