@@ -584,7 +584,7 @@ class CodeFormatter {
 					break;
 				case T_ELSE:
 					$this->append_code($text, false);
-					if (!$this->is_token(ST_CURLY_OPEN) && !$this->is_token(ST_COLON)) {
+					if (!$this->is_token(ST_CURLY_OPEN) && !$this->is_token(ST_COLON) && !$this->is_token(array(T_IF))) {
 						$ignore_count = 0;
 						$this->append_code('{'.$this->new_line);
 						while (list($index, $token) = each($this->tkns)) {
