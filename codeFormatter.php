@@ -316,7 +316,7 @@ class CodeFormatter {
 					if (0 == $switch_curly_count[$switch_level] && $switch_level > 0) {
 						$switch_level--;
 					}
-					$this->append_code($text, false);
+					$this->append_code($this->get_indent($switch_level).$text, false);
 					break;
 				case T_DEFAULT:
 				case T_CASE:
@@ -333,8 +333,6 @@ class CodeFormatter {
 					break;
 			}
 		}
-		die($this->code);
-
 		return $this->code;
 	}
 	private function two_commands_in_same_line($source) {
