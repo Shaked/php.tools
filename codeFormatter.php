@@ -143,7 +143,6 @@ class CodeFormatter {
 		return $return;
 	}
 	public function formatCode($source = '') {
-		// extra comma
 		$source = $this->two_commands_in_same_line($source);
 		$tmp = $this->add_missing_curly_braces($source);
 		while (true) {
@@ -157,6 +156,7 @@ class CodeFormatter {
 		$source = $this->merge_paren_close_with_curly_open($source);
 		$source = $this->merge_curly_close_and_do_while($source);
 		$source = $this->merge_double_arrow_and_array($source);
+		$source = $this->extra_comma_in_array($source);
 		$source = $this->resize_spaces($source);
 		$source = $this->reindent($source);
 		$source = $this->reindent_colon_blocks($source);
@@ -314,6 +314,48 @@ class CodeFormatter {
 					}
 				default:
 					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+	//extra_comma_in_array
+	private function extra_comma_in_array($source) {
+		$this->tkns = token_get_all($source);
+		$this->code       = '';
+		$in_array_counter = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_ARRAY:
+					$in_array_counter++;
+					$this->append_code($text, false);
+					break;
+				case ST_PARENTHESES_OPEN:
+					if ($in_array_counter > 0 && $this->is_token(ST_PARENTHESES_CLOSE)) {
+						$in_array_counter--;
+					}
+					$this->append_code($text, false);
+					break;
+				case ST_PARENTHESES_CLOSE:
+					if ($in_array_counter > 0) {
+						$in_array_counter--;
+					}
+					$this->append_code($text, false);
+					break;
+				default:
+					if ($in_array_counter > 0 && $this->is_token(ST_PARENTHESES_CLOSE)) {
+						$in_array_counter--;
+						if (ST_COMMA == $id || !$this->has_ln_after()) {
+							$this->append_code($text, false);
+						} else {
+							$this->append_code($text.',', false);
+						}
+						break;
+					} else {
+						$this->append_code($text, false);
+					}
 					break;
 			}
 		}

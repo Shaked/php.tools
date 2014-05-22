@@ -2,7 +2,7 @@
 $a = array(1, 2);
 $a = array(
 	1,
-	2
+	2,
 );
 $a = array(array());
 $a = array(
@@ -11,6 +11,6 @@ $a = array(
 $a = array(
 	array(
 		'k' => 'v',
-		'k' => 'v'
+		'k' => 'v',
 	)
 );

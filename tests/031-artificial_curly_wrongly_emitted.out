@@ -21,7 +21,7 @@ function dataState() {
 		Comment 3 */
 		func(array(
 				'type' => 'CHAR',
-				'data' => $ch
+				'data' => $ch,
 			));
 
 		/*
@@ -53,7 +53,7 @@ function dataState() {
 		Comment 8 */
 		func(array(
 				'type' => 'CHAR',
-				'data' => $ch
+				'data' => $ch,
 			));
 
 	} elseif ($tch === $this->EOF) {
@@ -83,7 +83,7 @@ function dataState() {
 
 		func(array(
 				'type' => 'CHAR',
-				'data' => $ch
+				'data' => $ch,
 			));
 
 		$state = 'd';
