@@ -155,9 +155,9 @@ class CodeFormatter {
 		}
 		$source = $this->normalize_ln_and_ltrim_lines($source);
 		$source = $this->merge_paren_close_with_curly_open($source);
+		$source = $this->merge_curly_close_and_do_while($source);
+		$source = $this->merge_double_arrow_and_array($source);
 		$source = $this->resize_spaces($source);
-		//$source = $this->merge_curly_close_and_do_while($source);
-		//$source = $this->merge_double_arrow_and_array($source);
 		$source = $this->reindent($source);
 		$source = $this->reindent_colon_blocks($source);
 		if ($this->options['ORDER_USE']) {
@@ -167,9 +167,15 @@ class CodeFormatter {
 		if ($this->options['ALIGN_ASSIGNMENTS']) {
 			$source = $this->align_operators($source);
 		}
-		return implode($this->new_line, array_map(function ($v) {
+		return implode(
+			$this->new_line,
+			array_map(
+				function ($v) {
 					return rtrim($v);
-				}, explode($this->new_line, $source)));
+				},
+				explode($this->new_line, $source)
+			)
+		);
 	}
 
 	private function normalize_ln_and_ltrim_lines($source) {
@@ -258,6 +264,54 @@ class CodeFormatter {
 						$this->append_code($text, false);
 					}
 					break;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+
+	private function merge_curly_close_and_do_while($source) {
+		$this->tkns = token_get_all($source);
+		$this->code          = '';
+		$in_do_while_context = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_DO:
+					$in_do_while_context++;
+					$this->append_code($text, false);
+					break;
+				case T_WHILE:
+					if ($in_do_while_context > 0 && $this->is_token(ST_CURLY_CLOSE, true)) {
+						$in_do_while_context--;
+						$this->append_code($text);
+						break;
+					}
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+
+	private function merge_double_arrow_and_array($source) {
+		$this->tkns = token_get_all($source);
+		$this->code          = '';
+		$in_do_while_context = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_ARRAY:
+					if ($this->is_token(array(T_DOUBLE_ARROW), true)) {
+						$in_do_while_context--;
+						$this->append_code($text);
+						break;
+					}
 				default:
 					$this->append_code($text, false);
 					break;
