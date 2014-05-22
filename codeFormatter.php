@@ -764,6 +764,9 @@ class CodeFormatter {
 					if ($this->is_token(array(T_VARIABLE))) {
 						$this->append_code($text.$this->get_space(), false);
 						break;
+					} elseif ($this->is_token(ST_PARENTHESES_OPEN)) {
+						$this->append_code($text, false);
+						break;
 					}
 				case ST_CURLY_OPEN:
 					if ($this->is_token(array(T_STRING), true)) {
@@ -808,6 +811,11 @@ class CodeFormatter {
 						$this->append_code($text.$this->get_space(), false);
 						break;
 					}
+				case T_DOUBLE_ARROW:
+					if ($this->is_token(array(T_CONSTANT_ENCAPSED_STRING), true)) {
+						$this->append_code($this->get_space().$text.$this->get_space(), false);
+						break;
+					}
 				case T_PUBLIC:
 				case T_PRIVATE:
 				case T_PROTECTED:
@@ -822,7 +830,6 @@ class CodeFormatter {
 				case T_REQUIRE:
 				case T_INCLUDE_ONCE:
 				case T_REQUIRE_ONCE:
-				case T_DOUBLE_ARROW:
 				case T_FUNCTION:
 				case T_IF:
 				case T_FOR:
