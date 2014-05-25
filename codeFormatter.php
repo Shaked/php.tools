@@ -99,7 +99,7 @@ class CodeFormatter {
 		natcasesort($use_stack);
 		$alias_list  = [];
 		$alias_count = [];
-		foreach($use_stack as $use) {
+		foreach ($use_stack as $use) {
 			if (false !== stripos($use, ' as ')) {
 				$alias = substr(strstr($use, ' as '), strlen(' as '), -1);
 			} else {
@@ -110,7 +110,7 @@ class CodeFormatter {
 			$alias_count[$alias] = 0;
 		}
 		$return = '';
-		foreach($new_tokens as $token) {
+		foreach ($new_tokens as $token) {
 			if ($token instanceof SurrogateToken) {
 				$return .= array_shift($use_stack);
 			} else {
@@ -136,7 +136,7 @@ class CodeFormatter {
 						return 0 == $v;
 					}
 				));
-			foreach($unused_import as $v) {
+			foreach ($unused_import as $v) {
 				$return = str_ireplace($alias_list[$v], null, $return);
 			}
 		}
@@ -160,6 +160,7 @@ class CodeFormatter {
 		$source = $this->resize_spaces($source);
 		$source = $this->reindent($source);
 		$source = $this->reindent_colon_blocks($source);
+		$source = $this->reindent_obj_ops($source);
 		if ($this->options['ORDER_USE']) {
 			$source = $this->orderUseClauses($source);
 		}
@@ -461,9 +462,44 @@ class CodeFormatter {
 		}
 		return $this->code;
 	}
+	private function reindent_obj_ops($source) {
+		$this->tkns = token_get_all($source);
+		$this->code       = '';
+		$in_objop_context = 0;// 1 - indent, 2 - don't indent, so future auto-align takes place
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_OBJECT_OPERATOR:
+					if (0 === $in_objop_context && ($this->has_ln_before() || $this->has_ln_prev_token())) {
+						$in_objop_context = 1;
+					} elseif (0 === $in_objop_context && !($this->has_ln_before() || $this->has_ln_prev_token())) {
+						$in_objop_context = 2;
+					}
+					if (1 == $in_objop_context) {
+						$this->set_indent(+1);
+						$this->append_code($this->get_indent().$text, false);
+						$this->set_indent(-1);
+					} elseif (2 === $in_objop_context) {
+						$this->append_code($this->get_indent().$text, false);
+					} else {
+						$this->append_code($text, false);
+					}
+					break;
+				case ST_SEMI_COLON:
+					if (0 !== $in_objop_context) {
+						$in_objop_context = 0;
+					}
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
 	private function two_commands_in_same_line($source) {
 		$lines = explode($this->new_line, $source);
-		foreach($lines as $idx => $line) {
+		foreach ($lines as $idx => $line) {
 			if (substr_count($line, ';') <= 1) {
 				continue;
 			}
@@ -744,20 +780,20 @@ class CodeFormatter {
 		$lines = explode($this->new_line, $source);
 		$empty_lines_chunks = [];
 		$block_count        = 0;
-		foreach($lines as $idx => $line) {
+		foreach ($lines as $idx => $line) {
 			if ('' == trim($line)) {
 				$empty_lines_chunks[$block_count][] = $idx;
 			} else {
 				$block_count++;
 			}
 		}
-		foreach($empty_lines_chunks as $group) {
+		foreach ($empty_lines_chunks as $group) {
 			if (1 == sizeof($group)) {
 				continue;
 			}
 
 			array_shift($group);
-			foreach($group as $idx) {
+			foreach ($group as $idx) {
 				unset($lines[$idx]);
 			}
 		}
@@ -769,7 +805,7 @@ class CodeFormatter {
 		$lines_with_equals = [];
 		$block_count       = 0;
 
-		foreach($lines as $idx => $line) {
+		foreach ($lines as $idx => $line) {
 			if (1 == substr_count($line, '=') && 0 == substr_count($line, '==') && 0 == substr_count($line, '(') && 0 == substr_count($line, '.=') && 0 == substr_count($line, '+=') && 0 == substr_count($line, '-=') && 0 == substr_count($line, '*=') && 0 == substr_count($line, '&=') && 0 == substr_count($line, '|=') && 0 == substr_count($line, '>=') && 0 == substr_count($line, '!=') && 0 == substr_count($line, '<=') && 0 == substr_count($line, '<<=') && 0 == substr_count($line, '>>=') && 0 == substr_count($line, '^=') && 0 == substr_count($line, '%=')) {
 				$lines_with_equals[$block_count][] = $idx;
 			} else {
@@ -777,15 +813,15 @@ class CodeFormatter {
 			}
 		}
 
-		foreach($lines_with_equals as $group) {
+		foreach ($lines_with_equals as $group) {
 			if (1 == sizeof($group)) {
 				continue;
 			}
 			$farthest_equals_sign = 0;
-			foreach($group as $idx) {
+			foreach ($group as $idx) {
 				$farthest_equals_sign = max($farthest_equals_sign, strpos($lines[$idx], '='));
 			}
-			foreach($group as $idx) {
+			foreach ($group as $idx) {
 				$line = $lines[$idx];
 				$current_equals = strpos($line, '=');
 				$delta = abs($farthest_equals_sign-$current_equals);
@@ -798,30 +834,37 @@ class CodeFormatter {
 
 		$lines_with_obj_operator = [];
 		$block_count             = 0;
-		foreach($lines as $idx => $line) {
+		foreach ($lines as $idx => $line) {
 			// replicate this elsewhere
 			$line_comment = strpos($line, '//');
 			$block_comment = strpos($line, '/*');
-			if (false !== $line_comment && strpos($line, '->') >= $line_comment) {
+			$equals = strpos($line, '=');
+			$objop = strpos($line, '->');
+			$paren_open = strpos($line, '(');
+			if (false !== $line_comment && false !== $objop && $objop < $line_comment) {
+				$lines_with_obj_operator[$block_count][] = $idx;
+			} elseif (false !== $block_comment && $objop >= $block_comment) {
 				$block_count++;
-			} elseif (false !== $block_comment && strpos($line, '->') >= $block_comment) {
+			} elseif (false !== $paren_open && $objop >= $paren_open) {
 				$block_count++;
-			} elseif (substr_count($line, '->') > 0 && 0 == substr_count($line, '{') && 0 == substr_count($line, '||') && 0 == substr_count($line, '&&') && 0 == substr_count($line, '=>') && 0 == substr_count($line, '=')) {
+			} elseif (false !== $equals && $objop >= $equals && $objop < $paren_open) {
+				$lines_with_obj_operator[$block_count][] = $idx;
+			} elseif (false !== $objop && 0 == substr_count($line, '{') && 0 == substr_count($line, '||') && 0 == substr_count($line, '&&') && 0 == substr_count($line, '=>')) {
 				$lines_with_obj_operator[$block_count][] = $idx;
 			} else {
 				$block_count++;
 			}
 		}
 
-		foreach($lines_with_obj_operator as $group) {
+		foreach ($lines_with_obj_operator as $group) {
 			if (1 == sizeof($group)) {
 				continue;
 			}
 			$farthest_obj_op = 0;
-			foreach($group as $idx) {
+			foreach ($group as $idx) {
 				$farthest_obj_op = max($farthest_obj_op, strpos($lines[$idx], '->'));
 			}
-			foreach($group as $idx) {
+			foreach ($group as $idx) {
 				$line = $lines[$idx];
 				$current_obj_op = strpos($line, '->');
 				$delta = abs($farthest_obj_op-$current_obj_op);
@@ -834,7 +877,7 @@ class CodeFormatter {
 
 		$lines_with_alignable_comments = [];
 		$block_count                   = 0;
-		foreach($lines as $idx => $line) {
+		foreach ($lines as $idx => $line) {
 			if (substr_count($line, self::ALIGNABLE_COMMENT) > 0 && strpos($line, self::ALIGNABLE_COMMENT) > 0) {
 				$lines_with_alignable_comments[$block_count][] = $idx;
 			} else {
@@ -842,15 +885,15 @@ class CodeFormatter {
 			}
 		}
 
-		foreach($lines_with_alignable_comments as $group) {
+		foreach ($lines_with_alignable_comments as $group) {
 			if (1 == sizeof($group)) {
 				continue;
 			}
 			$farthest_comment = 0;
-			foreach($group as $idx) {
+			foreach ($group as $idx) {
 				$farthest_comment = max($farthest_comment, strpos($lines[$idx], self::ALIGNABLE_COMMENT));
 			}
-			foreach($group as $idx) {
+			foreach ($group as $idx) {
 				$line = $lines[$idx];
 				$current_comment = strpos($line, self::ALIGNABLE_COMMENT);
 				$delta = abs($farthest_comment-$current_comment);
