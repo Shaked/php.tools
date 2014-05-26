@@ -6,8 +6,8 @@
 // comment
 // comment
 
-try{
+try {
 	doSomething();
-}catch(Exception $exc) {
+} catch (Exception $exc) {
 	//caught me!
 }

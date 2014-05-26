@@ -1012,6 +1012,7 @@ class CodeFormatter {
 				case T_FOR:
 				case T_FOREACH:
 				case T_SWITCH:
+				case T_TRY:
 				case ST_COMMA:
 					$this->append_code($text.$this->get_space(), false);
 					break;
@@ -1048,6 +1049,7 @@ class CodeFormatter {
 				case T_ELSE:
 				case T_ELSEIF:
 				case ST_EQUAL:
+				case T_CATCH:
 					$this->append_code($this->get_space().$text.$this->get_space(), false);
 					break;
 				case T_ARRAY_CAST:
