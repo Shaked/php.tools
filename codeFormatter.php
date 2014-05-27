@@ -497,6 +497,8 @@ class CodeFormatter {
 					} elseif (0 === $in_objop_context && !($this->has_ln_before() || $this->has_ln_prev_token())) {
 						$alignable_objop_counter++;
 						$in_objop_context = 2;
+					} elseif ($paren_count > 0) {
+						$in_objop_context = 0;
 					}
 					if (1 == $in_objop_context) {
 						$this->set_indent(+1);
@@ -520,6 +522,7 @@ class CodeFormatter {
 					$this->append_code($text, false);
 					break;
 				case T_DOUBLE_ARROW:
+				case ST_SEMI_COLON:
 					if (0 !== $in_objop_context) {
 						$in_objop_context = 0;
 					}
