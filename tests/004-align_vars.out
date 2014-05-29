@@ -35,15 +35,15 @@ function b(
 while (false) {
 	$aa = 2;
 	$a[$b] = array(
-		'a'  => 1,
+		'a' => 1,
 		'ba' => 1,
 	);
 }
 for ($i = 0; $i < 10; $i++) {
 	$aa = 2;
 	$a[$b] = array(
-		'a'   => 1,
-		'ba'  => 1,
+		'a' => 1,
+		'ba' => 1,
 		'bca' => 1,
 	);
 }
