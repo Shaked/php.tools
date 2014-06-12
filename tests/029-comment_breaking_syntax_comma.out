@@ -1,7 +1,7 @@
 <?php
 $expect = array(
 	// comment 1
-	0=> new ClassObject('b')
+	0  => new ClassObject('b')
 	, 1=> new ClassObject('comment 1')
 	, 2=> new ClassObject('b')
 	, 3=> new ClassObject("\n")

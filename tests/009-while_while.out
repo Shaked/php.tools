@@ -1,5 +1,4 @@
-<?php
- while (true) {}
+<?php while (true) {}
 while (true) {}
 try {} catch (Exception $e) {}
 try { $a;} catch (Exception $e) {$c;func(); $c = array(1, 2);}
