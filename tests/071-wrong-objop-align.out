@@ -1,5 +1,5 @@
 <?php
-$class = new ClassObject('Constant');
+$class  = new ClassObject('Constant');
 $method = $class->getMethod($name);
 $method->setAccessible(true);
 

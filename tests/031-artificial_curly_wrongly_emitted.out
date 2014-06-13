@@ -78,7 +78,7 @@ function dataState() {
 		Multiline comment
 		Comment 10 */
 		$len = strcspn($dt, '<&', $tch);
-		$ch = substr($dt, $tch, $len);
+		$ch  = substr($dt, $tch, $len);
 		$tch += $len-1;
 
 		func(array(

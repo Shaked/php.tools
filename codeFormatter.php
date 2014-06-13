@@ -1009,7 +1009,32 @@ class CodeFormatter {
 		$block_count       = 0;
 
 		foreach ($lines as $idx => $line) {
-			if (1 == substr_count($line, '=') && 0 == substr_count($line, '==') && 0 == substr_count($line, '=>') && 0 == substr_count($line, '(') && 0 == substr_count($line, '.=') && 0 == substr_count($line, '+=') && 0 == substr_count($line, '-=') && 0 == substr_count($line, '*=') && 0 == substr_count($line, '&=') && 0 == substr_count($line, '|=') && 0 == substr_count($line, '>=') && 0 == substr_count($line, '!=') && 0 == substr_count($line, '<=') && 0 == substr_count($line, '<<=') && 0 == substr_count($line, '>>=') && 0 == substr_count($line, '^=') && 0 == substr_count($line, '%=')) {
+			if (
+				1 == substr_count($line, '=') &&
+				0 == substr_count($line, '==') &&
+				0 == substr_count($line, '=>') &&
+				(
+					(0 == substr_count($line, '(') && 0 == substr_count($line, ')'))
+					 ||
+					(
+						0 != substr_count($line, '(') &&
+						strpos($line, '(') > strpos($line, '=')
+					)
+				) &&
+				0 == substr_count($line, '.=') &&
+				0 == substr_count($line, '+=') &&
+				0 == substr_count($line, '-=') &&
+				0 == substr_count($line, '*=') &&
+				0 == substr_count($line, '&=') &&
+				0 == substr_count($line, '|=') &&
+				0 == substr_count($line, '>=') &&
+				0 == substr_count($line, '!=') &&
+				0 == substr_count($line, '<=') &&
+				0 == substr_count($line, '<<=') &&
+				0 == substr_count($line, '>>=') &&
+				0 == substr_count($line, '^=') &&
+				0 == substr_count($line, '%=')
+			) {
 				$lines_with_equals[$block_count][] = $idx;
 			} else {
 				$block_count++;
