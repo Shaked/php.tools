@@ -331,7 +331,9 @@ class CodeFormatter {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ARRAY:
-					$in_array_counter++;
+					if ($this->is_token(ST_PARENTHESES_OPEN)) {
+						$in_array_counter++;
+					}
 					$this->append_code($text, false);
 					break;
 				case ST_PARENTHESES_OPEN:
