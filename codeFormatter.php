@@ -1,6 +1,4 @@
 <?php
-//Inspired by http://phpstylist.sourceforge.net/
-//
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
 //
@@ -13,7 +11,6 @@
 //3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 //
 //THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-define("DEBUG", false);
 define("ST_AT", "@");
 define("ST_BRACKET_CLOSE", "]");
 define("ST_BRACKET_OPEN", "[");
@@ -63,7 +60,6 @@ class CodeFormatter {
 	private $code        = '';
 	private $ptr         = 0;
 	private $tkns        = 0;
-	private $debug       = DEBUG;
 	private function orderUseClauses($source = '') {
 		$use_stack   = [];
 		$tokens      = token_get_all($source);
@@ -117,7 +113,7 @@ class CodeFormatter {
 				$return .= array_shift($use_stack);
 			} else {
 				list($id, $text) = $this->get_token($token);
-				$lower_text = strtolower($text);
+				$lower_text      = strtolower($text);
 				if (T_STRING == $id && isset($alias_list[$lower_text])) {
 					$alias_count[$lower_text]++;
 				}
@@ -127,7 +123,7 @@ class CodeFormatter {
 		/*prev($tokens);*/
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
-			$lower_text = strtolower($text);
+			$lower_text      = strtolower($text);
 			if (T_STRING == $id && isset($alias_list[$lower_text])) {
 				$alias_count[$lower_text]++;
 			}
@@ -187,8 +183,8 @@ class CodeFormatter {
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			$this->ptr = $index;
+			$this->ptr       = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
@@ -206,7 +202,7 @@ class CodeFormatter {
 					}
 					$lines = explode($this->new_line, $text);
 					$lines = array_map(function ($v) {
-							$v   = ltrim($v);
+							$v = ltrim($v);
 							if ('*' == substr($v, 0, 1)) {
 								$v = ' '.$v;
 							}
@@ -249,7 +245,7 @@ class CodeFormatter {
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 				case ST_CURLY_OPEN:
 					if ($this->is_token(ST_PARENTHESES_CLOSE, true)) {
@@ -282,7 +278,7 @@ class CodeFormatter {
 		$in_do_while_context = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 				case T_DO:
 					$in_do_while_context++;
@@ -308,7 +304,7 @@ class CodeFormatter {
 		$in_do_while_context = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 				case T_ARRAY:
 					if ($this->is_token(array(T_DOUBLE_ARROW), true)) {
@@ -330,7 +326,7 @@ class CodeFormatter {
 		$in_array_counter = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 				case T_ARRAY:
 					if ($this->is_token(ST_PARENTHESES_OPEN)) {
@@ -373,7 +369,7 @@ class CodeFormatter {
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 				case T_CONSTANT_ENCAPSED_STRING:
 				case T_ENCAPSED_AND_WHITESPACE:
@@ -385,7 +381,7 @@ class CodeFormatter {
 					$this->append_code($text, false);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
+						$this->ptr       = $index;
 						switch ($id) {
 						case T_END_HEREDOC:
 								$this->append_code($text, false);
@@ -432,7 +428,7 @@ class CodeFormatter {
 		$switch_curly_count[$switch_level] = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 				case T_SWITCH:
 					$switch_level++;
@@ -477,7 +473,7 @@ class CodeFormatter {
 		$bracket_count           = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 				case ST_PARENTHESES_OPEN:
 					$paren_count++;
@@ -586,124 +582,6 @@ class CodeFormatter {
 
 		return $this->code;
 	}
-	private function reindent_double_arrow($source) {
-		$this->tkns              = token_get_all($source);
-		$this->code              = '';
-		$in_objop_context        = 0;// 1 - indent, 2 - don't indent, so future auto-align takes place
-		$alignable_objop_counter = 0;
-		$printed_placeholder     = false;
-		$paren_count             = 0;
-		$bracket_count           = 0;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case ST_PARENTHESES_OPEN:
-					$paren_count++;
-					$this->append_code($text, false);
-					break;
-				case ST_PARENTHESES_CLOSE:
-					$paren_count--;
-					$this->append_code($text, false);
-					break;
-				case ST_BRACKET_OPEN:
-					$bracket_count++;
-					$this->append_code($text, false);
-					break;
-				case ST_BRACKET_CLOSE:
-					$bracket_count--;
-					$this->append_code($text, false);
-					break;
-				case T_DOUBLE_ARROW:
-					if (0 === $in_objop_context && ($this->has_ln_before() || $this->has_ln_prev_token())) {
-						$in_objop_context = 1;
-					} elseif (0 === $in_objop_context && !($this->has_ln_before() || $this->has_ln_prev_token())) {
-						$alignable_objop_counter++;
-						$in_objop_context = 2;
-					} elseif ($paren_count > 0) {
-						$in_objop_context = 0;
-					}
-					if (1 == $in_objop_context) {
-						$this->set_indent(+1);
-						$this->append_code($this->get_indent().$text, false);
-						$this->set_indent(-1);
-					} elseif (2 === $in_objop_context) {
-						$placeholder = '';
-						if (!$printed_placeholder) {
-							$placeholder         = sprintf(self::ALIGNABLE_OBJOP, $alignable_objop_counter);
-							$printed_placeholder = true;
-						}
-						$this->append_code($placeholder.$text, false);
-					} else {
-						$this->append_code($text, false);
-					}
-					break;
-				case T_VARIABLE:
-					if (0 === $paren_count && 0 === $bracket_count && 0 !== $in_objop_context) {
-						$in_objop_context = 0;
-					}
-					$this->append_code($text, false);
-					break;
-				case ST_SEMI_COLON:
-					if (0 !== $in_objop_context) {
-						$in_objop_context = 0;
-					}
-					$this->append_code($text, false);
-					break;
-				default:
-					$this->append_code($text, false);
-					break;
-			}
-			if (substr_count($text, $this->new_line) > 0) {
-				$printed_placeholder = false;
-			}
-		}
-
-		for ($j = $alignable_objop_counter; $j > 0; $j--) {
-			$current_align_objop = sprintf(self::ALIGNABLE_OBJOP, $j);
-			if (substr_count($this->code, $current_align_objop) <= 1) {
-				$this->code = str_replace($current_align_objop, '', $this->code);
-				continue;
-			}
-
-			$lines            = explode($this->new_line, $this->code);
-			$lines_with_objop = [];
-			$block_count      = 0;
-
-			foreach ($lines as $idx => $line) {
-				if (substr_count($line, $current_align_objop) > 0) {
-					$lines_with_objop[$block_count][] = $idx;
-				} else {
-					$block_count++;
-				}
-			}
-
-			$i = 0;
-			foreach ($lines_with_objop as $group) {
-				if (1 == sizeof($group)) {
-					continue;
-				}
-				$i++;
-				$farthest_objop = 0;
-				foreach ($group as $idx) {
-					$farthest_objop = max($farthest_objop, strpos($lines[$idx], $current_align_objop));
-				}
-				foreach ($group as $idx) {
-					$line          = $lines[$idx];
-					$current_objop = strpos($line, $current_align_objop);
-					$delta         = abs($farthest_objop-$current_objop);
-					if ($delta > 0) {
-						$line        = str_replace($current_align_objop, str_repeat(' ', $delta).$current_align_objop, $line);
-						$lines[$idx] = $line;
-					}
-				}
-			}
-
-			$this->code = str_replace($current_align_objop, '', implode($this->new_line, $lines));
-		}
-
-		return $this->code;
-	}
 	private function two_commands_in_same_line($source) {
 		$lines = explode($this->new_line, $source);
 		foreach ($lines as $idx => $line) {
@@ -744,14 +622,14 @@ class CodeFormatter {
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 				case T_FOR:
 					$this->append_code($text, false);
 					$paren_count = null;
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
+						$this->ptr       = $index;
 						if (ST_PARENTHESES_OPEN == $id) {
 							$paren_count++;
 						} elseif (ST_PARENTHESES_CLOSE == $id) {
@@ -771,7 +649,7 @@ class CodeFormatter {
 						}
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
-							$this->ptr = $index;
+							$this->ptr       = $index;
 							if (ST_PARENTHESES_OPEN == $id || ST_CURLY_OPEN == $id || ST_BRACKET_OPEN == $id) {
 								$ignore_count++;
 							} elseif (ST_PARENTHESES_CLOSE == $id || ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id) {
@@ -792,7 +670,7 @@ class CodeFormatter {
 					$paren_count = null;
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
+						$this->ptr       = $index;
 						if (ST_PARENTHESES_OPEN == $id) {
 							$paren_count++;
 						} elseif (ST_PARENTHESES_CLOSE == $id) {
@@ -814,7 +692,7 @@ class CodeFormatter {
 						}
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
-							$this->ptr = $index;
+							$this->ptr       = $index;
 							if (ST_PARENTHESES_OPEN == $id || ST_CURLY_OPEN == $id || ST_BRACKET_OPEN == $id) {
 								$ignore_count++;
 							} elseif (ST_PARENTHESES_CLOSE == $id || ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id) {
@@ -836,7 +714,7 @@ class CodeFormatter {
 						$this->append_code('{'.$this->new_line);
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
-							$this->ptr = $index;
+							$this->ptr       = $index;
 							if (ST_PARENTHESES_OPEN == $id || ST_CURLY_OPEN == $id || ST_BRACKET_OPEN == $id) {
 								$ignore_count++;
 							} elseif (ST_PARENTHESES_CLOSE == $id || ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id) {
@@ -858,7 +736,7 @@ class CodeFormatter {
 		}
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			$this->append_code($text, false);
 		}
 
@@ -896,9 +774,6 @@ class CodeFormatter {
 	}
 	private function get_space($true = true) {
 		return $true?" ":"";
-	}
-	private function get_indent_level() {
-		return $this->indent;
 	}
 	private function get_indent($increment = 0) {
 		return str_repeat($this->indent_char, ($this->indent+$increment)*$this->indent_size);
@@ -940,48 +815,21 @@ class CodeFormatter {
 		while (--$i >= 0 && is_array($this->tkns[$i]) && $this->tkns[$i][0] == T_WHITESPACE);
 		return $this->tkns[$i];
 	}
-	private function is_token_lf($prev = false, $i = 99999) {
-		if ($i == 99999) {
-			$i = $this->ptr;
-		}
-		if ($prev) {
-			$count = 0;
-			while (--$i >= 0 && is_array($this->tkns[$i]) && $this->tkns[$i][0] == T_WHITESPACE && strpos($this->tkns[$i][1], "\n") === false);
-		} else {
-			$count = 1;
-			while (++$i < sizeof($this->tkns) && is_array($this->tkns[$i]) && $this->tkns[$i][0] == T_WHITESPACE && strpos($this->tkns[$i][1], "\n") === false);
-		}
-		if (is_array($this->tkns[$i]) && preg_match_all("/\r?\n/", $this->tkns[$i][1], $matches) > $count) {
-			return true;
-		}
-		return false;
-	}
 	private function has_ln_after() {
-		$id   = null;
-		$text = null;
+		$id              = null;
+		$text            = null;
 		list($id, $text) = $this->inspect_token();
 		return T_WHITESPACE == $id && substr_count($text, PHP_EOL) > 0;
 	}
 	private function has_ln_before() {
-		$id   = null;
-		$text = null;
+		$id              = null;
+		$text            = null;
 		list($id, $text) = $this->inspect_token(-1);
 		return T_WHITESPACE == $id && substr_count($text, PHP_EOL) > 0;
 	}
 	private function has_ln_prev_token() {
 		list($id, $text) = $this->get_token($this->prev_token());
 		return substr_count($text, PHP_EOL) > 0;
-	}
-	private function count_ln_before() {
-		$id   = null;
-		$text = null;
-		list($id, $text) = $this->inspect_token(-1);
-		$count_ln = substr_count($text, PHP_EOL);
-		if (T_WHITESPACE == $id && $count_ln > 0) {
-			return $count_ln;
-		} else {
-			return false;
-		}
 	}
 	private function eliminate_duplicated_empty_lines($source) {
 		$lines              = explode($this->new_line, $source);
@@ -1014,7 +862,7 @@ class CodeFormatter {
 		$bracket_count = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 				case ST_PARENTHESES_OPEN:
 					$paren_count++;
@@ -1087,7 +935,7 @@ class CodeFormatter {
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 
 				case T_DOUBLE_ARROW:
@@ -1145,7 +993,7 @@ class CodeFormatter {
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 				case T_WHITESPACE:
 					if (0 == substr_count($text, $this->new_line)) {
@@ -1160,7 +1008,7 @@ class CodeFormatter {
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
+			$this->ptr       = $index;
 			switch ($id) {
 				case T_ARRAY:
 					if ($this->is_token(array(T_VARIABLE))) {
@@ -1314,11 +1162,6 @@ class CodeFormatter {
 			}
 		}
 		return $cnt;
-	}
-	private function debug($str) {
-		if ($this->debug) {
-			return $str;
-		}
 	}
 }
 class SurrogateToken {
