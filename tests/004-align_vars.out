@@ -5,12 +5,12 @@ $a   = 1;
 /*
 Others alignments
  */
-$a[$b = 1] = 1;
-$ab[$bc = 1] = 1;
+$a[$b = 1]     = 1;
+$ab[$bc = 1]   = 1;
 $abc[$bcd = 1] = 1;
-$a[$b]     = 1;
-$ab[$bc]   = 1;
-$abc[$bcd] = 1;
+$a[$b]         = 1;
+$ab[$bc]       = 1;
+$abc[$bcd]     = 1;
 
 if ($a = 1) {
 	$ccc = 1;
@@ -19,8 +19,8 @@ if ($a = 1) {
 }
 
 function a($a = 1, $b = 2, $c = 3) {
-	$a[$b = 1] = 1;
-	$ab[$bc = 1] = 1;
+	$a[$b = 1]     = 1;
+	$ab[$bc = 1]   = 1;
 	$abc[$bcd = 1] = 1;
 }
 function b(
@@ -28,8 +28,8 @@ function b(
 	$b = 2,
 	$c = 3
 ) {
-	$a[$b = 1] = 1;
-	$ab[$bc = 1] = 1;
+	$a[$b = 1]     = 1;
+	$ab[$bc = 1]   = 1;
 	$abc[$bcd = 1] = 1;
 }
 while (false) {
