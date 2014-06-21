@@ -46,20 +46,15 @@ class CodeFormatter {
 	const ALIGNABLE_COMMENT = "\x2 FMT \x3";
 	const ALIGNABLE_OBJOP   = "\x2 OBJOP%d \x3";
 	const ALIGNABLE_EQUAL   = "\x2 EQUAL%d \x3";
-	private $options        = array(
-		"ALIGN_ASSIGNMENTS"            => true,
-		"ORDER_USE"                    => true,
-		"REMOVE_UNUSED_USE_STATEMENTS" => true,
-	);
-	private $indent_size = 1;
-	private $indent_char = "\t";
-	private $block_size  = 1;
-	private $new_line    = "\n";
-	private $indent      = 0;
-	private $for_idx     = 0;
-	private $code        = '';
-	private $ptr         = 0;
-	private $tkns        = 0;
+	private $indent_size    = 1;
+	private $indent_char    = "\t";
+	private $block_size     = 1;
+	private $new_line       = "\n";
+	private $indent         = 0;
+	private $for_idx        = 0;
+	private $code           = '';
+	private $ptr            = 0;
+	private $tkns           = 0;
 	private function orderUseClauses($source = '') {
 		$use_stack   = [];
 		$tokens      = token_get_all($source);
@@ -120,7 +115,6 @@ class CodeFormatter {
 				$return .= $text;
 			}
 		}
-		/*prev($tokens);*/
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
 			$lower_text      = strtolower($text);
@@ -129,15 +123,17 @@ class CodeFormatter {
 			}
 			$return .= $text;
 		}
-		if ($this->options['REMOVE_UNUSED_USE_STATEMENTS']) {
-			$unused_import = array_keys(array_filter($alias_count, function ($v) {
-						return 0 == $v;
-					}
-				));
-			foreach ($unused_import as $v) {
-				$return = str_ireplace($alias_list[$v], null, $return);
-			}
+		$unused_import = array_keys(
+			array_filter(
+				$alias_count, function ($v) {
+					return 0 == $v;
+				}
+			)
+		);
+		foreach ($unused_import as $v) {
+			$return = str_ireplace($alias_list[$v], null, $return);
 		}
+
 		return $return;
 	}
 	public function formatCode($source = '') {
@@ -159,14 +155,10 @@ class CodeFormatter {
 		$source = $this->reindent($source);
 		$source = $this->reindent_colon_blocks($source);
 		$source = $this->reindent_obj_ops($source);
-		if ($this->options['ORDER_USE']) {
-			$source = $this->orderUseClauses($source);
-		}
+		$source = $this->orderUseClauses($source);
 		$source = $this->eliminate_duplicated_empty_lines($source);
-		if ($this->options['ALIGN_ASSIGNMENTS']) {
-			$source = $this->align_equals($source);
-			$source = $this->align_double_arrow($source);
-		}
+		$source = $this->align_equals($source);
+		$source = $this->align_double_arrow($source);
 		return implode(
 			$this->new_line,
 			array_map(
