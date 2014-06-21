@@ -832,28 +832,57 @@ class CodeFormatter {
 		return substr_count($text, PHP_EOL) > 0;
 	}
 	private function eliminate_duplicated_empty_lines($source) {
-		$lines              = explode($this->new_line, $source);
-		$empty_lines_chunks = [];
-		$block_count        = 0;
+		$this->tkns    = token_get_all($source);
+		$this->code    = '';
+		$paren_count   = 0;
+		$bracket_count = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			switch ($id) {
+				case T_WHITESPACE:
+					$text = str_replace($this->new_line, self::ALIGNABLE_EQUAL.$this->new_line, $text);
+					$this->append_code($text, false);
+					break;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+
+		$lines            = explode($this->new_line, $this->code);
+		$lines_with_objop = [];
+		$block_count      = 0;
+
 		foreach ($lines as $idx => $line) {
-			if ('' == trim($line)) {
-				$empty_lines_chunks[$block_count][] = $idx;
+			if (trim($line) == self::ALIGNABLE_EQUAL) {
+				//if (substr_count($line, self::ALIGNABLE_EQUAL) > 0) {
+				$lines_with_objop[$block_count][] = $idx;
 			} else {
 				$block_count++;
 			}
 		}
-		foreach ($empty_lines_chunks as $group) {
+
+		$i = 0;
+		foreach ($lines_with_objop as $group) {
 			if (1 == sizeof($group)) {
 				continue;
 			}
-
-			array_shift($group);
-			foreach ($group as $idx) {
-				unset($lines[$idx]);
+			array_pop($group);
+			foreach ($group as $line_number) {
+				unset($lines[$line_number]);
 			}
 		}
 
-		return implode($this->new_line, $lines);
+		$this->code = str_replace(self::ALIGNABLE_EQUAL, '', implode($this->new_line, $lines));
+
+		$tkns            = token_get_all($this->code);
+		list($id, $text) = $this->get_token(array_pop($tkns));
+		if (T_WHITESPACE == $id && '' == trim($text)) {
+			$this->code = rtrim($this->code).$this->new_line;
+		}
+
+		return $this->code;
 	}
 	private function align_equals($source) {
 		$this->tkns    = token_get_all($source);
