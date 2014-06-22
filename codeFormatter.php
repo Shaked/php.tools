@@ -1221,6 +1221,7 @@ final class ResizeSpaces extends FormatterPass {
 				case ST_CONCAT:
 					if (
 						!$this->is_token(ST_PARENTHESES_CLOSE, true) &&
+						!$this->is_token(ST_BRACKET_CLOSE, true) &&
 						!$this->is_token(array(T_VARIABLE, T_STRING, T_CONSTANT_ENCAPSED_STRING, T_WHITESPACE), true)
 					) {
 						$this->append_code($this->get_space().$text, false);
