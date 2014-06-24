@@ -1406,7 +1406,7 @@ final class PSR1MethodNames extends FormatterPass {
 					if ($found_method) {
 						$count = 0;
 						$tmp   = ucwords(str_replace(array('-', '_'), ' ', strtolower($text), $count));
-						if ($count > 0) {
+						if ($count > 0 && '' != trim($tmp) && '_' != substr($text, 0, 1)) {
 							$text = lcfirst(str_replace(' ', '', $tmp));
 						}
 						$this->append_code($text, false);
@@ -1584,8 +1584,12 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					break;
 				case T_FINAL:
 				case T_ABSTRACT:
-					$final_or_abstract = $text;
-					$skip_whitespaces  = true;
+					if (!$this->is_token(array(T_CLASS))) {
+						$final_or_abstract = $text;
+						$skip_whitespaces  = true;
+					} else {
+						$this->append_code($text, false);
+					}
 					break;
 				case T_STATIC:
 					if (!$this->is_token(array(T_VARIABLE))) {
@@ -1594,6 +1598,22 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					} else {
 						$this->append_code($text, false);
 					}
+					break;
+				case T_VARIABLE:
+					if (
+						null !== $visibility ||
+						null !== $final_or_abstract ||
+						null !== $static
+					) {
+						null !== $visibility && $this->append_code($final_or_abstract.$this->get_space(), false);
+						null !== $final_or_abstract && $this->append_code($visibility.$this->get_space(), false);
+						null !== $static && $this->append_code($static.$this->get_space(), false);
+						$final_or_abstract = null;
+						$visibility        = null;
+						$static            = null;
+						$skip_whitespaces  = false;
+					}
+					$this->append_code($text, false);
 					break;
 				case T_FUNCTION:
 					if (isset($found[0]) && T_CLASS == $found[0] && null !== $final_or_abstract) {
