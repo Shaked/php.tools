@@ -1146,7 +1146,7 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case T_DOUBLE_ARROW:
-					if ($this->is_token(array(T_CONSTANT_ENCAPSED_STRING, T_STRING, T_VARIABLE), true)) {
+					if ($this->is_token(array(T_CONSTANT_ENCAPSED_STRING, T_STRING, T_VARIABLE, T_LNUMBER, T_DNUMBER), true)) {
 						$this->append_code($this->get_space().$text.$this->get_space());
 						break;
 					}
