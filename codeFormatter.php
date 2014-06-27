@@ -1717,13 +1717,23 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new AlignEquals());
 	$fmt->addPass(new AlignDoubleArrow());
 
-	$opts = getopt('', ['psr']);
+	$opts = getopt('', ['psr', 'indent_with_space']);
 	if (isset($opts['psr'])) {
 		PsrDecorator::decorate($fmt);
 		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
 					return $v != '--psr';
+				}
+			)
+		);
+	}
+	if (isset($opts['indent_with_space'])) {
+		$fmt->addPass(new PSR2IndentWithSpace());
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return $v != '--indent_with_space';
 				}
 			)
 		);
