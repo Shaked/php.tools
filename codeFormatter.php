@@ -181,14 +181,22 @@ final class AlignDoubleArrow extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
+		$context_counter = 0;
+		$in_bracket      = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
 			switch ($id) {
 
 				case T_DOUBLE_ARROW:
+					$this->append_code(sprintf(self::ALIGNABLE_EQUAL, $context_counter).$text, false);
+					break;
 
-					$this->append_code(self::ALIGNABLE_EQUAL.$text, false);
+				case ST_BRACKET_OPEN:
+					if ($this->is_token(array(T_DOUBLE_ARROW), true)) {
+						$context_counter++;
+					}
+					$this->append_code($text, false);
 					break;
 
 				default:
@@ -197,41 +205,43 @@ final class AlignDoubleArrow extends FormatterPass {
 			}
 		}
 
-		$lines            = explode($this->new_line, $this->code);
-		$lines_with_objop = [];
-		$block_count      = 0;
+		for ($j = 0; $j <= $context_counter; $j++) {
+			$placeholder      = sprintf(self::ALIGNABLE_EQUAL, $j);
+			$lines            = explode($this->new_line, $this->code);
+			$lines_with_objop = [];
+			$block_count      = 0;
 
-		foreach ($lines as $idx => $line) {
-			if (substr_count($line, self::ALIGNABLE_EQUAL) > 0) {
-				$lines_with_objop[$block_count][] = $idx;
-			} else {
-				$block_count++;
-			}
-		}
-
-		$i = 0;
-		foreach ($lines_with_objop as $group) {
-			if (1 == sizeof($group)) {
-				continue;
-			}
-			$i++;
-			$farthest_objop = 0;
-			foreach ($group as $idx) {
-				$farthest_objop = max($farthest_objop, strpos($lines[$idx], self::ALIGNABLE_EQUAL));
-			}
-			foreach ($group as $idx) {
-				$line          = $lines[$idx];
-				$current_objop = strpos($line, self::ALIGNABLE_EQUAL);
-				$delta         = abs($farthest_objop-$current_objop);
-				if ($delta > 0) {
-					$line        = str_replace(self::ALIGNABLE_EQUAL, str_repeat(' ', $delta).self::ALIGNABLE_EQUAL, $line);
-					$lines[$idx] = $line;
+			foreach ($lines as $idx => $line) {
+				if (substr_count($line, $placeholder) > 0) {
+					$lines_with_objop[$block_count][] = $idx;
+				} else {
+					$block_count++;
 				}
 			}
+
+			$i = 0;
+			foreach ($lines_with_objop as $group) {
+				if (1 == sizeof($group)) {
+					continue;
+				}
+				$i++;
+				$farthest_objop = 0;
+				foreach ($group as $idx) {
+					$farthest_objop = max($farthest_objop, strpos($lines[$idx], $placeholder));
+				}
+				foreach ($group as $idx) {
+					$line          = $lines[$idx];
+					$current_objop = strpos($line, $placeholder);
+					$delta         = abs($farthest_objop-$current_objop);
+					if ($delta > 0) {
+						$line        = str_replace($placeholder, str_repeat(' ', $delta).$placeholder, $line);
+						$lines[$idx] = $line;
+					}
+				}
+			}
+
+			$this->code = str_replace($placeholder, '', implode($this->new_line, $lines));
 		}
-
-		$this->code = str_replace(self::ALIGNABLE_EQUAL, '', implode($this->new_line, $lines));
-
 		return $this->code;
 	}
 }
