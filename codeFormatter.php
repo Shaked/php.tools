@@ -332,7 +332,10 @@ final class CodeFormatter {
 	}
 
 	public function formatCode($source = '') {
-		foreach ($this->passes as $pass) {
+		$passes = array_map(function ($pass) {
+				return clone$pass;
+			}, $this->passes);
+		while ($pass = array_shift($passes)) {
 			$source = $pass->format($source);
 		}
 		return $source;
