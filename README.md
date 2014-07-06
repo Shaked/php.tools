@@ -28,7 +28,6 @@ php.tools
 ```
 
 # Code Formatter's restrictions
-- It doesn't parse, *yet*, colon blocks like IF: ELSE: ENDIF; / SWITCH ... ENDSWITCH;
 - It has a hard time looking ahead for tokens which disrupts the flow of the staments like:
 ```
 	if // comment
@@ -44,25 +43,4 @@ php.tools
 	($condition) // comment
 	// comment
 	doSomething();
-```
-- It handles some implicit block statements and adds the missing curly braces. It is still incomplete, but consistent when it works.
-```
-	if ($condition)
-		$a;
-	becomes
-	if ($condition) {
-		$a;
-	}
-
-
-	if ($condition)
-		do{
-			doSomething()
-		}while($condition2);
-	becomes:
-	if ($condition) {
-		do{
-			doSomething()
-		}while($condition2);
-	}
 ```
