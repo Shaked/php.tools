@@ -332,9 +332,12 @@ final class CodeFormatter {
 	}
 
 	public function formatCode($source = '') {
-		$passes = array_map(function ($pass) {
-				return clone$pass;
-			}, $this->passes);
+		$passes = array_map(
+			function ($pass) {
+				return clone $pass;
+			},
+			$this->passes
+		);
 		while ($pass = array_shift($passes)) {
 			$source = $pass->format($source);
 		}
@@ -1331,6 +1334,7 @@ final class ResizeSpaces extends FormatterPass {
 				case T_SWITCH:
 				case T_TRY:
 				case ST_COMMA:
+				case T_CLONE:
 					$this->append_code($text.$this->get_space(), false);
 					break;
 				case T_EXTENDS:
