@@ -569,6 +569,52 @@ abstract class FormatterPass {
 		return $cnt;
 	}
 }
+final class LeftAlignComment extends FormatterPass {
+	const NON_INDENTABLE_COMMENT = "/*\x2 COMMENT \x3*/";
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			if ($text == self::NON_INDENTABLE_COMMENT) {
+				continue;
+			}
+			switch ($id) {
+				case T_COMMENT:
+				case T_DOC_COMMENT:
+					list(, $prev_text) = $this->inspect_token(-1);
+					if ($prev_text == self::NON_INDENTABLE_COMMENT) {
+						$lines = explode($this->new_line, $text);
+						$lines = array_map(function ($v) {
+								$v = ltrim($v);
+								if ('*' == substr($v, 0, 1)) {
+									$v = ' '.$v;
+								}
+								return $v;
+							}, $lines);
+						$this->append_code(implode($this->new_line, $lines), false);
+						break;
+					}
+				case T_WHITESPACE:
+					list(, $next_text) = $this->inspect_token(1);
+					if ($next_text == self::NON_INDENTABLE_COMMENT && substr_count($text, "\n") >= 2) {
+						$text = substr($text, 0, strrpos($text, "\n")+1);
+						$this->append_code($text, false);
+						break;
+					} elseif ($next_text == self::NON_INDENTABLE_COMMENT && substr_count($text, "\n") == 1) {
+						$text = substr($text, 0, strrpos($text, "\n")+1);
+						$this->append_code($text, false);
+						break;
+					}
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+}
 
 final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 	public function format($source) {
@@ -667,6 +713,17 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
+					list($prev_id, $prev_text) = $this->inspect_token(-1);
+
+					$prev_text = strrev($prev_text);
+					$first_ln  = strpos($prev_text, "\n");
+					$second_ln = strpos($prev_text, "\n", $first_ln+1);
+					if ($prev_id == T_WHITESPACE && substr_count($prev_text, "\n") >= 2 && 0 === $first_ln && 1 === $second_ln) {
+						$this->append_code(LeftAlignComment::NON_INDENTABLE_COMMENT, false);
+					} elseif ($prev_id == T_WHITESPACE && "\n" == $prev_text) {
+						$this->append_code(LeftAlignComment::NON_INDENTABLE_COMMENT, false);
+					}
+
 					if (substr_count($text, "\r\n")) {
 						$text = str_replace("\r\n", $this->new_line, $text);
 					}
@@ -810,7 +867,7 @@ final class OrderUseClauses extends FormatterPass {
 }
 
 final class Reindent extends FormatterPass {
-	public function format($source) {
+	private function normalizeHereDocs($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
@@ -855,8 +912,10 @@ final class Reindent extends FormatterPass {
 					break;
 			}
 		}
-
-		$this->tkns = token_get_all($this->code);
+		return $this->code;
+	}
+	private function indent($source) {
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -897,6 +956,11 @@ final class Reindent extends FormatterPass {
 			}
 		}
 		return $this->code;
+	}
+	public function format($source) {
+		$source = $this->normalizeHereDocs($source);
+		$source = $this->indent($source);
+		return $source;
 	}
 }
 
@@ -1916,6 +1980,7 @@ if (!isset($testEnv)) {
 			)
 		);
 	}
+	$fmt->addPass(new LeftAlignComment());
 	$fmt->addPass(new RTrim());
 
 	if (!isset($argv[1])) {

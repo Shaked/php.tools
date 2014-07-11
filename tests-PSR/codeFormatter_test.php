@@ -37,6 +37,7 @@ foreach ($cases as $caseIn) {
 	$fmt->addPass(new AlignEquals());
 	$fmt->addPass(new AlignDoubleArrow());
 	PsrDecorator::decorate($fmt);
+	$fmt->addPass(new LeftAlignComment());
 	$fmt->addPass(new RTrim());
 
 	$caseOut  = str_replace('.in', '.out', $caseIn);

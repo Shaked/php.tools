@@ -1,14 +1,14 @@
 <?php
 $array = array(
 	'a',
-	// TODO
+// TODO
 	'k' => 'v', //TODO
 	'k' => 'v', #TODO
 );
 
 $array = [
 	'a',
-	// TODO
+// TODO
 	'k' => 'v', //TODO
 	'k' => 'v', #TODO
 ];

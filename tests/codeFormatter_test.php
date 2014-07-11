@@ -36,6 +36,7 @@ foreach ($cases as $caseIn) {
 	$fmt->addPass(new EliminateDuplicatedEmptyLines());
 	$fmt->addPass(new AlignEquals());
 	$fmt->addPass(new AlignDoubleArrow());
+	$fmt->addPass(new LeftAlignComment());
 	$fmt->addPass(new RTrim());
 	$caseOut  = str_replace('.in', '.out', $caseIn);
 	$got      = $fmt->formatCode(file_get_contents($caseIn));
