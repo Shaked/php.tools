@@ -38,10 +38,10 @@ class StdObject
         if ($a) {
             echo 'a';
         }
-        $a =  ($a) {
+        $a = function ($a) {
             return false;
         };
-        $a =  (
+        $a = function (
             $b,
             $c
         ) use (

@@ -1759,6 +1759,8 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 							}
 						}
 						break;
+					} else {
+						$this->append_code($text, false);
 					}
 					break;
 				case ST_CURLY_OPEN:
