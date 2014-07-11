@@ -1918,7 +1918,7 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 				$this->append_code($text, false);
 			}
 		}
-		$this->code .= $this->get_crlf().$this->get_crlf();
+		$this->code = rtrim($this->code).$this->get_crlf();
 
 		return $this->code;
 	}
