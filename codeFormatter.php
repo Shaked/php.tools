@@ -187,6 +187,10 @@ final class AlignDoubleArrow extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
 			switch ($id) {
+				case T_FOREACH:
+					$context_counter++;
+					$this->append_code($text, false);
+					break;
 
 				case T_DOUBLE_ARROW:
 					$this->append_code(sprintf(self::ALIGNABLE_EQUAL, $context_counter).$text, false);
