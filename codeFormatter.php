@@ -189,6 +189,7 @@ final class AlignDoubleArrow extends FormatterPass {
 			switch ($id) {
 				case T_FOREACH:
 				case ST_SEMI_COLON:
+				case T_ARRAY:
 					$context_counter++;
 					$this->append_code($text, false);
 					break;
