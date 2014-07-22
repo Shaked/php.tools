@@ -1,6 +1,5 @@
 <?php
 namespace NS;
-
 use B;
 use C;
 new B;

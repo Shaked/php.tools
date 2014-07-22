@@ -873,7 +873,7 @@ final class OrderUseClauses extends FormatterPass {
 			)
 		);
 		foreach ($unused_import as $v) {
-			$return = str_ireplace($alias_list[$v], null, $return);
+			$return = str_ireplace($alias_list[$v].$this->new_line, null, $return);
 		}
 
 		return $return;
