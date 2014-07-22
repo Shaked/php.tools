@@ -1,0 +1,3 @@
+<?php
+fn(1, $acc1 = ObjectClass::fb(array('ii' => uniqid(), 'nnnn' => 1, 'description' => 'description', 'images' => 'image-url')));
+fn(null, $acc2 = ObjectClass::fb(array('ii' => uniqid(), 'nnnn' => 1, 'description' => 'description', 'imageUrl' => 'image-url')));
