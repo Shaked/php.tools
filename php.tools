@@ -317,19 +317,19 @@ update_sha () {
 }
 changed () {
 	echo "Running... $1 $2";
-	time execute
+	time execute "$@"
 	previous_sha=$sha
 }
 compare () {
 	update_sha
 	if [[ $sha != $previous_sha ]] ;
 	then
-		changed;
+		changed "$@";
 	fi
 }
 watch () {
 	while true; do
-		compare
+		compare "$@"
 		read -s -t 1 && (
 			execute "$@"
 		)
