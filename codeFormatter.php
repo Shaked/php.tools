@@ -1687,6 +1687,8 @@ final class PSR2IndentWithSpace extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
 			switch ($id) {
+				case T_COMMENT:
+				case T_DOC_COMMENT:
 				case T_WHITESPACE:
 					$this->append_code(str_replace($this->indent_char, $this->indent_spaces, $text), false);
 					break;
@@ -1854,7 +1856,7 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 					}
 					break;
 				case T_FUNCTION:
-					if (!$this->is_token(ST_EQUAL, true)) {
+					if (!$this->is_token(ST_EQUAL, true) && !$this->is_token(ST_PARENTHESES_OPEN, true) && !$this->is_token(ST_COMMA, true)) {
 						$this->append_code($text, false);
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
@@ -1908,10 +1910,12 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case ST_CURLY_OPEN:
-					$found[] = ST_CURLY_OPEN;
+				case ST_PARENTHESES_OPEN:
+					$found[] = $text;
 					$this->append_code($text, false);
 					break;
 				case ST_CURLY_CLOSE:
+				case ST_PARENTHESES_CLOSE:
 					array_pop($found);
 					if (1 == sizeof($found)) {
 						array_pop($found);
