@@ -1972,7 +1972,12 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					}
 					if (isset($found[0]) && T_CLASS == $found[0] && null !== $visibility) {
 						$this->append_code($visibility.$this->get_space(), false);
-					} elseif (isset($found[0]) && T_CLASS == $found[0] && !$this->is_token(ST_EQUAL, true)) {
+					} elseif (
+						isset($found[0]) && T_CLASS == $found[0] &&
+						!$this->is_token(ST_EQUAL, true) &&
+						!$this->is_token(ST_COMMA, true) &&
+						!$this->is_token(ST_PARENTHESES_OPEN, true)
+					) {
 						$this->append_code('public'.$this->get_space(), false);
 					}
 					if (isset($found[0]) && T_CLASS == $found[0] && null !== $static) {
