@@ -49,7 +49,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		return $source;
 	}
 	private function addBraces($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -178,7 +178,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 final class AlignDoubleArrow extends FormatterPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 
 		$context_counter = 0;
@@ -255,7 +255,7 @@ final class AlignDoubleArrow extends FormatterPass {
 final class AlignEquals extends FormatterPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
 	public function format($source) {
-		$this->tkns      = Token::token_get_all($source);
+		$this->tkns      = token_get_all($source);
 		$this->code      = '';
 		$paren_count     = 0;
 		$bracket_count   = 0;
@@ -346,6 +346,7 @@ final class CodeFormatter {
 	}
 
 	public function formatCode($source = '') {
+		gc_enable();
 		$passes = array_map(
 			function ($pass) {
 				return clone $pass;
@@ -354,7 +355,9 @@ final class CodeFormatter {
 		);
 		while ($pass = array_shift($passes)) {
 			$source = $pass->format($source);
+			gc_collect_cycles();
 		}
+		gc_disable();
 		return $source;
 	}
 }
@@ -362,7 +365,7 @@ final class CodeFormatter {
 final class EliminateDuplicatedEmptyLines extends FormatterPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
 	public function format($source) {
-		$this->tkns    = Token::token_get_all($source);
+		$this->tkns    = token_get_all($source);
 		$this->code    = '';
 		$paren_count   = 0;
 		$bracket_count = 0;
@@ -406,7 +409,7 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 
 		$this->code = str_replace(self::ALIGNABLE_EQUAL, '', implode($this->new_line, $lines));
 
-		$tkns            = Token::token_get_all($this->code);
+		$tkns            = token_get_all($this->code);
 		list($id, $text) = $this->get_token(array_pop($tkns));
 		if (T_WHITESPACE === $id && '' === trim($text)) {
 			$this->code = rtrim($this->code).$this->new_line;
@@ -418,7 +421,7 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 
 final class ExtraCommaInArray extends FormatterPass {
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 
 		$context_stack = [];
@@ -586,7 +589,7 @@ abstract class FormatterPass {
 final class LeftAlignComment extends FormatterPass {
 	const NON_INDENTABLE_COMMENT = "/*\x2 COMMENT \x3*/";
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -632,7 +635,7 @@ final class LeftAlignComment extends FormatterPass {
 
 final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 	public function format($source) {
-		$this->tkns          = Token::token_get_all($source);
+		$this->tkns          = token_get_all($source);
 		$this->code          = '';
 		$in_do_while_context = 0;
 		while (list($index, $token) = each($this->tkns)) {
@@ -660,7 +663,7 @@ final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 
 final class MergeDoubleArrowAndArray extends FormatterPass {
 	public function format($source) {
-		$this->tkns          = Token::token_get_all($source);
+		$this->tkns          = token_get_all($source);
 		$this->code          = '';
 		$in_do_while_context = 0;
 		while (list($index, $token) = each($this->tkns)) {
@@ -684,7 +687,7 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 
 final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -718,7 +721,7 @@ final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 
 final class NormalizeLnAndLtrimLines extends FormatterPass {
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -794,7 +797,7 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 final class OrderUseClauses extends FormatterPass {
 	public function format($source = '') {
 		$use_stack   = [];
-		$tokens      = Token::token_get_all($source);
+		$tokens      = token_get_all($source);
 		$new_tokens  = [];
 		$next_tokens = [];
 		while (list(, $pop_token) = each($tokens)) {
@@ -882,7 +885,7 @@ final class OrderUseClauses extends FormatterPass {
 
 final class Reindent extends FormatterPass {
 	private function normalizeHereDocs($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -929,7 +932,7 @@ final class Reindent extends FormatterPass {
 		return $this->code;
 	}
 	private function indent($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -980,7 +983,7 @@ final class Reindent extends FormatterPass {
 
 final class ReindentColonBlocks extends FormatterPass {
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 
 		$switch_level                      = 0;
@@ -1034,7 +1037,7 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 	}
 
 	private function format_blocks($source, $open_token, $close_token) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
@@ -1082,7 +1085,7 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		return $this->format_blocks($source, T_FOREACH, T_ENDFOREACH);
 	}
 	private function format_while_blocks($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
@@ -1127,7 +1130,7 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 
 final class ReindentIfColonBlocks extends FormatterPass {
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
@@ -1175,7 +1178,7 @@ final class ReindentIfColonBlocks extends FormatterPass {
 final class ReindentObjOps extends FormatterPass {
 	const ALIGNABLE_OBJOP = "\x2 OBJOP%d \x3";
 	public function format($source) {
-		$this->tkns              = Token::token_get_all($source);
+		$this->tkns              = token_get_all($source);
 		$this->code              = '';
 		$in_objop_context        = 0;// 1 - indent, 2 - don't indent, so future auto-align takes place
 		$alignable_objop_counter = 0;
@@ -1298,7 +1301,7 @@ final class ReindentObjOps extends FormatterPass {
 final class ResizeSpaces extends FormatterPass {
 	public function format($source) {
 		$new_tokens = [];
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -1512,21 +1515,6 @@ final class RTrim extends FormatterPass {
 final class SurrogateToken {
 }
 
-class Token {
-	static $cache = [];
-	public static function token_get_all($source) {
-		$key = crc32($source);
-		if (isset(static ::$cache[$key])) {
-			return static ::$cache[$key];
-		}
-		static ::$cache[$key] = token_get_all($source);
-		return static ::$cache[$key];
-	}
-	public static function clear() {
-		static ::$cache = [];
-	}
-}
-
 final class TwoCommandsInSameLine extends FormatterPass {
 	public function format($source) {
 		$lines = explode($this->new_line, $source);
@@ -1566,7 +1554,7 @@ final class TwoCommandsInSameLine extends FormatterPass {
 
 final class PSR1OpenTags extends FormatterPass {
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -1598,7 +1586,7 @@ final class PSR1BOMMark extends FormatterPass {
 
 final class PSR1ClassNames extends FormatterPass {
 	public function format($source) {
-		$this->tkns  = Token::token_get_all($source);
+		$this->tkns  = token_get_all($source);
 		$this->code  = '';
 		$found_class = false;
 		while (list($index, $token) = each($this->tkns)) {
@@ -1632,7 +1620,7 @@ final class PSR1ClassNames extends FormatterPass {
 
 final class PSR1ClassConstants extends FormatterPass {
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$uc_const   = false;
 		while (list($index, $token) = each($this->tkns)) {
@@ -1660,7 +1648,7 @@ final class PSR1ClassConstants extends FormatterPass {
 }
 final class PSR1MethodNames extends FormatterPass {
 	public function format($source) {
-		$this->tkns   = Token::token_get_all($source);
+		$this->tkns   = token_get_all($source);
 		$this->code   = '';
 		$found_method = false;
 		while (list($index, $token) = each($this->tkns)) {
@@ -1696,7 +1684,7 @@ final class PSR2IndentWithSpace extends FormatterPass {
 	private $indent_spaces = '    ';
 
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -1718,7 +1706,7 @@ final class PSR2IndentWithSpace extends FormatterPass {
 
 final class PSR2KeywordsLowerCase extends FormatterPass {
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -1813,7 +1801,7 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 }
 final class PSR2LnAfterNamespace extends FormatterPass {
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
@@ -1849,7 +1837,7 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 final class PSR2CurlyOpenNextLine extends FormatterPass {
 	public function format($source) {
 		$this->indent_char = '    ';
-		$this->tkns        = Token::token_get_all($source);
+		$this->tkns        = token_get_all($source);
 		$this->code        = '';
 
 		while (list($index, $token) = each($this->tkns)) {
@@ -1908,7 +1896,7 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 
 final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 
 		$found             = [];
@@ -2020,7 +2008,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 
 final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 	public function format($source) {
-		$this->tkns = Token::token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 
 		$open_tag_count = 0;
@@ -2144,5 +2132,4 @@ if (!isset($testEnv)) {
 			echo PHP_EOL;
 		}
 	}
-	Token::clear();
 }
