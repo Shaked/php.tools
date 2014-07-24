@@ -2124,13 +2124,25 @@ if (!isset($testEnv)) {
 		exit();
 	}
 
-	if(isset($opts['o'])){
+	if (isset($opts['o'])) {
 		unset($argv[1]);
 		unset($argv[2]);
 		$argv = array_values($argv);
 		file_put_contents($opts['o'], $fmt->formatCode(file_get_contents($argv[1])));
-	}else{
+	} elseif (is_file($argv[1])) {
 		echo $fmt->formatCode(file_get_contents($argv[1]));
+	} else {
+		$dir   = new RecursiveDirectoryIterator($argv[1]);
+		$it    = new RecursiveIteratorIterator($dir);
+		$files = new RegexIterator($it, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
+		foreach ($files as $file) {
+			$file = $file[0];
+			echo $file;
+			file_put_contents($file.'-tmp', $fmt->formatCode(file_get_contents($file)));
+			rename($file, $file.'~');
+			rename($file.'-tmp', $file);
+			echo PHP_EOL;
+		}
 	}
 	Token::clear();
 }
