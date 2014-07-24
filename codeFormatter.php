@@ -1871,7 +1871,7 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 					}
 					break;
 				case T_FUNCTION:
-					if (!$this->is_token(ST_EQUAL, true) && !$this->is_token(ST_PARENTHESES_OPEN, true) && !$this->is_token(ST_COMMA, true)) {
+					if (!$this->is_token([T_DOUBLE_ARROW, T_RETURN], true) && !$this->is_token(ST_EQUAL, true) && !$this->is_token(ST_PARENTHESES_OPEN, true) && !$this->is_token(ST_COMMA, true)) {
 						$this->append_code($text, false);
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
@@ -1993,6 +1993,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						$this->append_code($visibility.$this->get_space(), false);
 					} elseif (
 						isset($found[0]) && T_CLASS === $found[0] &&
+						!$this->is_token([T_DOUBLE_ARROW, T_RETURN], true) &&
 						!$this->is_token(ST_EQUAL, true) &&
 						!$this->is_token(ST_COMMA, true) &&
 						!$this->is_token(ST_PARENTHESES_OPEN, true)
