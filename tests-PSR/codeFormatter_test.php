@@ -43,6 +43,7 @@ foreach ($cases as $caseIn) {
 	$caseOut  = str_replace('.in', '.out', $caseIn);
 	$got      = $fmt->formatCode(file_get_contents($caseIn));
 	$expected = file_get_contents($caseOut);
+	Token::clear();
 	if ($got != $expected) {
 		$brokenTests[$caseOut] = $got;
 		echo '!';
