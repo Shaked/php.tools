@@ -2095,7 +2095,7 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new AlignEquals());
 	$fmt->addPass(new AlignDoubleArrow());
 
-	$opts = getopt('', ['psr', 'indent_with_space']);
+	$opts = getopt('o:', ['psr', 'indent_with_space']);
 	if (isset($opts['psr'])) {
 		PsrDecorator::decorate($fmt);
 		$argv = array_values(
@@ -2122,6 +2122,14 @@ if (!isset($testEnv)) {
 	if (!isset($argv[1])) {
 		exit();
 	}
-	echo $fmt->formatCode(file_get_contents($argv[1]));
-	Token::clear()
+
+	if(isset($opts['o'])){
+		unset($argv[1]);
+		unset($argv[2]);
+		$argv = array_values($argv);
+		file_put_contents($opts['o'], $fmt->formatCode(file_get_contents($argv[1])));
+	}else{
+		echo $fmt->formatCode(file_get_contents($argv[1]));
+	}
+	Token::clear();
 }
