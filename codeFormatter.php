@@ -1514,16 +1514,16 @@ final class SurrogateToken {
 
 class Token {
 	static $cache = [];
-	public static function token_get_all($source){
+	public static function token_get_all($source) {
 		$key = crc32($source);
-		if(isset(static::$cache[$key])){
-			return static::$cache[$key];
+		if (isset(static ::$cache[$key])) {
+			return static ::$cache[$key];
 		}
-		static::$cache[$key] = token_get_all($source);
-		return static::$cache[$key];
+		static ::$cache[$key] = token_get_all($source);
+		return static ::$cache[$key];
 	}
-	public static function clear(){
-		static::$cache = [];
+	public static function clear() {
+		static ::$cache = [];
 	}
 }
 
