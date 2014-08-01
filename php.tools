@@ -29,9 +29,11 @@ CURPWD=$(php -r "echo realpath('.');")
 if [[ $ARCH == *apple* ]]; then
 DIRS="`find . -depth 1 -type d | egrep -iv "cover|vendor|web|fixtures|docs|^\.$" | php -r "echo implode(' ', array_map(function(\\\$v){return str_replace('$CURPWD', '.',realpath(\\\$v)); }, array_filter(explode(PHP_EOL, file_get_contents('php://stdin')))));"`"
 FMT_CLEAN="find . -ipath '*~' -delete"
+INCREMENTAL_TEST="find . -ipath '*~' -mmin -10 | grep -iv '_test.php'"
 else
 DIRS="`find -maxdepth 1 -type d | egrep -iv "cover|vendor|web|fixtures|docs|^\.$" | xargs -l1 readlink -f | tr "\\n" " " | sed "s|$CURPWD/|./|g"`"
 FMT_CLEAN="find -iwholename '*~' -delete"
+INCREMENTAL_TEST="find $DIRS -iwholename '*.php' -mmin -10 | grep -iv '_test.php'"
 fi
 FMTWORKERS=2
 
@@ -197,7 +199,16 @@ then
 	shift
 	function execute(){
 		TEST=""
-		if [[ $1 == */* ]]; then
+		if [[ "incremental" == "$1" ]]; then
+			shift
+			FILES=`eval $INCREMENTAL_TEST`
+			for i in $FILES;
+			do
+				echo "Testing " ${i/.php/}
+				execute ${i/.php/} "$@"
+			done;
+			return 1
+		elif [[ $1 == */* ]]; then
 			TEST="$1Test $1_test.php"
 			shift
 		elif [[ $1 == *\\* ]]; then
@@ -215,7 +226,16 @@ then
 	shift
 	function execute(){
 		TEST=""
-		if [[ $1 == */* ]]; then
+		if [[ "incremental" == "$1" ]]; then
+			shift
+			FILES=`eval $INCREMENTAL_TEST`
+			for i in $FILES;
+			do
+				echo "Testing " ${i/.php/}
+				execute ${i/.php/} "$@"
+			done;
+			return 1
+		elif [[ $1 == */* ]]; then
 			TEST="$1Test $1_test.php"
 			shift
 		elif [[ $1 == *\\* ]]; then
