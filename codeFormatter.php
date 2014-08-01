@@ -960,6 +960,10 @@ final class Reindent extends FormatterPass {
 					$this->set_indent(-1);
 					$this->append_code($text, false);
 					break;
+				case T_FUNCTION:
+					if ($this->is_token(ST_PARENTHESES_OPEN, true) && !$this->has_ln_before()) {
+						$this->set_indent(-1);
+					}
 				default:
 					if (substr_count($text, $this->new_line) > 0 && !$this->is_token(ST_CURLY_CLOSE) && !$this->is_token(ST_PARENTHESES_CLOSE) && !$this->is_token(ST_BRACKET_CLOSE)) {
 						$text = str_replace($this->new_line, $this->new_line.$this->get_indent(), $text);
