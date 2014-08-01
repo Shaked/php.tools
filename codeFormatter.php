@@ -968,7 +968,7 @@ final class Reindent extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case T_FUNCTION:
-					if ($this->is_token(ST_PARENTHESES_OPEN, true) && !$this->has_ln_before()) {
+					if (($this->is_token(ST_PARENTHESES_OPEN, true) || $this->is_token(ST_COMMA, true)) && !$this->has_ln_before()) {
 						$found_stack[] = $id;
 						$this->set_indent(-1);
 					}
