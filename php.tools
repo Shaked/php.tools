@@ -204,7 +204,7 @@ then
 			FILES=`eval $INCREMENTAL_TEST`
 			for i in $FILES;
 			do
-				echo "Testing " ${i/.php/}
+				echo -e "\n---\n\n\e[32m\e[7mTesting " ${i/.php/} "\e[27m\e[0m"
 				execute ${i/.php/} "$@"
 			done;
 			return 1
@@ -231,7 +231,7 @@ then
 			FILES=`eval $INCREMENTAL_TEST`
 			for i in $FILES;
 			do
-				echo "Testing " ${i/.php/}
+				echo -e "\n---\n\n\e[32m\e[7mTesting " ${i/.php/} "\e[27m\e[0m"
 				execute ${i/.php/} "$@"
 			done;
 			return 1
