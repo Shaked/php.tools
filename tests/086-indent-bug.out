@@ -9,3 +9,16 @@ func(function () {
 }, function () {
 	return false;
 });
+
+function loadConfiguration() {
+	if (is_null($this->configuration)) {
+		$app['Configuration'] = $app->share(function (Application $app) {
+			return new Configuration();
+		});
+	} else {
+		$app['Configuration'] = $this->configuration;
+	}
+	if ($app['Configuration']->Debug()) {
+		$app['debug'] = true;
+	}
+}
