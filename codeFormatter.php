@@ -2093,16 +2093,16 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new ReindentObjOps());
 	$fmt->addPass(new OrderUseClauses());
 	$fmt->addPass(new EliminateDuplicatedEmptyLines());
-	$fmt->addPass(new AlignEquals());
-	$fmt->addPass(new AlignDoubleArrow());
 
-	$opts = getopt('o:', ['psr', 'indent_with_space']);
-	if (isset($opts['psr'])) {
-		PsrDecorator::decorate($fmt);
+	$opts = getopt('o:', ['psr', 'indent_with_space', 'disable_auto_align']);
+	if (!isset($opts['disable_auto_align'])) {
+		$fmt->addPass(new AlignEquals());
+		$fmt->addPass(new AlignDoubleArrow());
+	} else {
 		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
-					return $v !== '--psr';
+					return $v !== '--disable_auto_align';
 				}
 			)
 		);
