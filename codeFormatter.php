@@ -2117,6 +2117,16 @@ if (!isset($testEnv)) {
 			)
 		);
 	}
+	if (isset($opts['psr'])) {
+		PsrDecorator::decorate($fmt);
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return $v !== '--psr';
+				}
+			)
+		);
+	}
 	$fmt->addPass(new LeftAlignComment());
 	$fmt->addPass(new RTrim());
 
