@@ -27,20 +27,159 @@ php.tools
 	watch fmt [all|filename] - watch for changes and format according to project formatting rules
 ```
 
-# Code Formatter's restrictions
-- It has a hard time looking ahead for tokens which disrupts the flow of the staments like:
-```
-	if // comment
-	($condition) // comment
-	// comment
-	{
-		doSomething();
+# What does the Code Formatter do?
+
+### K&R configuration
+<table>
+<tr>
+<td>Before</td>
+<td>After</td>
+</tr>
+<tr>
+<td>
+<pre><code>&lt;?php
+for($i = 0; $i &lt; 10; $i++)
+{
+if($i%2==0)
+echo "Flipflop";
+}
+</code></pre>
+</td>
+<td>
+<pre><code>&lt;?php
+for ($i = 0; $i &lt; 10; $i++) {
+	if ($i%2 == 0) {
+		echo "Flipflop";
 	}
+}
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>&lt;?php
+$a = 10;
+$otherVar = 20;
+$third = 30;
+</code></pre>
+</td>
+<td>
+<pre><code>&lt;?php
+$a        = 10;
+$otherVar = 20;
+$third    = 30;
+</code></pre>
+<i>This can be disabled with the option "disable_auto_align"</i>
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>&lt;?php
+namespace NS\Something;
+use \OtherNS\C;
+use \OtherNS\B;
+use \OtherNS\A;
+use \OtherNS\D;
 
-	or
+$a = new A();
+$b = new C();
+$d = new D();
+</code></pre>
+</td>
+<td>
+<pre><code>&lt;?php
+namespace NS\Something;
 
-	if // comment
-	($condition) // comment
-	// comment
-	doSomething();
-```
+use \OtherNS\A;
+use \OtherNS\C;
+use \OtherNS\D;
+
+$a = new A();
+$b = new C();
+$d = new D();
+</code></pre>
+<i>note how it sorts the use clauses, and removes unused ones</i>
+</td>
+</tr>
+</table>
+
+### PSR configuration
+<table>
+<tr>
+<td>Before</td>
+<td>After</td>
+</tr>
+<tr>
+<td>
+<pre><code>&lt;?php
+for($i = 0; $i &lt; 10; $i++)
+{
+if($i%2==0)
+echo "Flipflop";
+}
+</code></pre>
+</td>
+<td>
+<pre><code>&lt;?php
+for ($i = 0; $i &lt; 10; $i++) {
+    if ($i%2 == 0) {
+        echo "Flipflop";
+    }
+}
+</code></pre>
+<i>Note the identation of 4 spaces.</i>
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>&lt;?php
+class A {
+function a(){
+return 10;
+}
+}
+</code></pre>
+</td>
+<td>
+<pre><code>&lt;?php
+class A
+{
+    public function a()
+    {
+        return 10;
+    }
+}
+</code></pre>
+<i>Note the braces position, and the visibility adjustment in the method a().</i>
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>&lt;?php
+namespace NS\Something;
+use \OtherNS\C;
+use \OtherNS\B;
+use \OtherNS\A;
+use \OtherNS\D;
+
+$a = new A();
+$b = new C();
+$d = new D();
+</code></pre>
+</td>
+<td>
+<pre><code>&lt;?php
+namespace NS\Something;
+
+use \OtherNS\A;
+use \OtherNS\C;
+use \OtherNS\D;
+
+$a = new A();
+$b = new C();
+$d = new D();
+</code></pre>
+<i>note how it sorts the use clauses, and removes unused ones</i>
+</td>
+</tr>
+</table>
