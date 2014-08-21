@@ -35,7 +35,9 @@ define("ST_QUOTE", '"');
 define("ST_REFERENCE", "&");
 define("ST_SEMI_COLON", ";");
 define("ST_TIMES", "*");
-
+if (!defined("T_YIELD")) {
+	define("T_YIELD", "*");
+}
 final class AddMissingCurlyBraces extends FormatterPass {
 	public function format($source) {
 		$tmp = $this->addBraces($source);
