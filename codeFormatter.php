@@ -36,7 +36,10 @@ define("ST_REFERENCE", "&");
 define("ST_SEMI_COLON", ";");
 define("ST_TIMES", "*");
 if (!defined("T_YIELD")) {
-	define("T_YIELD", "*");
+	define("T_YIELD", "yield");
+}
+if (!defined("T_FINALLY")) {
+	define("T_FINALLY", "finally");
 }
 final class AddMissingCurlyBraces extends FormatterPass {
 	public function format($source) {
