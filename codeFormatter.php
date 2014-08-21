@@ -604,12 +604,12 @@ final class LeftAlignComment extends FormatterPass {
 					if ($prev_text === self::NON_INDENTABLE_COMMENT) {
 						$lines = explode($this->new_line, $text);
 						$lines = array_map(function ($v) {
-								$v = ltrim($v);
-								if ('*' === substr($v, 0, 1)) {
-									$v = ' '.$v;
-								}
-								return $v;
-							}, $lines);
+							$v = ltrim($v);
+							if ('*' === substr($v, 0, 1)) {
+								$v = ' '.$v;
+							}
+							return $v;
+						}, $lines);
 						$this->append_code(implode($this->new_line, $lines), false);
 						break;
 					}
@@ -755,12 +755,12 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 					}
 					$lines = explode($this->new_line, $text);
 					$lines = array_map(function ($v) {
-							$v = ltrim($v);
-							if ('*' === substr($v, 0, 1)) {
-								$v = ' '.$v;
-							}
-							return $v;
-						}, $lines);
+						$v = ltrim($v);
+						if ('*' === substr($v, 0, 1)) {
+							$v = ' '.$v;
+						}
+						return $v;
+					}, $lines);
 					$this->append_code(implode($this->new_line, $lines), false);
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
@@ -871,9 +871,9 @@ final class OrderUseClauses extends FormatterPass {
 		$unused_import = array_keys(
 			array_filter(
 				$alias_count, function ($v) {
-					return 0 === $v;
-				}
-			)
+				return 0 === $v;
+			}
+		)
 		);
 		foreach ($unused_import as $v) {
 			$return = str_ireplace($alias_list[$v].$this->new_line, null, $return);
@@ -932,9 +932,9 @@ final class Reindent extends FormatterPass {
 		return $this->code;
 	}
 	private function indent($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		$found_stack     = [];
+		$this->tkns  = token_get_all($source);
+		$this->code  = '';
+		$found_stack = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
@@ -1428,7 +1428,7 @@ final class ResizeSpaces extends FormatterPass {
 				case T_TRY:
 				case ST_COMMA:
 				case T_CLONE:
-					$this->append_code($text.$this->get_space(), false);
+					$this->append_code($text.$this->get_space(!$this->is_token(ST_SEMI_COLON)), false);
 					break;
 				case T_EXTENDS:
 				case T_IMPLEMENTS:
@@ -1962,7 +1962,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					}
 					break;
 				case T_STATIC:
-					if (!$this->is_token(array(T_VARIABLE))) {
+					if (!$this->is_token(array(T_VARIABLE)) && !$this->is_token(array(T_NEW), true)) {
 						$static           = $text;
 						$skip_whitespaces = true;
 					} else {
