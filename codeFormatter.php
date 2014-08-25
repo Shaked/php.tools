@@ -1469,6 +1469,13 @@ final class ResizeSpaces extends FormatterPass {
 				case T_CATCH:
 					$this->append_code($this->get_space().$text.$this->get_space(), false);
 					break;
+				case ST_REFERENCE:
+					if ($this->is_token(array(T_VARIABLE))) {
+						$this->append_code($this->get_space().$text.$this->get_space(), false);
+					} else {
+						$this->append_code($text, false);
+					}
+					break;
 				case T_ELSEIF:
 					if (!$this->is_token(ST_CURLY_CLOSE, true)) {
 						$this->append_code($text.$this->get_space(), false);
@@ -1835,8 +1842,8 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 							list(, $text) = $this->inspect_token();
 							if (1 === substr_count($text, $this->new_line)) {
 								$this->append_code($this->new_line, false);
-								break;
 							}
+							break;
 						} else {
 							$this->append_code($text, false);
 						}
@@ -2066,19 +2073,26 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 }
 
 class PsrDecorator {
-	public static function decorate(CodeFormatter $fmt) {
+	public static function PSR1(CodeFormatter $fmt) {
 		$fmt->addPass(new PSR1OpenTags());
 		$fmt->addPass(new PSR1BOMMark());
 		$fmt->addPass(new PSR1ClassNames());
 		$fmt->addPass(new PSR1ClassConstants());
 		$fmt->addPass(new PSR1MethodNames());
+	}
 
+	public static function PSR2(CodeFormatter $fmt) {
 		$fmt->addPass(new PSR2KeywordsLowerCase());
 		$fmt->addPass(new PSR2IndentWithSpace());
 		$fmt->addPass(new PSR2LnAfterNamespace());
 		$fmt->addPass(new PSR2CurlyOpenNextLine());
 		$fmt->addPass(new PSR2ModifierVisibilityStaticOrder());
 		$fmt->addPass(new PSR2SingleEmptyLineAndStripClosingTag());
+	}
+
+	public static function decorate(CodeFormatter $fmt) {
+		self::PSR1($fmt);
+		self::PSR2($fmt);
 	}
 }
 if (!isset($testEnv)) {
@@ -2099,7 +2113,7 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new OrderUseClauses());
 	$fmt->addPass(new EliminateDuplicatedEmptyLines());
 
-	$opts = getopt('o:', ['psr', 'indent_with_space', 'disable_auto_align']);
+	$opts = getopt('o:', ['psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align']);
 	if (!isset($opts['disable_auto_align'])) {
 		$fmt->addPass(new AlignEquals());
 		$fmt->addPass(new AlignDoubleArrow());
@@ -2128,6 +2142,26 @@ if (!isset($testEnv)) {
 			array_filter($argv,
 				function ($v) {
 					return $v !== '--psr';
+				}
+			)
+		);
+	}
+	if (isset($opts['psr1'])) {
+		PsrDecorator::PSR1($fmt);
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return $v !== '--psr1';
+				}
+			)
+		);
+	}
+	if (isset($opts['psr2'])) {
+		PsrDecorator::PSR2($fmt);
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return $v !== '--psr2';
 				}
 			)
 		);
