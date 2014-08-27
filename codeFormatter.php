@@ -1317,6 +1317,129 @@ final class ReindentObjOps extends FormatterPass {
 
 final class ResizeSpaces extends FormatterPass {
 	public function format($source) {
+		$source = $this->basicSpacing($source);
+		$source = $this->airOutSpacing($source);
+
+		return $source;
+	}
+
+	private function airOutSpacing($source) {
+		$new_tokens          = [];
+		$this->tkns          = token_get_all($source);
+		$this->code          = '';
+		$in_ternary_operator = false;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			switch ($id) {
+				case '-':
+					list($prev_id, $prev_text) = $this->inspect_token(-1);
+					list($next_id, $next_text) = $this->inspect_token(+1);
+					if (
+						($prev_id == T_LNUMBER || $prev_id == T_DNUMBER || $prev_id == T_VARIABLE)
+					 	&&
+						($next_id == T_LNUMBER || $next_id == T_DNUMBER || $next_id == T_VARIABLE)
+					) {
+						$this->append_code($this->get_space().$text.$this->get_space(), false);
+					} else {
+						$this->append_code($text, false);
+					}
+					break;
+				case '*':
+					list($prev_id, $prev_text) = $this->inspect_token(-1);
+					list($next_id, $next_text) = $this->inspect_token(+1);
+					if ('*' == $next_text) {
+						$text .= '*';
+						list($index, $token)       = each($this->tkns);
+						$this->ptr                 = $index;
+						list($next_id, $next_text) = $this->inspect_token(+1);
+					}
+					if (
+						T_WHITESPACE == $prev_id &&
+						T_WHITESPACE != $next_id
+					) {
+						$this->append_code($text.$this->get_space(), false);
+					} elseif (
+						T_WHITESPACE != $prev_id &&
+						T_WHITESPACE == $next_id
+					) {
+						$this->append_code($this->get_space().$text, false);
+					} elseif (
+						T_WHITESPACE != $prev_id &&
+						T_WHITESPACE != $next_id
+					) {
+						$this->append_code($this->get_space().$text.$this->get_space(), false);
+					} else {
+						$this->append_code($text, false);
+					}
+					break;
+				case '%':
+				case '+':
+				case '/':
+
+				case ST_QUESTION:
+				case ST_CONCAT:
+					list($prev_id, $prev_text) = $this->inspect_token(-1);
+					list($next_id, $next_text) = $this->inspect_token(+1);
+					if (
+						T_WHITESPACE == $prev_id &&
+						T_WHITESPACE != $next_id
+					) {
+						$this->append_code($text.$this->get_space(), false);
+					} elseif (
+						T_WHITESPACE != $prev_id &&
+						T_WHITESPACE == $next_id
+					) {
+						$this->append_code($this->get_space().$text, false);
+					} elseif (
+						T_WHITESPACE != $prev_id &&
+						T_WHITESPACE != $next_id
+					) {
+						$this->append_code($this->get_space().$text.$this->get_space(), false);
+					} else {
+						$this->append_code($text, false);
+					}
+					if (ST_QUESTION == $id) {
+						$in_ternary_operator = true;
+					}
+					break;
+				case ST_COLON:
+					list($prev_id, $prev_text) = $this->inspect_token(-1);
+					list($next_id, $next_text) = $this->inspect_token(+1);
+					if (
+						$in_ternary_operator &&
+						T_WHITESPACE == $prev_id &&
+						T_WHITESPACE != $next_id
+					) {
+						$this->append_code($text.$this->get_space(), false);
+						$in_ternary_operator = false;
+					} elseif (
+						$in_ternary_operator &&
+						T_WHITESPACE != $prev_id &&
+						T_WHITESPACE == $next_id
+					) {
+						$this->append_code($this->get_space().$text, false);
+						$in_ternary_operator = false;
+					} elseif (
+						$in_ternary_operator &&
+						T_WHITESPACE != $prev_id &&
+						T_WHITESPACE != $next_id
+					) {
+						$this->append_code($this->get_space().$text.$this->get_space(), false);
+						$in_ternary_operator = false;
+					} else {
+						$this->append_code($text, false);
+					}
+					break;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+
+	private function basicSpacing($source) {
 		$new_tokens = [];
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -1411,10 +1534,12 @@ final class ResizeSpaces extends FormatterPass {
 						$this->append_code($this->get_space().$text.$this->get_space());
 						break;
 					}
+				case T_STATIC:
+					$this->append_code($text.$this->get_space(!$this->is_token(ST_SEMI_COLON) && !$this->is_token([T_DOUBLE_COLON])), false);
+					break;
 				case T_PUBLIC:
 				case T_PRIVATE:
 				case T_PROTECTED:
-				case T_STATIC:
 				case T_CLASS:
 				case T_TRAIT:
 				case T_INTERFACE:

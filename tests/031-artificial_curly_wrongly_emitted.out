@@ -12,7 +12,7 @@ Multiline comment
 Comment 2 */
 		if (($cm === 'RCDATA' || $cm ===
 				'CDATA') && $es === false &&
-			$tch >= 3 && charfunc($tch-4, 4) === '<!--') {
+			$tch >= 3 && charfunc($tch - 4, 4) === '<!--') {
 			$es = true;
 		}
 
@@ -79,7 +79,7 @@ Multiline comment
 Comment 10 */
 		$len = strcspn($dt, '<&', $tch);
 		$ch  = substr($dt, $tch, $len);
-		$tch += $len-1;
+		$tch += $len - 1;
 
 		func(array(
 				'type' => 'CHAR',

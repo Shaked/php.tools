@@ -1,13 +1,13 @@
 <?php
 for ($i = 0; $i < 10; $i++):
 	echo $i;
-	echo $i+1;
+	echo $i + 1;
 endfor;
 
 for ($i = 0; $i < 10; $i++):
 	for ($j = 0; $j < 10; $j++) {
 		echo $i;
-		echo $i+1;
+		echo $i + 1;
 		?>content<?php
 	}
 endfor;
@@ -21,7 +21,7 @@ $i = 0;
 while ($i < 10):
 	$i++;
 	echo $i;
-	if ($i%2 == 0) {
+	if ($i % 2 == 0) {
 		echo "even";
 	} else {
 
