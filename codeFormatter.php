@@ -60,6 +60,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
 			switch ($id) {
+				case T_FOREACH:
 				case T_FOR:
 					$this->append_code($text, false);
 					$paren_count = null;
