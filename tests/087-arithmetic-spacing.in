@@ -10,3 +10,7 @@ echo (10**2);
 $b = $a-10;
 $b = $a-$c;
 $b = $a+$c;
+
+time()-$time;
+time()-time();
+$time-time();
