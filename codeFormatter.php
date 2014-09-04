@@ -831,7 +831,7 @@ final class OrderUseClauses extends FormatterPass {
 					$use_stack[] = $use_item;
 					$token       = new SurrogateToken();
 				}
-				if (T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id) {
+				if (T_DOC_COMMENT === $id || T_COMMENT === $id || T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id) {
 					if (sizeof($use_stack) > 0) {
 						$new_tokens[] = $this->new_line;
 					}
