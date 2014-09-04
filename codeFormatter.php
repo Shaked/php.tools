@@ -809,10 +809,14 @@ final class OrderUseClauses extends FormatterPass {
 		$tokens      = token_get_all($source);
 		$new_tokens  = [];
 		$next_tokens = [];
+		$touched_namespace = false;
 		while (list(, $pop_token) = each($tokens)) {
 			$next_tokens[] = $pop_token;
 			while (($token = array_shift($next_tokens))) {
 				list($id, $text) = $this->get_token($token);
+				if (T_NAMESPACE == $id) {
+					$touched_namespace = true;
+				}
 				if (T_USE === $id) {
 					$use_item = $text;
 					while (list(, $token) = each($tokens)) {
@@ -831,7 +835,14 @@ final class OrderUseClauses extends FormatterPass {
 					$use_stack[] = $use_item;
 					$token       = new SurrogateToken();
 				}
-				if (T_DOC_COMMENT === $id || T_COMMENT === $id || T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id) {
+				if (T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id) {
+					if (sizeof($use_stack) > 0) {
+						$new_tokens[] = $this->new_line;
+						$new_tokens[] = $this->new_line;
+					}
+					$new_tokens[] = $token;
+					break 2;
+				} elseif ($touched_namespace && (T_DOC_COMMENT === $id || T_COMMENT === $id)) {
 					if (sizeof($use_stack) > 0) {
 						$new_tokens[] = $this->new_line;
 					}
