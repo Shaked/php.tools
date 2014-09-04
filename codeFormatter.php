@@ -1469,8 +1469,8 @@ final class ResizeSpaces extends FormatterPass {
 			$this->ptr       = $index;
 			switch ($id) {
 				case T_ARRAY:
-					if ($this->is_token(array(T_VARIABLE))) {
-						$this->append_code($text.$this->get_space(), false);
+					if ($this->is_token(array(T_VARIABLE)) || $this->is_token(ST_REFERENCE)) {
+						$this->append_code($text . $this->get_space(), false);
 						break;
 					} elseif ($this->is_token(ST_PARENTHESES_OPEN)) {
 						$this->append_code($text, false);
