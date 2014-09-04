@@ -1992,6 +1992,8 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
 			switch ($id) {
+				case T_INTERFACE:
+				case T_TRAIT:
 				case T_CLASS:
 					$this->append_code($text, false);
 					while (list($index, $token) = each($this->tkns)) {
