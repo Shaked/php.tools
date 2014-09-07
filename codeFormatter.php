@@ -1892,7 +1892,6 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 				case T_ELSE:
 				case T_ELSEIF:
 				case T_EMPTY:
-				case T_ENCAPSED_AND_WHITESPACE:
 				case T_ENDDECLARE:
 				case T_ENDFOR:
 				case T_ENDFOREACH:
