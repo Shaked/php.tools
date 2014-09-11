@@ -1646,6 +1646,11 @@ final class ResizeSpaces extends FormatterPass {
 						$this->append_code($text, false);
 					}
 					break;
+				case ST_REFERENCE:
+					if ($this->is_token(array(T_STRING), true)) {
+						$this->append_code($this->get_space() . $text, false);
+						break;
+					}
 				default:
 					$this->append_code($text, false);
 					break;
