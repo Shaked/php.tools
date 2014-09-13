@@ -959,6 +959,17 @@ final class Reindent extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
 			switch ($id) {
+				case T_CLOSE_TAG:
+					$this->append_code($text, false);
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr       = $index;
+						$this->append_code($text, false);
+						if ($id == T_OPEN_TAG) {
+							break;
+						}
+					}
+					break;
 				case T_START_HEREDOC:
 					$this->append_code(rtrim($text).$this->get_crlf(), false);
 					break;
