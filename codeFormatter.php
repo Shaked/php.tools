@@ -958,6 +958,20 @@ final class Reindent extends FormatterPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
+
+			if (
+				(
+					T_WHITESPACE === $id ||
+					(T_COMMENT === $id && '//' == substr($text, 0, 2))
+				) && substr_count($text, PHP_EOL) > 0
+			) {
+				$bottom_found_stack = end($found_stack);
+				if (isset($bottom_found_stack['implicit']) && $bottom_found_stack['implicit']) {
+					$idx                           = sizeof($found_stack) - 1;
+					$found_stack[$idx]['implicit'] = false;
+					$this->set_indent(+1);
+				}
+			}
 			switch ($id) {
 				case T_CLOSE_TAG:
 					$this->append_code($text, false);
@@ -983,26 +997,27 @@ final class Reindent extends FormatterPass {
 				case ST_CURLY_OPEN:
 				case ST_PARENTHESES_OPEN:
 				case ST_BRACKET_OPEN:
-					$this->set_indent(+1);
+					$indent_token = [
+						'id'       => $id,
+						'implicit' => true
+					];
 					$this->append_code($text, false);
-					$found_stack[] = $id;
+					if ($this->has_ln_after()) {
+						$indent_token['implicit'] = false;
+						$this->set_indent(+1);
+					}
+					$found_stack[] = $indent_token;
 					break;
 				case ST_CURLY_CLOSE:
 				case ST_PARENTHESES_CLOSE:
 				case ST_BRACKET_CLOSE:
 					$popped_id = array_pop($found_stack);
-					if (T_FUNCTION == $popped_id) {
-						array_pop($found_stack);
-					} else {
+					if (false === $popped_id['implicit']) {
 						$this->set_indent(-1);
 					}
 					$this->append_code($text, false);
 					break;
-				case T_FUNCTION:
-					if (($this->is_token(ST_PARENTHESES_OPEN, true) || $this->is_token(ST_COMMA, true)) && !$this->has_ln_before()) {
-						$found_stack[] = $id;
-						$this->set_indent(-1);
-					}
+
 				default:
 					if (substr_count($text, $this->new_line) > 0 && !$this->is_token(ST_CURLY_CLOSE) && !$this->is_token(ST_PARENTHESES_CLOSE) && !$this->is_token(ST_BRACKET_CLOSE)) {
 						$text = str_replace($this->new_line, $this->new_line.$this->get_indent(), $text);
