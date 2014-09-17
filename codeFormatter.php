@@ -644,20 +644,33 @@ final class LeftAlignComment extends FormatterPass {
 
 final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 	public function format($source) {
-		$this->tkns          = token_get_all($source);
-		$this->code          = '';
-		$in_do_while_context = 0;
+		$this->tkns        = token_get_all($source);
+		$this->code        = '';
+		$in_do_while_stack = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
 			switch ($id) {
 				case T_DO:
-					$in_do_while_context++;
+
 					$this->append_code($text, false);
+					$in_do_while_stack[] = 'DO';
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr       = $index;
+						$this->append_code($text, false);
+						if (ST_CURLY_OPEN === $id) {
+							break;
+						}
+					}
 					break;
 				case T_WHILE:
-					if ($in_do_while_context > 0 && $this->is_token(ST_CURLY_CLOSE, true)) {
-						$in_do_while_context--;
+					list($pt_id, $pt_text) = $this->get_token($this->prev_token());
+					if ($pt_id != ST_CURLY_CLOSE) {
+						$in_do_while_stack[] = 'WHILE';
+					}
+					$last_touched = end($in_do_while_stack);
+					if ('DO' == $last_touched && $this->is_token(ST_CURLY_CLOSE, true)) {
 						$this->append_code($text);
 						break;
 					}
