@@ -1940,6 +1940,8 @@ final class PSR1MethodNames extends FormatterPass {
 						$found_method = false;
 						break;
 					}
+				case ST_PARENTHESES_OPEN:
+					$found_method = false;
 				default:
 					$this->append_code($text, false);
 					break;
