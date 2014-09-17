@@ -569,17 +569,17 @@ abstract class FormatterPass {
 		$id              = null;
 		$text            = null;
 		list($id, $text) = $this->inspect_token();
-		return T_WHITESPACE === $id && substr_count($text, PHP_EOL) > 0;
+		return T_WHITESPACE === $id && substr_count($text, $this->new_line) > 0;
 	}
 	protected function has_ln_before() {
 		$id              = null;
 		$text            = null;
 		list($id, $text) = $this->inspect_token(-1);
-		return T_WHITESPACE === $id && substr_count($text, PHP_EOL) > 0;
+		return T_WHITESPACE === $id && substr_count($text, $this->new_line) > 0;
 	}
 	protected function has_ln_prev_token() {
 		list($id, $text) = $this->get_token($this->prev_token());
-		return substr_count($text, PHP_EOL) > 0;
+		return substr_count($text, $this->new_line) > 0;
 	}
 	protected function substr_count_trailing($haystack, $needle) {
 		$cnt = 0;
@@ -1041,7 +1041,7 @@ final class Reindent extends FormatterPass {
 				(
 					T_WHITESPACE === $id ||
 					(T_COMMENT === $id && '//' == substr($text, 0, 2))
-				) && substr_count($text, PHP_EOL) > 0
+				) && substr_count($text, $this->new_line) > 0
 			) {
 				$bottom_found_stack = end($found_stack);
 				if (isset($bottom_found_stack['implicit']) && $bottom_found_stack['implicit']) {
