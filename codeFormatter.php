@@ -660,11 +660,11 @@ final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 						if (
 							ST_CURLY_OPEN == $id ||
 							ST_COLON == $id ||
-							(ST_SEMI_COLON == $id && (T_COMMENT == $pt_id || T_DOC_COMMENT == $pt_id))
+							(ST_SEMI_COLON == $id && (ST_CURLY_OPEN == $pt_id || T_COMMENT == $pt_id || T_DOC_COMMENT == $pt_id))
 						) {
 							$this->append_code($str, false);
 							break;
-						} elseif (ST_SEMI_COLON == $id && !(T_COMMENT == $pt_id || T_DOC_COMMENT == $pt_id)) {
+						} elseif (ST_SEMI_COLON == $id && !(ST_CURLY_OPEN == $pt_id || T_COMMENT == $pt_id || T_DOC_COMMENT == $pt_id)) {
 							$this->append_code($str);
 							break;
 						}
