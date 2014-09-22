@@ -465,7 +465,7 @@ final class ExtraCommaInArray extends FormatterPass {
 				default:
 					if (isset($context_stack[0]) && T_ARRAY === $context_stack[0] && $this->is_token(ST_PARENTHESES_CLOSE)) {
 						array_shift($context_stack);
-						if (ST_COMMA === $id || T_COMMENT === $id || T_DOC_COMMENT === $id || !$this->has_ln_after()) {
+						if (ST_COMMA === $id || T_END_HEREDOC === $id || T_COMMENT === $id || T_DOC_COMMENT === $id || !$this->has_ln_after()) {
 							$this->append_code($text, false);
 						} else {
 							$this->append_code($text . ',', false);
