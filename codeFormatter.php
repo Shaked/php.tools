@@ -2415,7 +2415,7 @@ class PsrDecorator {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('o:', ['refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align']);
+	$opts = getopt('o:', ['refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['refactor']) && !isset($opts['to'])) {
 		fwrite(STDERR, "Refactor must have --refactor (from) and --to (to) parameters" . PHP_EOL);
 		exit(255);
@@ -2486,6 +2486,16 @@ if (!isset($testEnv)) {
 			array_filter($argv,
 				function ($v) {
 					return $v !== '--psr2';
+				}
+			)
+		);
+	}
+	if (isset($opts['visibility_order'])) {
+		$fmt->addPass(new PSR2ModifierVisibilityStaticOrder());
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return $v !== '--visibility_order';
 				}
 			)
 		);
