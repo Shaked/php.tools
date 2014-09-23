@@ -2293,7 +2293,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					}
 					break;
 				case T_STATIC:
-					if (!$this->is_token(array(T_VARIABLE)) && !$this->is_token(array(T_NEW), true)) {
+					if (!$this->is_token(array(T_VARIABLE, T_DOUBLE_COLON)) && !$this->is_token(array(T_NEW), true)) {
 						$static           = $text;
 						$skip_whitespaces = true;
 					} else {
