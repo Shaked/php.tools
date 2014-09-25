@@ -5,7 +5,7 @@ namespace Fdw\Core\Libraries\Helpage\Traits;
 trait SingletonTrait
 {
 
-    static $singleton = null;
+    protected static $singleton = null;
 
     function getInstance()
     {

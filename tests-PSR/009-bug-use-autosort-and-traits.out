@@ -6,7 +6,7 @@ use Fdw\Core\Models\WarehouseItem;
 
 trait WarehouseTrait
 {
-    static $cache = [];
+    protected static $cache = [];
 
     function assignWarehouses($warehouses, $update = false)
     {
