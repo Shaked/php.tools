@@ -2323,11 +2323,18 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 				case T_FUNCTION:
 					if (!$this->is_token([T_DOUBLE_ARROW, T_RETURN], true) && !$this->is_token(ST_EQUAL, true) && !$this->is_token(ST_PARENTHESES_OPEN, true) && !$this->is_token(ST_COMMA, true)) {
 						$this->append_code($text, false);
+						$touched_ln = false;
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr       = $index;
-							if (ST_CURLY_OPEN === $id) {
+							if (T_WHITESPACE == $id && substr_count($text, $this->new_line) > 0) {
+								$touched_ln = true;
+							}
+							if (ST_CURLY_OPEN === $id && !$touched_ln) {
 								$this->append_code($this->get_crlf_indent(), false);
+								prev($this->tkns);
+								break;
+							} elseif (ST_CURLY_OPEN === $id) {
 								prev($this->tkns);
 								break;
 							} else {
