@@ -594,6 +594,16 @@ abstract class FormatterPass {
 		}
 		return $cnt;
 	}
+	protected function printUntilTheEndOfString() {
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			$this->append_code($text, false);
+			if (ST_QUOTE == $id) {
+				break;
+			}
+		}
+	}
 }
 final class LeftAlignComment extends FormatterPass {
 	const NON_INDENTABLE_COMMENT = "/*\x2 COMMENT \x3*/";
@@ -1200,6 +1210,10 @@ final class ReindentColonBlocks extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
 			switch ($id) {
+				case ST_QUOTE:
+					$this->append_code($text, false);
+					$this->printUntilTheEndOfString();
+					break;
 				case T_SWITCH:
 					$switch_level++;
 					$switch_curly_count[$switch_level] = 0;
@@ -2304,6 +2318,10 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
 			switch ($id) {
+				case ST_QUOTE:
+					$this->append_code($text, false);
+					$this->printUntilTheEndOfString();
+					break;
 				case T_INTERFACE:
 				case T_TRAIT:
 				case T_CLASS:
@@ -2377,6 +2395,10 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
 			switch ($id) {
+				case ST_QUOTE:
+					$this->append_code($text, false);
+					$this->printUntilTheEndOfString();
+					break;
 				case T_CLASS:
 					$found[] = T_CLASS;
 					$this->append_code($text, false);
