@@ -2566,7 +2566,30 @@ class PsrDecorator {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('o:', ['setters_and_getters::', 'refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('ho:', ['help', 'setters_and_getters::', 'refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	if (isset($opts['h']) || isset($opts['help'])) {
+		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--refactor=from --to=to] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
+		$options = [
+			'--disable_auto_align'       => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
+			'--indent_with_space'        => 'use spaces instead of tabs for indentation',
+			'--psr'                      => 'activate PSR1 and PSR2 styles',
+			'--psr1'                     => 'activate PSR1 style',
+			'--psr2'                     => 'activate PSR2 style',
+			'--refactor=from, --to=to'   => 'Search for "from" and replace with "to" - context aware search and replace',
+			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
+			'--visibility_order'         => 'fixes visibiliy order for method in classes. PSR-2 4.2',
+			'-h, --help'                 => 'this help message',
+			'-o=file'                    => 'output the formatted code to "file"',
+		];
+		$maxLen = max(array_map(function ($v) {
+			return strlen($v);
+		}, array_keys($options)));
+		foreach ($options as $k => $v) {
+			echo '  ', str_pad($k, $maxLen), '  ', $v, PHP_EOL;
+		}
+		echo PHP_EOL, 'If <target> is blank, it reads from stdin', PHP_EOL;
+		die();
+	}
 	if (isset($opts['refactor']) && !isset($opts['to'])) {
 		fwrite(STDERR, "Refactor must have --refactor (from) and --to (to) parameters" . PHP_EOL);
 		exit(255);
@@ -2664,9 +2687,6 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new LeftAlignComment());
 	$fmt->addPass(new RTrim());
 
-	if (!isset($argv[1])) {
-		exit();
-	}
 	if (isset($opts['refactor']) && isset($opts['to'])) {
 		$argv = array_values(
 			array_filter($argv,
@@ -2685,9 +2705,9 @@ if (!isset($testEnv)) {
 		unset($argv[2]);
 		$argv = array_values($argv);
 		file_put_contents($opts['o'], $fmt->formatCode(file_get_contents($argv[1])));
-	} elseif (is_file($argv[1])) {
+	} elseif (isset($argv[1]) && is_file($argv[1])) {
 		echo $fmt->formatCode(file_get_contents($argv[1]));
-	} else {
+	} elseif (isset($argv[1]) && is_dir($argv[1])) {
 		$dir   = new RecursiveDirectoryIterator($argv[1]);
 		$it    = new RecursiveIteratorIterator($dir);
 		$files = new RegexIterator($it, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
@@ -2699,5 +2719,7 @@ if (!isset($testEnv)) {
 			rename($file . '-tmp', $file);
 			echo PHP_EOL;
 		}
+	} else {
+		echo $fmt->formatCode(file_get_contents('php://stdin'));
 	}
 }
