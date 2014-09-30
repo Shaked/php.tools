@@ -51,12 +51,17 @@ include 'PsrDecorator.php';
 
 final class CodeFormatter {
 	private $passes = [];
-
+	private $debug  = false;
+	public function __construct($debug = false) {
+		$this->debug = (bool) $debug;
+	}
 	public function addPass(FormatterPass $pass) {
 		$this->passes[] = $pass;
 	}
 
 	public function formatCode($source = '') {
+		$start   = microtime(true);
+		$timings = [];
 		gc_enable();
 		$passes = array_map(
 			function ($pass) {
@@ -65,15 +70,37 @@ final class CodeFormatter {
 			$this->passes
 		);
 		while (($pass = array_shift($passes))) {
-			$source = $pass->format($source);
+			$source                    = $pass->format($source);
+			$timings[get_class($pass)] = microtime(true);
 			gc_collect_cycles();
 		}
 		gc_disable();
+		$delta   = $start;
+		$total   = 0;
+		$nameLen = 0;
+		foreach ($timings as $pass => $timestamp) {
+			$total += $timestamp - $delta;
+			$delta   = $timestamp;
+			$nameLen = max(strlen($pass), $nameLen);
+		}
+		$delta = $start;
+		foreach ($timings as $pass => $timestamp) {
+			$this->debug && fwrite(STDERR, str_pad($pass, $nameLen + 1) . ' ' . str_pad(round((($timestamp - $delta) / $total * 100), 2), 5, ' ', STR_PAD_LEFT) . '% ' .
+				str_pad(
+					str_repeat('|',
+						round((($timestamp - $delta) / $total * 50), 0)
+					)
+					, 50, ' ')
+
+				. ' ' . ($timestamp - $delta) . PHP_EOL);
+			$delta = $timestamp;
+		}
+		$this->debug && fwrite(STDERR, 'Total: ' . $total . PHP_EOL);
 		return $source;
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('ho:', ['purge_empty_line', 'help', 'setters_and_getters::', 'refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['timing', 'purge_empty_line', 'help', 'setters_and_getters::', 'refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--refactor=from --to=to] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
@@ -82,12 +109,13 @@ if (!isset($testEnv)) {
 			'--psr'                      => 'activate PSR1 and PSR2 styles',
 			'--psr1'                     => 'activate PSR1 style',
 			'--psr2'                     => 'activate PSR2 style',
+			'--purge_empty_line=policy'  => 'purge empty lines. policies: aggressive (1 line), mild (5 lines)',
 			'--refactor=from, --to=to'   => 'Search for "from" and replace with "to" - context aware search and replace',
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
 			'--visibility_order'         => 'fixes visibiliy order for method in classes. PSR-2 4.2',
-			'--purge_empty_line=policy'  => 'purge empty lines. policies: aggressive (1 line), mild (5 lines)',
 			'-h, --help'                 => 'this help message',
 			'-o=file'                    => 'output the formatted code to "file"',
+			'-v, --timing'               => 'timing',
 		];
 		$maxLen = max(array_map(function ($v) {
 			return strlen($v);
@@ -103,7 +131,19 @@ if (!isset($testEnv)) {
 		exit(255);
 	}
 
-	$fmt = new CodeFormatter();
+	$debug = false;
+	if (isset($opts['v']) || isset($opts['timing'])) {
+		$debug = true;
+		$argv  = array_values(
+			array_filter($argv,
+				function ($v) {
+					return !($v === '-v' || $v === '--timing');
+				}
+			)
+		);
+	}
+
+	$fmt = new CodeFormatter($debug);
 	$fmt->addPass(new TwoCommandsInSameLine());
 	if (isset($opts['setters_and_getters'])) {
 		$argv = array_values(
@@ -242,4 +282,3 @@ if (!isset($testEnv)) {
 		echo $fmt->formatCode(file_get_contents('php://stdin'));
 	}
 }
-
