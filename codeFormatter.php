@@ -2562,7 +2562,7 @@ class PsrDecorator {
 
 final class CodeFormatter {
 	private $passes = [];
-	private $debug  = false;
+	private $debug = false;
 	public function __construct($debug = false) {
 		$this->debug = (bool) $debug;
 	}
@@ -2571,7 +2571,7 @@ final class CodeFormatter {
 	}
 
 	public function formatCode($source = '') {
-		$start   = microtime(true);
+		$start = microtime(true);
 		$timings = [];
 		gc_enable();
 		$passes = array_map(
@@ -2581,29 +2581,37 @@ final class CodeFormatter {
 			$this->passes
 		);
 		while (($pass = array_shift($passes))) {
-			$source                    = $pass->format($source);
+			$source = $pass->format($source);
 			$timings[get_class($pass)] = microtime(true);
 			gc_collect_cycles();
 		}
 		gc_disable();
-		$delta   = $start;
-		$total   = 0;
+		$delta = $start;
+		$total = 0;
 		$nameLen = 0;
 		foreach ($timings as $pass => $timestamp) {
 			$total += $timestamp - $delta;
-			$delta   = $timestamp;
+			$delta = $timestamp;
 			$nameLen = max(strlen($pass), $nameLen);
 		}
 		$delta = $start;
 		foreach ($timings as $pass => $timestamp) {
-			$this->debug && fwrite(STDERR, str_pad($pass, $nameLen + 1) . ' ' . str_pad(round((($timestamp - $delta) / $total * 100), 2), 5, ' ', STR_PAD_LEFT) . '% ' .
+			$this->debug && fwrite(
+				STDERR,
+				str_pad($pass, $nameLen + 1)
+				. ' ' .
+				str_pad(round((($timestamp - $delta) / $total * 100), 2), 5, ' ', STR_PAD_LEFT)
+				. '% ' .
 				str_pad(
 					str_repeat('|',
 						round((($timestamp - $delta) / $total * 50), 0)
 					)
-					, 50, ' ')
-
-				. ' ' . ($timestamp - $delta) . PHP_EOL);
+					, 50, ' '
+				)
+				. ' ' .
+				($timestamp - $delta) .
+				PHP_EOL
+			);
 			$delta = $timestamp;
 		}
 		$this->debug && fwrite(STDERR, 'Total: ' . $total . PHP_EOL);
@@ -2615,18 +2623,18 @@ if (!isset($testEnv)) {
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--refactor=from --to=to] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
-			'--disable_auto_align'       => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
-			'--indent_with_space'        => 'use spaces instead of tabs for indentation',
-			'--psr'                      => 'activate PSR1 and PSR2 styles',
-			'--psr1'                     => 'activate PSR1 style',
-			'--psr2'                     => 'activate PSR2 style',
-			'--purge_empty_line=policy'  => 'purge empty lines. policies: aggressive (1 line), mild (5 lines)',
-			'--refactor=from, --to=to'   => 'Search for "from" and replace with "to" - context aware search and replace',
+			'--disable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
+			'--indent_with_space' => 'use spaces instead of tabs for indentation',
+			'--psr' => 'activate PSR1 and PSR2 styles',
+			'--psr1' => 'activate PSR1 style',
+			'--psr2' => 'activate PSR2 style',
+			'--purge_empty_line=policy' => 'purge empty lines. policies: aggressive (1 line), mild (5 lines)',
+			'--refactor=from, --to=to' => 'Search for "from" and replace with "to" - context aware search and replace',
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
-			'--visibility_order'         => 'fixes visibiliy order for method in classes. PSR-2 4.2',
-			'-h, --help'                 => 'this help message',
-			'-o=file'                    => 'output the formatted code to "file"',
-			'-v, --timing'               => 'timing',
+			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
+			'-h, --help' => 'this help message',
+			'-o=file' => 'output the formatted code to "file"',
+			'-v, --timing' => 'timing',
 		];
 		$maxLen = max(array_map(function ($v) {
 			return strlen($v);
@@ -2645,7 +2653,7 @@ if (!isset($testEnv)) {
 	$debug = false;
 	if (isset($opts['v']) || isset($opts['timing'])) {
 		$debug = true;
-		$argv  = array_values(
+		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
 					return !($v === '-v' || $v === '--timing');
@@ -2778,8 +2786,8 @@ if (!isset($testEnv)) {
 	} elseif (isset($argv[1]) && is_file($argv[1])) {
 		echo $fmt->formatCode(file_get_contents($argv[1]));
 	} elseif (isset($argv[1]) && is_dir($argv[1])) {
-		$dir   = new RecursiveDirectoryIterator($argv[1]);
-		$it    = new RecursiveIteratorIterator($dir);
+		$dir = new RecursiveDirectoryIterator($argv[1]);
+		$it = new RecursiveIteratorIterator($dir);
 		$files = new RegexIterator($it, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
 		foreach ($files as $file) {
 			$file = $file[0];
