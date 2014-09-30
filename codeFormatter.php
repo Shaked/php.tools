@@ -2641,7 +2641,7 @@ if (!isset($testEnv)) {
 		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
-					return $v !== '--purge_empty_line';
+					return substr($v, 0, strlen('--purge_empty_line')) !== '--purge_empty_line';
 				}
 			)
 		);
