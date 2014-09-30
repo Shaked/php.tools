@@ -11,11 +11,11 @@
 //3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 //
 //THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+include 'constants.php';
 include 'FormatterPass.php';
 include 'AddMissingCurlyBraces.php';
 include 'AlignDoubleArrow.php';
 include 'AlignEquals.php';
-include 'constants.php';
 include 'EliminateDuplicatedEmptyLines.php';
 include 'ExtraCommaInArray.php';
 include 'LeftAlignComment.php';
@@ -24,6 +24,18 @@ include 'MergeDoubleArrowAndArray.php';
 include 'MergeParenCloseWithCurlyOpen.php';
 include 'NormalizeLnAndLtrimLines.php';
 include 'OrderUseClauses.php';
+include 'Refactor.php';
+include 'Reindent.php';
+include 'ReindentColonBlocks.php';
+include 'ReindentIfColonBlocks.php';
+include 'ReindentLoopColonBlocks.php';
+include 'ReindentObjOps.php';
+include 'ResizeSpaces.php';
+include 'RTrim.php';
+include 'SettersAndGettersPass.php';
+include 'SurrogateToken.php';
+include 'TwoCommandsInSameLine.php';
+//PSR standards
 include 'PSR1BOMMark.php';
 include 'PSR1ClassConstants.php';
 include 'PSR1ClassNames.php';
@@ -36,17 +48,6 @@ include 'PSR2LnAfterNamespace.php';
 include 'PSR2ModifierVisibilityStaticOrder.php';
 include 'PSR2SingleEmptyLineAndStripClosingTag.php';
 include 'PsrDecorator.php';
-include 'Refactor.php';
-include 'Reindent.php';
-include 'ReindentColonBlocks.php';
-include 'ReindentIfColonBlocks.php';
-include 'ReindentLoopColonBlocks.php';
-include 'ReindentObjOps.php';
-include 'ResizeSpaces.php';
-include 'RTrim.php';
-include 'SettersAndGettersPass.php';
-include 'SurrogateToken.php';
-include 'TwoCommandsInSameLine.php';
 
 final class CodeFormatter {
 	private $passes = [];

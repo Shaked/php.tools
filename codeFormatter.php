@@ -11,6 +11,51 @@
 //3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 //
 //THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//Copyright (c) 2014, Carlos C
+//All rights reserved.
+//
+//Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+//
+//1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+//
+//2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+//
+//3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+//
+//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+define("ST_AT", "@");
+define("ST_BRACKET_CLOSE", "]");
+define("ST_BRACKET_OPEN", "[");
+define("ST_COLON", ":");
+define("ST_COMMA", ",");
+define("ST_CONCAT", ".");
+define("ST_CURLY_CLOSE", "}");
+define("ST_CURLY_OPEN", "{");
+define("ST_DIVIDE", "/");
+define("ST_DOLLAR", "$");
+define("ST_EQUAL", "=");
+define("ST_EXCLAMATION", "!");
+define("ST_IS_GREATER", ">");
+define("ST_IS_SMALLER", "<");
+define("ST_MINUS", "-");
+define("ST_MODULUS", "%");
+define("ST_PARENTHESES_CLOSE", ")");
+define("ST_PARENTHESES_OPEN", "(");
+define("ST_PLUS", "+");
+define("ST_QUESTION", "?");
+define("ST_QUOTE", '"');
+define("ST_REFERENCE", "&");
+define("ST_SEMI_COLON", ";");
+define("ST_TIMES", "*");
+if (!defined("T_POW")) {
+	define("T_POW", "**");
+}
+if (!defined("T_YIELD")) {
+	define("T_YIELD", "yield");
+}
+if (!defined("T_FINALLY")) {
+	define("T_FINALLY", "finally");
+};
 abstract class FormatterPass {
 	protected $indent_size = 1;
 	protected $indent_char = "\t";
@@ -445,51 +490,6 @@ final class AlignEquals extends FormatterPass {
 
 		return $this->code;
 	}
-};
-//Copyright (c) 2014, Carlos C
-//All rights reserved.
-//
-//Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-//
-//1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-//
-//2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-//
-//3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-//
-//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-define("ST_AT", "@");
-define("ST_BRACKET_CLOSE", "]");
-define("ST_BRACKET_OPEN", "[");
-define("ST_COLON", ":");
-define("ST_COMMA", ",");
-define("ST_CONCAT", ".");
-define("ST_CURLY_CLOSE", "}");
-define("ST_CURLY_OPEN", "{");
-define("ST_DIVIDE", "/");
-define("ST_DOLLAR", "$");
-define("ST_EQUAL", "=");
-define("ST_EXCLAMATION", "!");
-define("ST_IS_GREATER", ">");
-define("ST_IS_SMALLER", "<");
-define("ST_MINUS", "-");
-define("ST_MODULUS", "%");
-define("ST_PARENTHESES_CLOSE", ")");
-define("ST_PARENTHESES_OPEN", "(");
-define("ST_PLUS", "+");
-define("ST_QUESTION", "?");
-define("ST_QUOTE", '"');
-define("ST_REFERENCE", "&");
-define("ST_SEMI_COLON", ";");
-define("ST_TIMES", "*");
-if (!defined("T_POW")) {
-	define("T_POW", "**");
-}
-if (!defined("T_YIELD")) {
-	define("T_YIELD", "yield");
-}
-if (!defined("T_FINALLY")) {
-	define("T_FINALLY", "finally");
 };
 final class EliminateDuplicatedEmptyLines extends FormatterPass {
 	const ALIGNABLE_EQUAL  = "\x2 EQUAL%d \x3";
@@ -994,542 +994,6 @@ final class OrderUseClauses extends FormatterPass {
 	}
 }
 ;
-final class PSR1BOMMark extends FormatterPass {
-	public function format($source) {
-		$bom = "\xef\xbb\xbf";
-		if ($bom === substr($source, 0, 3)) {
-			return substr($source, 3);
-		}
-		return $source;
-	}
-}
-;
-final class PSR1ClassConstants extends FormatterPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		$uc_const   = false;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
-			switch ($id) {
-				case T_CONST:
-					$uc_const = true;
-					$this->append_code($text, false);
-					break;
-				case T_STRING:
-					if ($uc_const) {
-						$text     = strtoupper($text);
-						$uc_const = false;
-					}
-					$this->append_code($text, false);
-					break;
-				default:
-					$this->append_code($text, false);
-					break;
-			}
-		}
-		return $this->code;
-	}
-};
-final class PSR1ClassNames extends FormatterPass {
-	public function format($source) {
-		$this->tkns  = token_get_all($source);
-		$this->code  = '';
-		$found_class = false;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
-			switch ($id) {
-				case T_CLASS:
-					$found_class = true;
-					$this->append_code($text, false);
-					break;
-				case T_STRING:
-					if ($found_class) {
-						$count = 0;
-						$tmp   = ucwords(str_replace(array('-', '_'), ' ', strtolower($text), $count));
-						if ($count > 0) {
-							$text = str_replace(' ', '', $tmp);
-						}
-						$this->append_code($text, false);
-
-						$found_class = false;
-						break;
-					}
-				default:
-					$this->append_code($text, false);
-					break;
-			}
-		}
-		return $this->code;
-	}
-}
-;
-final class PSR1MethodNames extends FormatterPass {
-	public function format($source) {
-		$this->tkns   = token_get_all($source);
-		$this->code   = '';
-		$found_method = false;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
-			switch ($id) {
-				case T_FUNCTION:
-					$found_method = true;
-					$this->append_code($text, false);
-					break;
-				case T_STRING:
-					if ($found_method) {
-						$count = 0;
-						$tmp   = ucwords(str_replace(array('-', '_'), ' ', strtolower($text), $count));
-						if ($count > 0 && '' !== trim($tmp) && '_' !== substr($text, 0, 1)) {
-							$text = lcfirst(str_replace(' ', '', $tmp));
-						}
-						$this->append_code($text, false);
-
-						$found_method = false;
-						break;
-					}
-				case ST_PARENTHESES_OPEN:
-					$found_method = false;
-				default:
-					$this->append_code($text, false);
-					break;
-			}
-		}
-		return $this->code;
-	}
-}
-;
-final class PSR1OpenTags extends FormatterPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
-			switch ($id) {
-				case T_OPEN_TAG:
-					if ('<?php' !== $text) {
-						$this->append_code('<?php' . $this->new_line, false);
-						break;
-					}
-				default:
-					$this->append_code($text, false);
-					break;
-			}
-		}
-		return $this->code;
-	}
-}
-;
-final class PSR2CurlyOpenNextLine extends FormatterPass {
-	public function format($source) {
-		$this->indent_char = '    ';
-		$this->tkns        = token_get_all($source);
-		$this->code        = '';
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
-			switch ($id) {
-				case ST_QUOTE:
-					$this->append_code($text, false);
-					$this->printUntilTheEndOfString();
-					break;
-				case T_INTERFACE:
-				case T_TRAIT:
-				case T_CLASS:
-					$this->append_code($text, false);
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr       = $index;
-						if (ST_CURLY_OPEN === $id) {
-							$this->append_code($this->get_crlf_indent(), false);
-							prev($this->tkns);
-							break;
-						} else {
-							$this->append_code($text, false);
-						}
-					}
-					break;
-				case T_FUNCTION:
-					if (!$this->is_token([T_DOUBLE_ARROW, T_RETURN], true) && !$this->is_token(ST_EQUAL, true) && !$this->is_token(ST_PARENTHESES_OPEN, true) && !$this->is_token(ST_COMMA, true)) {
-						$this->append_code($text, false);
-						$touched_ln = false;
-						while (list($index, $token) = each($this->tkns)) {
-							list($id, $text) = $this->get_token($token);
-							$this->ptr       = $index;
-							if (T_WHITESPACE == $id && substr_count($text, $this->new_line) > 0) {
-								$touched_ln = true;
-							}
-							if (ST_CURLY_OPEN === $id && !$touched_ln) {
-								$this->append_code($this->get_crlf_indent(), false);
-								prev($this->tkns);
-								break;
-							} elseif (ST_CURLY_OPEN === $id) {
-								prev($this->tkns);
-								break;
-							} else {
-								$this->append_code($text, false);
-							}
-						}
-						break;
-					} else {
-						$this->append_code($text, false);
-					}
-					break;
-				case ST_CURLY_OPEN:
-					$this->append_code($text, false);
-					$this->set_indent(+1);
-					break;
-				case ST_CURLY_CLOSE:
-					$this->set_indent(-1);
-					$this->append_code($text, false);
-					break;
-				default:
-					$this->append_code($text, false);
-					break;
-			}
-		}
-		return $this->code;
-	}
-};
-final class PSR2IndentWithSpace extends FormatterPass {
-	private $indent_spaces = '    ';
-
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
-			switch ($id) {
-				case T_COMMENT:
-				case T_DOC_COMMENT:
-				case T_WHITESPACE:
-					$this->append_code(str_replace($this->indent_char, $this->indent_spaces, $text), false);
-					break;
-				default:
-					$this->append_code($text, false);
-					break;
-			}
-		}
-		return $this->code;
-	}
-};
-final class PSR2KeywordsLowerCase extends FormatterPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
-			switch ($id) {
-				case T_ABSTRACT:
-				case T_ARRAY:
-				case T_ARRAY_CAST:
-				case T_AS:
-				case T_BOOL_CAST:
-				case T_BREAK:
-				case T_CASE:
-				case T_CATCH:
-				case T_CLASS:
-				case T_CLONE:
-				case T_CONST:
-				case T_CONTINUE:
-				case T_DECLARE:
-				case T_DEFAULT:
-				case T_DO:
-				case T_DOUBLE_CAST:
-				case T_ECHO:
-				case T_ELSE:
-				case T_ELSEIF:
-				case T_EMPTY:
-				case T_ENDDECLARE:
-				case T_ENDFOR:
-				case T_ENDFOREACH:
-				case T_ENDIF:
-				case T_ENDSWITCH:
-				case T_ENDWHILE:
-				case T_EVAL:
-				case T_EXIT:
-				case T_EXTENDS:
-				case T_FINAL:
-				case T_FINALLY:
-				case T_FOR:
-				case T_FOREACH:
-				case T_FUNCTION:
-				case T_GLOBAL:
-				case T_GOTO:
-				case T_IF:
-				case T_IMPLEMENTS:
-				case T_INCLUDE:
-				case T_INCLUDE_ONCE:
-				case T_INSTANCEOF:
-				case T_INSTEADOF:
-				case T_INT_CAST:
-				case T_INTERFACE:
-				case T_ISSET:
-				case T_LIST:
-				case T_LOGICAL_AND:
-				case T_LOGICAL_OR:
-				case T_LOGICAL_XOR:
-				case T_NAMESPACE:
-				case T_NEW:
-				case T_OBJECT_CAST:
-				case T_PRINT:
-				case T_PRIVATE:
-				case T_PUBLIC:
-				case T_PROTECTED:
-				case T_REQUIRE:
-				case T_REQUIRE_ONCE:
-				case T_RETURN:
-				case T_STATIC:
-				case T_STRING_CAST:
-				case T_SWITCH:
-				case T_THROW:
-				case T_TRAIT:
-				case T_TRY:
-				case T_UNSET:
-				case T_UNSET_CAST:
-				case T_USE:
-				case T_VAR:
-				case T_WHILE:
-				case T_XOR_EQUAL:
-				case T_YIELD:
-					$this->append_code(strtolower($text), false);
-					break;
-				default:
-					$lc_text = strtolower($text);
-					if ('true' === $lc_text || 'false' === $lc_text || 'null' === $lc_text) {
-						$text = $lc_text;
-					}
-					$this->append_code($text, false);
-					break;
-			}
-		}
-		return $this->code;
-	}
-};
-final class PSR2LnAfterNamespace extends FormatterPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
-			switch ($id) {
-				case T_NAMESPACE:
-					$this->append_code($text, false);
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr       = $index;
-						if (ST_SEMI_COLON === $id) {
-							$this->append_code($text, false);
-							list(, $text) = $this->inspect_token();
-							if (1 === substr_count($text, $this->new_line)) {
-								$this->append_code($this->new_line, false);
-							}
-							break;
-						} else {
-							$this->append_code($text, false);
-						}
-					}
-					break;
-				default:
-					$this->append_code($text, false);
-					break;
-			}
-		}
-		return $this->code;
-	}
-};
-final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-
-		$found             = [];
-		$visibility        = null;
-		$final_or_abstract = null;
-		$static            = null;
-		$skip_whitespaces  = false;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
-			switch ($id) {
-				case ST_QUOTE:
-					$this->append_code($text, false);
-					$this->printUntilTheEndOfString();
-					break;
-				case T_CLASS:
-					$found[] = T_CLASS;
-					$this->append_code($text, false);
-					break;
-				case ST_CURLY_OPEN:
-				case ST_PARENTHESES_OPEN:
-					$found[] = $text;
-					$this->append_code($text, false);
-					break;
-				case ST_CURLY_CLOSE:
-				case ST_PARENTHESES_CLOSE:
-					array_pop($found);
-					if (1 === sizeof($found)) {
-						array_pop($found);
-					}
-					$this->append_code($text, false);
-					break;
-				case T_WHITESPACE:
-					if (!$skip_whitespaces) {
-						$this->append_code($text, false);
-					}
-					break;
-				case T_PUBLIC:
-				case T_PRIVATE:
-				case T_PROTECTED:
-					if (!$this->is_token(array(T_VARIABLE))) {
-						$visibility       = $text;
-						$skip_whitespaces = true;
-					} else {
-						$this->append_code($text, false);
-					}
-					break;
-				case T_FINAL:
-				case T_ABSTRACT:
-					if (!$this->is_token(array(T_CLASS))) {
-						$final_or_abstract = $text;
-						$skip_whitespaces  = true;
-					} else {
-						$this->append_code($text, false);
-					}
-					break;
-				case T_STATIC:
-					if (!is_null($visibility)) {
-						$static           = $text;
-						$skip_whitespaces = true;
-					} elseif (!$this->is_token(array(T_VARIABLE, T_DOUBLE_COLON)) && !$this->is_token(array(T_NEW), true)) {
-						$static           = $text;
-						$skip_whitespaces = true;
-					} else {
-						$this->append_code($text, false);
-					}
-					break;
-				case T_VARIABLE:
-					if (
-						null !== $visibility ||
-						null !== $final_or_abstract ||
-						null !== $static
-					) {
-						null !== $final_or_abstract && $this->append_code($final_or_abstract . $this->get_space(), false);
-						null !== $visibility && $this->append_code($visibility . $this->get_space(), false);
-						null !== $static && $this->append_code($static . $this->get_space(), false);
-						$final_or_abstract = null;
-						$visibility        = null;
-						$static            = null;
-						$skip_whitespaces  = false;
-					}
-					$this->append_code($text, false);
-					break;
-				case T_FUNCTION:
-					if (isset($found[0]) && T_CLASS === $found[0] && null !== $final_or_abstract) {
-						$this->append_code($final_or_abstract . $this->get_space(), false);
-					}
-					if (isset($found[0]) && T_CLASS === $found[0] && null !== $visibility) {
-						$this->append_code($visibility . $this->get_space(), false);
-					} elseif (
-						isset($found[0]) && T_CLASS === $found[0] &&
-						!$this->is_token([T_DOUBLE_ARROW, T_RETURN], true) &&
-						!$this->is_token(ST_EQUAL, true) &&
-						!$this->is_token(ST_COMMA, true) &&
-						!$this->is_token(ST_PARENTHESES_OPEN, true)
-					) {
-						$this->append_code('public' . $this->get_space(), false);
-					}
-					if (isset($found[0]) && T_CLASS === $found[0] && null !== $static) {
-						$this->append_code($static . $this->get_space(), false);
-					}
-					$this->append_code($text, false);
-					$final_or_abstract = null;
-					$visibility        = null;
-					$static            = null;
-					$skip_whitespaces  = false;
-					break;
-				default:
-					$this->append_code($text, false);
-					break;
-			}
-		}
-		return $this->code;
-	}
-};
-final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-
-		$open_tag_count = 0;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, ) = $this->get_token($token);
-			if (T_OPEN_TAG === $id) {
-				$open_tag_count++;
-				break;
-			}
-		}
-
-		reset($this->tkns);
-		if (1 === $open_tag_count) {
-			while (list($index, $token) = each($this->tkns)) {
-				list($id, $text) = $this->get_token($token);
-				$this->ptr       = $index;
-				switch ($id) {
-					case T_CLOSE_TAG:
-						$this->append_code($this->get_crlf(), false);
-						break;
-					default:
-						$this->append_code($text, false);
-						break;
-				}
-			}
-			$this->code = rtrim($this->code);
-		} else {
-			while (list($index, $token) = each($this->tkns)) {
-				list($id, $text) = $this->get_token($token);
-				$this->ptr       = $index;
-				$this->append_code($text, false);
-			}
-		}
-		$this->code = rtrim($this->code) . $this->get_crlf();
-
-		return $this->code;
-	}
-}
-;
-class PsrDecorator {
-	public static function PSR1(CodeFormatter $fmt) {
-		$fmt->addPass(new PSR1OpenTags());
-		$fmt->addPass(new PSR1BOMMark());
-		$fmt->addPass(new PSR1ClassNames());
-		$fmt->addPass(new PSR1ClassConstants());
-		$fmt->addPass(new PSR1MethodNames());
-	}
-
-	public static function PSR2(CodeFormatter $fmt) {
-		$fmt->addPass(new PSR2KeywordsLowerCase());
-		$fmt->addPass(new PSR2IndentWithSpace());
-		$fmt->addPass(new PSR2LnAfterNamespace());
-		$fmt->addPass(new PSR2CurlyOpenNextLine());
-		$fmt->addPass(new PSR2ModifierVisibilityStaticOrder());
-		$fmt->addPass(new PSR2SingleEmptyLineAndStripClosingTag());
-	}
-
-	public static function decorate(CodeFormatter $fmt) {
-		self::PSR1($fmt);
-		self::PSR2($fmt);
-	}
-};
 final class Refactor extends FormatterPass {
 	private $from;
 	private $to;
@@ -2556,6 +2020,543 @@ final class TwoCommandsInSameLine extends FormatterPass {
 			$lines[$idx] = $new_line;
 		}
 		return implode($this->new_line, $lines);
+	}
+};
+//PSR standards
+final class PSR1BOMMark extends FormatterPass {
+	public function format($source) {
+		$bom = "\xef\xbb\xbf";
+		if ($bom === substr($source, 0, 3)) {
+			return substr($source, 3);
+		}
+		return $source;
+	}
+}
+;
+final class PSR1ClassConstants extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$uc_const   = false;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			switch ($id) {
+				case T_CONST:
+					$uc_const = true;
+					$this->append_code($text, false);
+					break;
+				case T_STRING:
+					if ($uc_const) {
+						$text     = strtoupper($text);
+						$uc_const = false;
+					}
+					$this->append_code($text, false);
+					break;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+};
+final class PSR1ClassNames extends FormatterPass {
+	public function format($source) {
+		$this->tkns  = token_get_all($source);
+		$this->code  = '';
+		$found_class = false;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			switch ($id) {
+				case T_CLASS:
+					$found_class = true;
+					$this->append_code($text, false);
+					break;
+				case T_STRING:
+					if ($found_class) {
+						$count = 0;
+						$tmp   = ucwords(str_replace(array('-', '_'), ' ', strtolower($text), $count));
+						if ($count > 0) {
+							$text = str_replace(' ', '', $tmp);
+						}
+						$this->append_code($text, false);
+
+						$found_class = false;
+						break;
+					}
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+}
+;
+final class PSR1MethodNames extends FormatterPass {
+	public function format($source) {
+		$this->tkns   = token_get_all($source);
+		$this->code   = '';
+		$found_method = false;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			switch ($id) {
+				case T_FUNCTION:
+					$found_method = true;
+					$this->append_code($text, false);
+					break;
+				case T_STRING:
+					if ($found_method) {
+						$count = 0;
+						$tmp   = ucwords(str_replace(array('-', '_'), ' ', strtolower($text), $count));
+						if ($count > 0 && '' !== trim($tmp) && '_' !== substr($text, 0, 1)) {
+							$text = lcfirst(str_replace(' ', '', $tmp));
+						}
+						$this->append_code($text, false);
+
+						$found_method = false;
+						break;
+					}
+				case ST_PARENTHESES_OPEN:
+					$found_method = false;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+}
+;
+final class PSR1OpenTags extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			switch ($id) {
+				case T_OPEN_TAG:
+					if ('<?php' !== $text) {
+						$this->append_code('<?php' . $this->new_line, false);
+						break;
+					}
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+}
+;
+final class PSR2CurlyOpenNextLine extends FormatterPass {
+	public function format($source) {
+		$this->indent_char = '    ';
+		$this->tkns        = token_get_all($source);
+		$this->code        = '';
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			switch ($id) {
+				case ST_QUOTE:
+					$this->append_code($text, false);
+					$this->printUntilTheEndOfString();
+					break;
+				case T_INTERFACE:
+				case T_TRAIT:
+				case T_CLASS:
+					$this->append_code($text, false);
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr       = $index;
+						if (ST_CURLY_OPEN === $id) {
+							$this->append_code($this->get_crlf_indent(), false);
+							prev($this->tkns);
+							break;
+						} else {
+							$this->append_code($text, false);
+						}
+					}
+					break;
+				case T_FUNCTION:
+					if (!$this->is_token([T_DOUBLE_ARROW, T_RETURN], true) && !$this->is_token(ST_EQUAL, true) && !$this->is_token(ST_PARENTHESES_OPEN, true) && !$this->is_token(ST_COMMA, true)) {
+						$this->append_code($text, false);
+						$touched_ln = false;
+						while (list($index, $token) = each($this->tkns)) {
+							list($id, $text) = $this->get_token($token);
+							$this->ptr       = $index;
+							if (T_WHITESPACE == $id && substr_count($text, $this->new_line) > 0) {
+								$touched_ln = true;
+							}
+							if (ST_CURLY_OPEN === $id && !$touched_ln) {
+								$this->append_code($this->get_crlf_indent(), false);
+								prev($this->tkns);
+								break;
+							} elseif (ST_CURLY_OPEN === $id) {
+								prev($this->tkns);
+								break;
+							} else {
+								$this->append_code($text, false);
+							}
+						}
+						break;
+					} else {
+						$this->append_code($text, false);
+					}
+					break;
+				case ST_CURLY_OPEN:
+					$this->append_code($text, false);
+					$this->set_indent(+1);
+					break;
+				case ST_CURLY_CLOSE:
+					$this->set_indent(-1);
+					$this->append_code($text, false);
+					break;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+};
+final class PSR2IndentWithSpace extends FormatterPass {
+	private $indent_spaces = '    ';
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			switch ($id) {
+				case T_COMMENT:
+				case T_DOC_COMMENT:
+				case T_WHITESPACE:
+					$this->append_code(str_replace($this->indent_char, $this->indent_spaces, $text), false);
+					break;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+};
+final class PSR2KeywordsLowerCase extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			switch ($id) {
+				case T_ABSTRACT:
+				case T_ARRAY:
+				case T_ARRAY_CAST:
+				case T_AS:
+				case T_BOOL_CAST:
+				case T_BREAK:
+				case T_CASE:
+				case T_CATCH:
+				case T_CLASS:
+				case T_CLONE:
+				case T_CONST:
+				case T_CONTINUE:
+				case T_DECLARE:
+				case T_DEFAULT:
+				case T_DO:
+				case T_DOUBLE_CAST:
+				case T_ECHO:
+				case T_ELSE:
+				case T_ELSEIF:
+				case T_EMPTY:
+				case T_ENDDECLARE:
+				case T_ENDFOR:
+				case T_ENDFOREACH:
+				case T_ENDIF:
+				case T_ENDSWITCH:
+				case T_ENDWHILE:
+				case T_EVAL:
+				case T_EXIT:
+				case T_EXTENDS:
+				case T_FINAL:
+				case T_FINALLY:
+				case T_FOR:
+				case T_FOREACH:
+				case T_FUNCTION:
+				case T_GLOBAL:
+				case T_GOTO:
+				case T_IF:
+				case T_IMPLEMENTS:
+				case T_INCLUDE:
+				case T_INCLUDE_ONCE:
+				case T_INSTANCEOF:
+				case T_INSTEADOF:
+				case T_INT_CAST:
+				case T_INTERFACE:
+				case T_ISSET:
+				case T_LIST:
+				case T_LOGICAL_AND:
+				case T_LOGICAL_OR:
+				case T_LOGICAL_XOR:
+				case T_NAMESPACE:
+				case T_NEW:
+				case T_OBJECT_CAST:
+				case T_PRINT:
+				case T_PRIVATE:
+				case T_PUBLIC:
+				case T_PROTECTED:
+				case T_REQUIRE:
+				case T_REQUIRE_ONCE:
+				case T_RETURN:
+				case T_STATIC:
+				case T_STRING_CAST:
+				case T_SWITCH:
+				case T_THROW:
+				case T_TRAIT:
+				case T_TRY:
+				case T_UNSET:
+				case T_UNSET_CAST:
+				case T_USE:
+				case T_VAR:
+				case T_WHILE:
+				case T_XOR_EQUAL:
+				case T_YIELD:
+					$this->append_code(strtolower($text), false);
+					break;
+				default:
+					$lc_text = strtolower($text);
+					if ('true' === $lc_text || 'false' === $lc_text || 'null' === $lc_text) {
+						$text = $lc_text;
+					}
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+};
+final class PSR2LnAfterNamespace extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			switch ($id) {
+				case T_NAMESPACE:
+					$this->append_code($text, false);
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr       = $index;
+						if (ST_SEMI_COLON === $id) {
+							$this->append_code($text, false);
+							list(, $text) = $this->inspect_token();
+							if (1 === substr_count($text, $this->new_line)) {
+								$this->append_code($this->new_line, false);
+							}
+							break;
+						} else {
+							$this->append_code($text, false);
+						}
+					}
+					break;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+};
+final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+
+		$found             = [];
+		$visibility        = null;
+		$final_or_abstract = null;
+		$static            = null;
+		$skip_whitespaces  = false;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr       = $index;
+			switch ($id) {
+				case ST_QUOTE:
+					$this->append_code($text, false);
+					$this->printUntilTheEndOfString();
+					break;
+				case T_CLASS:
+					$found[] = T_CLASS;
+					$this->append_code($text, false);
+					break;
+				case ST_CURLY_OPEN:
+				case ST_PARENTHESES_OPEN:
+					$found[] = $text;
+					$this->append_code($text, false);
+					break;
+				case ST_CURLY_CLOSE:
+				case ST_PARENTHESES_CLOSE:
+					array_pop($found);
+					if (1 === sizeof($found)) {
+						array_pop($found);
+					}
+					$this->append_code($text, false);
+					break;
+				case T_WHITESPACE:
+					if (!$skip_whitespaces) {
+						$this->append_code($text, false);
+					}
+					break;
+				case T_PUBLIC:
+				case T_PRIVATE:
+				case T_PROTECTED:
+					if (!$this->is_token(array(T_VARIABLE))) {
+						$visibility       = $text;
+						$skip_whitespaces = true;
+					} else {
+						$this->append_code($text, false);
+					}
+					break;
+				case T_FINAL:
+				case T_ABSTRACT:
+					if (!$this->is_token(array(T_CLASS))) {
+						$final_or_abstract = $text;
+						$skip_whitespaces  = true;
+					} else {
+						$this->append_code($text, false);
+					}
+					break;
+				case T_STATIC:
+					if (!is_null($visibility)) {
+						$static           = $text;
+						$skip_whitespaces = true;
+					} elseif (!$this->is_token(array(T_VARIABLE, T_DOUBLE_COLON)) && !$this->is_token(array(T_NEW), true)) {
+						$static           = $text;
+						$skip_whitespaces = true;
+					} else {
+						$this->append_code($text, false);
+					}
+					break;
+				case T_VARIABLE:
+					if (
+						null !== $visibility ||
+						null !== $final_or_abstract ||
+						null !== $static
+					) {
+						null !== $final_or_abstract && $this->append_code($final_or_abstract . $this->get_space(), false);
+						null !== $visibility && $this->append_code($visibility . $this->get_space(), false);
+						null !== $static && $this->append_code($static . $this->get_space(), false);
+						$final_or_abstract = null;
+						$visibility        = null;
+						$static            = null;
+						$skip_whitespaces  = false;
+					}
+					$this->append_code($text, false);
+					break;
+				case T_FUNCTION:
+					if (isset($found[0]) && T_CLASS === $found[0] && null !== $final_or_abstract) {
+						$this->append_code($final_or_abstract . $this->get_space(), false);
+					}
+					if (isset($found[0]) && T_CLASS === $found[0] && null !== $visibility) {
+						$this->append_code($visibility . $this->get_space(), false);
+					} elseif (
+						isset($found[0]) && T_CLASS === $found[0] &&
+						!$this->is_token([T_DOUBLE_ARROW, T_RETURN], true) &&
+						!$this->is_token(ST_EQUAL, true) &&
+						!$this->is_token(ST_COMMA, true) &&
+						!$this->is_token(ST_PARENTHESES_OPEN, true)
+					) {
+						$this->append_code('public' . $this->get_space(), false);
+					}
+					if (isset($found[0]) && T_CLASS === $found[0] && null !== $static) {
+						$this->append_code($static . $this->get_space(), false);
+					}
+					$this->append_code($text, false);
+					$final_or_abstract = null;
+					$visibility        = null;
+					$static            = null;
+					$skip_whitespaces  = false;
+					break;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+};
+final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+
+		$open_tag_count = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, ) = $this->get_token($token);
+			if (T_OPEN_TAG === $id) {
+				$open_tag_count++;
+				break;
+			}
+		}
+
+		reset($this->tkns);
+		if (1 === $open_tag_count) {
+			while (list($index, $token) = each($this->tkns)) {
+				list($id, $text) = $this->get_token($token);
+				$this->ptr       = $index;
+				switch ($id) {
+					case T_CLOSE_TAG:
+						$this->append_code($this->get_crlf(), false);
+						break;
+					default:
+						$this->append_code($text, false);
+						break;
+				}
+			}
+			$this->code = rtrim($this->code);
+		} else {
+			while (list($index, $token) = each($this->tkns)) {
+				list($id, $text) = $this->get_token($token);
+				$this->ptr       = $index;
+				$this->append_code($text, false);
+			}
+		}
+		$this->code = rtrim($this->code) . $this->get_crlf();
+
+		return $this->code;
+	}
+}
+;
+class PsrDecorator {
+	public static function PSR1(CodeFormatter $fmt) {
+		$fmt->addPass(new PSR1OpenTags());
+		$fmt->addPass(new PSR1BOMMark());
+		$fmt->addPass(new PSR1ClassNames());
+		$fmt->addPass(new PSR1ClassConstants());
+		$fmt->addPass(new PSR1MethodNames());
+	}
+
+	public static function PSR2(CodeFormatter $fmt) {
+		$fmt->addPass(new PSR2KeywordsLowerCase());
+		$fmt->addPass(new PSR2IndentWithSpace());
+		$fmt->addPass(new PSR2LnAfterNamespace());
+		$fmt->addPass(new PSR2CurlyOpenNextLine());
+		$fmt->addPass(new PSR2ModifierVisibilityStaticOrder());
+		$fmt->addPass(new PSR2SingleEmptyLineAndStripClosingTag());
+	}
+
+	public static function decorate(CodeFormatter $fmt) {
+		self::PSR1($fmt);
+		self::PSR2($fmt);
 	}
 };
 
