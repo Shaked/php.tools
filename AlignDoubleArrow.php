@@ -36,8 +36,11 @@ final class AlignDoubleArrow extends FormatterPass {
 		}
 
 		for ($j = 0; $j <= $context_counter; $j++) {
-			$placeholder      = sprintf(self::ALIGNABLE_EQUAL, $j);
-			$lines            = explode($this->new_line, $this->code);
+			$placeholder = sprintf(self::ALIGNABLE_EQUAL, $j);
+			if (false === strpos($this->code, $placeholder)) {
+				continue;
+			}
+			$lines = explode($this->new_line, $this->code);
 			$lines_with_objop = [];
 			$block_count      = 0;
 
