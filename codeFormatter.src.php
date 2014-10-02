@@ -16,6 +16,7 @@ include 'FormatterPass.php';
 include 'AddMissingCurlyBraces.php';
 include 'AlignDoubleArrow.php';
 include 'AlignEquals.php';
+include 'AutoImport.php';
 include 'EliminateDuplicatedEmptyLines.php';
 include 'ExtraCommaInArray.php';
 include 'LeftAlignComment.php';
@@ -114,7 +115,7 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['timing', 'purge_empty_line', 'help', 'setters_and_getters::', 'refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters::', 'refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--refactor=from --to=to] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
@@ -169,6 +170,17 @@ if (!isset($testEnv)) {
 		);
 		$fmt->addPass(new SettersAndGettersPass($opts['setters_and_getters']));
 	}
+	if (isset($opts['oracleDB'])) {
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return substr($v, 0, strlen('--oracleDB')) !== '--oracleDB';
+				}
+			)
+		);
+		$fmt->addPass(new AutoImportPass($opts['oracleDB']));
+	}
+
 	$fmt->addPass(new OrderUseClauses());
 	$fmt->addPass(new AddMissingCurlyBraces());
 	$fmt->addPass(new NormalizeLnAndLtrimLines());
