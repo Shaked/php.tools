@@ -87,7 +87,7 @@ final class CodeFormatter {
 		$lines = [];
 		foreach ($timings as $pass => $timestamp) {
 			$proportion = ($timestamp - $delta) / $total;
-			$lines[]    = [
+			$lines[] = [
 				str_pad($pass, $nameLen + 1)
 				. ' ' .
 				str_pad(round(($proportion * 100), 2), 5, ' ', STR_PAD_LEFT)

@@ -2,10 +2,10 @@
 final class OrderUseClauses extends FormatterPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERBY \x3*/";
 	private function singleNamespace($source) {
-		$tokens            = token_get_all($source);
-		$use_stack         = [];
-		$new_tokens        = [];
-		$next_tokens       = [];
+		$tokens = token_get_all($source);
+		$use_stack = [];
+		$new_tokens = [];
+		$next_tokens = [];
 		$touched_namespace = false;
 		while (list(, $pop_token) = each($tokens)) {
 			$next_tokens[] = $pop_token;
@@ -30,7 +30,7 @@ final class OrderUseClauses extends FormatterPass {
 						}
 					}
 					$use_stack[] = $use_item;
-					$token       = new SurrogateToken();
+					$token = new SurrogateToken();
 				}
 				if (T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id || T_TRAIT === $id || T_VARIABLE === $id) {
 					if (sizeof($use_stack) > 0) {
@@ -51,7 +51,7 @@ final class OrderUseClauses extends FormatterPass {
 		}
 
 		natcasesort($use_stack);
-		$alias_list  = [];
+		$alias_list = [];
 		$alias_count = [];
 		foreach ($use_stack as $use) {
 			if (false !== stripos($use, ' as ')) {
@@ -59,8 +59,8 @@ final class OrderUseClauses extends FormatterPass {
 			} else {
 				$alias = basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 			}
-			$alias               = strtolower($alias);
-			$alias_list[$alias]  = strtolower($use);
+			$alias = strtolower($alias);
+			$alias_list[$alias] = strtolower($use);
 			$alias_count[$alias] = 0;
 		}
 		$return = '';
@@ -69,7 +69,7 @@ final class OrderUseClauses extends FormatterPass {
 				$return .= array_shift($use_stack);
 			} else {
 				list($id, $text) = $this->get_token($token);
-				$lower_text      = strtolower($text);
+				$lower_text = strtolower($text);
 				if (T_STRING === $id && isset($alias_list[$lower_text])) {
 					$alias_count[$lower_text]++;
 				}
@@ -79,7 +79,7 @@ final class OrderUseClauses extends FormatterPass {
 
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
-			$lower_text      = strtolower($text);
+			$lower_text = strtolower($text);
 			if (T_STRING === $id && isset($alias_list[$lower_text])) {
 				$alias_count[$lower_text]++;
 			} elseif (T_DOC_COMMENT === $id) {
@@ -106,7 +106,7 @@ final class OrderUseClauses extends FormatterPass {
 	}
 	public function format($source = '') {
 		$namespace_count = 0;
-		$tokens          = token_get_all($source);
+		$tokens = token_get_all($source);
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
 			if (T_NAMESPACE == $id) {
@@ -121,23 +121,23 @@ final class OrderUseClauses extends FormatterPass {
 		reset($tokens);
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
 					$return .= $text;
 					while (list($index, $token) = each($tokens)) {
 						list($id, $text) = $this->get_token($token);
-						$this->ptr       = $index;
+						$this->ptr = $index;
 						$return .= $text;
 						if ($id == ST_CURLY_OPEN) {
 							break;
 						}
 					}
 					$namespace_block = '';
-					$curly_count     = 1;
+					$curly_count = 1;
 					while (list($index, $token) = each($tokens)) {
 						list($id, $text) = $this->get_token($token);
-						$this->ptr       = $index;
+						$this->ptr = $index;
 						$namespace_block .= $text;
 						if ($id == ST_CURLY_OPEN) {
 							$curly_count++;

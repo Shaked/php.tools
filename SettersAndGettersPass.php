@@ -2,7 +2,7 @@
 final class SettersAndGettersPass extends FormatterPass {
 	const TYPE_CAMEL_CASE = 'camel';
 	const TYPE_SNAKE_CASE = 'snake';
-	const TYPE_GOLANG     = 'golang';
+	const TYPE_GOLANG = 'golang';
 	public function __construct($type) {
 		if (self::TYPE_CAMEL_CASE == $type || self::TYPE_SNAKE_CASE == $type || self::TYPE_GOLANG == $type) {
 			$this->type = $type;
@@ -17,7 +17,7 @@ final class SettersAndGettersPass extends FormatterPass {
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case T_CLASS:
 					$attributes = [
@@ -25,14 +25,14 @@ final class SettersAndGettersPass extends FormatterPass {
 						'public' => [],
 						'protected' => [],
 					];
-					$function_list      = [];
+					$function_list = [];
 					$touched_visibility = false;
-					$touched_function   = false;
-					$curly_count        = null;
+					$touched_function = false;
+					$curly_count = null;
 					$this->append_code($text, false);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
-						$this->ptr       = $index;
+						$this->ptr = $index;
 						if ($id == ST_CURLY_OPEN) {
 							$curly_count++;
 						}
@@ -52,19 +52,19 @@ final class SettersAndGettersPass extends FormatterPass {
 						}
 						if (T_VARIABLE == $id && T_PUBLIC == $touched_visibility) {
 							$attributes['public'][] = $text;
-							$touched_visibility     = null;
+							$touched_visibility = null;
 						} elseif (T_VARIABLE == $id && T_PRIVATE == $touched_visibility) {
 							$attributes['private'][] = $text;
-							$touched_visibility      = null;
+							$touched_visibility = null;
 						} elseif (T_VARIABLE == $id && T_PROTECTED == $touched_visibility) {
 							$attributes['protected'][] = $text;
-							$touched_visibility        = null;
+							$touched_visibility = null;
 						} elseif (T_FUNCTION == $id) {
 							$touched_function = true;
 						} elseif ($touched_function && T_STRING == $id) {
-							$function_list[]    = $text;
+							$function_list[] = $text;
 							$touched_visibility = null;
-							$touched_function   = false;
+							$touched_function = false;
 						}
 					}
 					$function_list = array_combine($function_list, $function_list);

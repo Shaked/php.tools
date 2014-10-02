@@ -16,7 +16,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case T_FOREACH:
 				case T_FOR:
@@ -24,7 +24,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 					$paren_count = null;
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
-						$this->ptr       = $index;
+						$this->ptr = $index;
 						if (ST_PARENTHESES_OPEN === $id) {
 							$paren_count++;
 						} elseif (ST_PARENTHESES_CLOSE === $id) {
@@ -44,7 +44,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						}
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
-							$this->ptr       = $index;
+							$this->ptr = $index;
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
 								$ignore_count++;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
@@ -65,7 +65,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 					$paren_count = null;
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
-						$this->ptr       = $index;
+						$this->ptr = $index;
 						if (ST_PARENTHESES_OPEN === $id) {
 							$paren_count++;
 						} elseif (ST_PARENTHESES_CLOSE === $id) {
@@ -87,7 +87,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						}
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
-							$this->ptr       = $index;
+							$this->ptr = $index;
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
 								$ignore_count++;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
@@ -109,7 +109,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						$this->append_code('{' . $this->new_line);
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
-							$this->ptr       = $index;
+							$this->ptr = $index;
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
 								$ignore_count++;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
@@ -131,7 +131,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		}
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			$this->append_code($text, false);
 		}
 

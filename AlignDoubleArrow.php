@@ -6,10 +6,10 @@ final class AlignDoubleArrow extends FormatterPass {
 		$this->code = '';
 
 		$context_counter = 0;
-		$in_bracket      = 0;
+		$in_bracket = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case T_FOREACH:
 				case ST_SEMI_COLON:
@@ -42,7 +42,7 @@ final class AlignDoubleArrow extends FormatterPass {
 			}
 			$lines = explode($this->new_line, $this->code);
 			$lines_with_objop = [];
-			$block_count      = 0;
+			$block_count = 0;
 
 			foreach ($lines as $idx => $line) {
 				if (substr_count($line, $placeholder) > 0) {
@@ -63,11 +63,11 @@ final class AlignDoubleArrow extends FormatterPass {
 					$farthest_objop = max($farthest_objop, strpos($lines[$idx], $placeholder));
 				}
 				foreach ($group as $idx) {
-					$line          = $lines[$idx];
+					$line = $lines[$idx];
 					$current_objop = strpos($line, $placeholder);
-					$delta         = abs($farthest_objop - $current_objop);
+					$delta = abs($farthest_objop - $current_objop);
 					if ($delta > 0) {
-						$line        = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
+						$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
 						$lines[$idx] = $line;
 					}
 				}

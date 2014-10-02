@@ -6,13 +6,13 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
 					$this->append_code($text, false);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
-						$this->ptr       = $index;
+						$this->ptr = $index;
 						if (ST_SEMI_COLON === $id) {
 							$this->append_code($text, false);
 							list(, $text) = $this->inspect_token();

@@ -2,13 +2,13 @@
 abstract class FormatterPass {
 	protected $indent_size = 1;
 	protected $indent_char = "\t";
-	protected $block_size  = 1;
-	protected $new_line    = "\n";
-	protected $indent      = 0;
-	protected $for_idx     = 0;
-	protected $code        = '';
-	protected $ptr         = 0;
-	protected $tkns        = [];
+	protected $block_size = 1;
+	protected $new_line = "\n";
+	protected $indent = 0;
+	protected $for_idx = 0;
+	protected $code = '';
+	protected $ptr = 0;
+	protected $tkns = [];
 
 	abstract public function format($source);
 	protected function get_token($token) {
@@ -92,14 +92,14 @@ abstract class FormatterPass {
 		return $this->tkns[$i];
 	}
 	protected function has_ln_after() {
-		$id              = null;
-		$text            = null;
+		$id = null;
+		$text = null;
 		list($id, $text) = $this->inspect_token();
 		return T_WHITESPACE === $id && substr_count($text, $this->new_line) > 0;
 	}
 	protected function has_ln_before() {
-		$id              = null;
-		$text            = null;
+		$id = null;
+		$text = null;
 		list($id, $text) = $this->inspect_token(-1);
 		return T_WHITESPACE === $id && substr_count($text, $this->new_line) > 0;
 	}
@@ -109,7 +109,7 @@ abstract class FormatterPass {
 	}
 	protected function substr_count_trailing($haystack, $needle) {
 		$cnt = 0;
-		$i   = strlen($haystack) - 1;
+		$i = strlen($haystack) - 1;
 		for ($i = $i; $i >= 0; $i--) {
 			$char = substr($haystack, $i, 1);
 			if ($needle === $char) {
@@ -123,7 +123,7 @@ abstract class FormatterPass {
 	protected function printUntilTheEndOfString() {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			$this->append_code($text, false);
 			if (ST_QUOTE == $id) {
 				break;
@@ -133,7 +133,7 @@ abstract class FormatterPass {
 	protected function walk_until($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			if ($id == $tknid) {
 				return [$id, $text];
 			}

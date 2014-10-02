@@ -8,13 +8,13 @@ final class ResizeSpaces extends FormatterPass {
 	}
 
 	private function airOutSpacing($source) {
-		$new_tokens          = [];
-		$this->tkns          = token_get_all($source);
-		$this->code          = '';
+		$new_tokens = [];
+		$this->tkns = token_get_all($source);
+		$this->code = '';
 		$in_ternary_operator = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case '+':
 				case '-':
@@ -35,8 +35,8 @@ final class ResizeSpaces extends FormatterPass {
 					list($next_id, $next_text) = $this->inspect_token(+1);
 					if ('*' == $next_text) {
 						$text .= '*';
-						list($index, $token)       = each($this->tkns);
-						$this->ptr                 = $index;
+						list($index, $token) = each($this->tkns);
+						$this->ptr = $index;
 						list($next_id, $next_text) = $this->inspect_token(+1);
 					}
 					if (
@@ -138,10 +138,10 @@ final class ResizeSpaces extends FormatterPass {
 		// 	}
 		// ));
 		// return $new_tokens;
-		$new_tokens  = [];
-		$tkns        = token_get_all($source);
+		$new_tokens = [];
+		$tkns = token_get_all($source);
 		$sizeof_tkns = sizeof($tkns);
-		$i           = 0;
+		$i = 0;
 
 		$n = ($sizeof_tkns + 7) / 8;
 
@@ -157,7 +157,7 @@ final class ResizeSpaces extends FormatterPass {
 		loop:
 		label_case0:
 		if (isset($tkns[$i])) {
-			$token           = $tkns[$i];
+			$token = $tkns[$i];
 			list($id, $text) = $this->get_token($token);
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
@@ -166,7 +166,7 @@ final class ResizeSpaces extends FormatterPass {
 		}
 		label_case7:
 		if (isset($tkns[$i])) {
-			$token           = $tkns[$i];
+			$token = $tkns[$i];
 			list($id, $text) = $this->get_token($token);
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
@@ -176,7 +176,7 @@ final class ResizeSpaces extends FormatterPass {
 
 		label_case6:
 		if (isset($tkns[$i])) {
-			$token           = $tkns[$i];
+			$token = $tkns[$i];
 			list($id, $text) = $this->get_token($token);
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
@@ -186,7 +186,7 @@ final class ResizeSpaces extends FormatterPass {
 
 		label_case5:
 		if (isset($tkns[$i])) {
-			$token           = $tkns[$i];
+			$token = $tkns[$i];
 			list($id, $text) = $this->get_token($token);
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
@@ -196,7 +196,7 @@ final class ResizeSpaces extends FormatterPass {
 
 		label_case4:
 		if (isset($tkns[$i])) {
-			$token           = $tkns[$i];
+			$token = $tkns[$i];
 			list($id, $text) = $this->get_token($token);
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
@@ -206,7 +206,7 @@ final class ResizeSpaces extends FormatterPass {
 
 		label_case3:
 		if (isset($tkns[$i])) {
-			$token           = $tkns[$i];
+			$token = $tkns[$i];
 			list($id, $text) = $this->get_token($token);
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
@@ -216,7 +216,7 @@ final class ResizeSpaces extends FormatterPass {
 
 		label_case2:
 		if (isset($tkns[$i])) {
-			$token           = $tkns[$i];
+			$token = $tkns[$i];
 			list($id, $text) = $this->get_token($token);
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
@@ -226,7 +226,7 @@ final class ResizeSpaces extends FormatterPass {
 
 		label_case1:
 		if (isset($tkns[$i])) {
-			$token           = $tkns[$i];
+			$token = $tkns[$i];
 			list($id, $text) = $this->get_token($token);
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
@@ -246,7 +246,7 @@ final class ResizeSpaces extends FormatterPass {
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case T_ARRAY:
 					if ($this->is_token(array(T_VARIABLE, ST_REFERENCE))) {

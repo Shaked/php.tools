@@ -1,7 +1,7 @@
 <?php
 final class ReindentIfColonBlocks extends FormatterPass {
 	public function format($source) {
-		$this->tkns  = token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$found_colon = false;
 		foreach ($this->tkns as $token) {
 			list($id, $text) = $this->get_token($token);
@@ -18,7 +18,7 @@ final class ReindentIfColonBlocks extends FormatterPass {
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case T_ENDIF:
 					$this->set_indent(-1);
@@ -31,7 +31,7 @@ final class ReindentIfColonBlocks extends FormatterPass {
 					$this->append_code($text, false);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
-						$this->ptr       = $index;
+						$this->ptr = $index;
 						$this->append_code($text, false);
 						if (ST_CURLY_OPEN === $id) {
 							break;

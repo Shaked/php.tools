@@ -7,7 +7,7 @@ final class ExtraCommaInArray extends FormatterPass {
 		$context_stack = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case T_STRING:
 					if ($this->is_token(ST_PARENTHESES_OPEN)) {

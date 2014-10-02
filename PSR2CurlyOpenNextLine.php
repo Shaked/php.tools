@@ -2,12 +2,12 @@
 final class PSR2CurlyOpenNextLine extends FormatterPass {
 	public function format($source) {
 		$this->indent_char = '    ';
-		$this->tkns        = token_get_all($source);
-		$this->code        = '';
+		$this->tkns = token_get_all($source);
+		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case ST_QUOTE:
 					$this->append_code($text, false);
@@ -19,7 +19,7 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 					$this->append_code($text, false);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
-						$this->ptr       = $index;
+						$this->ptr = $index;
 						if (ST_CURLY_OPEN === $id) {
 							$this->append_code($this->get_crlf_indent(), false);
 							prev($this->tkns);
@@ -35,7 +35,7 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 						$touched_ln = false;
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
-							$this->ptr       = $index;
+							$this->ptr = $index;
 							if (T_WHITESPACE == $id && substr_count($text, $this->new_line) > 0) {
 								$touched_ln = true;
 							}

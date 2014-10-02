@@ -4,14 +4,14 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
-		$found             = [];
-		$visibility        = null;
+		$found = [];
+		$visibility = null;
 		$final_or_abstract = null;
-		$static            = null;
-		$skip_whitespaces  = false;
+		$static = null;
+		$skip_whitespaces = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case ST_QUOTE:
 					$this->append_code($text, false);
@@ -43,7 +43,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 				case T_PRIVATE:
 				case T_PROTECTED:
 					if (!$this->is_token(array(T_VARIABLE))) {
-						$visibility       = $text;
+						$visibility = $text;
 						$skip_whitespaces = true;
 					} else {
 						$this->append_code($text, false);
@@ -53,17 +53,17 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 				case T_ABSTRACT:
 					if (!$this->is_token(array(T_CLASS))) {
 						$final_or_abstract = $text;
-						$skip_whitespaces  = true;
+						$skip_whitespaces = true;
 					} else {
 						$this->append_code($text, false);
 					}
 					break;
 				case T_STATIC:
 					if (!is_null($visibility)) {
-						$static           = $text;
+						$static = $text;
 						$skip_whitespaces = true;
 					} elseif (!$this->is_token(array(T_VARIABLE, T_DOUBLE_COLON)) && !$this->is_token(array(T_NEW), true)) {
-						$static           = $text;
+						$static = $text;
 						$skip_whitespaces = true;
 					} else {
 						$this->append_code($text, false);
@@ -79,9 +79,9 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						null !== $visibility && $this->append_code($visibility . $this->get_space(), false);
 						null !== $static && $this->append_code($static . $this->get_space(), false);
 						$final_or_abstract = null;
-						$visibility        = null;
-						$static            = null;
-						$skip_whitespaces  = false;
+						$visibility = null;
+						$static = null;
+						$skip_whitespaces = false;
 					}
 					$this->append_code($text, false);
 					break;
@@ -105,9 +105,9 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					}
 					$this->append_code($text, false);
 					$final_or_abstract = null;
-					$visibility        = null;
-					$static            = null;
-					$skip_whitespaces  = false;
+					$visibility = null;
+					$static = null;
+					$skip_whitespaces = false;
 					break;
 				default:
 					$this->append_code($text, false);

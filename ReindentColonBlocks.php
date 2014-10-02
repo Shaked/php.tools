@@ -1,7 +1,7 @@
 <?php
 final class ReindentColonBlocks extends FormatterPass {
 	public function format($source) {
-		$this->tkns  = token_get_all($source);
+		$this->tkns = token_get_all($source);
 		$found_colon = false;
 		foreach ($this->tkns as $token) {
 			list($id, $text) = $this->get_token($token);
@@ -16,12 +16,12 @@ final class ReindentColonBlocks extends FormatterPass {
 		reset($this->tkns);
 		$this->code = '';
 
-		$switch_level                      = 0;
-		$switch_curly_count                = [];
+		$switch_level = 0;
+		$switch_curly_count = [];
 		$switch_curly_count[$switch_level] = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case ST_QUOTE:
 					$this->append_code($text, false);

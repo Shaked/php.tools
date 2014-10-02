@@ -32,12 +32,12 @@ final class Refactor extends FormatterPass {
 	}
 
 	public function format($source) {
-		$from      = $this->getFrom();
+		$from = $this->getFrom();
 		$from_size = sizeof($from);
-		$from_str  = implode('', array_map(function ($v) {
+		$from_str = implode('', array_map(function ($v) {
 			return $v[1];
 		}, $from));
-		$to     = $this->getTo();
+		$to = $this->getTo();
 		$to_str = implode('', array_map(function ($v) {
 			return $v[1];
 		}, $to));
@@ -46,16 +46,16 @@ final class Refactor extends FormatterPass {
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 
 			if ($id == $from[0][0]) {
-				$match  = true;
+				$match = true;
 				$buffer = $text;
-				$i      = 1;
+				$i = 1;
 				for ($i = 1; $i < $from_size; $i++) {
 					list($index, $token) = each($this->tkns);
-					$this->ptr           = $index;
-					list($id, $text)     = $this->get_token($token);
+					$this->ptr = $index;
+					list($id, $text) = $this->get_token($token);
 					$buffer .= $text;
 					if ($id != $from[$i][0]) {
 						$match = false;

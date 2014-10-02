@@ -17,7 +17,7 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 		if (1 === $open_tag_count) {
 			while (list($index, $token) = each($this->tkns)) {
 				list($id, $text) = $this->get_token($token);
-				$this->ptr       = $index;
+				$this->ptr = $index;
 				switch ($id) {
 					case T_CLOSE_TAG:
 						$this->append_code($this->get_crlf(), false);
@@ -31,7 +31,7 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 		} else {
 			while (list($index, $token) = each($this->tkns)) {
 				list($id, $text) = $this->get_token($token);
-				$this->ptr       = $index;
+				$this->ptr = $index;
 				$this->append_code($text, false);
 			}
 		}

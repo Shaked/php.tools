@@ -2,16 +2,16 @@
 final class ReindentObjOps extends FormatterPass {
 	const ALIGNABLE_OBJOP = "\x2 OBJOP%d \x3";
 	public function format($source) {
-		$this->tkns              = token_get_all($source);
-		$this->code              = '';
-		$in_objop_context        = 0;// 1 - indent, 2 - don't indent, so future auto-align takes place
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$in_objop_context = 0;// 1 - indent, 2 - don't indent, so future auto-align takes place
 		$alignable_objop_counter = 0;
-		$printed_placeholder     = false;
-		$paren_count             = 0;
-		$bracket_count           = 0;
+		$printed_placeholder = false;
+		$paren_count = 0;
+		$bracket_count = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case ST_PARENTHESES_OPEN:
 					$paren_count++;
@@ -45,7 +45,7 @@ final class ReindentObjOps extends FormatterPass {
 					} elseif (2 === $in_objop_context) {
 						$placeholder = '';
 						if (!$printed_placeholder) {
-							$placeholder         = sprintf(self::ALIGNABLE_OBJOP, $alignable_objop_counter);
+							$placeholder = sprintf(self::ALIGNABLE_OBJOP, $alignable_objop_counter);
 							$printed_placeholder = true;
 						}
 						$this->append_code($placeholder . $text, false);
@@ -77,14 +77,15 @@ final class ReindentObjOps extends FormatterPass {
 
 		for ($j = $alignable_objop_counter; $j > 0; $j--) {
 			$current_align_objop = sprintf(self::ALIGNABLE_OBJOP, $j);
+
 			if (substr_count($this->code, $current_align_objop) <= 1) {
 				$this->code = str_replace($current_align_objop, '', $this->code);
 				continue;
 			}
 
-			$lines            = explode($this->new_line, $this->code);
+			$lines = explode($this->new_line, $this->code);
 			$lines_with_objop = [];
-			$block_count      = 0;
+			$block_count = 0;
 
 			foreach ($lines as $idx => $line) {
 				if (substr_count($line, $current_align_objop) > 0) {
@@ -105,11 +106,11 @@ final class ReindentObjOps extends FormatterPass {
 					$farthest_objop = max($farthest_objop, strpos($lines[$idx], $current_align_objop));
 				}
 				foreach ($group as $idx) {
-					$line          = $lines[$idx];
+					$line = $lines[$idx];
 					$current_objop = strpos($line, $current_align_objop);
-					$delta         = abs($farthest_objop - $current_objop);
+					$delta = abs($farthest_objop - $current_objop);
 					if ($delta > 0) {
-						$line        = str_replace($current_align_objop, str_repeat(' ', $delta) . $current_align_objop, $line);
+						$line = str_replace($current_align_objop, str_repeat(' ', $delta) . $current_align_objop, $line);
 						$lines[$idx] = $line;
 					}
 				}

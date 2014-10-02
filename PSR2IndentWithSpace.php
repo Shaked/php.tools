@@ -7,7 +7,7 @@ final class PSR2IndentWithSpace extends FormatterPass {
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:

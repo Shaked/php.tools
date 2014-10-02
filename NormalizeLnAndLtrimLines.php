@@ -5,15 +5,14 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
-			$this->ptr       = $index;
-			$this->ptr       = $index;
+			$this->ptr = $index;
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
 
 					$prev_text = strrev($prev_text);
-					$first_ln  = strpos($prev_text, "\n");
+					$first_ln = strpos($prev_text, "\n");
 					$second_ln = strpos($prev_text, "\n", $first_ln + 1);
 					if ($prev_id === T_WHITESPACE && substr_count($prev_text, "\n") >= 2 && 0 === $first_ln && 1 === $second_ln) {
 						$this->append_code(LeftAlignComment::NON_INDENTABLE_COMMENT, false);
