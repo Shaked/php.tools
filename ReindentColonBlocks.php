@@ -1,7 +1,19 @@
 <?php
 final class ReindentColonBlocks extends FormatterPass {
 	public function format($source) {
-		$this->tkns = token_get_all($source);
+		$this->tkns  = token_get_all($source);
+		$found_colon = false;
+		foreach ($this->tkns as $token) {
+			list($id, $text) = $this->get_token($token);
+			if (T_DEFAULT == $id || T_CASE == $id || T_SWITCH == $id) {
+				$found_colon = true;
+				break;
+			}
+		}
+		if (!$found_colon) {
+			return $source;
+		}
+		reset($this->tkns);
 		$this->code = '';
 
 		$switch_level                      = 0;

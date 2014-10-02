@@ -1213,7 +1213,19 @@ final class Reindent extends FormatterPass {
 };
 final class ReindentColonBlocks extends FormatterPass {
 	public function format($source) {
-		$this->tkns = token_get_all($source);
+		$this->tkns  = token_get_all($source);
+		$found_colon = false;
+		foreach ($this->tkns as $token) {
+			list($id, $text) = $this->get_token($token);
+			if (T_DEFAULT == $id || T_CASE == $id || T_SWITCH == $id) {
+				$found_colon = true;
+				break;
+			}
+		}
+		if (!$found_colon) {
+			return $source;
+		}
+		reset($this->tkns);
 		$this->code = '';
 
 		$switch_level                      = 0;
@@ -1263,7 +1275,19 @@ final class ReindentColonBlocks extends FormatterPass {
 };
 final class ReindentIfColonBlocks extends FormatterPass {
 	public function format($source) {
-		$this->tkns = token_get_all($source);
+		$this->tkns  = token_get_all($source);
+		$found_colon = false;
+		foreach ($this->tkns as $token) {
+			list($id, $text) = $this->get_token($token);
+			if (ST_COLON == trim($text)) {
+				$found_colon = true;
+				break;
+			}
+		}
+		if (!$found_colon) {
+			return $source;
+		}
+		reset($this->tkns);
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
@@ -1310,9 +1334,25 @@ final class ReindentIfColonBlocks extends FormatterPass {
 };
 final class ReindentLoopColonBlocks extends FormatterPass {
 	public function format($source) {
-		$source = $this->format_for_blocks($source);
-		$source = $this->format_foreach_blocks($source);
-		$source = $this->format_while_blocks($source);
+		$tkns             = token_get_all($source);
+		$found_endwhile   = false;
+		$found_endforeach = false;
+		$found_endfor     = false;
+		foreach ($tkns as $token) {
+			list($id, $text) = $this->get_token($token);
+			if (!$found_endwhile && T_ENDWHILE == $id) {
+				$source         = $this->format_while_blocks($source);
+				$found_endwhile = true;
+			} elseif (!$found_endforeach && T_ENDFOREACH == $id) {
+				$source           = $this->format_foreach_blocks($source);
+				$found_endforeach = true;
+			} elseif (!$found_endfor && T_ENDFOR == $id) {
+				$source       = $this->format_for_blocks($source);
+				$found_endfor = true;
+			} elseif ($found_endwhile && $found_endforeach && $found_endfor) {
+				break;
+			}
+		}
 		return $source;
 	}
 

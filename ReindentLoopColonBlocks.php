@@ -1,9 +1,25 @@
 <?php
 final class ReindentLoopColonBlocks extends FormatterPass {
 	public function format($source) {
-		$source = $this->format_for_blocks($source);
-		$source = $this->format_foreach_blocks($source);
-		$source = $this->format_while_blocks($source);
+		$tkns             = token_get_all($source);
+		$found_endwhile   = false;
+		$found_endforeach = false;
+		$found_endfor     = false;
+		foreach ($tkns as $token) {
+			list($id, $text) = $this->get_token($token);
+			if (!$found_endwhile && T_ENDWHILE == $id) {
+				$source         = $this->format_while_blocks($source);
+				$found_endwhile = true;
+			} elseif (!$found_endforeach && T_ENDFOREACH == $id) {
+				$source           = $this->format_foreach_blocks($source);
+				$found_endforeach = true;
+			} elseif (!$found_endfor && T_ENDFOR == $id) {
+				$source       = $this->format_for_blocks($source);
+				$found_endfor = true;
+			} elseif ($found_endwhile && $found_endforeach && $found_endfor) {
+				break;
+			}
+		}
 		return $source;
 	}
 
