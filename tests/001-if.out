@@ -27,7 +27,8 @@ if ($a) {foreach ($a as $b) {$b;}
 if ($a) {while (false) {$b;}
 }
 
-if ($a) {function ($a, $b) {$a; $b;};
+if ($a) {function ($a, $b) {$a;
+	$b;};
 }
 
 if ($a) {
