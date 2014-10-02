@@ -401,6 +401,7 @@ final class ResizeSpaces extends FormatterPass {
 				case T_OBJECT_CAST:
 				case T_STRING_CAST:
 				case T_UNSET_CAST:
+				case T_GOTO:
 					$this->append_code($text . $this->get_space(), false);
 					break;
 				case ST_CONCAT:
