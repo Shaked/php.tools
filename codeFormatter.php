@@ -618,7 +618,7 @@ final class AutoImportPass extends FormatterPass {
 		$alias_count = [];
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
-			if (T_USE == $id || T_NAMESPACE == $id) {
+			if (T_USE == $id || T_NAMESPACE == $id || T_FUNCTION == $id) {
 				while (list($index, $token) = each($tokens)) {
 					list($id, $text) = $this->get_token($token);
 					if (ST_SEMI_COLON == $id || ST_PARENTHESES_OPEN == $id || ST_CURLY_OPEN == $id) {
