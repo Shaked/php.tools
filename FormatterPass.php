@@ -8,7 +8,8 @@ abstract class FormatterPass {
 	protected $for_idx     = 0;
 	protected $code        = '';
 	protected $ptr         = 0;
-	protected $tkns        = 0;
+	protected $tkns        = [];
+
 	abstract public function format($source);
 	protected function get_token($token) {
 		if (is_string($token)) {
@@ -58,23 +59,30 @@ abstract class FormatterPass {
 		}
 		return $this->get_token($this->tkns[$this->ptr + $delta]);
 	}
-	protected function is_token($token, $prev = false, $i = 99999, $idx = false) {
-		if ($i === 99999) {
-			$i = $this->ptr;
-		}
+	protected function is_token($token, $prev = false) {
+
+		$i = $this->ptr;
 		if ($prev) {
 			while (--$i >= 0 && is_array($this->tkns[$i]) && $this->tkns[$i][0] === T_WHITESPACE);
 		} else {
 			while (++$i < sizeof($this->tkns) - 1 && is_array($this->tkns[$i]) && $this->tkns[$i][0] === T_WHITESPACE);
 		}
-		if (isset($this->tkns[$i]) && is_string($this->tkns[$i]) && $this->tkns[$i] === $token) {
-			return $idx ? $i : true;
-		} elseif (is_array($token) && isset($this->tkns[$i]) && is_array($this->tkns[$i])) {
-			if (in_array($this->tkns[$i][0], $token)) {
-				return $idx ? $i : true;
-			} elseif ($prev && $this->tkns[$i][0] === T_OPEN_TAG) {
-				return $idx ? $i : true;
+
+		if (!isset($this->tkns[$i])) {
+			return false;
+		}
+
+		$found_token = $this->tkns[$i];
+		if (is_string($found_token) && $found_token === $token) {
+			return true;
+		} elseif (is_array($token) && is_array($found_token)) {
+			if (in_array($found_token[0], $token)) {
+				return true;
+			} elseif ($prev && $found_token[0] === T_OPEN_TAG) {
+				return true;
 			}
+		} elseif (is_array($token) && is_string($found_token) && in_array($found_token, $token)) {
+			return true;
 		}
 		return false;
 	}
@@ -122,11 +130,11 @@ abstract class FormatterPass {
 			}
 		}
 	}
-	protected function walk_until($tknid){
+	protected function walk_until($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr       = $index;
-			if($id == $tknid){
+			if ($id == $tknid) {
 				return [$id, $text];
 			}
 		}
