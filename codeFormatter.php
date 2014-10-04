@@ -2986,6 +2986,9 @@ final class CodeFormatter {
 		$delta = $start;
 		$lines = [];
 		foreach ($timings as $pass => $timestamp) {
+			if (0 == $total){
+				continue;
+			}
 			$proportion = ($timestamp - $delta) / $total;
 			$lines[] = [
 				str_pad($pass, $nameLen + 1)
