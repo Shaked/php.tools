@@ -87,7 +87,7 @@ final class CodeFormatter {
 		$delta = $start;
 		$lines = [];
 		foreach ($timings as $pass => $timestamp) {
-			if (0 == $total){
+			if (0 == $total) {
 				continue;
 			}
 			$proportion = 0;
