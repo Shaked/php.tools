@@ -61,8 +61,6 @@ final class CodeFormatter {
 	}
 
 	public function formatCode($source = '') {
-		$start = microtime(true);
-		$timings = [];
 		gc_enable();
 		$passes = array_map(
 			function ($pass) {
@@ -72,51 +70,9 @@ final class CodeFormatter {
 		);
 		while (($pass = array_shift($passes))) {
 			$source = $pass->format($source);
-			$timings[get_class($pass)] = microtime(true);
 			gc_collect_cycles();
 		}
 		gc_disable();
-		$delta = $start;
-		$total = 0;
-		$nameLen = 0;
-		foreach ($timings as $pass => $timestamp) {
-			$total += $timestamp - $delta;
-			$delta = $timestamp;
-			$nameLen = max(strlen($pass), $nameLen);
-		}
-		$delta = $start;
-		$lines = [];
-		foreach ($timings as $pass => $timestamp) {
-			if (0 == $total) {
-				continue;
-			}
-			$proportion = 0;
-			if ($total > 0 && $timestamp > 0) {
-				$proportion = ($timestamp - $delta) / $total;
-			}
-			$lines[] = [
-				str_pad($pass, $nameLen + 1)
-				. ' ' .
-				str_pad(round(($proportion * 100), 2), 5, ' ', STR_PAD_LEFT)
-				. '% ' .
-				str_pad(
-					str_repeat('|',
-						round(($proportion * 50), 0)
-					),
-					50,
-					' '
-				)
-				. ' ' .
-				($timestamp - $delta),
-				$proportion
-			];
-			$delta = $timestamp;
-		}
-		usort($lines, function ($a, $b) {
-			return $a[1] < $b[1];
-		});
-		$this->debug && fwrite(STDERR, implode(PHP_EOL, array_map(function ($v) {return $v[0];}, $lines)) . PHP_EOL);
-		$this->debug && fwrite(STDERR, 'Total: ' . $total . PHP_EOL);
 		return $source;
 	}
 }
