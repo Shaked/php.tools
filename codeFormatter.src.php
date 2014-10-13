@@ -90,7 +90,10 @@ final class CodeFormatter {
 			if (0 == $total){
 				continue;
 			}
-			$proportion = ($timestamp - $delta) / $total;
+			$proportion = 0;
+			if ($total > 0 && $timestamp > 0) {
+				$proportion = ($timestamp - $delta) / $total;
+			}
 			$lines[] = [
 				str_pad($pass, $nameLen + 1)
 				. ' ' .
