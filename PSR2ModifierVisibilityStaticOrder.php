@@ -21,6 +21,10 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					$found[] = T_CLASS;
 					$this->append_code($text, false);
 					break;
+				case T_INTERFACE:
+					$found[] = T_INTERFACE;
+					$this->append_code($text, false);
+					break;
 				case ST_CURLY_OPEN:
 				case ST_PARENTHESES_OPEN:
 					$found[] = $text;
@@ -86,13 +90,14 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case T_FUNCTION:
-					if (isset($found[0]) && T_CLASS === $found[0] && null !== $final_or_abstract) {
+					$has_found_class_or_interface = (T_CLASS === $found[0] || T_INTERFACE === $found[0]);
+					if (isset($found[0]) && $has_found_class_or_interface && null !== $final_or_abstract) {
 						$this->append_code($final_or_abstract . $this->get_space(), false);
 					}
-					if (isset($found[0]) && T_CLASS === $found[0] && null !== $visibility) {
+					if (isset($found[0]) && $has_found_class_or_interface && null !== $visibility) {
 						$this->append_code($visibility . $this->get_space(), false);
 					} elseif (
-						isset($found[0]) && T_CLASS === $found[0] &&
+						isset($found[0]) && $has_found_class_or_interface &&
 						!$this->is_token([T_DOUBLE_ARROW, T_RETURN], true) &&
 						!$this->is_token(ST_EQUAL, true) &&
 						!$this->is_token(ST_COMMA, true) &&
@@ -100,7 +105,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					) {
 						$this->append_code('public' . $this->get_space(), false);
 					}
-					if (isset($found[0]) && T_CLASS === $found[0] && null !== $static) {
+					if (isset($found[0]) && $has_found_class_or_interface && null !== $static) {
 						$this->append_code($static . $this->get_space(), false);
 					}
 					$this->append_code($text, false);

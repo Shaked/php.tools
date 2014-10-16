@@ -19,5 +19,5 @@ trait SingletonTrait
 
 interface ISingletonTrait
 {
-    function getInstance();
+    public static function getInstance();
 }
