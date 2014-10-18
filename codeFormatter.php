@@ -2856,7 +2856,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case T_FUNCTION:
-					$has_found_class_or_interface = (T_CLASS === $found[0] || T_INTERFACE === $found[0]);
+					$has_found_class_or_interface = isset($found[0]) && (T_CLASS === $found[0] || T_INTERFACE === $found[0]);
 					if (isset($found[0]) && $has_found_class_or_interface && null !== $final_or_abstract) {
 						$this->append_code($final_or_abstract . $this->get_space(), false);
 					}
