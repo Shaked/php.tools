@@ -45,6 +45,21 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
+
+							if (ST_QUOTE == $id) {
+								$this->append_code($text, false);
+								while (list($index, $token) = each($this->tkns)) {
+									list($id, $text) = $this->get_token($token);
+									$this->ptr = $index;
+
+									$this->append_code($text, false);
+									if (ST_QUOTE == $id) {
+										break;
+									}
+								}
+								continue;
+							}
+
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
 								$ignore_count++;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
@@ -88,6 +103,21 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
+
+							if (ST_QUOTE == $id) {
+								$this->append_code($text, false);
+								while (list($index, $token) = each($this->tkns)) {
+									list($id, $text) = $this->get_token($token);
+									$this->ptr = $index;
+
+									$this->append_code($text, false);
+									if (ST_QUOTE == $id) {
+										break;
+									}
+								}
+								continue;
+							}
+
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
 								$ignore_count++;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
@@ -110,6 +140,21 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
+
+							if (ST_QUOTE == $id) {
+								$this->append_code($text, false);
+								while (list($index, $token) = each($this->tkns)) {
+									list($id, $text) = $this->get_token($token);
+									$this->ptr = $index;
+
+									$this->append_code($text, false);
+									if (ST_QUOTE == $id) {
+										break;
+									}
+								}
+								continue;
+							}
+
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
 								$ignore_count++;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
