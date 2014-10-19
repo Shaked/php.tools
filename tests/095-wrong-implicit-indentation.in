@@ -19,7 +19,7 @@ function aaa($query) {
 	$a;
 }
 
-function aaa($query) { $a;
+function bbb($query) { $a;
 	$b;
 }
 

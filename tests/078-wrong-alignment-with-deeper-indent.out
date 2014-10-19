@@ -6,7 +6,7 @@ class StdObj {
 	 */
 	public function execute() {
 		return [
-			''
+			'',
 			'aaaaaaaaaaaaaaaaaaaa' => [
 				'aaaaaaaaaaaaa' => '',
 				'aaaaaaaaaaa'   => 200,
