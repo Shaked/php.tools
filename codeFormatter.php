@@ -520,6 +520,7 @@ final class AlignEquals extends FormatterPass {
 					$lines_with_objop[$block_count][] = $idx;
 				} else {
 					$block_count++;
+					$lines_with_objop[$block_count] = [];
 				}
 			}
 
