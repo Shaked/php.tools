@@ -43,7 +43,7 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 			if (trim($line) === self::ALIGNABLE_EQUAL) {
 				$lines_with_objop[$block_count][] = $idx;
 			} else {
-				$block_count++;
+				++$block_count;
 			}
 		}
 
@@ -51,7 +51,7 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 			if (sizeof($group) <= $this->policy) {
 				continue;
 			}
-			for ($i = 0; $i < $this->policy; $i++) {
+			for ($i = 0; $i < $this->policy; ++$i) {
 				array_pop($group);
 			}
 			foreach ($group as $line_number) {

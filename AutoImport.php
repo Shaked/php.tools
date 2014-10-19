@@ -75,7 +75,7 @@ final class AutoImportPass extends FormatterPass {
 				list($id, $text) = $this->get_token($token);
 				$lower_text = strtolower($text);
 				if (T_STRING === $id && isset($alias_list[$lower_text])) {
-					$alias_count[$lower_text]++;
+					++$alias_count[$lower_text];
 				}
 			}
 		}
@@ -84,11 +84,11 @@ final class AutoImportPass extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$lower_text = strtolower($text);
 			if (T_STRING === $id && isset($alias_list[$lower_text])) {
-				$alias_count[$lower_text]++;
+				++$alias_count[$lower_text];
 			} elseif (T_DOC_COMMENT === $id) {
 				foreach ($alias_list as $alias => $use) {
 					if (false !== stripos($text, $alias)) {
-						$alias_count[$alias]++;
+						++$alias_count[$alias];
 					}
 				}
 			}
@@ -134,7 +134,7 @@ final class AutoImportPass extends FormatterPass {
 				if (!isset($alias_count[$lower_text])) {
 					$alias_count[$lower_text] = 0;
 				}
-				$alias_count[$lower_text]++;
+				++$alias_count[$lower_text];
 			}
 		}
 		$auto_import_candidates = array_intersect_key($class_list, $alias_count);
@@ -183,7 +183,7 @@ final class AutoImportPass extends FormatterPass {
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
 			if (T_NAMESPACE == $id) {
-				$namespace_count++;
+				++$namespace_count;
 			}
 		}
 		if ($namespace_count <= 1) {
@@ -213,7 +213,7 @@ final class AutoImportPass extends FormatterPass {
 						$this->ptr = $index;
 						$namespace_block .= $text;
 						if ($id == ST_CURLY_OPEN) {
-							$curly_count++;
+							++$curly_count;
 						} elseif ($id == ST_CURLY_CLOSE) {
 							$curly_count--;
 						}

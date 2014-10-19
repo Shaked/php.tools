@@ -8,7 +8,7 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, ) = $this->get_token($token);
 			if (T_OPEN_TAG === $id) {
-				$open_tag_count++;
+				++$open_tag_count;
 				break;
 			}
 		}

@@ -28,12 +28,12 @@ final class ReindentColonBlocks extends FormatterPass {
 					$this->printUntilTheEndOfString();
 					break;
 				case T_SWITCH:
-					$switch_level++;
+					++$switch_level;
 					$switch_curly_count[$switch_level] = 0;
 					$this->append_code($text, false);
 					break;
 				case ST_CURLY_OPEN:
-					$switch_curly_count[$switch_level]++;
+					++$switch_curly_count[$switch_level];
 					$this->append_code($text, false);
 					break;
 				case ST_CURLY_CLOSE:

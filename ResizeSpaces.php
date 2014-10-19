@@ -162,7 +162,7 @@ final class ResizeSpaces extends FormatterPass {
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
 			}
-			$i++;
+			++$i;
 		}
 		label_case7:
 		if (isset($tkns[$i])) {
@@ -171,7 +171,7 @@ final class ResizeSpaces extends FormatterPass {
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
 			}
-			$i++;
+			++$i;
 		}
 
 		label_case6:
@@ -181,7 +181,7 @@ final class ResizeSpaces extends FormatterPass {
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
 			}
-			$i++;
+			++$i;
 		}
 
 		label_case5:
@@ -191,7 +191,7 @@ final class ResizeSpaces extends FormatterPass {
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
 			}
-			$i++;
+			++$i;
 		}
 
 		label_case4:
@@ -201,7 +201,7 @@ final class ResizeSpaces extends FormatterPass {
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
 			}
-			$i++;
+			++$i;
 		}
 
 		label_case3:
@@ -211,7 +211,7 @@ final class ResizeSpaces extends FormatterPass {
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
 			}
-			$i++;
+			++$i;
 		}
 
 		label_case2:
@@ -221,7 +221,7 @@ final class ResizeSpaces extends FormatterPass {
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
 			}
-			$i++;
+			++$i;
 		}
 
 		label_case1:
@@ -231,7 +231,7 @@ final class ResizeSpaces extends FormatterPass {
 			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
 				$new_tokens[] = $token;
 			}
-			$i++;
+			++$i;
 		}
 
 		if (--$n > 0) {

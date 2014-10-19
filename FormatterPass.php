@@ -27,7 +27,7 @@ abstract class FormatterPass {
 	}
 	protected function get_crlf_indent($in_for = false, $increment = 0) {
 		if ($in_for) {
-			$this->for_idx++;
+			++$this->for_idx;
 			if ($this->for_idx > 2) {
 				$this->for_idx = 0;
 			}
@@ -113,7 +113,7 @@ abstract class FormatterPass {
 		for ($i = $i; $i >= 0; $i--) {
 			$char = substr($haystack, $i, 1);
 			if ($needle === $char) {
-				$cnt++;
+				++$cnt;
 			} elseif (' ' !== $char && "\t" !== $char) {
 				break;
 			}

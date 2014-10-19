@@ -71,7 +71,7 @@ final class OrderUseClauses extends FormatterPass {
 				list($id, $text) = $this->get_token($token);
 				$lower_text = strtolower($text);
 				if (T_STRING === $id && isset($alias_list[$lower_text])) {
-					$alias_count[$lower_text]++;
+					++$alias_count[$lower_text];
 				}
 				$return .= $text;
 			}
@@ -81,11 +81,11 @@ final class OrderUseClauses extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$lower_text = strtolower($text);
 			if (T_STRING === $id && isset($alias_list[$lower_text])) {
-				$alias_count[$lower_text]++;
+				++$alias_count[$lower_text];
 			} elseif (T_DOC_COMMENT === $id) {
 				foreach ($alias_list as $alias => $use) {
 					if (false !== stripos($text, $alias)) {
-						$alias_count[$alias]++;
+						++$alias_count[$alias];
 					}
 				}
 			}
@@ -110,7 +110,7 @@ final class OrderUseClauses extends FormatterPass {
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
 			if (T_NAMESPACE == $id) {
-				$namespace_count++;
+				++$namespace_count;
 			}
 		}
 		if ($namespace_count <= 1) {
@@ -140,7 +140,7 @@ final class OrderUseClauses extends FormatterPass {
 						$this->ptr = $index;
 						$namespace_block .= $text;
 						if ($id == ST_CURLY_OPEN) {
-							$curly_count++;
+							++$curly_count;
 						} elseif ($id == ST_CURLY_CLOSE) {
 							$curly_count--;
 						}

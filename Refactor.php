@@ -52,7 +52,7 @@ final class Refactor extends FormatterPass {
 				$match = true;
 				$buffer = $text;
 				$i = 1;
-				for ($i = 1; $i < $from_size; $i++) {
+				for ($i = 1; $i < $from_size; ++$i) {
 					list($index, $token) = each($this->tkns);
 					$this->ptr = $index;
 					list($id, $text) = $this->get_token($token);

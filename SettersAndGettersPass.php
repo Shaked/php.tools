@@ -34,7 +34,7 @@ final class SettersAndGettersPass extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						if ($id == ST_CURLY_OPEN) {
-							$curly_count++;
+							++$curly_count;
 						}
 						if ($id == ST_CURLY_CLOSE) {
 							$curly_count--;

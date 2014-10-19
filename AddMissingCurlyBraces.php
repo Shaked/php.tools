@@ -26,7 +26,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						if (ST_PARENTHESES_OPEN === $id) {
-							$paren_count++;
+							++$paren_count;
 						} elseif (ST_PARENTHESES_CLOSE === $id) {
 							$paren_count--;
 						}
@@ -61,7 +61,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							}
 
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
-								$ignore_count++;
+								++$ignore_count;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
 								$ignore_count--;
 							}
@@ -82,7 +82,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						if (ST_PARENTHESES_OPEN === $id) {
-							$paren_count++;
+							++$paren_count;
 						} elseif (ST_PARENTHESES_CLOSE === $id) {
 							$paren_count--;
 						}
@@ -119,7 +119,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							}
 
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
-								$ignore_count++;
+								++$ignore_count;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
 								$ignore_count--;
 							}
@@ -156,7 +156,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							}
 
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
-								$ignore_count++;
+								++$ignore_count;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
 								$ignore_count--;
 							}

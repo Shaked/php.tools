@@ -14,7 +14,7 @@ final class AlignDoubleArrow extends FormatterPass {
 				case T_FOREACH:
 				case ST_SEMI_COLON:
 				case T_ARRAY:
-					$context_counter++;
+					++$context_counter;
 					$this->append_code($text, false);
 					break;
 
@@ -24,7 +24,7 @@ final class AlignDoubleArrow extends FormatterPass {
 
 				case ST_BRACKET_OPEN:
 					if ($this->is_token(array(T_DOUBLE_ARROW), true)) {
-						$context_counter++;
+						++$context_counter;
 					}
 					$this->append_code($text, false);
 					break;
@@ -35,7 +35,7 @@ final class AlignDoubleArrow extends FormatterPass {
 			}
 		}
 
-		for ($j = 0; $j <= $context_counter; $j++) {
+		for ($j = 0; $j <= $context_counter; ++$j) {
 			$placeholder = sprintf(self::ALIGNABLE_EQUAL, $j);
 			if (false === strpos($this->code, $placeholder)) {
 				continue;
@@ -48,7 +48,7 @@ final class AlignDoubleArrow extends FormatterPass {
 				if (substr_count($line, $placeholder) > 0) {
 					$lines_with_objop[$block_count][] = $idx;
 				} else {
-					$block_count++;
+					++$block_count;
 				}
 			}
 
@@ -57,7 +57,7 @@ final class AlignDoubleArrow extends FormatterPass {
 				if (1 === sizeof($group)) {
 					continue;
 				}
-				$i++;
+				++$i;
 				$farthest_objop = 0;
 				foreach ($group as $idx) {
 					$farthest_objop = max($farthest_objop, strpos($lines[$idx], $placeholder));

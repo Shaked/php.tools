@@ -12,11 +12,11 @@ final class AlignEquals extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_FUNCTION:
-					$context_counter++;
+					++$context_counter;
 					$this->append_code($text, false);
 					break;
 				case ST_PARENTHESES_OPEN:
-					$paren_count++;
+					++$paren_count;
 					$this->append_code($text, false);
 					break;
 				case ST_PARENTHESES_CLOSE:
@@ -24,7 +24,7 @@ final class AlignEquals extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case ST_BRACKET_OPEN:
-					$bracket_count++;
+					++$bracket_count;
 					$this->append_code($text, false);
 					break;
 				case ST_BRACKET_CLOSE:
@@ -43,7 +43,7 @@ final class AlignEquals extends FormatterPass {
 			}
 		}
 
-		for ($j = 0; $j <= $context_counter; $j++) {
+		for ($j = 0; $j <= $context_counter; ++$j) {
 			$placeholder = sprintf(self::ALIGNABLE_EQUAL, $j);
 			if (false === strpos($this->code, $placeholder)) {
 				continue;
@@ -56,7 +56,7 @@ final class AlignEquals extends FormatterPass {
 				if (substr_count($line, $placeholder) > 0) {
 					$lines_with_objop[$block_count][] = $idx;
 				} else {
-					$block_count++;
+					++$block_count;
 					$lines_with_objop[$block_count] = [];
 				}
 			}
@@ -66,7 +66,7 @@ final class AlignEquals extends FormatterPass {
 				if (1 === sizeof($group)) {
 					continue;
 				}
-				$i++;
+				++$i;
 				$farthest_objop = 0;
 				foreach ($group as $idx) {
 					$farthest_objop = max($farthest_objop, strpos($lines[$idx], $placeholder));
