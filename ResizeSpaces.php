@@ -249,7 +249,7 @@ final class ResizeSpaces extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ARRAY:
-					if ($this->is_token(array(T_VARIABLE, ST_REFERENCE))) {
+					if ($this->is_token([T_VARIABLE, ST_REFERENCE])) {
 						$this->append_code($text . $this->get_space(), false);
 						break;
 					} elseif ($this->is_token(ST_PARENTHESES_OPEN)) {
@@ -257,7 +257,7 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case T_STRING:
-					if ($this->is_token(array(T_VARIABLE, T_DOUBLE_ARROW))) {
+					if ($this->is_token([T_VARIABLE, T_DOUBLE_ARROW])) {
 						$this->append_code($text . $this->get_space(), false);
 						break;
 					} else {
@@ -265,7 +265,7 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case ST_CURLY_OPEN:
-					if ($this->is_token(array(T_STRING, T_DO, ST_PARENTHESES_CLOSE), true)) {
+					if ($this->is_token([T_STRING, T_DO, ST_PARENTHESES_CLOSE], true)) {
 						$this->append_code($this->get_space() . $text, false);
 						break;
 					} elseif ($this->is_token(ST_CURLY_CLOSE)) {
@@ -273,7 +273,7 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case ST_SEMI_COLON:
-					if ($this->is_token(array(T_VARIABLE, T_INC))) {
+					if ($this->is_token([T_VARIABLE, T_INC])) {
 						$this->append_code($text . $this->get_space(), false);
 						break;
 					}
@@ -315,7 +315,7 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case T_DOUBLE_ARROW:
-					if ($this->is_token(array(T_CONSTANT_ENCAPSED_STRING, T_STRING, T_VARIABLE, T_LNUMBER, T_DNUMBER), true)) {
+					if ($this->is_token([T_CONSTANT_ENCAPSED_STRING, T_STRING, T_VARIABLE, T_LNUMBER, T_DNUMBER], true)) {
 						$this->append_code($this->get_space() . $text . $this->get_space());
 						break;
 					}
@@ -406,7 +406,7 @@ final class ResizeSpaces extends FormatterPass {
 					break;
 				case ST_CONCAT:
 					if (
-						!$this->is_token(array(ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE, T_VARIABLE, T_STRING, T_CONSTANT_ENCAPSED_STRING, T_WHITESPACE), true)
+						!$this->is_token([ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE, T_VARIABLE, T_STRING, T_CONSTANT_ENCAPSED_STRING, T_WHITESPACE], true)
 					) {
 						$this->append_code($this->get_space() . $text, false);
 					} else {
@@ -414,7 +414,7 @@ final class ResizeSpaces extends FormatterPass {
 					}
 					break;
 				case ST_REFERENCE:
-					if ($this->is_token(array(T_STRING), true)) {
+					if ($this->is_token([T_STRING], true)) {
 						$this->append_code($this->get_space() . $text, false);
 						break;
 					}

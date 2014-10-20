@@ -15,7 +15,7 @@ final class PSR1ClassNames extends FormatterPass {
 				case T_STRING:
 					if ($found_class) {
 						$count = 0;
-						$tmp = ucwords(str_replace(array('-', '_'), ' ', strtolower($text), $count));
+						$tmp = ucwords(str_replace(['-', '_'], ' ', strtolower($text), $count));
 						if ($count > 0) {
 							$text = str_replace(' ', '', $tmp);
 						}

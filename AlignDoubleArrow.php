@@ -23,7 +23,7 @@ final class AlignDoubleArrow extends FormatterPass {
 					break;
 
 				case ST_BRACKET_OPEN:
-					if ($this->is_token(array(T_DOUBLE_ARROW), true)) {
+					if ($this->is_token([T_DOUBLE_ARROW], true)) {
 						++$context_counter;
 					}
 					$this->append_code($text, false);

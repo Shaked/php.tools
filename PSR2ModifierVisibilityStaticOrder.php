@@ -46,7 +46,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 				case T_PUBLIC:
 				case T_PRIVATE:
 				case T_PROTECTED:
-					if (!$this->is_token(array(T_VARIABLE))) {
+					if (!$this->is_token([T_VARIABLE])) {
 						$visibility = $text;
 						$skip_whitespaces = true;
 					} else {
@@ -55,7 +55,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					break;
 				case T_FINAL:
 				case T_ABSTRACT:
-					if (!$this->is_token(array(T_CLASS))) {
+					if (!$this->is_token([T_CLASS])) {
 						$final_or_abstract = $text;
 						$skip_whitespaces = true;
 					} else {
@@ -66,7 +66,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					if (!is_null($visibility)) {
 						$static = $text;
 						$skip_whitespaces = true;
-					} elseif (!$this->is_token(array(T_VARIABLE, T_DOUBLE_COLON)) && !$this->is_token(array(T_NEW), true)) {
+					} elseif (!$this->is_token([T_VARIABLE, T_DOUBLE_COLON]) && !$this->is_token([T_NEW], true)) {
 						$static = $text;
 						$skip_whitespaces = true;
 					} else {

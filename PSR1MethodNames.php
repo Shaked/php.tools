@@ -15,7 +15,7 @@ final class PSR1MethodNames extends FormatterPass {
 				case T_STRING:
 					if ($found_method) {
 						$count = 0;
-						$tmp = ucwords(str_replace(array('-', '_'), ' ', strtolower($text), $count));
+						$tmp = ucwords(str_replace(['-', '_'], ' ', strtolower($text), $count));
 						if ($count > 0 && '' !== trim($tmp) && '_' !== substr($text, 0, 1)) {
 							$text = lcfirst(str_replace(' ', '', $tmp));
 						}

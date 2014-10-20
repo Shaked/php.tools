@@ -43,7 +43,7 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 						$this->append_code($text, false);
 						if (ST_CURLY_OPEN === $id) {
 							break;
-						} elseif (ST_COLON === $id && !$this->is_token(array(T_CLOSE_TAG))) {
+						} elseif (ST_COLON === $id && !$this->is_token([T_CLOSE_TAG])) {
 							$this->set_indent(+1);
 							break;
 						} elseif (ST_COLON === $id) {
@@ -52,9 +52,9 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 					}
 					break;
 				default:
-					if (substr_count($text, $this->new_line) > 0 && !$this->is_token(array($close_token))) {
+					if (substr_count($text, $this->new_line) > 0 && !$this->is_token([$close_token])) {
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					} elseif (substr_count($text, $this->new_line) > 0 && $this->is_token(array($close_token))) {
+					} elseif (substr_count($text, $this->new_line) > 0 && $this->is_token([$close_token])) {
 						$this->set_indent(-1);
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
 						$this->set_indent(+1);
@@ -100,9 +100,9 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 					}
 					break;
 				default:
-					if (substr_count($text, $this->new_line) > 0 && !$this->is_token(array(T_ENDWHILE))) {
+					if (substr_count($text, $this->new_line) > 0 && !$this->is_token([T_ENDWHILE])) {
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					} elseif (substr_count($text, $this->new_line) > 0 && $this->is_token(array(T_ENDWHILE))) {
+					} elseif (substr_count($text, $this->new_line) > 0 && $this->is_token([T_ENDWHILE])) {
 						$this->set_indent(-1);
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
 						$this->set_indent(+1);

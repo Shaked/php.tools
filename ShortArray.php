@@ -15,7 +15,7 @@ class ShortArray extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ARRAY:
-					if ($this->is_token(array(ST_PARENTHESES_OPEN))) {
+					if ($this->is_token([ST_PARENTHESES_OPEN])) {
 						$found_paren[] = self::FOUND_ARRAY;
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);

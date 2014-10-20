@@ -13,7 +13,7 @@ abstract class FormatterPass {
 	abstract public function format($source);
 	protected function get_token($token) {
 		if (is_string($token)) {
-			return array($token, $token);
+			return [$token, $token];
 		} else {
 			return $token;
 		}

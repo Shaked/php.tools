@@ -10,7 +10,7 @@ final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 				case ST_CURLY_OPEN:
 					if ($this->is_token(ST_PARENTHESES_CLOSE, true)) {
 						$this->append_code($text, true);
-					} elseif ($this->is_token(array(T_ELSE, T_STRING), true)) {
+					} elseif ($this->is_token([T_ELSE, T_STRING], true)) {
 						$this->append_code($text, true);
 					} else {
 						$this->append_code($text, false);
