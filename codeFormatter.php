@@ -1190,9 +1190,12 @@ final class OrderUseClauses extends FormatterPass {
 			$alias_count[$alias] = 0;
 		}
 		$return = '';
-		foreach ($new_tokens as $token) {
+		foreach ($new_tokens as $idx => $token) {
 			if ($token instanceof SurrogateToken) {
 				$return .= array_shift($use_stack);
+			} elseif (T_WHITESPACE == $token[0] && $new_tokens[$idx - 1] instanceof SurrogateToken && $new_tokens[$idx + 1] instanceof SurrogateToken) {
+				$return .= $this->new_line;
+				continue;
 			} else {
 				list($id, $text) = $this->get_token($token);
 				$lower_text = strtolower($text);
