@@ -22,6 +22,7 @@ include 'ExtraCommaInArray.php';
 include 'LeftAlignComment.php';
 include 'MergeCurlyCloseAndDoWhile.php';
 include 'MergeDoubleArrowAndArray.php';
+include 'MergeElseIf.php';
 include 'MergeParenCloseWithCurlyOpen.php';
 include 'NormalizeLnAndLtrimLines.php';
 include 'OrderUseClauses.php';
@@ -34,6 +35,7 @@ include 'ReindentObjOps.php';
 include 'ResizeSpaces.php';
 include 'RTrim.php';
 include 'SettersAndGettersPass.php';
+include 'ShortArray.php';
 include 'SurrogateToken.php';
 include 'TwoCommandsInSameLine.php';
 //PSR standards
@@ -77,7 +79,7 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters::', 'refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters::', 'refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--refactor=from --to=to] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
@@ -90,6 +92,7 @@ if (!isset($testEnv)) {
 			'--refactor=from, --to=to' => 'Search for "from" and replace with "to" - context aware search and replace',
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
 			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
+			'--passes=pass1,passN' => 'call specific compiler pass',
 			'-h, --help' => 'this help message',
 			'-o=file' => 'output the formatted code to "file"',
 			'-v, --timing' => 'timing',
@@ -245,6 +248,24 @@ if (!isset($testEnv)) {
 			)
 		);
 		$fmt->addPass(new Refactor($opts['refactor'], $opts['to']));
+	}
+
+	if (isset($opts['passes'])) {
+		$optPasses = array_map(function ($v) {
+			return trim($v);
+		}, explode(',', $opts['passes']));
+		foreach ($optPasses as $optPass) {
+			if (class_exists($optPass)) {
+				$fmt->addPass(new $optPass());
+			}
+		}
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return substr($v, 0, strlen('--passes')) !== '--passes';
+				}
+			)
+		);
 	}
 
 	if (isset($opts['o'])) {

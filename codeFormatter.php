@@ -1018,6 +1018,34 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 		return $this->code;
 	}
 };
+/**
+ * From PHP-CS-Fixer
+ */
+class MergeElseIf extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$paren_count = 0;
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_IF:
+					if ($this->is_token(array(T_ELSE), true) && !$this->is_token(array(T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO), true)) {
+						$this->append_code($text, true);
+						break;
+					}
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+
+		return $this->code;
+	}
+}
+;
 final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -2421,6 +2449,54 @@ final class SettersAndGettersPass extends FormatterPass {
 		return $str;
 	}
 };
+/**
+ * From PHP-CS-Fixer
+ */
+class ShortArray extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$paren_count = 0;
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_ARRAY:
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr = $index;
+						if (T_WHITESPACE == $id) {
+							$this->append_code($text, false);
+							continue;
+						}
+
+						if (ST_PARENTHESES_OPEN == $id) {
+							++$paren_count;
+							$this->append_code(ST_BRACKET_OPEN, false);
+							continue;
+						} elseif (ST_PARENTHESES_CLOSE == $id) {
+							--$paren_count;
+							$this->append_code(ST_BRACKET_CLOSE, false);
+							continue;
+						}
+
+						if (0 == $paren_count) {
+							break;
+						}
+					}
+					$this->append_code($text, false);
+					break;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+
+		return $this->code;
+	}
+}
+;
 final class SurrogateToken {
 }
 ;
@@ -3030,7 +3106,7 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters::', 'refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters::', 'refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--refactor=from --to=to] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
@@ -3043,6 +3119,7 @@ if (!isset($testEnv)) {
 			'--refactor=from, --to=to' => 'Search for "from" and replace with "to" - context aware search and replace',
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
 			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
+			'--passes=pass1,passN' => 'call specific compiler pass',
 			'-h, --help' => 'this help message',
 			'-o=file' => 'output the formatted code to "file"',
 			'-v, --timing' => 'timing',
@@ -3198,6 +3275,24 @@ if (!isset($testEnv)) {
 			)
 		);
 		$fmt->addPass(new Refactor($opts['refactor'], $opts['to']));
+	}
+
+	if (isset($opts['passes'])) {
+		$optPasses = array_map(function ($v) {
+			return trim($v);
+		}, explode(',', $opts['passes']));
+		foreach ($optPasses as $optPass) {
+			if (class_exists($optPass)) {
+				$fmt->addPass(new $optPass());
+			}
+		}
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return substr($v, 0, strlen('--passes')) !== '--passes';
+				}
+			)
+		);
 	}
 
 	if (isset($opts['o'])) {
