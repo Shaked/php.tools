@@ -20,7 +20,7 @@ final class AlignEquals extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case ST_PARENTHESES_CLOSE:
-					$paren_count--;
+					--$paren_count;
 					$this->append_code($text, false);
 					break;
 				case ST_BRACKET_OPEN:
@@ -28,7 +28,7 @@ final class AlignEquals extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case ST_BRACKET_CLOSE:
-					$bracket_count--;
+					--$bracket_count;
 					$this->append_code($text, false);
 					break;
 				case ST_EQUAL:

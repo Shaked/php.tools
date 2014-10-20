@@ -37,9 +37,9 @@ final class ReindentColonBlocks extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case ST_CURLY_CLOSE:
-					$switch_curly_count[$switch_level]--;
+					--$switch_curly_count[$switch_level];
 					if (0 === $switch_curly_count[$switch_level] && $switch_level > 0) {
-						$switch_level--;
+						--$switch_level;
 					}
 					$this->append_code($this->get_indent($switch_level) . $text, false);
 					break;

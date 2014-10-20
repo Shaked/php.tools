@@ -37,7 +37,7 @@ final class SettersAndGettersPass extends FormatterPass {
 							++$curly_count;
 						}
 						if ($id == ST_CURLY_CLOSE) {
-							$curly_count--;
+							--$curly_count;
 						}
 						if (0 === $curly_count) {
 							break;

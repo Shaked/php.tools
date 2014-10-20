@@ -167,7 +167,7 @@ abstract class FormatterPass {
 	protected function substr_count_trailing($haystack, $needle) {
 		$cnt = 0;
 		$i = strlen($haystack) - 1;
-		for ($i = $i; $i >= 0; $i--) {
+		for ($i = $i; $i >= 0;--$i) {
 			$char = substr($haystack, $i, 1);
 			if ($needle === $char) {
 				++$cnt;
@@ -226,7 +226,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						if (ST_PARENTHESES_OPEN === $id) {
 							++$paren_count;
 						} elseif (ST_PARENTHESES_CLOSE === $id) {
-							$paren_count--;
+							--$paren_count;
 						}
 						$this->append_code($text, false);
 						if (0 === $paren_count && !$this->is_token([T_COMMENT, T_DOC_COMMENT])) {
@@ -261,7 +261,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
 								++$ignore_count;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
-								$ignore_count--;
+								--$ignore_count;
 							}
 							$this->append_code($text, false);
 							if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON) || $this->is_token([T_WHILE])) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
@@ -282,7 +282,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						if (ST_PARENTHESES_OPEN === $id) {
 							++$paren_count;
 						} elseif (ST_PARENTHESES_CLOSE === $id) {
-							$paren_count--;
+							--$paren_count;
 						}
 						$this->append_code($text, false);
 						if (0 === $paren_count && !$this->is_token([T_COMMENT, T_DOC_COMMENT])) {
@@ -319,7 +319,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
 								++$ignore_count;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
-								$ignore_count--;
+								--$ignore_count;
 							}
 							$this->append_code($text, false);
 							if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON) || $this->is_token([T_WHILE])) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
@@ -356,7 +356,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
 								++$ignore_count;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
-								$ignore_count--;
+								--$ignore_count;
 							}
 							$this->append_code($text, false);
 							if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON) || $this->is_token([T_WHILE])) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
@@ -483,7 +483,7 @@ final class AlignEquals extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case ST_PARENTHESES_CLOSE:
-					$paren_count--;
+					--$paren_count;
 					$this->append_code($text, false);
 					break;
 				case ST_BRACKET_OPEN:
@@ -491,7 +491,7 @@ final class AlignEquals extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case ST_BRACKET_CLOSE:
-					$bracket_count--;
+					--$bracket_count;
 					$this->append_code($text, false);
 					break;
 				case ST_EQUAL:
@@ -1006,7 +1006,7 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 			switch ($id) {
 				case T_ARRAY:
 					if ($this->is_token([T_DOUBLE_ARROW], true)) {
-						$in_do_while_context--;
+						--$in_do_while_context;
 						$this->append_code($text);
 						break;
 					}
@@ -1299,7 +1299,7 @@ final class OrderUseClauses extends FormatterPass {
 						if ($id == ST_CURLY_OPEN) {
 							++$curly_count;
 						} elseif ($id == ST_CURLY_CLOSE) {
-							$curly_count--;
+							--$curly_count;
 						}
 
 						if (0 == $curly_count) {
@@ -1568,9 +1568,9 @@ final class ReindentColonBlocks extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case ST_CURLY_CLOSE:
-					$switch_curly_count[$switch_level]--;
+					--$switch_curly_count[$switch_level];
 					if (0 === $switch_curly_count[$switch_level] && $switch_level > 0) {
-						$switch_level--;
+						--$switch_level;
 					}
 					$this->append_code($this->get_indent($switch_level) . $text, false);
 					break;
@@ -1785,7 +1785,7 @@ final class ReindentObjOps extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case ST_PARENTHESES_CLOSE:
-					$paren_count--;
+					--$paren_count;
 					$this->append_code($text, false);
 					break;
 				case ST_BRACKET_OPEN:
@@ -1793,7 +1793,7 @@ final class ReindentObjOps extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case ST_BRACKET_CLOSE:
-					$bracket_count--;
+					--$bracket_count;
 					$this->append_code($text, false);
 					break;
 				case T_OBJECT_OPERATOR:
@@ -1842,7 +1842,7 @@ final class ReindentObjOps extends FormatterPass {
 			}
 		}
 
-		for ($j = $alignable_objop_counter; $j > 0; $j--) {
+		for ($j = $alignable_objop_counter; $j > 0;--$j) {
 			$current_align_objop = sprintf(self::ALIGNABLE_OBJOP, $j);
 
 			if (substr_count($this->code, $current_align_objop) <= 1) {
@@ -2369,7 +2369,7 @@ final class SettersAndGettersPass extends FormatterPass {
 							++$curly_count;
 						}
 						if ($id == ST_CURLY_CLOSE) {
-							$curly_count--;
+							--$curly_count;
 						}
 						if (0 === $curly_count) {
 							break;

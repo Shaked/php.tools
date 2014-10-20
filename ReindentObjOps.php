@@ -18,7 +18,7 @@ final class ReindentObjOps extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case ST_PARENTHESES_CLOSE:
-					$paren_count--;
+					--$paren_count;
 					$this->append_code($text, false);
 					break;
 				case ST_BRACKET_OPEN:
@@ -26,7 +26,7 @@ final class ReindentObjOps extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case ST_BRACKET_CLOSE:
-					$bracket_count--;
+					--$bracket_count;
 					$this->append_code($text, false);
 					break;
 				case T_OBJECT_OPERATOR:
@@ -75,7 +75,7 @@ final class ReindentObjOps extends FormatterPass {
 			}
 		}
 
-		for ($j = $alignable_objop_counter; $j > 0; $j--) {
+		for ($j = $alignable_objop_counter; $j > 0;--$j) {
 			$current_align_objop = sprintf(self::ALIGNABLE_OBJOP, $j);
 
 			if (substr_count($this->code, $current_align_objop) <= 1) {

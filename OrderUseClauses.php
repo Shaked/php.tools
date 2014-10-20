@@ -145,7 +145,7 @@ final class OrderUseClauses extends FormatterPass {
 						if ($id == ST_CURLY_OPEN) {
 							++$curly_count;
 						} elseif ($id == ST_CURLY_CLOSE) {
-							$curly_count--;
+							--$curly_count;
 						}
 
 						if (0 == $curly_count) {
