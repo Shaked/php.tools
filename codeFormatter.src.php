@@ -26,7 +26,6 @@ include 'MergeElseIf.php';
 include 'MergeParenCloseWithCurlyOpen.php';
 include 'NormalizeLnAndLtrimLines.php';
 include 'OrderUseClauses.php';
-include 'Refactor.php';
 include 'Reindent.php';
 include 'ReindentColonBlocks.php';
 include 'ReindentIfColonBlocks.php';
@@ -79,9 +78,9 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters::', 'refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters::', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
-		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--refactor=from --to=to] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
+		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--disable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
@@ -89,7 +88,6 @@ if (!isset($testEnv)) {
 			'--psr1' => 'activate PSR1 style',
 			'--psr2' => 'activate PSR2 style',
 			'--purge_empty_line=policy' => 'purge empty lines. policies: aggressive (1 line), mild (5 lines)',
-			'--refactor=from, --to=to' => 'Search for "from" and replace with "to" - context aware search and replace',
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
 			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
 			'--passes=pass1,passN' => 'call specific compiler pass',
@@ -105,10 +103,6 @@ if (!isset($testEnv)) {
 		}
 		echo PHP_EOL, 'If <target> is blank, it reads from stdin', PHP_EOL;
 		die();
-	}
-	if (isset($opts['refactor']) && !isset($opts['to'])) {
-		fwrite(STDERR, "Refactor must have --refactor (from) and --to (to) parameters" . PHP_EOL);
-		exit(255);
 	}
 
 	$debug = false;
@@ -236,19 +230,6 @@ if (!isset($testEnv)) {
 	}
 	$fmt->addPass(new LeftAlignComment());
 	$fmt->addPass(new RTrim());
-
-	if (isset($opts['refactor']) && isset($opts['to'])) {
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					$param_from = '--refactor';
-					$param_to = '--to';
-					return substr($v, 0, strlen($param_from)) !== $param_from && substr($v, 0, strlen($param_to)) !== $param_to;
-				}
-			)
-		);
-		$fmt->addPass(new Refactor($opts['refactor'], $opts['to']));
-	}
 
 	if (isset($opts['passes'])) {
 		$optPasses = array_map(function ($v) {

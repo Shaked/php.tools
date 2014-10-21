@@ -1321,80 +1321,6 @@ final class OrderUseClauses extends FormatterPass {
 	}
 }
 ;
-final class Refactor extends FormatterPass {
-	private $from;
-	private $to;
-	public function __construct($from, $to) {
-		$this->setFrom($from);
-		$this->setTo($to);
-	}
-	private function setFrom($from) {
-		$tkns = token_get_all('<?php ' . $from);
-		array_shift($tkns);
-		$tkns = array_map(function ($v) {
-			return $this->get_token($v);
-		}, $tkns);
-		$this->from = $tkns;
-		return $this;
-	}
-	private function getFrom() {
-		return $this->from;
-	}
-	private function setTo($to) {
-		$tkns = token_get_all('<?php ' . $to);
-		array_shift($tkns);
-		$tkns = array_map(function ($v) {
-			return $this->get_token($v);
-		}, $tkns);
-		$this->to = $tkns;
-		return $this;
-	}
-	private function getTo() {
-		return $this->to;
-	}
-
-	public function format($source) {
-		$from = $this->getFrom();
-		$from_size = sizeof($from);
-		$from_str = implode('', array_map(function ($v) {
-			return $v[1];
-		}, $from));
-		$to = $this->getTo();
-		$to_str = implode('', array_map(function ($v) {
-			return $v[1];
-		}, $to));
-
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-
-			if ($id == $from[0][0]) {
-				$match = true;
-				$buffer = $text;
-				$i = 1;
-				for ($i = 1; $i < $from_size; ++$i) {
-					list($index, $token) = each($this->tkns);
-					$this->ptr = $index;
-					list($id, $text) = $this->get_token($token);
-					$buffer .= $text;
-					if ($id != $from[$i][0]) {
-						$match = false;
-						break;
-					}
-				}
-				if ($match) {
-					$buffer = str_replace($from_str, $to_str, $buffer);
-				}
-				$this->append_code($buffer, false);
-			} else {
-				$this->append_code($text, false);
-			}
-		}
-		return $this->code;
-	}
-};
 final class Reindent extends FormatterPass {
 	private function normalizeHereDocs($source) {
 		$this->tkns = token_get_all($source);
@@ -3107,9 +3033,9 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters::', 'refactor:', 'to:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters::', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
-		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--refactor=from --to=to] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
+		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--disable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
@@ -3117,7 +3043,6 @@ if (!isset($testEnv)) {
 			'--psr1' => 'activate PSR1 style',
 			'--psr2' => 'activate PSR2 style',
 			'--purge_empty_line=policy' => 'purge empty lines. policies: aggressive (1 line), mild (5 lines)',
-			'--refactor=from, --to=to' => 'Search for "from" and replace with "to" - context aware search and replace',
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
 			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
 			'--passes=pass1,passN' => 'call specific compiler pass',
@@ -3133,10 +3058,6 @@ if (!isset($testEnv)) {
 		}
 		echo PHP_EOL, 'If <target> is blank, it reads from stdin', PHP_EOL;
 		die();
-	}
-	if (isset($opts['refactor']) && !isset($opts['to'])) {
-		fwrite(STDERR, "Refactor must have --refactor (from) and --to (to) parameters" . PHP_EOL);
-		exit(255);
 	}
 
 	$debug = false;
@@ -3264,19 +3185,6 @@ if (!isset($testEnv)) {
 	}
 	$fmt->addPass(new LeftAlignComment());
 	$fmt->addPass(new RTrim());
-
-	if (isset($opts['refactor']) && isset($opts['to'])) {
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					$param_from = '--refactor';
-					$param_to = '--to';
-					return substr($v, 0, strlen($param_from)) !== $param_from && substr($v, 0, strlen($param_to)) !== $param_to;
-				}
-			)
-		);
-		$fmt->addPass(new Refactor($opts['refactor'], $opts['to']));
-	}
 
 	if (isset($opts['passes'])) {
 		$optPasses = array_map(function ($v) {
