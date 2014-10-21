@@ -26,6 +26,7 @@ include 'MergeDoubleArrowAndArray.php';
 include 'MergeElseIf.php';
 include 'MergeParenCloseWithCurlyOpen.php';
 include 'NormalizeLnAndLtrimLines.php';
+include 'OrderMethod.php';
 include 'OrderUseClauses.php';
 include 'Reindent.php';
 include 'ReindentColonBlocks.php';
