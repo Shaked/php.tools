@@ -2642,6 +2642,52 @@ class ShortArray extends FormatterPass {
 	}
 }
 ;
+final class SmartLnAfterCurlyOpen extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$curly_count = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case ST_CURLY_OPEN:
+					$this->append_code($text, false);
+					$curly_count = 1;
+					$stack = '';
+					$found_line_break = false;
+					$has_ln_after = $this->has_ln_after();
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr = $index;
+						if (ST_CURLY_OPEN == $id) {
+							++$curly_count;
+						}
+						if (ST_CURLY_CLOSE == $id) {
+							--$curly_count;
+						}
+						$stack .= $text;
+						if (T_WHITESPACE === $id && substr_count($text, $this->new_line) > 0) {
+							$found_line_break = true;
+							break;
+						}
+						if (0 == $curly_count) {
+							break;
+						}
+					}
+					if ($found_line_break && !$has_ln_after) {
+						$this->append_code($this->new_line, false);
+					}
+					$this->append_code($stack, false);
+					break;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+		return $this->code;
+	}
+};
 final class SurrogateToken {
 }
 ;
@@ -3251,7 +3297,7 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
@@ -3264,6 +3310,7 @@ if (!isset($testEnv)) {
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
+			'--smart_linebreak_after_curly' => 'convert multistatement blocks into multiline blocks',
 			'--passes=pass1,passN' => 'call specific compiler pass',
 			'-h, --help' => 'this help message',
 			'-o=file' => 'output the formatted code to "file"',
@@ -3326,6 +3373,16 @@ if (!isset($testEnv)) {
 
 	$fmt->addPass(new OrderUseClauses());
 	$fmt->addPass(new AddMissingCurlyBraces());
+	if (isset($opts['smart_linebreak_after_curly'])) {
+		$fmt->addPass(new SmartLnAfterCurlyOpen());
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return $v !== '--smart_linebreak_after_curly';
+				}
+			)
+		);
+	}
 	$fmt->addPass(new NormalizeLnAndLtrimLines());
 	$fmt->addPass(new MergeParenCloseWithCurlyOpen());
 	$fmt->addPass(new MergeCurlyCloseAndDoWhile());

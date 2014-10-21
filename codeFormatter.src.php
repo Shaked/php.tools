@@ -37,6 +37,7 @@ include 'ResizeSpaces.php';
 include 'RTrim.php';
 include 'SettersAndGettersPass.php';
 include 'ShortArray.php';
+include 'SmartLnAfterCurlyOpen.php';
 include 'SurrogateToken.php';
 include 'TwoCommandsInSameLine.php';
 //PSR standards
@@ -80,7 +81,7 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
@@ -93,6 +94,7 @@ if (!isset($testEnv)) {
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
+			'--smart_linebreak_after_curly' => 'convert multistatement blocks into multiline blocks',
 			'--passes=pass1,passN' => 'call specific compiler pass',
 			'-h, --help' => 'this help message',
 			'-o=file' => 'output the formatted code to "file"',
@@ -155,6 +157,16 @@ if (!isset($testEnv)) {
 
 	$fmt->addPass(new OrderUseClauses());
 	$fmt->addPass(new AddMissingCurlyBraces());
+	if (isset($opts['smart_linebreak_after_curly'])) {
+		$fmt->addPass(new SmartLnAfterCurlyOpen());
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return $v !== '--smart_linebreak_after_curly';
+				}
+			)
+		);
+	}
 	$fmt->addPass(new NormalizeLnAndLtrimLines());
 	$fmt->addPass(new MergeParenCloseWithCurlyOpen());
 	$fmt->addPass(new MergeCurlyCloseAndDoWhile());
