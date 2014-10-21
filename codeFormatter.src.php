@@ -17,6 +17,7 @@ include 'AddMissingCurlyBraces.php';
 include 'AlignDoubleArrow.php';
 include 'AlignEquals.php';
 include 'AutoImport.php';
+include 'ConstructorPass.php';
 include 'EliminateDuplicatedEmptyLines.php';
 include 'ExtraCommaInArray.php';
 include 'LeftAlignComment.php';
@@ -78,9 +79,9 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters::', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
-		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
+		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--disable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
@@ -89,6 +90,7 @@ if (!isset($testEnv)) {
 			'--psr2' => 'activate PSR2 style',
 			'--purge_empty_line=policy' => 'purge empty lines. policies: aggressive (1 line), mild (5 lines)',
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
+			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
 			'--passes=pass1,passN' => 'call specific compiler pass',
 			'-h, --help' => 'this help message',
@@ -128,6 +130,16 @@ if (!isset($testEnv)) {
 			)
 		);
 		$fmt->addPass(new SettersAndGettersPass($opts['setters_and_getters']));
+	}
+	if (isset($opts['constructor'])) {
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return substr($v, 0, strlen('--constructor')) !== '--constructor';
+				}
+			)
+		);
+		$fmt->addPass(new ConstructorPass($opts['constructor']));
 	}
 	if (isset($opts['oracleDB'])) {
 		$argv = array_values(
