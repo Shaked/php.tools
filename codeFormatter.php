@@ -246,15 +246,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 
 							if (ST_QUOTE == $id) {
 								$this->append_code($text, false);
-								while (list($index, $token) = each($this->tkns)) {
-									list($id, $text) = $this->get_token($token);
-									$this->ptr = $index;
-
-									$this->append_code($text, false);
-									if (ST_QUOTE == $id) {
-										break;
-									}
-								}
+								$this->printUntilTheEndOfString();
 								continue;
 							}
 
@@ -304,15 +296,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 
 							if (ST_QUOTE == $id) {
 								$this->append_code($text, false);
-								while (list($index, $token) = each($this->tkns)) {
-									list($id, $text) = $this->get_token($token);
-									$this->ptr = $index;
-
-									$this->append_code($text, false);
-									if (ST_QUOTE == $id) {
-										break;
-									}
-								}
+								$this->printUntilTheEndOfString();
 								continue;
 							}
 
@@ -341,15 +325,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 
 							if (ST_QUOTE == $id) {
 								$this->append_code($text, false);
-								while (list($index, $token) = each($this->tkns)) {
-									list($id, $text) = $this->get_token($token);
-									$this->ptr = $index;
-
-									$this->append_code($text, false);
-									if (ST_QUOTE == $id) {
-										break;
-									}
-								}
+								$this->printUntilTheEndOfString();
 								continue;
 							}
 
