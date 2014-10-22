@@ -61,7 +61,7 @@ if (isset($opt['v']) || isset($opt['verbose'])) {
 		unlink($caseOut . '-got');
 	}
 }
-echo "Took ", (microtime(true) - $start), 'us', PHP_EOL;
+echo "Took ", (microtime(true) - $start), PHP_EOL;
 if (sizeof($brokenTests) > 0) {
 	echo "run phpCodeFormatter_test.php -v to see the error diffs", PHP_EOL;
 	exit(255);
