@@ -19,27 +19,44 @@ echo 'Running tests...', PHP_EOL;
 $brokenTests = [];
 foreach ($cases as $caseIn) {
 	$fmt = new CodeFormatter();
-	$fmt->addPass(new TwoCommandsInSameLine());
-	$fmt->addPass(new AddMissingCurlyBraces());
-	$fmt->addPass(new NormalizeLnAndLtrimLines());
-	$fmt->addPass(new MergeParenCloseWithCurlyOpen());
-	$fmt->addPass(new MergeCurlyCloseAndDoWhile());
-	$fmt->addPass(new MergeDoubleArrowAndArray());
-	$fmt->addPass(new ExtraCommaInArray());
-	$fmt->addPass(new ResizeSpaces());
-	$fmt->addPass(new Reindent());
-	$fmt->addPass(new ReindentColonBlocks());
-	$fmt->addPass(new ReindentLoopColonBlocks());
-	$fmt->addPass(new ReindentIfColonBlocks());
-	$fmt->addPass(new ReindentObjOps());
-	$fmt->addPass(new OrderUseClauses());
-	$fmt->addPass(new EliminateDuplicatedEmptyLines());
-	$fmt->addPass(new AlignEquals());
-	$fmt->addPass(new AlignDoubleArrow());
-	$fmt->addPass(new LeftAlignComment());
-	$fmt->addPass(new RTrim());
 	$caseOut = str_replace('.in', '.out', $caseIn);
-	$got = $fmt->formatCode(file_get_contents($caseIn));
+	$content = file_get_contents($caseIn);
+	$tokens = token_get_all($content);
+	$specialPasses = false;
+	foreach ($tokens as $token) {
+		list($id, $text) = get_token($token);
+		if (T_COMMENT == $id && '//passes:' == substr($text, 0, 9)) {
+			$passes = explode(',', str_replace('//passes:', '', $text));
+			foreach ($passes as $pass) {
+				$pass = trim($pass);
+				$fmt->addPass(new $pass());
+				$specialPasses = true;
+			}
+		}
+	}
+	if (!$specialPasses) {
+		$fmt->addPass(new TwoCommandsInSameLine());
+		$fmt->addPass(new AddMissingCurlyBraces());
+		$fmt->addPass(new NormalizeLnAndLtrimLines());
+		$fmt->addPass(new MergeParenCloseWithCurlyOpen());
+		$fmt->addPass(new MergeCurlyCloseAndDoWhile());
+		$fmt->addPass(new MergeDoubleArrowAndArray());
+		$fmt->addPass(new ExtraCommaInArray());
+		$fmt->addPass(new ResizeSpaces());
+		$fmt->addPass(new Reindent());
+		$fmt->addPass(new ReindentColonBlocks());
+		$fmt->addPass(new ReindentLoopColonBlocks());
+		$fmt->addPass(new ReindentIfColonBlocks());
+		$fmt->addPass(new ReindentObjOps());
+		$fmt->addPass(new OrderUseClauses());
+		$fmt->addPass(new EliminateDuplicatedEmptyLines());
+		$fmt->addPass(new AlignEquals());
+		$fmt->addPass(new AlignDoubleArrow());
+		$fmt->addPass(new LeftAlignComment());
+		$fmt->addPass(new RTrim());
+	}
+
+	$got = $fmt->formatCode($content);
 	$expected = file_get_contents($caseOut);
 	if ($got != $expected) {
 		$brokenTests[$caseOut] = $got;
@@ -65,3 +82,11 @@ if (sizeof($brokenTests) > 0) {
 	exit(255);
 }
 exit(0);
+
+function get_token($token) {
+	if (is_string($token)) {
+		return [$token, $token];
+	} else {
+		return $token;
+	}
+}
