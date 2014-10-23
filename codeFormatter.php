@@ -1733,7 +1733,23 @@ final class ReindentIfColonBlocks extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						$this->append_code($text, false);
-						if (ST_CURLY_OPEN === $id) {
+						if (ST_PARENTHESES_OPEN === $id) {
+							$paren_count = 1;
+							while (list($index, $token) = each($this->tkns)) {
+								list($id, $text) = $this->get_token($token);
+								$this->ptr = $index;
+								$this->append_code($text, false);
+								if (ST_PARENTHESES_OPEN === $id) {
+									++$paren_count;
+								}
+								if (ST_PARENTHESES_CLOSE === $id) {
+									--$paren_count;
+								}
+								if (0 == $paren_count) {
+									break;
+								}
+							}
+						} elseif (ST_CURLY_OPEN === $id) {
 							break;
 						} elseif (ST_COLON === $id && !$this->is_token([T_CLOSE_TAG])) {
 							$this->set_indent(+1);
