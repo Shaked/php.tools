@@ -873,20 +873,7 @@ final class ConstructorPass extends FormatterPass {
 };
 final class EliminateDuplicatedEmptyLines extends FormatterPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
-	const AGGRESSIVE = 'aggressive';
-	const MILD = 'mild';
-	private $policiesSizes = [
-		self::AGGRESSIVE => 1,
-		self::MILD => 5,
-	];
 	private $policy = null;
-
-	public function __construct($policy = self::AGGRESSIVE) {
-		$this->policy = $this->policiesSizes[self::AGGRESSIVE];
-		if (isset($this->policiesSizes[$policy])) {
-			$this->policy = $this->policiesSizes[$policy];
-		}
-	}
 
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -920,10 +907,10 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 		}
 
 		foreach ($lines_with_objop as $group) {
-			if (sizeof($group) <= $this->policy) {
+			if (sizeof($group) <= 1) {
 				continue;
 			}
-			for ($i = 0; $i < $this->policy; ++$i) {
+			for ($i = 0; $i < 1; ++$i) {
 				array_pop($group);
 			}
 			foreach ($group as $line_number) {
@@ -3273,7 +3260,7 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'timing', 'purge_empty_line', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'timing', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
@@ -3282,7 +3269,6 @@ if (!isset($testEnv)) {
 			'--psr' => 'activate PSR1 and PSR2 styles',
 			'--psr1' => 'activate PSR1 style',
 			'--psr2' => 'activate PSR2 style',
-			'--purge_empty_line=policy' => 'purge empty lines. policies: aggressive (1 line), mild (5 lines)',
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
@@ -3370,18 +3356,7 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new ReindentLoopColonBlocks());
 	$fmt->addPass(new ReindentIfColonBlocks());
 	$fmt->addPass(new ReindentObjOps());
-	if (isset($opts['purge_empty_line'])) {
-		$fmt->addPass(new EliminateDuplicatedEmptyLines($opts['purge_empty_line']));
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return substr($v, 0, strlen('--purge_empty_line')) !== '--purge_empty_line';
-				}
-			)
-		);
-	} else {
-		$fmt->addPass(new EliminateDuplicatedEmptyLines());
-	}
+	$fmt->addPass(new EliminateDuplicatedEmptyLines());
 
 	if (!isset($opts['disable_auto_align'])) {
 		$fmt->addPass(new AlignEquals());

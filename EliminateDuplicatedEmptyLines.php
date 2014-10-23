@@ -1,20 +1,7 @@
 <?php
 final class EliminateDuplicatedEmptyLines extends FormatterPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
-	const AGGRESSIVE = 'aggressive';
-	const MILD = 'mild';
-	private $policiesSizes = [
-		self::AGGRESSIVE => 1,
-		self::MILD => 5,
-	];
 	private $policy = null;
-
-	public function __construct($policy = self::AGGRESSIVE) {
-		$this->policy = $this->policiesSizes[self::AGGRESSIVE];
-		if (isset($this->policiesSizes[$policy])) {
-			$this->policy = $this->policiesSizes[$policy];
-		}
-	}
 
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -48,10 +35,10 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 		}
 
 		foreach ($lines_with_objop as $group) {
-			if (sizeof($group) <= $this->policy) {
+			if (sizeof($group) <= 1) {
 				continue;
 			}
-			for ($i = 0; $i < $this->policy; ++$i) {
+			for ($i = 0; $i < 1; ++$i) {
 				array_pop($group);
 			}
 			foreach ($group as $line_number) {
