@@ -632,7 +632,7 @@ final class AutoImportPass extends FormatterPass {
 			$base_class_name = '';
 			while ($cnp = array_pop($class_name_parts)) {
 				$base_class_name = $cnp . $base_class_name;
-				$class_list[strtolower($base_class_name)][] = str_replace('\\\\', '\\', '\\' . $class_name) . ' as ' . $base_class_name;
+				$class_list[strtolower($base_class_name)][] = ltrim(str_replace('\\\\', '\\', '\\' . $class_name) . ' as ' . $base_class_name, '\\');
 			}
 		}
 
@@ -680,7 +680,7 @@ final class AutoImportPass extends FormatterPass {
 			if (T_FUNCTION == $id) {
 				$touched_function = true;
 			}
-			if (!$touched_function && $touched_namespace && T_USE == $id) {
+			if (!$touched_function && $touched_namespace && (T_USE == $id || T_CLASS == $id || T_INTERFACE == $id || T_TRAIT == $id)) {
 				$return .= self::AUTOIMPORT_PLACEHOLDER . $this->new_line;
 				$return .= $text;
 
