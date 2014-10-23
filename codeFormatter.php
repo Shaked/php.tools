@@ -680,7 +680,7 @@ final class AutoImportPass extends FormatterPass {
 			if (T_FUNCTION == $id) {
 				$touched_function = true;
 			}
-			if (!$touched_function && $touched_namespace && (T_USE == $id || T_CLASS == $id || T_INTERFACE == $id || T_TRAIT == $id)) {
+			if (!$touched_function && $touched_namespace && (T_FINAL == $id || T_STATIC == $id || T_USE == $id || T_CLASS == $id || T_INTERFACE == $id || T_TRAIT == $id)) {
 				$return .= self::AUTOIMPORT_PLACEHOLDER . $this->new_line;
 				$return .= $text;
 
