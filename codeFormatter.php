@@ -2281,7 +2281,7 @@ final class ResizeSpaces extends FormatterPass {
 					if ($this->is_token([T_STRING, T_DO, ST_PARENTHESES_CLOSE], true)) {
 						$this->append_code($this->get_space() . $text, false);
 						break;
-					} elseif ($this->is_token(ST_CURLY_CLOSE)) {
+					} elseif ($this->is_token(ST_CURLY_CLOSE) || ($this->is_token([T_VARIABLE]) && $this->is_token([T_OBJECT_OPERATOR], true))) {
 						$this->append_code($text, false);
 						break;
 					}
