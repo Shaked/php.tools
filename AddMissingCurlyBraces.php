@@ -124,7 +124,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 					if (!$this->is_token([ST_CURLY_OPEN, ST_COLON, T_IF])) {
 						$while_in_next_token = $this->is_token([T_WHILE, T_DO]);
 						$ignore_count = 0;
-						$this->append_code('{' . $this->new_line);
+						$this->append_code('{');
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;

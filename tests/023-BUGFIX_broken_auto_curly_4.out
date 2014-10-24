@@ -11,7 +11,6 @@ abstract class GenericContent {
 		if ($prop_types) {
 			$this->prop_types = $prop_types;
 		} else {
-
 			$this->prop_types = self::$PROPERTIES;
 		}
 

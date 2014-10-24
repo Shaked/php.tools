@@ -75,7 +75,7 @@ final class ReindentObjOps extends FormatterPass {
 			}
 		}
 
-		for ($j = $alignable_objop_counter; $j > 0;--$j) {
+		for ($j = $alignable_objop_counter; $j > 0; --$j) {
 			$current_align_objop = sprintf(self::ALIGNABLE_OBJOP, $j);
 
 			if (substr_count($this->code, $current_align_objop) <= 1) {

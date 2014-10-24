@@ -12,7 +12,6 @@ if (true) {
 if ($a) {
 	return false;
 } else {
-
 	$a;
 }
 

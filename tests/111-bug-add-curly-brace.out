@@ -19,7 +19,6 @@ if ($a == 1) {$x = $i;
 		$ten = intval($ten / 26);
 	}
 } else {
-
 	while ($ten != 0) {
 		$ten = intval($ten / 26);
 	}

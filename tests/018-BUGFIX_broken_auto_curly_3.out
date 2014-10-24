@@ -12,18 +12,15 @@ if ($count_spaces > 0) {func($a);
 }
 
 if ($count_spaces > 0) {func($a);
-} else {
-	$a;
+} else { $a;
 }
 
 if ($count_spaces > 0) {func($a);
-} else {
-	do {$a;} while (false);
+} else {do {$a;} while (false);
 }
 
 if ($count_spaces > 0) {func($a);
-} else {
-	do {$a;} while (false);
+} else {do {$a;} while (false);
 }
 
 if ($count_spaces > 0) {func($a);
@@ -32,14 +29,12 @@ if ($count_spaces > 0) {func($a);
 
 if ($count_spaces > 0) {func($a);
 } elseif (true) {do {$a;} while (false);
-} else {
-	foreach ($a as $v) {$b;}
+} else {foreach ($a as $v) {$b;}
 }
 
 if ($count_spaces > 0) {func($a);
-} elseif (true) {do {$b;} while (false);} else {
-	foreach ($a as $v) {$b;
-	}
+} elseif (true) {do {$b;} while (false);} else {foreach ($a as $v) {$b;
+}
 }
 
 if ($count_spaces > 0) {func($a);
