@@ -216,6 +216,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_WHILE:
 				case T_FOREACH:
 				case T_FOR:
 					$this->append_code($text, false);
@@ -240,6 +241,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						} else {
 							$this->append_code('{');
 						}
+						$iii = 0;
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
@@ -255,12 +257,16 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
 								--$ignore_count;
 							}
-							$this->append_code($text, false);
-							if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON) || $this->is_token([T_WHILE])) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
+							if($iii++ == 0 && ($id !== T_WHITESPACE || ($id === T_WHITESPACE && substr_count($text, $this->new_line)==0))){
+								$this->append_code($this->new_line . $text, false);
+							}else{
+								$this->append_code($text, false);
+							}
+							if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON)) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
 								break;
 							}
 						}
-						$this->append_code($this->get_crlf_indent() . '}' . $this->get_crlf_indent(), false);
+						$this->append_code($this->get_crlf_indent() . '}', false);
 						break 2;
 					}
 					break;
@@ -290,6 +296,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							// $this->append_code('{'.$this->new_line);
 							$this->append_code('{');
 						}
+						$iii = 0;
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
@@ -305,12 +312,16 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
 								--$ignore_count;
 							}
-							$this->append_code($text, false);
-							if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON) || $this->is_token([T_WHILE])) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
+							if($iii++ == 0 && ($id !== T_WHITESPACE || ($id === T_WHITESPACE && substr_count($text, $this->new_line)==0))){
+								$this->append_code($this->new_line . $text, false);
+							}else{
+								$this->append_code($text, false);
+							}
+							if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON)) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
 								break;
 							}
 						}
-						$this->append_code($this->get_crlf_indent() . '}' . $this->get_crlf_indent(), false);
+						$this->append_code($this->get_crlf_indent() . '}', false);
 						break 2;
 					}
 					break;
@@ -318,7 +329,8 @@ final class AddMissingCurlyBraces extends FormatterPass {
 					$this->append_code($text, false);
 					if (!$this->is_token(ST_CURLY_OPEN) && !$this->is_token(ST_COLON) && !$this->is_token([T_IF])) {
 						$ignore_count = 0;
-						$this->append_code('{' . $this->new_line);
+						$this->append_code('{');
+						$iii = 0;
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
@@ -334,12 +346,16 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
 								--$ignore_count;
 							}
-							$this->append_code($text, false);
-							if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON) || $this->is_token([T_WHILE])) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
+							if($iii++ == 0 && ($id !== T_WHITESPACE || ($id === T_WHITESPACE && substr_count($text, $this->new_line)==0))){
+								$this->append_code($this->new_line . $text, false);
+							}else{
+								$this->append_code($text, false);
+							}
+							if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON)) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
 								break;
 							}
 						}
-						$this->append_code($this->get_crlf_indent() . '}' . $this->get_crlf_indent(), false);
+						$this->append_code($this->get_crlf_indent() . '}', false);
 						break 2;
 					}
 					break;
@@ -2079,8 +2095,14 @@ final class ResizeSpaces extends FormatterPass {
 				case ST_QUESTION:
 				case ST_CONCAT:
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
-					list($next_id, $next_text) = $this->inspect_token(+1);
-					if (
+					list($next_id, $next_text) = $this->inspect_token(+1);		
+					if ($id == ST_QUESTION && $next_id == ST_COLON) {
+						// deal with :  $a ?: $b   do not add whitespace between ?:
+						if (T_WHITESPACE == $prev_id)
+							$this->append_code($text, false);
+						else
+							$this->append_code($this->get_space() . $text, false);
+					} elseif (
 						T_WHITESPACE == $prev_id &&
 						T_WHITESPACE != $next_id
 					) {
@@ -2106,6 +2128,16 @@ final class ResizeSpaces extends FormatterPass {
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
 					list($next_id, $next_text) = $this->inspect_token(+1);
 					if (
+						$in_ternary_operator && 
+						$prev_id == ST_QUESTION
+					) {
+						// deal with :  $a ?: $b   do not add whitespace between ?:
+						if (T_WHITESPACE == $next_id)
+							$this->append_code($text, false);
+						else
+							$this->append_code($text . $this->get_space(), false);
+						$in_ternary_operator = false;
+					} elseif (
 						$in_ternary_operator &&
 						T_WHITESPACE == $prev_id &&
 						T_WHITESPACE != $next_id
