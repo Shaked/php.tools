@@ -57,7 +57,10 @@ foreach ($cases as $caseIn) {
 	}
 
 	$got = $fmt->formatCode($content);
-	$expected = file_get_contents($caseOut);
+	$expected = '';
+	if (file_exists($caseOut)) {
+		$expected = file_get_contents($caseOut);
+	}
 	if ($got != $expected) {
 		$brokenTests[$caseOut] = $got;
 		echo '!';
