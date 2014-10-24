@@ -2427,7 +2427,7 @@ final class ResizeSpaces extends FormatterPass {
 					}
 					break;
 				case ST_REFERENCE:
-					if (($this->is_token([T_VARIABLE], true) && $this->is_token([T_VARIABLE])) || ($this->is_token([T_STRING], true) && $this->is_token([T_STRING]))) {
+					if (($this->is_token([T_VARIABLE], true) && $this->is_token([T_VARIABLE])) || ($this->is_token([T_VARIABLE], true) && $this->is_token([T_STRING])) || ($this->is_token([T_STRING], true) && $this->is_token([T_STRING]))) {
 						$this->append_code($this->get_space() . $text . $this->get_space(), false);
 						break;
 					} elseif ($this->is_token([T_STRING], true)) {

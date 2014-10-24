@@ -5,7 +5,7 @@ function a(&$b) {
 }
 $c = &$a;
 
-if (($a&self::MY_BITMASK) === $a) {
+if (($a & self::MY_BITMASK) === $a) {
 
 }
 
