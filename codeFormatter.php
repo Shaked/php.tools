@@ -2029,6 +2029,7 @@ final class ResizeSpaces extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$in_ternary_operator = false;
+		$short_ternary_operator = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -2088,7 +2089,7 @@ final class ResizeSpaces extends FormatterPass {
 						T_WHITESPACE == $prev_id &&
 						T_WHITESPACE != $next_id
 					) {
-						$this->append_code($text . $this->get_space(), false);
+						$this->append_code($text . $this->get_space(!$this->is_token(ST_COLON)), false);
 					} elseif (
 						T_WHITESPACE != $prev_id &&
 						T_WHITESPACE == $next_id
@@ -2098,12 +2099,13 @@ final class ResizeSpaces extends FormatterPass {
 						T_WHITESPACE != $prev_id &&
 						T_WHITESPACE != $next_id
 					) {
-						$this->append_code($this->get_space() . $text . $this->get_space(), false);
+						$this->append_code($this->get_space() . $text . $this->get_space(!$this->is_token(ST_COLON)), false);
 					} else {
 						$this->append_code($text, false);
 					}
 					if (ST_QUESTION == $id) {
 						$in_ternary_operator = true;
+						$short_ternary_operator = $this->is_token(ST_COLON);
 					}
 					break;
 				case ST_COLON:
@@ -2121,14 +2123,14 @@ final class ResizeSpaces extends FormatterPass {
 						T_WHITESPACE != $prev_id &&
 						T_WHITESPACE == $next_id
 					) {
-						$this->append_code($this->get_space() . $text, false);
+						$this->append_code($this->get_space(!$short_ternary_operator) . $text, false);
 						$in_ternary_operator = false;
 					} elseif (
 						$in_ternary_operator &&
 						T_WHITESPACE != $prev_id &&
 						T_WHITESPACE != $next_id
 					) {
-						$this->append_code($this->get_space() . $text . $this->get_space(), false);
+						$this->append_code($this->get_space(!$short_ternary_operator) . $text . $this->get_space(), false);
 						$in_ternary_operator = false;
 					} else {
 						$this->append_code($text, false);
