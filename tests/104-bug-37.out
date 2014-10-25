@@ -6,7 +6,6 @@ if ($a) {
 if ($a) {
 	throw new OrderException("Order №{$orderId} not found", 100);
 } else {
-
 	throw new OrderException("Order №{$orderId} not found", 100);
 }
 
@@ -21,7 +20,6 @@ if ($a) {
 } elseif (!$b) {
 	throw new OrderException("Order №{$orderId} not found", 100);
 } else {
-
 	throw new OrderException("Order №{$orderId} not found", 100);
 }
 

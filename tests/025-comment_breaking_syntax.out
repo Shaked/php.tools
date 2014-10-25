@@ -5,6 +5,5 @@ if ($a)// Comment 1
 { $r = 2;
 } elseif ($c)// Comment 3
 { $r = 3;
-} else {
-	continue;
+} else {continue;
 }

@@ -18,6 +18,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_WHILE:
 				case T_FOREACH:
 				case T_FOR:
 					$this->append_code($text, false);
@@ -35,7 +36,8 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							break;
 						}
 					}
-					if (!$this->is_token(ST_CURLY_OPEN) && !$this->is_token(ST_COLON)) {
+					if (!$this->is_token([ST_CURLY_OPEN, ST_COLON, ST_SEMI_COLON])) {
+						$while_in_next_token = $this->is_token([T_WHILE, T_DO]);
 						$ignore_count = 0;
 						if (!$this->is_token([T_COMMENT, T_DOC_COMMENT], true)) {
 							$this->append_code($this->new_line . '{');
@@ -58,7 +60,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 								--$ignore_count;
 							}
 							$this->append_code($text, false);
-							if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON) || $this->is_token([T_WHILE])) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
+							if ($ignore_count <= 0 && !($this->is_token([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN]) || ($while_in_next_token && $this->is_token([T_WHILE]))) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
 								break;
 							}
 						}
@@ -83,7 +85,8 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							break;
 						}
 					}
-					if (!$this->is_token(ST_CURLY_OPEN) && !$this->is_token(ST_COLON)) {
+					if (!$this->is_token([ST_CURLY_OPEN, ST_COLON])) {
+						$while_in_next_token = $this->is_token([T_WHILE, T_DO]);
 						$ignore_count = 0;
 						if (!$this->is_token([T_COMMENT, T_DOC_COMMENT], true)) {
 							// $this->append_code($this->new_line.'{'.$this->new_line);
@@ -108,7 +111,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 								--$ignore_count;
 							}
 							$this->append_code($text, false);
-							if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON) || $this->is_token([T_WHILE])) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
+							if ($ignore_count <= 0 && !($this->is_token([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN]) || ($while_in_next_token && $this->is_token([T_WHILE]))) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
 								break;
 							}
 						}
@@ -118,9 +121,10 @@ final class AddMissingCurlyBraces extends FormatterPass {
 					break;
 				case T_ELSE:
 					$this->append_code($text, false);
-					if (!$this->is_token(ST_CURLY_OPEN) && !$this->is_token(ST_COLON) && !$this->is_token([T_IF])) {
+					if (!$this->is_token([ST_CURLY_OPEN, ST_COLON, T_IF])) {
+						$while_in_next_token = $this->is_token([T_WHILE, T_DO]);
 						$ignore_count = 0;
-						$this->append_code('{' . $this->new_line);
+						$this->append_code('{');
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
@@ -137,7 +141,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 								--$ignore_count;
 							}
 							$this->append_code($text, false);
-							if ($ignore_count <= 0 && !($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_SEMI_COLON) || $this->is_token([T_WHILE])) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
+							if ($ignore_count <= 0 && !($this->is_token([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN]) || ($while_in_next_token && $this->is_token([T_WHILE]))) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
 								break;
 							}
 						}

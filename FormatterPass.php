@@ -110,7 +110,7 @@ abstract class FormatterPass {
 	protected function substr_count_trailing($haystack, $needle) {
 		$cnt = 0;
 		$i = strlen($haystack) - 1;
-		for ($i = $i; $i >= 0;--$i) {
+		for ($i = $i; $i >= 0; --$i) {
 			$char = substr($haystack, $i, 1);
 			if ($needle === $char) {
 				++$cnt;

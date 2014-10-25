@@ -59,27 +59,29 @@ if ($a) {
 			echo 5;
 			break;
 	}
+}
 
-	while ($a) {
-		switch ($a) {
-			case 1:
-			case 2:
-			case 3:
-				echo 1;
-				echo 2;
-				echo 3;
-				echo 4;
-				break;
-			case 4:
-			default:
-				echo 2;
-				echo 3;
-				echo 4;
-				echo 5;
-				break;
-		}
+// This is not part of the upper IF from here
+while ($a) {
+	switch ($a) {
+		case 1:
+		case 2:
+		case 3:
+			echo 1;
+			echo 2;
+			echo 3;
+			echo 4;
+			break;
+		case 4:
+		default:
+			echo 2;
+			echo 3;
+			echo 4;
+			echo 5;
+			break;
 	}
 }
+// To Here
 
 if ($a) {
 	switch ($a) {
