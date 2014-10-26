@@ -5,7 +5,7 @@ final class YodaComparisons extends FormatterPass {
 	const CHAIN_FUNC = 'CHAIN_FUNC';
 	const CHAIN_STRING = 'CHAIN_STRING';
 	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
-	const PHP_OPEN_TAG_PLACEHOLDER = '<?php' . ' /*\x2 PHPOPEN \x3*/';
+	const PHP_OPEN_TAG_PLACEHOLDER = '<?php /*\x2 PHPOPEN \x3*/';
 	public function format($source) {
 		return $this->yodise($source);
 	}
