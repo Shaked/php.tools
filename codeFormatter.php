@@ -2906,14 +2906,23 @@ final class TwoCommandsInSameLine extends FormatterPass {
 
 				case ST_PARENTHESES_OPEN:
 					$this->append_code($text, false);
+					$paren_count = 1;
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						$this->append_code($text, false);
+
+						if (ST_PARENTHESES_OPEN == $id) {
+							++$paren_count;
+						}
 						if (ST_PARENTHESES_CLOSE == $id) {
+							--$paren_count;
+						}
+						if (0 == $paren_count) {
 							break;
 						}
 					}
+
 					break;
 				default:
 					$this->append_code($text, false);
@@ -2923,7 +2932,8 @@ final class TwoCommandsInSameLine extends FormatterPass {
 		}
 		return $this->code;
 	}
-};
+}
+;
 final class YodaComparisons extends FormatterPass {
 	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
 	const CHAIN_LITERAL = 'CHAIN_LITERAL';
