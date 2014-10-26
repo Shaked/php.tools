@@ -159,14 +159,7 @@ abstract class FormatterPass {
 		return $cnt;
 	}
 	protected function printUntilTheEndOfString() {
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			$this->append_code($text, false);
-			if (ST_QUOTE == $id) {
-				break;
-			}
-		}
+		$this->printUntilTheEndOf(ST_QUOTE);
 	}
 	protected function walk_until($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
@@ -174,6 +167,16 @@ abstract class FormatterPass {
 			$this->ptr = $index;
 			if ($id == $tknid) {
 				return [$id, $text];
+			}
+		}
+	}
+	protected  function printUntilTheEndOf($tknid) {
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			$this->append_code($text, false);
+			if ($tknid == $id) {
+				break;
 			}
 		}
 	}
