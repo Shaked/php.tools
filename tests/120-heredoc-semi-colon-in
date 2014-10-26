@@ -1,0 +1,18 @@
+$str = <<<EOT
+	sdf
+EOT
+;
+
+
+if ($a) {
+	$str = <<<EOT
+		{$keywords}abcd"
+EOT;
+}
+
+
+if ($a) {
+	$str = <<<EOT
+		{$keywords}abcd"
+EOT;
+}
