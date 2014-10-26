@@ -818,7 +818,6 @@ final class AutoPreincrement extends FormatterPass {
 	const CHAIN_FUNC = 'CHAIN_FUNC';
 	const CHAIN_STRING = 'CHAIN_STRING';
 	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
-	const PHP_OPEN_TAG_PLACEHOLDER = '<?php /*\x2 PHPOPEN \x3*/';
 	public function format($source) {
 		return $this->swap($source);
 	}
@@ -941,7 +940,8 @@ final class AutoPreincrement extends FormatterPass {
 	}
 
 	private function scan_and_replace(&$tkns, &$ptr, $start, $end) {
-		$tmp = self::PHP_OPEN_TAG_PLACEHOLDER;
+		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
+		$tmp = $placeholder;
 		$tkn_count = 1;
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -957,7 +957,7 @@ final class AutoPreincrement extends FormatterPass {
 			}
 			$tmp .= $text;
 		}
-		return $start . str_replace(self::PHP_OPEN_TAG_PLACEHOLDER, '', $this->swap($tmp)) . $end;
+		return $start . str_replace($placeholder, '', $this->swap($tmp)) . $end;
 	}
 };
 final class ConstructorPass extends FormatterPass {
@@ -2913,7 +2913,6 @@ final class YodaComparisons extends FormatterPass {
 	const CHAIN_FUNC = 'CHAIN_FUNC';
 	const CHAIN_STRING = 'CHAIN_STRING';
 	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
-	const PHP_OPEN_TAG_PLACEHOLDER = '<?php /*\x2 PHPOPEN \x3*/';
 	public function format($source) {
 		return $this->yodise($source);
 	}
@@ -3124,7 +3123,8 @@ final class YodaComparisons extends FormatterPass {
 	}
 
 	private function scan_and_replace(&$tkns, &$ptr, $start, $end) {
-		$tmp = self::PHP_OPEN_TAG_PLACEHOLDER;
+		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
+		$tmp = $placeholder;
 		$tkn_count = 1;
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -3140,7 +3140,7 @@ final class YodaComparisons extends FormatterPass {
 			}
 			$tmp .= $text;
 		}
-		return $start . str_replace(self::PHP_OPEN_TAG_PLACEHOLDER, '', $this->yodise($tmp)) . $end;
+		return $start . str_replace($placeholder, '', $this->yodise($tmp)) . $end;
 	}
 };
 //PSR standards
