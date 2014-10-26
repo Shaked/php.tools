@@ -51,7 +51,6 @@ final class Reindent extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$found_stack = [];
-		$dollar_open_curly_brace = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -70,6 +69,10 @@ final class Reindent extends FormatterPass {
 				}
 			}
 			switch ($id) {
+				case ST_QUOTE:
+					$this->append_code($text, false);
+					$this->printUntilTheEndOfString();
+					break;
 				case T_CLOSE_TAG:
 					$this->append_code($text, false);
 					while (list($index, $token) = each($this->tkns)) {
@@ -105,20 +108,12 @@ final class Reindent extends FormatterPass {
 					}
 					$found_stack[] = $indent_token;
 					break;
-				case T_DOLLAR_OPEN_CURLY_BRACES:
-					$dollar_open_curly_brace = true;
-					$this->append_code($text, false);
-					break;
 				case ST_CURLY_CLOSE:
 				case ST_PARENTHESES_CLOSE:
 				case ST_BRACKET_CLOSE:
-					if($dollar_open_curly_brace == false){
-						$popped_id = array_pop($found_stack);
-						if (false === $popped_id['implicit']) {
-							$this->set_indent(-1);
-						}
-					}else{
-						$dollar_open_curly_brace = false;
+					$popped_id = array_pop($found_stack);
+					if (false === $popped_id['implicit']) {
+						$this->set_indent(-1);
 					}
 					$this->append_code($text, false);
 					break;
