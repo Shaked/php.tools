@@ -7,6 +7,14 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case ST_QUOTE:
+					$this->append_code($text, false);
+					$this->printUntilTheEndOfString();
+					break;
+				case T_START_HEREDOC:
+					$this->append_code($text, false);
+					$this->printUntilTheEndOf(T_END_HEREDOC);
+					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
