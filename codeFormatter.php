@@ -47,15 +47,21 @@ define("ST_QUOTE", '"');
 define("ST_REFERENCE", "&");
 define("ST_SEMI_COLON", ";");
 define("ST_TIMES", "*");
+define("ST_BITWISE_OR", "|");
+define("ST_BITWISE_XOR", "^");
 if (!defined("T_POW")) {
 	define("T_POW", "**");
+}
+if (!defined("T_POW_EQUAL")) {
+	define("T_POW_EQUAL", "**=");
 }
 if (!defined("T_YIELD")) {
 	define("T_YIELD", "yield");
 }
 if (!defined("T_FINALLY")) {
 	define("T_FINALLY", "finally");
-};
+}
+;
 abstract class FormatterPass {
 	protected $indent_size = 1;
 	protected $indent_char = "\t";
@@ -117,8 +123,10 @@ abstract class FormatterPass {
 		return $this->get_token($this->tkns[$this->ptr + $delta]);
 	}
 	protected function is_token($token, $prev = false) {
-
-		$i = $this->ptr;
+		return $this->is_token_idx($this->ptr, $token, $prev);
+	}
+	protected function is_token_idx($idx, $token, $prev = false) {
+		$i = $idx;
 		if ($prev) {
 			while (--$i >= 0 && is_array($this->tkns[$i]) && $this->tkns[$i][0] === T_WHITESPACE);
 		} else {
@@ -143,10 +151,46 @@ abstract class FormatterPass {
 		}
 		return false;
 	}
+	protected function is_token_in_subset($tkns, $idx, $token, $prev = false) {
+		$i = $idx;
+		if ($prev) {
+			while (--$i >= 0 && is_array($tkns[$i]) && $tkns[$i][0] === T_WHITESPACE);
+		} else {
+			while (++$i < sizeof($tkns) - 1 && is_array($tkns[$i]) && $tkns[$i][0] === T_WHITESPACE);
+		}
+
+		if (!isset($tkns[$i])) {
+			return false;
+		}
+
+		$found_token = $tkns[$i];
+		if (is_string($found_token) && $found_token === $token) {
+			return true;
+		} elseif (is_array($token) && is_array($found_token)) {
+			if (in_array($found_token[0], $token)) {
+				return true;
+			} elseif ($prev && $found_token[0] === T_OPEN_TAG) {
+				return true;
+			}
+		} elseif (is_array($token) && is_string($found_token) && in_array($found_token, $token)) {
+			return true;
+		}
+		return false;
+	}
+
 	protected function prev_token() {
 		$i = $this->ptr;
 		while (--$i >= 0 && is_array($this->tkns[$i]) && $this->tkns[$i][0] === T_WHITESPACE);
 		return $this->tkns[$i];
+	}
+	protected function siblings($tkns, $ptr) {
+		$i = $ptr;
+		while (--$i >= 0 && is_array($tkns[$i]) && $tkns[$i][0] === T_WHITESPACE);
+		$left = $i;
+		$i = $ptr;
+		while (++$i < sizeof($tkns) - 1 && is_array($tkns[$i]) && $tkns[$i][0] === T_WHITESPACE);
+		$right = $i;
+		return [$left, $right];
 	}
 	protected function has_ln_after() {
 		$id = null;
@@ -2715,6 +2759,247 @@ final class TwoCommandsInSameLine extends FormatterPass {
 		return $this->code;
 	}
 };
+final class YodaComparisons extends FormatterPass {
+	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
+	const CHAIN_LITERAL = 'CHAIN_LITERAL';
+	const CHAIN_FUNC = 'CHAIN_FUNC';
+	const CHAIN_STRING = 'CHAIN_STRING';
+	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
+	const PHP_OPEN_TAG_PLACEHOLDER = '<?php /*\x2 PHPOPEN \x3*/';
+	public function format($source) {
+		return $this->yodise($source);
+	}
+	private function yodise($source) {
+		$tkns = $this->aggregate_variables($source);
+		reset($tkns);
+		while (list($ptr, $token) = each($tkns)) {
+			if (is_null($token)) {
+				continue;
+			}
+			list($id, $text) = $this->get_token($token);
+			switch ($id) {
+				case T_IS_EQUAL:
+				case T_IS_IDENTICAL:
+				case T_IS_NOT_EQUAL:
+				case T_IS_NOT_IDENTICAL:
+					list($left, $right) = $this->siblings($tkns, $ptr);
+					list($left_id, $left_text) = $tkns[$left];
+					list($right_id, $right_text) = $tkns[$right];
+					if ($left_id == $right_id) {
+						continue;
+					}
+
+					$left_pure_variable = $this->is_pure_variable($left_id);
+					for ($leftmost = $left; $leftmost >= 0; --$leftmost) {
+						list($left_scan_id, $left_scan_text) = $this->get_token($tkns[$leftmost]);
+						if ($this->is_lower_precedence($left_scan_id)) {
+							++$leftmost;
+							break;
+						}
+						$left_pure_variable &= $this->is_pure_variable($left_scan_id);
+					}
+
+					$right_pure_variable = $this->is_pure_variable($right_id);
+					for ($rightmost = $right; $rightmost < sizeof($tkns) - 1; ++$rightmost) {
+						list($right_scan_id, $right_scan_text) = $this->get_token($tkns[$rightmost]);
+						if ($this->is_lower_precedence($right_scan_id)) {
+							--$rightmost;
+							break;
+						}
+						$right_pure_variable &= $this->is_pure_variable($right_scan_id);
+					}
+					// print_r([$leftmost, $left, $right, $rightmost, (int) $left_pure_variable, (int) $right_pure_variable, $tkns[$leftmost], $tkns[$rightmost]]);
+
+					if ($left_pure_variable && !$right_pure_variable) {
+						$orig_left_tokens = $left_tokens = implode('', array_map(function ($token) {
+							return isset($token[1]) ? $token[1] : $token;
+						}, array_slice($tkns, $leftmost, $left - $leftmost + 1)));
+						$orig_right_tokens = $right_tokens = implode('', array_map(function ($token) {
+							return isset($token[1]) ? $token[1] : $token;
+						}, array_slice($tkns, $right, $rightmost - $right + 1)));
+
+						// echo '>' . $orig_left_tokens . '<', '>', $orig_right_tokens, '<', PHP_EOL;
+						// $left_tokens = str_repeat($this->new_line, substr_count($orig_right_tokens, $this->new_line)) . trim($left_tokens) . (substr($orig_right_tokens, -1, 1) == ' ' ? ' ' : '');
+						// $right_tokens = str_repeat($this->new_line, substr_count($orig_left_tokens, $this->new_line)) . trim($right_tokens) . (substr($orig_left_tokens, -1, 1) == ' ' ? ' ' : '');
+
+						$left_tokens = (substr($orig_right_tokens, 0, 1) == ' ' ? ' ' : '') . trim($left_tokens) . (substr($orig_right_tokens, -1, 1) == ' ' ? ' ' : '');
+						$right_tokens = (substr($orig_left_tokens, 0, 1) == ' ' ? ' ' : '') . trim($right_tokens) . (substr($orig_left_tokens, -1, 1) == ' ' ? ' ' : '');
+
+						$tkns[$leftmost] = ['REPLACED', $right_tokens];
+						$tkns[$right] = ['REPLACED', $left_tokens];
+
+						if ($leftmost != $left) {
+							for ($i = $leftmost + 1; $i <= $left; ++$i) {
+								$tkns[$i] = null;
+							}
+						}
+						if ($rightmost != $right) {
+							for ($i = $right + 1; $i <= $rightmost; ++$i) {
+								$tkns[$i] = null;
+							}
+						}
+					}
+			}
+		}
+		return implode('', array_map(function ($token) {
+			list($id, $text) = $this->get_token($token);
+			return $text;
+		}, array_filter($tkns)));
+	}
+
+	private function is_pure_variable($id) {
+		return self::CHAIN_VARIABLE == $id || T_VARIABLE == $id || T_INC == $id || T_DEC == $id || ST_EXCLAMATION == $id || T_COMMENT == $id || T_DOC_COMMENT == $id || T_WHITESPACE == $id;
+	}
+	private function is_lower_precedence($id) {
+		switch ($id) {
+			case ST_REFERENCE:
+			case ST_BITWISE_XOR:
+			case ST_BITWISE_OR:
+			case T_BOOLEAN_AND:
+			case T_BOOLEAN_OR:
+			case ST_QUESTION:
+			case ST_COLON:
+			case ST_EQUAL:
+			case T_PLUS_EQUAL:
+			case T_MINUS_EQUAL:
+			case T_MUL_EQUAL:
+			case T_POW_EQUAL:
+			case T_DIV_EQUAL:
+			case T_CONCAT_EQUAL:
+			case T_MOD_EQUAL:
+			case T_AND_EQUAL:
+			case T_OR_EQUAL:
+			case T_XOR_EQUAL:
+			case T_SL_EQUAL:
+			case T_SR_EQUAL:
+			case T_DOUBLE_ARROW:
+			case T_LOGICAL_AND:
+			case T_LOGICAL_XOR:
+			case T_LOGICAL_OR:
+			case ST_COMMA:
+			case ST_SEMI_COLON:
+			case T_RETURN:
+			case T_THROW:
+			case T_GOTO:
+			case T_CASE:
+			case T_COMMENT:
+			case T_DOC_COMMENT:
+			case T_OPEN_TAG:
+				return true;
+		}
+		return false;
+	}
+
+	private function aggregate_variables($source) {
+		$tkns = token_get_all($source);
+		reset($tkns);
+		while (list($ptr, $token) = each($tkns)) {
+			list($id, $text) = $this->get_token($token);
+
+			if (ST_PARENTHESES_OPEN == $id) {
+				$initial_ptr = $ptr;
+				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
+				continue;
+			}
+			if (ST_QUOTE == $id) {
+				$stack = $text;
+				$initial_ptr = $ptr;
+				while (list($ptr, $token) = each($tkns)) {
+					list($id, $text) = $this->get_token($token);
+					$stack .= $text;
+					$tkns[$ptr] = null;
+					if (ST_QUOTE == $id) {
+						break;
+					}
+				}
+
+				$tkns[$initial_ptr] = [self::CHAIN_STRING, $stack];
+				continue;
+			}
+
+			if (T_STRING == $id || T_VARIABLE == $id || T_NS_SEPARATOR == $id) {
+				$initial_index = $ptr;
+				$stack = $text;
+				$touched_variable = false;
+				if (T_VARIABLE == $id) {
+					$touched_variable = true;
+				}
+				if (!$this->is_token_in_subset(
+					$tkns,
+					$ptr,
+					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
+				)) {
+					continue;
+				}
+				while (list($ptr, $token) = each($tkns)) {
+					list($id, $text) = $this->get_token($token);
+					if (ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id || ST_PARENTHESES_CLOSE == $id || ST_SEMI_COLON == $id
+
+					) {
+						$token = prev($tkns);
+						$ptr = key($tkns);
+						list($id, $text) = $this->get_token($token);
+						break;
+					}
+					$tkns[$ptr] = null;
+					if (ST_CURLY_OPEN == $id) {
+						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE);
+					} elseif (ST_BRACKET_OPEN == $id) {
+						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE);
+					} elseif (ST_PARENTHESES_OPEN == $id) {
+						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+					}
+
+					$stack .= $text;
+
+					if (!$touched_variable && T_VARIABLE == $id) {
+						$touched_variable = true;
+					}
+
+					if (
+						!$this->is_token_in_subset(
+							$tkns,
+							$ptr,
+							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
+						)
+					) {
+						break;
+					}
+				}
+				if (substr(trim($stack), -1, 1) == ST_PARENTHESES_CLOSE) {
+					$tkns[$initial_index] = [self::CHAIN_FUNC, $stack];
+				} elseif ($touched_variable) {
+					$tkns[$initial_index] = [self::CHAIN_VARIABLE, $stack];
+				} else {
+					$tkns[$initial_index] = [self::CHAIN_LITERAL, $stack];
+				}
+			}
+		}
+		$tkns = array_values(array_filter($tkns));
+		return $tkns;
+	}
+
+	private function scan_and_replace(&$tkns, &$ptr, $start, $end) {
+		$tmp = self::PHP_OPEN_TAG_PLACEHOLDER;
+		$tkn_count = 1;
+		while (list($ptr, $token) = each($tkns)) {
+			list($id, $text) = $this->get_token($token);
+			if ($start == $id) {
+				++$tkn_count;
+			}
+			if ($end == $id) {
+				--$tkn_count;
+			}
+			$tkns[$ptr] = null;
+			if (0 == $tkn_count) {
+				break;
+			}
+			$tmp .= $text;
+		}
+		return $start . str_replace(self::PHP_OPEN_TAG_PLACEHOLDER, '', $this->yodise($tmp)) . $end;
+	}
+};
 //PSR standards
 final class PSR1BOMMark extends FormatterPass {
 	public function format($source) {
@@ -3285,20 +3570,21 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'timing', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['yoda', 'smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'timing', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
+			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--disable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
+			'--passes=pass1,passN' => 'call specific compiler pass',
 			'--psr' => 'activate PSR1 and PSR2 styles',
 			'--psr1' => 'activate PSR1 style',
 			'--psr2' => 'activate PSR2 style',
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
-			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
-			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
 			'--smart_linebreak_after_curly' => 'convert multistatement blocks into multiline blocks',
-			'--passes=pass1,passN' => 'call specific compiler pass',
+			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
+			'--yoda' => 'yoda-style comparisons',
 			'-h, --help' => 'this help message',
 			'-o=file' => 'output the formatted code to "file"',
 			'-v, --timing' => 'timing',
@@ -3375,6 +3661,18 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new MergeCurlyCloseAndDoWhile());
 	$fmt->addPass(new MergeDoubleArrowAndArray());
 	$fmt->addPass(new ExtraCommaInArray());
+
+	if (isset($opts['yoda'])) {
+		$fmt->addPass(new YodaComparisons());
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return $v !== '--yoda';
+				}
+			)
+		);
+	}
+
 	$fmt->addPass(new ResizeSpaces());
 	$fmt->addPass(new Reindent());
 	$fmt->addPass(new ReindentColonBlocks());

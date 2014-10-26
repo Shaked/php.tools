@@ -35,8 +35,13 @@ define("ST_QUOTE", '"');
 define("ST_REFERENCE", "&");
 define("ST_SEMI_COLON", ";");
 define("ST_TIMES", "*");
+define("ST_BITWISE_OR", "|");
+define("ST_BITWISE_XOR", "^");
 if (!defined("T_POW")) {
 	define("T_POW", "**");
+}
+if (!defined("T_POW_EQUAL")) {
+	define("T_POW_EQUAL", "**=");
 }
 if (!defined("T_YIELD")) {
 	define("T_YIELD", "yield");
