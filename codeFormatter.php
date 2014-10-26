@@ -222,14 +222,7 @@ abstract class FormatterPass {
 		return $cnt;
 	}
 	protected function printUntilTheEndOfString() {
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			$this->append_code($text, false);
-			if (ST_QUOTE == $id) {
-				break;
-			}
-		}
+		$this->printUntilTheEndOf(ST_QUOTE);
 	}
 	protected function walk_until($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
@@ -240,7 +233,29 @@ abstract class FormatterPass {
 			}
 		}
 	}
-};
+	protected function printUntilTheEndOf($tknid) {
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			$this->append_code($text, false);
+			if ($tknid == $id) {
+				break;
+			}
+		}
+	}
+	protected function walk_and_accumulate_until(&$tkns, $tknid) {
+		$ret = '';
+		while (list($index, $token) = each($tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			$ret .= $text;
+			if ($tknid == $id) {
+				return $ret;
+			}
+		}
+	}
+}
+;
 final class AddMissingCurlyBraces extends FormatterPass {
 	public function format($source) {
 		$tmp = $this->addBraces($source);
@@ -1354,6 +1369,14 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case ST_QUOTE:
+					$this->append_code($text, false);
+					$this->printUntilTheEndOfString();
+					break;
+				case T_START_HEREDOC:
+					$this->append_code($text, false);
+					$this->printUntilTheEndOf(T_END_HEREDOC);
+					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
@@ -1418,7 +1441,8 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 
 		return $this->code;
 	}
-};
+}
+;
 final class OrderMethod extends FormatterPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
 	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
@@ -1712,54 +1736,7 @@ final class OrderUseClauses extends FormatterPass {
 }
 ;
 final class Reindent extends FormatterPass {
-	private function normalizeHereDocs($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_ENCAPSED_AND_WHITESPACE:
-					$tmp = str_replace(' ', '', $text);
-					if ('=<<<' === substr($tmp, 0, 4)) {
-						$initial = strpos($text, $this->new_line);
-						$heredoc_tag = trim(substr($text, strpos($text, '<<<') + 3, strpos($text, $this->new_line)-(strpos($text, '<<<') + 3)));
-
-						$this->append_code(substr($text, 0, $initial), false);
-						$text = rtrim(substr($text, $initial));
-						$text = substr($text, 0, strlen($text) - 1) . $this->new_line . ST_SEMI_COLON . $this->new_line;
-					}
-					$this->append_code($text);
-					break;
-				case T_START_HEREDOC:
-					$this->append_code($text, false);
-					$heredoc_tag = trim(str_replace('<<<', '', $text));
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
-						if (ST_SEMI_COLON === substr(rtrim($text), -1)) {
-							$this->append_code(
-								substr(
-									rtrim($text),
-									0,
-									strlen(rtrim($text)) - 1
-								) . $this->new_line . ST_SEMI_COLON . $this->new_line,
-								false
-							);
-							break;
-						} else {
-							$this->append_code($text, false);
-						}
-					}
-					break;
-				default:
-					$this->append_code($text, false);
-					break;
-			}
-		}
-		return $this->code;
-	}
-	private function indent($source) {
+	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$found_stack = [];
@@ -1844,12 +1821,9 @@ final class Reindent extends FormatterPass {
 		}
 		return $this->code;
 	}
-	public function format($source) {
-		$source = $this->normalizeHereDocs($source);
-		$source = $this->indent($source);
-		return $source;
-	}
-};
+
+}
+;
 final class ReindentColonBlocks extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -2860,13 +2834,21 @@ final class SmartLnAfterCurlyOpen extends FormatterPass {
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
+						$stack .= $text;
+						if (T_START_HEREDOC == $id) {
+							$stack .= $this->walk_and_accumulate_until($this->tkns, T_END_HEREDOC);
+							continue;
+						}
+						if (ST_QUOTE == $id) {
+							$stack .= $this->walk_and_accumulate_until($this->tkns, ST_QUOTE);
+							continue;
+						}
 						if (ST_CURLY_OPEN == $id) {
 							++$curly_count;
 						}
 						if (ST_CURLY_CLOSE == $id) {
 							--$curly_count;
 						}
-						$stack .= $text;
 						if (T_WHITESPACE === $id && substr_count($text, $this->new_line) > 0) {
 							$found_line_break = true;
 							break;
@@ -2887,7 +2869,8 @@ final class SmartLnAfterCurlyOpen extends FormatterPass {
 		}
 		return $this->code;
 	}
-};
+}
+;
 final class SurrogateToken {
 }
 ;

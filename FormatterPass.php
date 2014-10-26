@@ -170,13 +170,24 @@ abstract class FormatterPass {
 			}
 		}
 	}
-	protected  function printUntilTheEndOf($tknid) {
+	protected function printUntilTheEndOf($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			$this->append_code($text, false);
 			if ($tknid == $id) {
 				break;
+			}
+		}
+	}
+	protected function walk_and_accumulate_until(&$tkns, $tknid) {
+		$ret = '';
+		while (list($index, $token) = each($tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			$ret .= $text;
+			if ($tknid == $id) {
+				return $ret;
 			}
 		}
 	}

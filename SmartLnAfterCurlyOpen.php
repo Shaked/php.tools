@@ -18,15 +18,12 @@ final class SmartLnAfterCurlyOpen extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						$stack .= $text;
-						if (T_START_HEREDOC == $id || ST_QUOTE == $id) {
-							while (list($index2, $token2) = each($this->tkns)) {
-								list($id2, $text2) = $this->get_token($token2);
-								$this->ptr = $index2;
-								$stack .= $text2;
-								if (T_END_HEREDOC == $id2 || ST_QUOTE == $id2) {
-									break;
-								}
-							}
+						if (T_START_HEREDOC == $id) {
+							$stack .= $this->walk_and_accumulate_until($this->tkns, T_END_HEREDOC);
+							continue;
+						}
+						if (ST_QUOTE == $id) {
+							$stack .= $this->walk_and_accumulate_until($this->tkns, ST_QUOTE);
 							continue;
 						}
 						if (ST_CURLY_OPEN == $id) {

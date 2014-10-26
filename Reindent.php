@@ -1,57 +1,6 @@
 <?php
 final class Reindent extends FormatterPass {
-	private function normalizeHereDocs($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_ENCAPSED_AND_WHITESPACE:
-					$tmp = str_replace(' ', '', $text);
-					if ('=<<<' === substr($tmp, 0, 4)) {
-						$initial = strpos($text, $this->new_line);
-						$heredoc_tag = trim(substr($text, strpos($text, '<<<') + 3, strpos($text, $this->new_line)-(strpos($text, '<<<') + 3)));
-
-						$this->append_code(substr($text, 0, $initial), false);
-						$text = rtrim(substr($text, $initial));
-						$text = substr($text, 0, strlen($text) - 1) . $this->new_line . ST_SEMI_COLON . $this->new_line;
-					}
-					$this->append_code($text);
-					break;
-				case T_START_HEREDOC:
-					$this->append_code($text, false);
-					$heredoc_tag = trim(str_replace('<<<', '', $text));
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
-						if (T_WHITESPACE == $id && $this->is_token(ST_SEMI_COLON, false)) {
-							continue;
-						}
-						// when happen like this? ST_SEMI_COLON is a single char, no more other chars with it.
-						if (ST_SEMI_COLON === substr(rtrim($text), -1)) {
-							$this->append_code(
-								substr(
-									rtrim($text),
-									0,
-									strlen(rtrim($text)) - 1
-								) . ST_SEMI_COLON . (isset($this->tkns[$index+1]) ? '' : $this->new_line),
-								false
-							);
-							break;
-						} else {
-							$this->append_code($text, false);
-						}
-					}
-					break;
-				default:
-					$this->append_code($text, false);
-					break;
-			}
-		}
-		return $this->code;
-	}
-	private function indent($source) {
+	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$found_stack = [];
@@ -136,9 +85,5 @@ final class Reindent extends FormatterPass {
 		}
 		return $this->code;
 	}
-	public function format($source) {
-		$source = $this->normalizeHereDocs($source);
-		$source = $this->indent($source);
-		return $source;
-	}
+
 }
