@@ -2922,7 +2922,6 @@ final class TwoCommandsInSameLine extends FormatterPass {
 							break;
 						}
 					}
-
 					break;
 				default:
 					$this->append_code($text, false);
@@ -2932,8 +2931,7 @@ final class TwoCommandsInSameLine extends FormatterPass {
 		}
 		return $this->code;
 	}
-}
-;
+};
 final class YodaComparisons extends FormatterPass {
 	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
 	const CHAIN_LITERAL = 'CHAIN_LITERAL';
