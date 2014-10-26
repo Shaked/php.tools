@@ -24,7 +24,7 @@ final class Reindent extends FormatterPass {
 			switch ($id) {
 				case ST_QUOTE:
 					$this->append_code($text, false);
-					$this->printUntilTheEndOfString();
+					$this->print_until_the_end_of_string();
 					break;
 				case T_CLOSE_TAG:
 					$this->append_code($text, false);

@@ -221,8 +221,8 @@ abstract class FormatterPass {
 		}
 		return $cnt;
 	}
-	protected function printUntilTheEndOfString() {
-		$this->printUntilTheEndOf(ST_QUOTE);
+	protected function print_until_the_end_of_string() {
+		$this->print_until_the_end_of(ST_QUOTE);
 	}
 	protected function walk_until($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
@@ -233,7 +233,7 @@ abstract class FormatterPass {
 			}
 		}
 	}
-	protected function printUntilTheEndOf($tknid) {
+	protected function print_until_the_end_of($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -307,7 +307,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 
 							if (ST_QUOTE == $id) {
 								$this->append_code($text, false);
-								$this->printUntilTheEndOfString();
+								$this->print_until_the_end_of_string();
 								continue;
 							}
 
@@ -358,7 +358,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 
 							if (ST_QUOTE == $id) {
 								$this->append_code($text, false);
-								$this->printUntilTheEndOfString();
+								$this->print_until_the_end_of_string();
 								continue;
 							}
 
@@ -388,7 +388,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 
 							if (ST_QUOTE == $id) {
 								$this->append_code($text, false);
-								$this->printUntilTheEndOfString();
+								$this->print_until_the_end_of_string();
 								continue;
 							}
 
@@ -1371,11 +1371,11 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 			switch ($id) {
 				case ST_QUOTE:
 					$this->append_code($text, false);
-					$this->printUntilTheEndOfString();
+					$this->print_until_the_end_of_string();
 					break;
 				case T_START_HEREDOC:
 					$this->append_code($text, false);
-					$this->printUntilTheEndOf(T_END_HEREDOC);
+					$this->print_until_the_end_of(T_END_HEREDOC);
 					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
@@ -1760,7 +1760,7 @@ final class Reindent extends FormatterPass {
 			switch ($id) {
 				case ST_QUOTE:
 					$this->append_code($text, false);
-					$this->printUntilTheEndOfString();
+					$this->print_until_the_end_of_string();
 					break;
 				case T_CLOSE_TAG:
 					$this->append_code($text, false);
@@ -1850,7 +1850,7 @@ final class ReindentColonBlocks extends FormatterPass {
 			switch ($id) {
 				case ST_QUOTE:
 					$this->append_code($text, false);
-					$this->printUntilTheEndOfString();
+					$this->print_until_the_end_of_string();
 					break;
 				case T_SWITCH:
 					++$switch_level;
@@ -3297,7 +3297,7 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 			switch ($id) {
 				case ST_QUOTE:
 					$this->append_code($text, false);
-					$this->printUntilTheEndOfString();
+					$this->print_until_the_end_of_string();
 					break;
 				case T_INTERFACE:
 				case T_TRAIT:
@@ -3524,7 +3524,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 			switch ($id) {
 				case ST_QUOTE:
 					$this->append_code($text, false);
-					$this->printUntilTheEndOfString();
+					$this->print_until_the_end_of_string();
 					break;
 				case T_CLASS:
 					$found[] = T_CLASS;

@@ -158,8 +158,8 @@ abstract class FormatterPass {
 		}
 		return $cnt;
 	}
-	protected function printUntilTheEndOfString() {
-		$this->printUntilTheEndOf(ST_QUOTE);
+	protected function print_until_the_end_of_string() {
+		$this->print_until_the_end_of(ST_QUOTE);
 	}
 	protected function walk_until($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
@@ -170,7 +170,7 @@ abstract class FormatterPass {
 			}
 		}
 	}
-	protected function printUntilTheEndOf($tknid) {
+	protected function print_until_the_end_of($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;

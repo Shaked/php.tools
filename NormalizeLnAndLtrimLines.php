@@ -9,11 +9,11 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 			switch ($id) {
 				case ST_QUOTE:
 					$this->append_code($text, false);
-					$this->printUntilTheEndOfString();
+					$this->print_until_the_end_of_string();
 					break;
 				case T_START_HEREDOC:
 					$this->append_code($text, false);
-					$this->printUntilTheEndOf(T_END_HEREDOC);
+					$this->print_until_the_end_of(T_END_HEREDOC);
 					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
