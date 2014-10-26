@@ -132,24 +132,37 @@ final class OrderUseClauses extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						$return .= $text;
-						if ($id == ST_CURLY_OPEN) {
+						if ($id == ST_CURLY_OPEN || $id == ST_SEMI_COLON) {
 							break;
 						}
 					}
-					$namespace_block = '';
-					$curly_count = 1;
-					while (list($index, $token) = each($tokens)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
-						$namespace_block .= $text;
-						if ($id == ST_CURLY_OPEN) {
-							++$curly_count;
-						} elseif ($id == ST_CURLY_CLOSE) {
-							--$curly_count;
-						}
+					if ($id == ST_CURLY_OPEN) {
+						$namespace_block = '';
+						$curly_count = 1;
+						while (list($index, $token) = each($tokens)) {
+							list($id, $text) = $this->get_token($token);
+							$this->ptr = $index;
+							$namespace_block .= $text;
+							if ($id == ST_CURLY_OPEN) {
+								++$curly_count;
+							} elseif ($id == ST_CURLY_CLOSE) {
+								--$curly_count;
+							}
 
-						if (0 == $curly_count) {
-							break;
+							if (0 == $curly_count) {
+								break;
+							}
+						}
+					} elseif ($id == ST_SEMI_COLON) {
+						$namespace_block = '';
+						while (list($index, $token) = each($tokens)) {
+							list($id, $text) = $this->get_token($token);
+							$this->ptr = $index;
+							if ($id == T_NAMESPACE) {
+								prev($tokens);
+								break;
+							}
+							$namespace_block .= $text;
 						}
 					}
 					$return .= str_replace(
