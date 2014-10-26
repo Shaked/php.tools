@@ -5,7 +5,6 @@ final class YodaComparisons extends FormatterPass {
 	const CHAIN_FUNC = 'CHAIN_FUNC';
 	const CHAIN_STRING = 'CHAIN_STRING';
 	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
-	const PHP_OPEN_TAG_PLACEHOLDER = '<?php /*\x2 PHPOPEN \x3*/';
 	public function format($source) {
 		return $this->yodise($source);
 	}
@@ -48,7 +47,6 @@ final class YodaComparisons extends FormatterPass {
 						}
 						$right_pure_variable &= $this->is_pure_variable($right_scan_id);
 					}
-					// print_r([$leftmost, $left, $right, $rightmost, (int) $left_pure_variable, (int) $right_pure_variable, $tkns[$leftmost], $tkns[$rightmost]]);
 
 					if ($left_pure_variable && !$right_pure_variable) {
 						$orig_left_tokens = $left_tokens = implode('', array_map(function ($token) {
@@ -57,10 +55,6 @@ final class YodaComparisons extends FormatterPass {
 						$orig_right_tokens = $right_tokens = implode('', array_map(function ($token) {
 							return isset($token[1]) ? $token[1] : $token;
 						}, array_slice($tkns, $right, $rightmost - $right + 1)));
-
-						// echo '>' . $orig_left_tokens . '<', '>', $orig_right_tokens, '<', PHP_EOL;
-						// $left_tokens = str_repeat($this->new_line, substr_count($orig_right_tokens, $this->new_line)) . trim($left_tokens) . (substr($orig_right_tokens, -1, 1) == ' ' ? ' ' : '');
-						// $right_tokens = str_repeat($this->new_line, substr_count($orig_left_tokens, $this->new_line)) . trim($right_tokens) . (substr($orig_left_tokens, -1, 1) == ' ' ? ' ' : '');
 
 						$left_tokens = (substr($orig_right_tokens, 0, 1) == ' ' ? ' ' : '') . trim($left_tokens) . (substr($orig_right_tokens, -1, 1) == ' ' ? ' ' : '');
 						$right_tokens = (substr($orig_left_tokens, 0, 1) == ' ' ? ' ' : '') . trim($right_tokens) . (substr($orig_left_tokens, -1, 1) == ' ' ? ' ' : '');
@@ -221,7 +215,8 @@ final class YodaComparisons extends FormatterPass {
 	}
 
 	private function scan_and_replace(&$tkns, &$ptr, $start, $end) {
-		$tmp = self::PHP_OPEN_TAG_PLACEHOLDER;
+		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
+		$tmp = $placeholder;
 		$tkn_count = 1;
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -237,6 +232,6 @@ final class YodaComparisons extends FormatterPass {
 			}
 			$tmp .= $text;
 		}
-		return $start . str_replace(self::PHP_OPEN_TAG_PLACEHOLDER, '', $this->yodise($tmp)) . $end;
+		return $start . str_replace($placeholder, '', $this->yodise($tmp)) . $end;
 	}
 }
