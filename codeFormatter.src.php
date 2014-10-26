@@ -17,6 +17,7 @@ include 'AddMissingCurlyBraces.php';
 include 'AlignDoubleArrow.php';
 include 'AlignEquals.php';
 include 'AutoImport.php';
+include 'AutoPreincrement.php';
 include 'ConstructorPass.php';
 include 'EliminateDuplicatedEmptyLines.php';
 include 'ExtraCommaInArray.php';
