@@ -25,13 +25,17 @@ final class Reindent extends FormatterPass {
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
+						if (T_WHITESPACE == $id && $this->is_token(ST_SEMI_COLON, false)) {
+							continue;
+						}
+						// when happen like this? ST_SEMI_COLON is a single char, no more other chars with it.
 						if (ST_SEMI_COLON === substr(rtrim($text), -1)) {
 							$this->append_code(
 								substr(
 									rtrim($text),
 									0,
 									strlen(rtrim($text)) - 1
-								) . $this->new_line . ST_SEMI_COLON . $this->new_line,
+								) . ST_SEMI_COLON . (isset($this->tkns[$index+1]) ? '' : $this->new_line),
 								false
 							);
 							break;
