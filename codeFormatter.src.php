@@ -40,6 +40,7 @@ include 'ShortArray.php';
 include 'SmartLnAfterCurlyOpen.php';
 include 'SurrogateToken.php';
 include 'TwoCommandsInSameLine.php';
+include 'YodaComparisons.php';
 //PSR standards
 include 'PSR1BOMMark.php';
 include 'PSR1ClassConstants.php';
@@ -81,20 +82,21 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'timing', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['yoda', 'smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'timing', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'disable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--disable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
+			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--disable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
+			'--passes=pass1,passN' => 'call specific compiler pass',
 			'--psr' => 'activate PSR1 and PSR2 styles',
 			'--psr1' => 'activate PSR1 style',
 			'--psr2' => 'activate PSR2 style',
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
-			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
-			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
 			'--smart_linebreak_after_curly' => 'convert multistatement blocks into multiline blocks',
-			'--passes=pass1,passN' => 'call specific compiler pass',
+			'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
+			'--yoda' => 'yoda-style comparisons',
 			'-h, --help' => 'this help message',
 			'-o=file' => 'output the formatted code to "file"',
 			'-v, --timing' => 'timing',
@@ -171,6 +173,18 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new MergeCurlyCloseAndDoWhile());
 	$fmt->addPass(new MergeDoubleArrowAndArray());
 	$fmt->addPass(new ExtraCommaInArray());
+
+	if (isset($opts['yoda'])) {
+		$fmt->addPass(new YodaComparisons());
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return $v !== '--yoda';
+				}
+			)
+		);
+	}
+
 	$fmt->addPass(new ResizeSpaces());
 	$fmt->addPass(new Reindent());
 	$fmt->addPass(new ReindentColonBlocks());

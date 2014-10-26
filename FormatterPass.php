@@ -60,8 +60,10 @@ abstract class FormatterPass {
 		return $this->get_token($this->tkns[$this->ptr + $delta]);
 	}
 	protected function is_token($token, $prev = false) {
-
-		$i = $this->ptr;
+		return $this->is_token_idx($this->ptr, $token, $prev);
+	}
+	protected function is_token_idx($idx, $token, $prev = false) {
+		$i = $idx;
 		if ($prev) {
 			while (--$i >= 0 && is_array($this->tkns[$i]) && $this->tkns[$i][0] === T_WHITESPACE);
 		} else {
@@ -86,10 +88,46 @@ abstract class FormatterPass {
 		}
 		return false;
 	}
+	protected function is_token_in_subset($tkns, $idx, $token, $prev = false) {
+		$i = $idx;
+		if ($prev) {
+			while (--$i >= 0 && is_array($tkns[$i]) && $tkns[$i][0] === T_WHITESPACE);
+		} else {
+			while (++$i < sizeof($tkns) - 1 && is_array($tkns[$i]) && $tkns[$i][0] === T_WHITESPACE);
+		}
+
+		if (!isset($tkns[$i])) {
+			return false;
+		}
+
+		$found_token = $tkns[$i];
+		if (is_string($found_token) && $found_token === $token) {
+			return true;
+		} elseif (is_array($token) && is_array($found_token)) {
+			if (in_array($found_token[0], $token)) {
+				return true;
+			} elseif ($prev && $found_token[0] === T_OPEN_TAG) {
+				return true;
+			}
+		} elseif (is_array($token) && is_string($found_token) && in_array($found_token, $token)) {
+			return true;
+		}
+		return false;
+	}
+
 	protected function prev_token() {
 		$i = $this->ptr;
 		while (--$i >= 0 && is_array($this->tkns[$i]) && $this->tkns[$i][0] === T_WHITESPACE);
 		return $this->tkns[$i];
+	}
+	protected function siblings($tkns, $ptr) {
+		$i = $ptr;
+		while (--$i >= 0 && is_array($tkns[$i]) && $tkns[$i][0] === T_WHITESPACE);
+		$left = $i;
+		$i = $ptr;
+		while (++$i < sizeof($tkns) - 1 && is_array($tkns[$i]) && $tkns[$i][0] === T_WHITESPACE);
+		$right = $i;
+		return [$left, $right];
 	}
 	protected function has_ln_after() {
 		$id = null;
