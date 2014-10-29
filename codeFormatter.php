@@ -2520,7 +2520,7 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case T_DOUBLE_ARROW:
-					if ($this->is_token([T_CONSTANT_ENCAPSED_STRING, T_STRING, T_VARIABLE, T_LNUMBER, T_DNUMBER, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE, ST_CURLY_CLOSE], true)) {
+					if (T_DOUBLE_ARROW == $id && $this->is_token([T_CONSTANT_ENCAPSED_STRING, T_STRING, T_VARIABLE, T_LNUMBER, T_DNUMBER, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE, ST_CURLY_CLOSE], true)) {
 						$this->append_code($this->get_space() . $text . $this->get_space());
 						break;
 					}
