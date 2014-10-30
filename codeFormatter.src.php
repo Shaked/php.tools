@@ -118,7 +118,7 @@ if (!isset($testEnv)) {
 		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
-					return !($v === '-v' || $v === '--timing');
+					return !('-v' === $v || '--timing' === $v);
 				}
 			)
 		);
@@ -164,7 +164,7 @@ if (!isset($testEnv)) {
 		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
-					return $v !== '--smart_linebreak_after_curly';
+					return '--smart_linebreak_after_curly' !== $v;
 				}
 			)
 		);
@@ -180,7 +180,7 @@ if (!isset($testEnv)) {
 		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
-					return $v !== '--yoda';
+					return '--yoda' !== $v;
 				}
 			)
 		);
@@ -201,7 +201,7 @@ if (!isset($testEnv)) {
 		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
-					return $v !== '--disable_auto_align';
+					return '--disable_auto_align' !== $v;
 				}
 			)
 		);
@@ -211,7 +211,7 @@ if (!isset($testEnv)) {
 		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
-					return $v !== '--indent_with_space';
+					return '--indent_with_space' !== $v;
 				}
 			)
 		);
@@ -221,7 +221,7 @@ if (!isset($testEnv)) {
 		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
-					return $v !== '--psr';
+					return '--psr' !== $v;
 				}
 			)
 		);
@@ -231,7 +231,7 @@ if (!isset($testEnv)) {
 		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
-					return $v !== '--psr1';
+					return '--psr1' !== $v;
 				}
 			)
 		);
@@ -241,7 +241,7 @@ if (!isset($testEnv)) {
 		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
-					return $v !== '--psr2';
+					return '--psr2' !== $v;
 				}
 			)
 		);
@@ -251,7 +251,7 @@ if (!isset($testEnv)) {
 		$argv = array_values(
 			array_filter($argv,
 				function ($v) {
-					return $v !== '--visibility_order';
+					return '--visibility_order' !== $v;
 				}
 			)
 		);
