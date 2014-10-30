@@ -63,7 +63,7 @@ final class CodeFormatter {
 		$this->debug = (bool) $debug;
 	}
 	public function addPass(FormatterPass $pass) {
-		$this->passes[] = $pass;
+		array_unshift($this->passes, $pass);
 	}
 
 	public function formatCode($source = '') {
@@ -74,7 +74,7 @@ final class CodeFormatter {
 			},
 			$this->passes
 		);
-		while (($pass = array_shift($passes))) {
+		while (($pass = array_pop($passes))) {
 			$source = $pass->format($source);
 			gc_collect_cycles();
 		}
