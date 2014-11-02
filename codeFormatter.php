@@ -2384,11 +2384,7 @@ final class ResizeSpaces extends FormatterPass {
 				case T_FINAL:
 				case T_CASE:
 				case T_BREAK:
-					if ($this->is_token(ST_SEMI_COLON)) {
-						$this->append_code($text, false);
-					} else {
-						$this->append_code($text . $this->get_space(), false);
-					}
+					$this->append_code($text . $this->get_space(!$this->is_token(ST_SEMI_COLON)), false);
 					break;
 				case T_WHILE:
 					if ($this->is_token(ST_SEMI_COLON)) {
