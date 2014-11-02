@@ -22,55 +22,37 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 					$prev_text = strrev($prev_text);
 					$first_ln = strpos($prev_text, "\n");
 					$second_ln = strpos($prev_text, "\n", $first_ln + 1);
-					if ($prev_id === T_WHITESPACE && substr_count($prev_text, "\n") >= 2 && 0 === $first_ln && 1 === $second_ln) {
+					if (T_WHITESPACE === $prev_id && substr_count($prev_text, "\n") >= 2 && 0 === $first_ln && 1 === $second_ln) {
 						$this->append_code(LeftAlignComment::NON_INDENTABLE_COMMENT, false);
-					} elseif ($prev_id === T_WHITESPACE && "\n" === $prev_text) {
+					} elseif (T_WHITESPACE === $prev_id && "\n" === $prev_text) {
 						$this->append_code(LeftAlignComment::NON_INDENTABLE_COMMENT, false);
 					}
 
-					if (substr_count($text, "\r\n")) {
-						$text = str_replace("\r\n", $this->new_line, $text);
-					}
-					if (substr_count($text, "\n\r")) {
-						$text = str_replace("\n\r", $this->new_line, $text);
-					}
-					if (substr_count($text, "\r")) {
-						$text = str_replace("\r", $this->new_line, $text);
-					}
-					if (substr_count($text, "\n")) {
-						$text = str_replace("\n", $this->new_line, $text);
-					}
-					$lines = explode($this->new_line, $text);
-					$lines = array_map(function ($v) {
-						$v = ltrim($v);
-						if ('*' === substr($v, 0, 1)) {
-							$v = ' ' . $v;
-						}
-						return $v;
-					}, $lines);
-					$this->append_code(implode($this->new_line, $lines), false);
+					$text = str_replace(["\r\n", "\n\r", "\r", "\n"], $this->new_line, $text);
+
+					$text = implode(
+						$this->new_line,
+						array_map(function ($v) {
+							$v = ltrim($v);
+							if ('*' === substr($v, 0, 1)) {
+								$v = ' ' . $v;
+							}
+							return $v;
+						}, explode($this->new_line, $text))
+					);
+
+					$this->append_code($text, false);
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
 					$this->append_code($text, false);
 					break;
 				default:
-					if (substr_count($text, "\r\n")) {
-						$text = str_replace("\r\n", $this->new_line, $text);
-					}
-					if (substr_count($text, "\n\r")) {
-						$text = str_replace("\n\r", $this->new_line, $text);
-					}
-					if (substr_count($text, "\r")) {
-						$text = str_replace("\r", $this->new_line, $text);
-					}
-					if (substr_count($text, "\n")) {
-						$text = str_replace("\n", $this->new_line, $text);
-					}
-
-					if ($this->substr_count_trailing($text, $this->new_line) > 0) {
-						$text = trim($text) . str_repeat($this->new_line, $this->substr_count_trailing($text, $this->new_line));
-					} elseif (0 === $this->substr_count_trailing($text, $this->new_line) && T_WHITESPACE === $id) {
-						$text = $this->get_space() . ltrim($text) . str_repeat($this->new_line, $this->substr_count_trailing($text, $this->new_line));
+					$text = str_replace(["\r\n", "\n\r", "\r", "\n"], $this->new_line, $text);
+					$trailing_new_line = $this->substr_count_trailing($text, $this->new_line);
+					if ($trailing_new_line > 0) {
+						$text = trim($text) . str_repeat($this->new_line, $trailing_new_line);
+					} elseif (0 === $trailing_new_line && T_WHITESPACE === $id) {
+						$text = $this->get_space() . ltrim($text) . str_repeat($this->new_line, $trailing_new_line);
 					}
 					$this->append_code($text, false);
 					break;

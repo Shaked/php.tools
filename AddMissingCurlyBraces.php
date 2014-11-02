@@ -14,9 +14,11 @@ final class AddMissingCurlyBraces extends FormatterPass {
 	private function addBraces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$this->use_cache = true;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
+			$this->cache = [];
 			switch ($id) {
 				case T_WHILE:
 				case T_FOREACH:
@@ -26,6 +28,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
+						$this->cache = [];
 						if (ST_PARENTHESES_OPEN === $id) {
 							++$paren_count;
 						} elseif (ST_PARENTHESES_CLOSE === $id) {
@@ -47,6 +50,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
+							$this->cache = [];
 
 							if (ST_QUOTE == $id) {
 								$this->append_code($text, false);
@@ -75,6 +79,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
+						$this->cache = [];
 						if (ST_PARENTHESES_OPEN === $id) {
 							++$paren_count;
 						} elseif (ST_PARENTHESES_CLOSE === $id) {
@@ -89,15 +94,14 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						$while_in_next_token = $this->is_token([T_WHILE, T_DO]);
 						$ignore_count = 0;
 						if (!$this->is_token([T_COMMENT, T_DOC_COMMENT], true)) {
-							// $this->append_code($this->new_line.'{'.$this->new_line);
 							$this->append_code($this->new_line . '{');
 						} else {
-							// $this->append_code('{'.$this->new_line);
 							$this->append_code('{');
 						}
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
+							$this->cache = [];
 
 							if (ST_QUOTE == $id) {
 								$this->append_code($text, false);
@@ -128,6 +132,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
+							$this->cache = [];
 
 							if (ST_QUOTE == $id) {
 								$this->append_code($text, false);

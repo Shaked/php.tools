@@ -2,29 +2,46 @@
 final class ResizeSpaces extends FormatterPass {
 	public function format($source) {
 		$source = $this->basicSpacing($source);
-		$source = $this->airOutSpacing($source);
 
 		return $source;
 	}
 
-	private function airOutSpacing($source) {
-		$new_tokens = [];
-		$this->tkns = token_get_all($source);
+	private function filterWhitespaces($source) {
+		$tkns = token_get_all($source);
+		$new_tokens = array_values(array_filter(
+			$tkns,
+			function ($token) {
+				list($id, $text) = $this->get_token($token);
+				if (T_WHITESPACE === $id && 0 === substr_count($text, $this->new_line)) {
+					return false;
+				}
+				return true;
+			}
+		));
+		return $new_tokens;
+	}
+
+	private function basicSpacing($source) {
+		$this->tkns = $this->filterWhitespaces($source);
 		$this->code = '';
+		$this->use_cache = true;
+
 		$in_ternary_operator = false;
 		$short_ternary_operator = false;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
+			$this->cache = [];
 			switch ($id) {
 				case '+':
 				case '-':
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
 					list($next_id, $next_text) = $this->inspect_token(+1);
 					if (
-						($prev_id == T_LNUMBER || $prev_id == T_DNUMBER || $prev_id == T_VARIABLE || $prev_id == ST_PARENTHESES_CLOSE || $prev_id == T_STRING)
+						(T_LNUMBER == $prev_id || T_DNUMBER == $prev_id || T_VARIABLE == $prev_id || ST_PARENTHESES_CLOSE == $prev_id || T_STRING == $prev_id)
 					 	&&
-						($next_id == T_LNUMBER || $next_id == T_DNUMBER || $next_id == T_VARIABLE || $next_id == ST_PARENTHESES_CLOSE || $next_id == T_STRING)
+						(T_LNUMBER == $next_id || T_DNUMBER == $next_id || T_VARIABLE == $next_id || ST_PARENTHESES_CLOSE == $next_id || T_STRING == $next_id)
 					) {
 						$this->append_code($this->get_space() . $text . $this->get_space(), false);
 					} else {
@@ -59,13 +76,17 @@ final class ResizeSpaces extends FormatterPass {
 						$this->append_code($text, false);
 					}
 					break;
-				case '%':
 
+				case '%':
 				case '/':
 				case T_POW:
 
 				case ST_QUESTION:
 				case ST_CONCAT:
+					if (ST_QUESTION == $id) {
+						$in_ternary_operator = true;
+						$short_ternary_operator = $this->is_token(ST_COLON);
+					}
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
 					list($next_id, $next_text) = $this->inspect_token(+1);
 					if (
@@ -73,24 +94,20 @@ final class ResizeSpaces extends FormatterPass {
 						T_WHITESPACE != $next_id
 					) {
 						$this->append_code($text . $this->get_space(!$this->is_token(ST_COLON)), false);
+						break;
 					} elseif (
 						T_WHITESPACE != $prev_id &&
 						T_WHITESPACE == $next_id
 					) {
 						$this->append_code($this->get_space() . $text, false);
+						break;
 					} elseif (
 						T_WHITESPACE != $prev_id &&
 						T_WHITESPACE != $next_id
 					) {
 						$this->append_code($this->get_space() . $text . $this->get_space(!$this->is_token(ST_COLON)), false);
-					} else {
-						$this->append_code($text, false);
+						break;
 					}
-					if (ST_QUESTION == $id) {
-						$in_ternary_operator = true;
-						$short_ternary_operator = $this->is_token(ST_COLON);
-					}
-					break;
 				case ST_COLON:
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
 					list($next_id, $next_text) = $this->inspect_token(+1);
@@ -119,137 +136,7 @@ final class ResizeSpaces extends FormatterPass {
 						$this->append_code($text, false);
 					}
 					break;
-				default:
-					$this->append_code($text, false);
-					break;
-			}
-		}
-		return $this->code;
-	}
 
-	private function filterWhitespaces($source) {
-		// $tkns = token_get_all($source);
-		// $new_tokens = array_values(array_filter(
-		// 	$tkns,
-		// 	function ($token) {
-		// 		list($id, $text) = $this->get_token($token);
-		// 		if ($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line)) {
-		// 			return false;
-		// 		}
-		// 		return true;
-		// 	}
-		// ));
-		// return $new_tokens;
-		$new_tokens = [];
-		$tkns = token_get_all($source);
-		$sizeof_tkns = sizeof($tkns);
-		$i = 0;
-
-		$n = ($sizeof_tkns + 7) / 8;
-
-		if ($sizeof_tkns % 8 == 0) {goto label_case0;}
-		if ($sizeof_tkns % 8 == 1) {goto label_case1;}
-		if ($sizeof_tkns % 8 == 2) {goto label_case2;}
-		if ($sizeof_tkns % 8 == 3) {goto label_case3;}
-		if ($sizeof_tkns % 8 == 4) {goto label_case4;}
-		if ($sizeof_tkns % 8 == 5) {goto label_case5;}
-		if ($sizeof_tkns % 8 == 6) {goto label_case6;}
-		if ($sizeof_tkns % 8 == 7) {goto label_case7;}
-
-		loop:
-		label_case0:
-		if (isset($tkns[$i])) {
-			$token = $tkns[$i];
-			list($id, $text) = $this->get_token($token);
-			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
-				$new_tokens[] = $token;
-			}
-			++$i;
-		}
-		label_case7:
-		if (isset($tkns[$i])) {
-			$token = $tkns[$i];
-			list($id, $text) = $this->get_token($token);
-			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
-				$new_tokens[] = $token;
-			}
-			++$i;
-		}
-
-		label_case6:
-		if (isset($tkns[$i])) {
-			$token = $tkns[$i];
-			list($id, $text) = $this->get_token($token);
-			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
-				$new_tokens[] = $token;
-			}
-			++$i;
-		}
-
-		label_case5:
-		if (isset($tkns[$i])) {
-			$token = $tkns[$i];
-			list($id, $text) = $this->get_token($token);
-			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
-				$new_tokens[] = $token;
-			}
-			++$i;
-		}
-
-		label_case4:
-		if (isset($tkns[$i])) {
-			$token = $tkns[$i];
-			list($id, $text) = $this->get_token($token);
-			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
-				$new_tokens[] = $token;
-			}
-			++$i;
-		}
-
-		label_case3:
-		if (isset($tkns[$i])) {
-			$token = $tkns[$i];
-			list($id, $text) = $this->get_token($token);
-			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
-				$new_tokens[] = $token;
-			}
-			++$i;
-		}
-
-		label_case2:
-		if (isset($tkns[$i])) {
-			$token = $tkns[$i];
-			list($id, $text) = $this->get_token($token);
-			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
-				$new_tokens[] = $token;
-			}
-			++$i;
-		}
-
-		label_case1:
-		if (isset($tkns[$i])) {
-			$token = $tkns[$i];
-			list($id, $text) = $this->get_token($token);
-			if (!($id === T_WHITESPACE && 0 === substr_count($text, $this->new_line))) {
-				$new_tokens[] = $token;
-			}
-			++$i;
-		}
-
-		if (--$n > 0) {
-			goto loop;
-		}
-
-		return $new_tokens;
-	}
-
-	private function basicSpacing($source) {
-		$this->tkns = $this->filterWhitespaces($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
 				case T_PRINT:
 					$this->append_code($text . $this->get_space(!$this->is_token([ST_PARENTHESES_OPEN])), false);
 					break;

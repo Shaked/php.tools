@@ -67,7 +67,6 @@ final class CodeFormatter {
 	}
 
 	public function formatCode($source = '') {
-		gc_enable();
 		$passes = array_map(
 			function ($pass) {
 				return clone $pass;
@@ -76,9 +75,7 @@ final class CodeFormatter {
 		);
 		while (($pass = array_pop($passes))) {
 			$source = $pass->format($source);
-			gc_collect_cycles();
 		}
-		gc_disable();
 		return $source;
 	}
 }

@@ -3,10 +3,12 @@ final class Reindent extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$this->use_cache = true;
 		$found_stack = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
+			$this->cache = [];
 
 			if (
 				(
@@ -31,8 +33,9 @@ final class Reindent extends FormatterPass {
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
+						$this->cache = [];
 						$this->append_code($text, false);
-						if ($id == T_OPEN_TAG) {
+						if (T_OPEN_TAG == $id) {
 							break;
 						}
 					}
