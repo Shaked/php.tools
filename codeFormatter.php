@@ -221,17 +221,7 @@ abstract class FormatterPass {
 		return substr_count($text, $this->new_line) > 0;
 	}
 	protected function substr_count_trailing($haystack, $needle) {
-		$cnt = 0;
-		$i = strlen($haystack) - 1;
-		for ($i = $i; $i >= 0; --$i) {
-			$char = substr($haystack, $i, 1);
-			if ($needle === $char) {
-				++$cnt;
-			} elseif (' ' !== $char && "\t" !== $char) {
-				break;
-			}
-		}
-		return $cnt;
+		return strlen(rtrim($haystack, " \t")) - strlen(rtrim($haystack, " \t" . $needle));
 	}
 	protected function print_until_the_end_of_string() {
 		$this->print_until_the_end_of(ST_QUOTE);
@@ -1431,7 +1421,7 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 					if ($trailing_new_line > 0) {
 						$text = trim($text) . str_repeat($this->new_line, $trailing_new_line);
 					} elseif (0 === $trailing_new_line && T_WHITESPACE === $id) {
-						$text = $this->get_space() . ltrim($text) . str_repeat($this->new_line, $trailing_new_line);
+						$text = $this->get_space() . ltrim($text);
 					}
 					$this->append_code($text, false);
 					break;

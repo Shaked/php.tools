@@ -158,17 +158,7 @@ abstract class FormatterPass {
 		return substr_count($text, $this->new_line) > 0;
 	}
 	protected function substr_count_trailing($haystack, $needle) {
-		$cnt = 0;
-		$i = strlen($haystack) - 1;
-		for ($i = $i; $i >= 0; --$i) {
-			$char = substr($haystack, $i, 1);
-			if ($needle === $char) {
-				++$cnt;
-			} elseif (' ' !== $char && "\t" !== $char) {
-				break;
-			}
-		}
-		return $cnt;
+		return strlen(rtrim($haystack, " \t")) - strlen(rtrim($haystack, " \t" . $needle));
 	}
 	protected function print_until_the_end_of_string() {
 		$this->print_until_the_end_of(ST_QUOTE);
