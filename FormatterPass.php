@@ -79,7 +79,8 @@ abstract class FormatterPass {
 		if ($prev) {
 			while (--$i >= 0 && is_array($this->tkns[$i]) && T_WHITESPACE === $this->tkns[$i][0]);
 		} else {
-			while (++$i < sizeof($this->tkns) - 1 && is_array($this->tkns[$i]) && T_WHITESPACE === $this->tkns[$i][0]);
+			$tkns_size = sizeof($this->tkns) - 1;
+			while (++$i < $tkns_size && is_array($this->tkns[$i]) && T_WHITESPACE === $this->tkns[$i][0]);
 		}
 
 		if (!isset($this->tkns[$i])) {
@@ -105,7 +106,8 @@ abstract class FormatterPass {
 		if ($prev) {
 			while (--$i >= 0 && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
 		} else {
-			while (++$i < sizeof($tkns) - 1 && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
+			$tkns_size = sizeof($tkns) - 1;
+			while (++$i < $tkns_size && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
 		}
 
 		if (!isset($tkns[$i])) {
@@ -137,7 +139,8 @@ abstract class FormatterPass {
 		while (--$i >= 0 && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
 		$left = $i;
 		$i = $ptr;
-		while (++$i < sizeof($tkns) - 1 && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
+		$tkns_size = sizeof($tkns) - 1;
+		while (++$i < $tkns_size && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
 		$right = $i;
 		return [$left, $right];
 	}
@@ -145,17 +148,17 @@ abstract class FormatterPass {
 		$id = null;
 		$text = null;
 		list($id, $text) = $this->inspect_token();
-		return T_WHITESPACE === $id && substr_count($text, $this->new_line) > 0;
+		return T_WHITESPACE === $id && false !== strpos($text, $this->new_line);
 	}
 	protected function has_ln_before() {
 		$id = null;
 		$text = null;
 		list($id, $text) = $this->inspect_token(-1);
-		return T_WHITESPACE === $id && substr_count($text, $this->new_line) > 0;
+		return T_WHITESPACE === $id && false !== strpos($text, $this->new_line);
 	}
 	protected function has_ln_prev_token() {
 		list($id, $text) = $this->get_token($this->prev_token());
-		return substr_count($text, $this->new_line) > 0;
+		return false !== strpos($text, $this->new_line);
 	}
 	protected function substr_count_trailing($haystack, $needle) {
 		return strlen(rtrim($haystack, " \t")) - strlen(rtrim($haystack, " \t" . $needle));

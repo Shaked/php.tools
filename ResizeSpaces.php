@@ -12,7 +12,8 @@ final class ResizeSpaces extends FormatterPass {
 			$tkns,
 			function ($token) {
 				list($id, $text) = $this->get_token($token);
-				if (T_WHITESPACE === $id && 0 === substr_count($text, $this->new_line)) {
+				// if (T_WHITESPACE === $id && 0 === substr_count($text, $this->new_line)) {
+				if (T_WHITESPACE === $id && false === strpos($text, $this->new_line)) {
 					return false;
 				}
 				return true;

@@ -142,7 +142,8 @@ abstract class FormatterPass {
 		if ($prev) {
 			while (--$i >= 0 && is_array($this->tkns[$i]) && T_WHITESPACE === $this->tkns[$i][0]);
 		} else {
-			while (++$i < sizeof($this->tkns) - 1 && is_array($this->tkns[$i]) && T_WHITESPACE === $this->tkns[$i][0]);
+			$tkns_size = sizeof($this->tkns) - 1;
+			while (++$i < $tkns_size && is_array($this->tkns[$i]) && T_WHITESPACE === $this->tkns[$i][0]);
 		}
 
 		if (!isset($this->tkns[$i])) {
@@ -168,7 +169,8 @@ abstract class FormatterPass {
 		if ($prev) {
 			while (--$i >= 0 && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
 		} else {
-			while (++$i < sizeof($tkns) - 1 && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
+			$tkns_size = sizeof($tkns) - 1;
+			while (++$i < $tkns_size && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
 		}
 
 		if (!isset($tkns[$i])) {
@@ -200,7 +202,8 @@ abstract class FormatterPass {
 		while (--$i >= 0 && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
 		$left = $i;
 		$i = $ptr;
-		while (++$i < sizeof($tkns) - 1 && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
+		$tkns_size = sizeof($tkns) - 1;
+		while (++$i < $tkns_size && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
 		$right = $i;
 		return [$left, $right];
 	}
@@ -208,17 +211,17 @@ abstract class FormatterPass {
 		$id = null;
 		$text = null;
 		list($id, $text) = $this->inspect_token();
-		return T_WHITESPACE === $id && substr_count($text, $this->new_line) > 0;
+		return T_WHITESPACE === $id && false !== strpos($text, $this->new_line);
 	}
 	protected function has_ln_before() {
 		$id = null;
 		$text = null;
 		list($id, $text) = $this->inspect_token(-1);
-		return T_WHITESPACE === $id && substr_count($text, $this->new_line) > 0;
+		return T_WHITESPACE === $id && false !== strpos($text, $this->new_line);
 	}
 	protected function has_ln_prev_token() {
 		list($id, $text) = $this->get_token($this->prev_token());
-		return substr_count($text, $this->new_line) > 0;
+		return false !== strpos($text, $this->new_line);
 	}
 	protected function substr_count_trailing($haystack, $needle) {
 		return strlen(rtrim($haystack, " \t")) - strlen(rtrim($haystack, " \t" . $needle));
@@ -1207,14 +1210,29 @@ final class LeftAlignComment extends FormatterPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
-			if ($text === self::NON_INDENTABLE_COMMENT) {
+			if (self::NON_INDENTABLE_COMMENT === $text) {
 				continue;
 			}
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
 					list(, $prev_text) = $this->inspect_token(-1);
-					if ($prev_text === self::NON_INDENTABLE_COMMENT) {
+					if (self::NON_INDENTABLE_COMMENT === $prev_text) {
+						// Benchmark me
+						// $new_text = '';
+						// $tok = strtok($text, $this->new_line);
+						// while (false !== $tok) {
+						// 	$v = ltrim($tok);
+						// 	if ('*' === substr($v, 0, 1)) {
+						// 		$v = ' ' . $v;
+						// 	}
+						// 	$new_text .= $v;
+						// 	if (substr($v, -2, 2) != '*/') {
+						// 		$new_text .= $this->new_line;
+						// 	}
+						// 	$tok = strtok($this->new_line);
+						// }
+						// $this->append_code($new_text, false);
 						$lines = explode($this->new_line, $text);
 						$lines = array_map(function ($v) {
 							$v = ltrim($v);
@@ -1228,11 +1246,11 @@ final class LeftAlignComment extends FormatterPass {
 					}
 				case T_WHITESPACE:
 					list(, $next_text) = $this->inspect_token(1);
-					if ($next_text === self::NON_INDENTABLE_COMMENT && substr_count($text, "\n") >= 2) {
+					if (self::NON_INDENTABLE_COMMENT === $next_text && substr_count($text, "\n") >= 2) {
 						$text = substr($text, 0, strrpos($text, "\n") + 1);
 						$this->append_code($text, false);
 						break;
-					} elseif ($next_text === self::NON_INDENTABLE_COMMENT && substr_count($text, "\n") === 1) {
+					} elseif (self::NON_INDENTABLE_COMMENT === $next_text && substr_count($text, "\n") === 1) {
 						$text = substr($text, 0, strrpos($text, "\n") + 1);
 						$this->append_code($text, false);
 						break;
@@ -2204,7 +2222,8 @@ final class ResizeSpaces extends FormatterPass {
 			$tkns,
 			function ($token) {
 				list($id, $text) = $this->get_token($token);
-				if (T_WHITESPACE === $id && 0 === substr_count($text, $this->new_line)) {
+				// if (T_WHITESPACE === $id && 0 === substr_count($text, $this->new_line)) {
+				if (T_WHITESPACE === $id && false === strpos($text, $this->new_line)) {
 					return false;
 				}
 				return true;
