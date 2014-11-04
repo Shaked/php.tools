@@ -30,12 +30,18 @@ foreach ($cases as $caseIn) {
 	$specialPasses = false;
 	foreach ($tokens as $token) {
 		list($id, $text) = get_token($token);
-		if (T_COMMENT == $id && '//passes:' == substr($text, 0, 9)) {
+		if (T_COMMENT == $id && '//version:' == substr($text, 0, 10)) {
+			$version = str_replace('//version:', '', $text);
+			if (version_compare(PHP_VERSION, $version, '<')) {
+				echo 'S';
+				continue 2;
+			}
+		} elseif (T_COMMENT == $id && '//passes:' == substr($text, 0, 9)) {
 			$passes = explode(',', str_replace('//passes:', '', $text));
+			$specialPasses = true;
 			foreach ($passes as $pass) {
 				$pass = trim($pass);
 				$fmt->addPass(new $pass());
-				$specialPasses = true;
 			}
 		}
 	}
