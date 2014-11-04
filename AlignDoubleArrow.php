@@ -5,7 +5,6 @@ final class AlignDoubleArrow extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
-		$used_counters = [];
 		$context_counter = 0;
 		$in_bracket = 0;
 		while (list($index, $token) = each($this->tkns)) {
@@ -20,7 +19,6 @@ final class AlignDoubleArrow extends FormatterPass {
 					break;
 
 				case T_DOUBLE_ARROW:
-					$used_counters[] = $context_counter;
 					$this->append_code(sprintf(self::ALIGNABLE_EQUAL, $context_counter) . $text, false);
 					break;
 
