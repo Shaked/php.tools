@@ -1,27 +1,18 @@
 <?php
 final class ResizeSpaces extends FormatterPass {
-	public function format($source) {
-		$source = $this->basicSpacing($source);
-
-		return $source;
-	}
-
 	private function filterWhitespaces($source) {
 		$tkns = token_get_all($source);
-		$new_tokens = array_values(array_filter(
-			$tkns,
-			function ($token) {
-				list($id, $text) = $this->get_token($token);
-				if (T_WHITESPACE === $id && false === strpos($text, $this->new_line)) {
-					return false;
-				}
-				return true;
+
+		foreach ($tkns as $idx => &$token) {
+			if (T_WHITESPACE === $token[0] && !$this->has_ln($token[1])) {
+				unset($tkns[$idx]);
 			}
-		));
-		return $new_tokens;
+		}
+
+		return array_values($tkns);
 	}
 
-	private function basicSpacing($source) {
+	public function format($source) {
 		$this->tkns = $this->filterWhitespaces($source);
 		$this->code = '';
 		$this->use_cache = true;
