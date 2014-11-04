@@ -60,9 +60,10 @@ final class ReindentIfColonBlocks extends FormatterPass {
 					}
 					break;
 				default:
-					if ($this->has_ln($text) && !$this->is_token([T_ENDIF, T_ELSE, T_ELSEIF])) {
+					$has_ln = $this->has_ln($text);
+					if ($has_ln && !$this->is_token([T_ENDIF, T_ELSE, T_ELSEIF])) {
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					} elseif ($this->has_ln($text) && $this->is_token([T_ENDIF, T_ELSE, T_ELSEIF])) {
+					} elseif ($has_ln && $this->is_token([T_ENDIF, T_ELSE, T_ELSEIF])) {
 						$this->set_indent(-1);
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
 						$this->set_indent(+1);

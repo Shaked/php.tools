@@ -73,17 +73,17 @@ final class CodeFormatter {
 			},
 			$this->passes
 		);
-		$timings = [];
+		// $timings = [];
 		while (($pass = array_pop($passes))) {
-			$start = microtime(true);
+			// $start = microtime(true);
 			$source = $pass->format($source);
-			$timings[get_class($pass)] = microtime(true) - $start;
+			// $timings[get_class($pass)] = microtime(true) - $start;
 		}
-		asort($timings, SORT_NUMERIC);
-		foreach ($timings as $pass => $timing) {
-			fwrite(STDERR, $pass . ":" . $timing . PHP_EOL);
-		}
-		fwrite(STDERR, "Total:" . array_sum($timings) . PHP_EOL);
+		// asort($timings, SORT_NUMERIC);
+		// foreach ($timings as $pass => $timing) {
+		// 	fwrite(STDERR, $pass . ":" . $timing . PHP_EOL);
+		// }
+		// fwrite(STDERR, "Total:" . array_sum($timings) . PHP_EOL);
 		return $source;
 	}
 }

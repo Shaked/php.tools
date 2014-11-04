@@ -1913,10 +1913,14 @@ final class ReindentColonBlocks extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				default:
-					if ($this->has_ln($text) && !$this->is_token([T_CASE, T_DEFAULT]) && !$this->is_token(ST_CURLY_CLOSE)) {
-						$this->append_code($text . $this->get_indent($switch_level), false);
-					} elseif ($this->has_ln($text) && $this->is_token([T_CASE, T_DEFAULT])) {
-						$this->append_code($text, false);
+					$has_ln = $this->has_ln($text);
+					if ($has_ln) {
+						$is_next_case_or_default = $this->is_token([T_CASE, T_DEFAULT]);
+						if (!$is_next_case_or_default && !$this->is_token(ST_CURLY_CLOSE)) {
+							$this->append_code($text . $this->get_indent($switch_level), false);
+						} else {
+							$this->append_code($text, false);
+						}
 					} else {
 						$this->append_code($text, false);
 					}
@@ -1987,9 +1991,10 @@ final class ReindentIfColonBlocks extends FormatterPass {
 					}
 					break;
 				default:
-					if ($this->has_ln($text) && !$this->is_token([T_ENDIF, T_ELSE, T_ELSEIF])) {
+					$has_ln = $this->has_ln($text);
+					if ($has_ln && !$this->is_token([T_ENDIF, T_ELSE, T_ELSEIF])) {
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					} elseif ($this->has_ln($text) && $this->is_token([T_ENDIF, T_ELSE, T_ELSEIF])) {
+					} elseif ($has_ln && $this->is_token([T_ENDIF, T_ELSE, T_ELSEIF])) {
 						$this->set_indent(-1);
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
 						$this->set_indent(+1);
@@ -3642,17 +3647,17 @@ final class CodeFormatter {
 			},
 			$this->passes
 		);
-		$timings = [];
+		// $timings = [];
 		while (($pass = array_pop($passes))) {
-			$start = microtime(true);
+			// $start = microtime(true);
 			$source = $pass->format($source);
-			$timings[get_class($pass)] = microtime(true) - $start;
+			// $timings[get_class($pass)] = microtime(true) - $start;
 		}
-		asort($timings, SORT_NUMERIC);
-		foreach ($timings as $pass => $timing) {
-			fwrite(STDERR, $pass . ":" . $timing . PHP_EOL);
-		}
-		fwrite(STDERR, "Total:" . array_sum($timings) . PHP_EOL);
+		// asort($timings, SORT_NUMERIC);
+		// foreach ($timings as $pass => $timing) {
+		// 	fwrite(STDERR, $pass . ":" . $timing . PHP_EOL);
+		// }
+		// fwrite(STDERR, "Total:" . array_sum($timings) . PHP_EOL);
 		return $source;
 	}
 }
