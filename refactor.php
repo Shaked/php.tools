@@ -249,6 +249,25 @@ abstract class FormatterPass {
 			}
 		}
 	}
+	protected function print_block($start, $end) {
+		$count = 1;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			$this->cache = [];
+			$this->append_code($text, false);
+
+			if ($start == $id) {
+				++$count;
+			}
+			if ($end == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
 	protected function walk_and_accumulate_until(&$tkns, $tknid) {
 		$ret = '';
 		while (list($index, $token) = each($tkns)) {

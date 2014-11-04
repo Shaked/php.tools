@@ -249,6 +249,25 @@ abstract class FormatterPass {
 			}
 		}
 	}
+	protected function print_block($start, $end) {
+		$count = 1;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			$this->cache = [];
+			$this->append_code($text, false);
+
+			if ($start == $id) {
+				++$count;
+			}
+			if ($end == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
 	protected function walk_and_accumulate_until(&$tkns, $tknid) {
 		$ret = '';
 		while (list($index, $token) = each($tkns)) {
@@ -2809,22 +2828,7 @@ final class TwoCommandsInSameLine extends FormatterPass {
 
 				case ST_PARENTHESES_OPEN:
 					$this->append_code($text, false);
-					$paren_count = 1;
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
-						$this->append_code($text, false);
-
-						if (ST_PARENTHESES_OPEN == $id) {
-							++$paren_count;
-						}
-						if (ST_PARENTHESES_CLOSE == $id) {
-							--$paren_count;
-						}
-						if (0 == $paren_count) {
-							break;
-						}
-					}
+					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
 				default:
 					$this->append_code($text, false);
