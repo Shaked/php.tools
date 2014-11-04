@@ -30,9 +30,10 @@ final class ReindentObjOps extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 				case T_OBJECT_OPERATOR:
-					if (0 === $in_objop_context && ($this->has_ln_before() || $this->has_ln_prev_token())) {
+					$has_ln_before = ($this->has_ln_before() || $this->has_ln_prev_token());
+					if (0 === $in_objop_context && $has_ln_before) {
 						$in_objop_context = 1;
-					} elseif (0 === $in_objop_context && !($this->has_ln_before() || $this->has_ln_prev_token())) {
+					} elseif (0 === $in_objop_context && !$has_ln_before) {
 						++$alignable_objop_counter;
 						$in_objop_context = 2;
 					} elseif ($paren_count > 0) {
@@ -70,15 +71,17 @@ final class ReindentObjOps extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 			}
-			if (substr_count($text, $this->new_line) > 0) {
+			if ($this->has_ln($text)) {
 				$printed_placeholder = false;
 			}
 		}
 
 		for ($j = $alignable_objop_counter; $j > 0; --$j) {
 			$current_align_objop = sprintf(self::ALIGNABLE_OBJOP, $j);
-
-			if (substr_count($this->code, $current_align_objop) <= 1) {
+			if (false === strpos($this->code, $current_align_objop)) {
+				continue;
+			}
+			if (1 === substr_count($this->code, $current_align_objop)) {
 				$this->code = str_replace($current_align_objop, '', $this->code);
 				continue;
 			}
@@ -92,6 +95,7 @@ final class ReindentObjOps extends FormatterPass {
 					$lines_with_objop[$block_count][] = $idx;
 				} else {
 					++$block_count;
+					$lines_with_objop[$block_count] = [];
 				}
 			}
 

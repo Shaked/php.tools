@@ -32,7 +32,7 @@ final class SmartLnAfterCurlyOpen extends FormatterPass {
 						if (ST_CURLY_CLOSE == $id) {
 							--$curly_count;
 						}
-						if (T_WHITESPACE === $id && substr_count($text, $this->new_line) > 0) {
+						if (T_WHITESPACE === $id && $this->has_ln($text)) {
 							$found_line_break = true;
 							break;
 						}

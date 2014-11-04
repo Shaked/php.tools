@@ -77,7 +77,7 @@ abstract class FormatterPass {
 
 	abstract public function format($source);
 	protected function get_token($token) {
-		if (is_string($token)) {
+		if (!isset($token[1])) {
 			return [$token, $token];
 		} else {
 			return $token;
@@ -151,7 +151,7 @@ abstract class FormatterPass {
 		}
 
 		$found_token = $this->tkns[$i];
-		if (is_string($found_token) && $found_token === $token) {
+		if ($found_token === $token) {
 			return true;
 		} elseif (is_array($token) && is_array($found_token)) {
 			if (in_array($found_token[0], $token)) {
@@ -178,7 +178,7 @@ abstract class FormatterPass {
 		}
 
 		$found_token = $tkns[$i];
-		if (is_string($found_token) && $found_token === $token) {
+		if ($found_token === $token) {
 			return true;
 		} elseif (is_array($token) && is_array($found_token)) {
 			if (in_array($found_token[0], $token)) {
@@ -211,17 +211,17 @@ abstract class FormatterPass {
 		$id = null;
 		$text = null;
 		list($id, $text) = $this->inspect_token();
-		return T_WHITESPACE === $id && false !== strpos($text, $this->new_line);
+		return T_WHITESPACE === $id && $this->has_ln($text);
 	}
 	protected function has_ln_before() {
 		$id = null;
 		$text = null;
 		list($id, $text) = $this->inspect_token(-1);
-		return T_WHITESPACE === $id && false !== strpos($text, $this->new_line);
+		return T_WHITESPACE === $id && $this->has_ln($text);
 	}
 	protected function has_ln_prev_token() {
 		list($id, $text) = $this->get_token($this->prev_token());
-		return false !== strpos($text, $this->new_line);
+		return $this->has_ln($text);
 	}
 	protected function substr_count_trailing($haystack, $needle) {
 		return strlen(rtrim($haystack, " \t")) - strlen(rtrim($haystack, " \t" . $needle));
@@ -242,6 +242,7 @@ abstract class FormatterPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
+			$this->cache = [];
 			$this->append_code($text, false);
 			if ($tknid == $id) {
 				break;
@@ -258,6 +259,10 @@ abstract class FormatterPass {
 				return $ret;
 			}
 		}
+	}
+
+	protected function has_ln($text) {
+		return (false !== strpos($text, $this->new_line));
 	}
 }
 ;

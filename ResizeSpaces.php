@@ -12,7 +12,6 @@ final class ResizeSpaces extends FormatterPass {
 			$tkns,
 			function ($token) {
 				list($id, $text) = $this->get_token($token);
-				// if (T_WHITESPACE === $id && 0 === substr_count($text, $this->new_line)) {
 				if (T_WHITESPACE === $id && false === strpos($text, $this->new_line)) {
 					return false;
 				}
@@ -40,9 +39,9 @@ final class ResizeSpaces extends FormatterPass {
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
 					list($next_id, $next_text) = $this->inspect_token(+1);
 					if (
-						(T_LNUMBER == $prev_id || T_DNUMBER == $prev_id || T_VARIABLE == $prev_id || ST_PARENTHESES_CLOSE == $prev_id || T_STRING == $prev_id)
+						(T_LNUMBER === $prev_id || T_DNUMBER === $prev_id || T_VARIABLE === $prev_id || ST_PARENTHESES_CLOSE === $prev_id || T_STRING === $prev_id)
 					 	&&
-						(T_LNUMBER == $next_id || T_DNUMBER == $next_id || T_VARIABLE == $next_id || ST_PARENTHESES_CLOSE == $next_id || T_STRING == $next_id)
+						(T_LNUMBER === $next_id || T_DNUMBER === $next_id || T_VARIABLE === $next_id || ST_PARENTHESES_CLOSE === $next_id || T_STRING === $next_id)
 					) {
 						$this->append_code($this->get_space() . $text . $this->get_space(), false);
 					} else {
@@ -59,18 +58,18 @@ final class ResizeSpaces extends FormatterPass {
 						list($next_id, $next_text) = $this->inspect_token(+1);
 					}
 					if (
-						T_WHITESPACE == $prev_id &&
-						T_WHITESPACE != $next_id
+						T_WHITESPACE === $prev_id &&
+						T_WHITESPACE !== $next_id
 					) {
 						$this->append_code($text . $this->get_space(), false);
 					} elseif (
-						T_WHITESPACE != $prev_id &&
-						T_WHITESPACE == $next_id
+						T_WHITESPACE !== $prev_id &&
+						T_WHITESPACE === $next_id
 					) {
 						$this->append_code($this->get_space() . $text, false);
 					} elseif (
-						T_WHITESPACE != $prev_id &&
-						T_WHITESPACE != $next_id
+						T_WHITESPACE !== $prev_id &&
+						T_WHITESPACE !== $next_id
 					) {
 						$this->append_code($this->get_space() . $text . $this->get_space(), false);
 					} else {
@@ -91,20 +90,20 @@ final class ResizeSpaces extends FormatterPass {
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
 					list($next_id, $next_text) = $this->inspect_token(+1);
 					if (
-						T_WHITESPACE == $prev_id &&
-						T_WHITESPACE != $next_id
+						T_WHITESPACE === $prev_id &&
+						T_WHITESPACE !== $next_id
 					) {
 						$this->append_code($text . $this->get_space(!$this->is_token(ST_COLON)), false);
 						break;
 					} elseif (
-						T_WHITESPACE != $prev_id &&
-						T_WHITESPACE == $next_id
+						T_WHITESPACE !== $prev_id &&
+						T_WHITESPACE === $next_id
 					) {
 						$this->append_code($this->get_space() . $text, false);
 						break;
 					} elseif (
-						T_WHITESPACE != $prev_id &&
-						T_WHITESPACE != $next_id
+						T_WHITESPACE !== $prev_id &&
+						T_WHITESPACE !== $next_id
 					) {
 						$this->append_code($this->get_space() . $text . $this->get_space(!$this->is_token(ST_COLON)), false);
 						break;
@@ -114,22 +113,22 @@ final class ResizeSpaces extends FormatterPass {
 					list($next_id, $next_text) = $this->inspect_token(+1);
 					if (
 						$in_ternary_operator &&
-						T_WHITESPACE == $prev_id &&
-						T_WHITESPACE != $next_id
+						T_WHITESPACE === $prev_id &&
+						T_WHITESPACE !== $next_id
 					) {
 						$this->append_code($text . $this->get_space(), false);
 						$in_ternary_operator = false;
 					} elseif (
 						$in_ternary_operator &&
-						T_WHITESPACE != $prev_id &&
-						T_WHITESPACE == $next_id
+						T_WHITESPACE !== $prev_id &&
+						T_WHITESPACE === $next_id
 					) {
 						$this->append_code($this->get_space(!$short_ternary_operator) . $text, false);
 						$in_ternary_operator = false;
 					} elseif (
 						$in_ternary_operator &&
-						T_WHITESPACE != $prev_id &&
-						T_WHITESPACE != $next_id
+						T_WHITESPACE !== $prev_id &&
+						T_WHITESPACE !== $next_id
 					) {
 						$this->append_code($this->get_space(!$short_ternary_operator) . $text . $this->get_space(), false);
 						$in_ternary_operator = false;

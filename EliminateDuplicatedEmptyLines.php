@@ -1,7 +1,6 @@
 <?php
 final class EliminateDuplicatedEmptyLines extends FormatterPass {
-	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
-	private $policy = null;
+	const EMPTY_LINE = "\x2 EMPTYLINE \x3";
 
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -13,7 +12,7 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_WHITESPACE:
-					$text = str_replace($this->new_line, self::ALIGNABLE_EQUAL . $this->new_line, $text);
+					$text = str_replace($this->new_line, self::EMPTY_LINE . $this->new_line, $text);
 					$this->append_code($text, false);
 					break;
 				default:
@@ -27,10 +26,11 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 		$block_count = 0;
 
 		foreach ($lines as $idx => $line) {
-			if (trim($line) === self::ALIGNABLE_EQUAL) {
+			if (trim($line) === self::EMPTY_LINE) {
 				$lines_with_objop[$block_count][] = $idx;
 			} else {
 				++$block_count;
+				$lines_with_objop[$block_count] = [];
 			}
 		}
 
@@ -38,15 +38,13 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 			if (sizeof($group) <= 1) {
 				continue;
 			}
-			for ($i = 0; $i < 1; ++$i) {
-				array_pop($group);
-			}
+			array_pop($group);
 			foreach ($group as $line_number) {
 				unset($lines[$line_number]);
 			}
 		}
 
-		$this->code = str_replace(self::ALIGNABLE_EQUAL, '', implode($this->new_line, $lines));
+		$this->code = str_replace(self::EMPTY_LINE, '', implode($this->new_line, $lines));
 
 		$tkns = token_get_all($this->code);
 		list($id, $text) = $this->get_token(array_pop($tkns));

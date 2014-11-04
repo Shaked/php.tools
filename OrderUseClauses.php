@@ -110,14 +110,20 @@ final class OrderUseClauses extends FormatterPass {
 	public function format($source = '') {
 		$namespace_count = 0;
 		$tokens = token_get_all($source);
+		$touched_t_use = false;
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
+			if (T_USE === $id) {
+				$touched_t_use = true;
+			}
 			if (T_NAMESPACE == $id) {
 				++$namespace_count;
 			}
 		}
-		if ($namespace_count <= 1) {
+		if ($namespace_count <= 1 && $touched_t_use) {
 			return $this->singleNamespace($source);
+		} elseif ($namespace_count <= 1) {
+			return $source;
 		}
 
 		$return = '';
@@ -128,24 +134,30 @@ final class OrderUseClauses extends FormatterPass {
 			switch ($id) {
 				case T_NAMESPACE:
 					$return .= $text;
+					$touched_t_use = false;
 					while (list($index, $token) = each($tokens)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						$return .= $text;
-						if ($id == ST_CURLY_OPEN || $id == ST_SEMI_COLON) {
+						if (ST_CURLY_OPEN == $id || ST_SEMI_COLON == $id) {
 							break;
 						}
 					}
-					if ($id == ST_CURLY_OPEN) {
+					if (ST_CURLY_OPEN === $id) {
 						$namespace_block = '';
 						$curly_count = 1;
 						while (list($index, $token) = each($tokens)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
 							$namespace_block .= $text;
-							if ($id == ST_CURLY_OPEN) {
+
+							if (T_USE === $id) {
+								$touched_t_use = true;
+							}
+
+							if (ST_CURLY_OPEN == $id) {
 								++$curly_count;
-							} elseif ($id == ST_CURLY_CLOSE) {
+							} elseif (ST_CURLY_CLOSE == $id) {
 								--$curly_count;
 							}
 
@@ -153,23 +165,33 @@ final class OrderUseClauses extends FormatterPass {
 								break;
 							}
 						}
-					} elseif ($id == ST_SEMI_COLON) {
+					} elseif (ST_SEMI_COLON === $id) {
 						$namespace_block = '';
 						while (list($index, $token) = each($tokens)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
-							if ($id == T_NAMESPACE) {
+
+							if (T_USE === $id) {
+								$touched_t_use = true;
+							}
+
+							if (T_NAMESPACE == $id) {
 								prev($tokens);
 								break;
 							}
+
 							$namespace_block .= $text;
 						}
 					}
-					$return .= str_replace(
-						self::OPENER_PLACEHOLDER,
-						'',
-						$this->singleNamespace(self::OPENER_PLACEHOLDER . $namespace_block)
-					);
+					if ($touched_t_use) {
+						$return .= str_replace(
+							self::OPENER_PLACEHOLDER,
+							'',
+							$this->singleNamespace(self::OPENER_PLACEHOLDER . $namespace_block)
+						);
+					} else {
+						$return .= $namespace_block;
+					}
 					break;
 				default:
 					$return .= $text;

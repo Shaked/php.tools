@@ -36,7 +36,7 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
 							$this->ptr = $index;
-							if (T_WHITESPACE == $id && substr_count($text, $this->new_line) > 0) {
+							if (T_WHITESPACE == $id && $this->has_ln($text)) {
 								$touched_ln = true;
 							}
 							if (ST_CURLY_OPEN === $id && !$touched_ln) {

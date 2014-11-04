@@ -1,9 +1,9 @@
 <?php
 final class AddMissingCurlyBraces extends FormatterPass {
 	public function format($source) {
-		$tmp = $this->addBraces($source);
-		while (true) {
-			$source = $this->addBraces($tmp);
+		list($tmp, $changed) = $this->addBraces($source);
+		while ($changed) {
+			list($source, $changed) = $this->addBraces($tmp);
 			if ($source === $tmp) {
 				break;
 			}
@@ -15,6 +15,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$this->use_cache = true;
+		$changed = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -69,6 +70,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							}
 						}
 						$this->append_code($this->get_crlf_indent() . '}' . $this->get_crlf_indent(), false);
+						$changed = true;
 						break 2;
 					}
 					break;
@@ -120,6 +122,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							}
 						}
 						$this->append_code($this->get_crlf_indent() . '}' . $this->get_crlf_indent(), false);
+						$changed = true;
 						break 2;
 					}
 					break;
@@ -151,6 +154,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							}
 						}
 						$this->append_code($this->get_crlf_indent() . '}' . $this->get_crlf_indent(), false);
+						$changed = true;
 						break 2;
 					}
 					break;
@@ -165,6 +169,6 @@ final class AddMissingCurlyBraces extends FormatterPass {
 			$this->append_code($text, false);
 		}
 
-		return $this->code;
+		return [$this->code, $changed];
 	}
 }

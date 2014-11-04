@@ -48,12 +48,17 @@ final class AlignEquals extends FormatterPass {
 			if (false === strpos($this->code, $placeholder)) {
 				continue;
 			}
+			if (1 === substr_count($this->code, $placeholder)) {
+				$this->code = str_replace($placeholder, '', $this->code);
+				continue;
+			}
+
 			$lines = explode($this->new_line, $this->code);
 			$lines_with_objop = [];
 			$block_count = 0;
 
 			foreach ($lines as $idx => $line) {
-				if (substr_count($line, $placeholder) > 0) {
+				if (false !== strpos($line, $placeholder)) {
 					$lines_with_objop[$block_count][] = $idx;
 				} else {
 					++$block_count;
@@ -63,18 +68,15 @@ final class AlignEquals extends FormatterPass {
 
 			$i = 0;
 			foreach ($lines_with_objop as $group) {
-				if (1 === sizeof($group)) {
-					continue;
-				}
 				++$i;
-				$farthest_objop = 0;
+				$farthest = 0;
 				foreach ($group as $idx) {
-					$farthest_objop = max($farthest_objop, strpos($lines[$idx], $placeholder));
+					$farthest = max($farthest, strpos($lines[$idx], $placeholder));
 				}
 				foreach ($group as $idx) {
 					$line = $lines[$idx];
-					$current_objop = strpos($line, $placeholder);
-					$delta = abs($farthest_objop - $current_objop);
+					$current = strpos($line, $placeholder);
+					$delta = abs($farthest - $current);
 					if ($delta > 0) {
 						$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
 						$lines[$idx] = $line;

@@ -14,7 +14,7 @@ final class Reindent extends FormatterPass {
 				(
 					T_WHITESPACE === $id ||
 					(T_COMMENT === $id && '//' == substr($text, 0, 2))
-				) && substr_count($text, $this->new_line) > 0
+				) && $this->has_ln($text)
 			) {
 				$bottom_found_stack = end($found_stack);
 				if (isset($bottom_found_stack['implicit']) && $bottom_found_stack['implicit']) {
@@ -30,15 +30,7 @@ final class Reindent extends FormatterPass {
 					break;
 				case T_CLOSE_TAG:
 					$this->append_code($text, false);
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
-						$this->cache = [];
-						$this->append_code($text, false);
-						if (T_OPEN_TAG == $id) {
-							break;
-						}
-					}
+					$this->print_until_the_end_of(T_OPEN_TAG);
 					break;
 				case T_START_HEREDOC:
 					$this->append_code(rtrim($text) . $this->get_crlf(), false);
@@ -75,12 +67,16 @@ final class Reindent extends FormatterPass {
 					break;
 
 				default:
-					if (substr_count($text, $this->new_line) > 0 && !$this->is_token(ST_CURLY_CLOSE) && !$this->is_token(ST_PARENTHESES_CLOSE) && !$this->is_token(ST_BRACKET_CLOSE)) {
-						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					} elseif (substr_count($text, $this->new_line) > 0 && ($this->is_token(ST_CURLY_CLOSE) || $this->is_token(ST_PARENTHESES_CLOSE) || $this->is_token(ST_BRACKET_CLOSE))) {
-						$this->set_indent(-1);
-						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-						$this->set_indent(+1);
+					$has_ln = ($this->has_ln($text));
+					if ($has_ln) {
+						$is_next_curly_paren_bracket_close = $this->is_token([ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE]);
+						if (!$is_next_curly_paren_bracket_close) {
+							$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
+						} elseif ($is_next_curly_paren_bracket_close) {
+							$this->set_indent(-1);
+							$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
+							$this->set_indent(+1);
+						}
 					}
 					$this->append_code($text, false);
 					break;
