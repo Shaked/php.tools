@@ -22,22 +22,19 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 		}
 
 		$lines = explode($this->new_line, $this->code);
-		$lines_with_objop = [];
+		$empty_lines = [];
 		$block_count = 0;
 
 		foreach ($lines as $idx => $line) {
 			if (trim($line) === self::EMPTY_LINE) {
-				$lines_with_objop[$block_count][] = $idx;
+				$empty_lines[$block_count][] = $idx;
 			} else {
 				++$block_count;
-				$lines_with_objop[$block_count] = [];
+				$empty_lines[$block_count] = [];
 			}
 		}
 
-		foreach ($lines_with_objop as $group) {
-			if (sizeof($group) <= 1) {
-				continue;
-			}
+		foreach ($empty_lines as $group) {
 			array_pop($group);
 			foreach ($group as $line_number) {
 				unset($lines[$line_number]);
@@ -46,8 +43,7 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 
 		$this->code = str_replace(self::EMPTY_LINE, '', implode($this->new_line, $lines));
 
-		$tkns = token_get_all($this->code);
-		list($id, $text) = $this->get_token(array_pop($tkns));
+		list($id, $text) = $this->get_token(array_pop($this->tkns));
 		if (T_WHITESPACE === $id && '' === trim($text)) {
 			$this->code = rtrim($this->code) . $this->new_line;
 		}
