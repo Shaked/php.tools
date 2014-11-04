@@ -140,10 +140,10 @@ abstract class FormatterPass {
 	protected function is_token_idx($idx, $token, $prev = false) {
 		$i = $idx;
 		if ($prev) {
-			while (--$i >= 0 && is_array($this->tkns[$i]) && T_WHITESPACE === $this->tkns[$i][0]);
+			while (--$i >= 0 && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
 		} else {
 			$tkns_size = sizeof($this->tkns) - 1;
-			while (++$i < $tkns_size && is_array($this->tkns[$i]) && T_WHITESPACE === $this->tkns[$i][0]);
+			while (++$i < $tkns_size && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
 		}
 
 		if (!isset($this->tkns[$i])) {
@@ -167,10 +167,10 @@ abstract class FormatterPass {
 	protected function is_token_in_subset($tkns, $idx, $token, $prev = false) {
 		$i = $idx;
 		if ($prev) {
-			while (--$i >= 0 && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
+			while (--$i >= 0 && isset($tkns[$i][1]) && T_WHITESPACE === $tkns[$i][0]);
 		} else {
 			$tkns_size = sizeof($tkns) - 1;
-			while (++$i < $tkns_size && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
+			while (++$i < $tkns_size && isset($tkns[$i][1]) && T_WHITESPACE === $tkns[$i][0]);
 		}
 
 		if (!isset($tkns[$i])) {
@@ -194,16 +194,16 @@ abstract class FormatterPass {
 
 	protected function prev_token() {
 		$i = $this->ptr;
-		while (--$i >= 0 && is_array($this->tkns[$i]) && T_WHITESPACE === $this->tkns[$i][0]);
+		while (--$i >= 0 && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
 		return $this->tkns[$i];
 	}
 	protected function siblings($tkns, $ptr) {
 		$i = $ptr;
-		while (--$i >= 0 && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
+		while (--$i >= 0 && isset($tkns[$i][1]) && T_WHITESPACE === $tkns[$i][0]);
 		$left = $i;
 		$i = $ptr;
 		$tkns_size = sizeof($tkns) - 1;
-		while (++$i < $tkns_size && is_array($tkns[$i]) && T_WHITESPACE === $tkns[$i][0]);
+		while (++$i < $tkns_size && isset($tkns[$i][1]) && T_WHITESPACE === $tkns[$i][0]);
 		$right = $i;
 		return [$left, $right];
 	}
