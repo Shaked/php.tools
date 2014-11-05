@@ -9,7 +9,7 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					$this->append_code($text, false);
+					$this->append_code($this->get_crlf($this->is_token(ST_CURLY_CLOSE, true)) . $text, false);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
@@ -19,6 +19,9 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 							if (1 === substr_count($text, $this->new_line)) {
 								$this->append_code($this->new_line, false);
 							}
+							break;
+						} elseif (ST_CURLY_OPEN === $id) {
+							$this->append_code($text, false);
 							break;
 						} else {
 							$this->append_code($text, false);
@@ -30,6 +33,7 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 					break;
 			}
 		}
+
 		return $this->code;
 	}
 }

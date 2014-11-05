@@ -1,0 +1,11 @@
+<?php namespace NS;
+
+namespace NS1{
+
+} namespace NS2 {
+
+}
+
+function a(){
+	a();
+}
