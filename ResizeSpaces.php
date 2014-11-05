@@ -204,7 +204,6 @@ final class ResizeSpaces extends FormatterPass {
 				case T_PUBLIC:
 				case T_PRIVATE:
 				case T_PROTECTED:
-				case T_CLASS:
 				case T_TRAIT:
 				case T_INTERFACE:
 				case T_THROW:
@@ -224,6 +223,9 @@ final class ResizeSpaces extends FormatterPass {
 				case T_CLONE:
 				case T_CONTINUE:
 					$this->append_code($text . $this->get_space(!$this->is_token(ST_SEMI_COLON)), false);
+					break;
+				case T_CLASS:
+					$this->append_code($text . $this->get_space(!$this->is_token(ST_SEMI_COLON) && !$this->is_token([T_DOUBLE_COLON], true)), false);
 					break;
 				case T_EXTENDS:
 				case T_IMPLEMENTS:

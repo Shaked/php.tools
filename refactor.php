@@ -153,12 +153,8 @@ abstract class FormatterPass {
 		$found_token = $this->tkns[$i];
 		if ($found_token === $token) {
 			return true;
-		} elseif (is_array($token) && is_array($found_token)) {
-			if (in_array($found_token[0], $token)) {
-				return true;
-			} elseif ($prev && T_OPEN_TAG === $found_token[0]) {
-				return true;
-			}
+		} elseif (is_array($token) && is_array($found_token) && in_array($found_token[0], $token)) {
+			return true;
 		} elseif (is_array($token) && is_string($found_token) && in_array($found_token, $token)) {
 			return true;
 		}
