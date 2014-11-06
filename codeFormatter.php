@@ -327,8 +327,8 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						$ignore_count = 0;
 						if (!$this->is_token([T_COMMENT, T_DOC_COMMENT], true)) {
 							$this->append_code($this->new_line . '{');
-						} else {
-							$this->append_code('{');
+							// } else {
+							// $this->append_code('{');
 						}
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
@@ -379,8 +379,8 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						$ignore_count = 0;
 						if (!$this->is_token([T_COMMENT, T_DOC_COMMENT], true)) {
 							$this->append_code($this->new_line . '{');
-						} else {
-							$this->append_code('{');
+							// } else {
+							// $this->append_code('{');
 						}
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
@@ -879,16 +879,10 @@ final class AutoPreincrement extends FormatterPass {
 		$tkns = $this->aggregate_variables($source);
 		reset($tkns);
 		while (list($ptr, $token) = each($tkns)) {
-			if (is_null($token)) {
-				continue;
-			}
 			list($id, $text) = $this->get_token($token);
 			switch ($id) {
 				case T_INC:
 				case T_DEC:
-					if (!isset($tkns[$ptr - 1])) {
-						break;
-					}
 					$prev_token = $tkns[$ptr - 1];
 					list($prev_id, ) = $prev_token;
 					if (T_VARIABLE == $prev_id || self::CHAIN_VARIABLE == $prev_id) {
@@ -945,16 +939,15 @@ final class AutoPreincrement extends FormatterPass {
 				)) {
 					continue;
 				}
+
 				while (list($ptr, $token) = each($tkns)) {
 					list($id, $text) = $this->get_token($token);
-					if (ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id || ST_PARENTHESES_CLOSE == $id || ST_SEMI_COLON == $id
-
-					) {
-						$token = prev($tkns);
-						$ptr = key($tkns);
-						list($id, $text) = $this->get_token($token);
-						break;
-					}
+					// if (ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id || ST_PARENTHESES_CLOSE == $id || ST_SEMI_COLON == $id) {
+					// 	$token = prev($tkns);
+					// 	$ptr = key($tkns);
+					// 	list($id, $text) = $this->get_token($token);
+					// 	break;
+					// }
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
 						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE);
@@ -1018,7 +1011,7 @@ final class ConstructorPass extends FormatterPass {
 	const TYPE_CAMEL_CASE = 'camel';
 	const TYPE_SNAKE_CASE = 'snake';
 	const TYPE_GOLANG = 'golang';
-	public function __construct($type) {
+	public function __construct($type = self::TYPE_CAMEL_CASE) {
 		if (self::TYPE_CAMEL_CASE == $type || self::TYPE_SNAKE_CASE == $type || self::TYPE_GOLANG == $type) {
 			$this->type = $type;
 		} else {
@@ -1044,10 +1037,10 @@ final class ConstructorPass extends FormatterPass {
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
-						if ($id == ST_CURLY_OPEN) {
+						if (ST_CURLY_OPEN == $id) {
 							++$curly_count;
 						}
-						if ($id == ST_CURLY_CLOSE) {
+						if (ST_CURLY_CLOSE == $id) {
 							--$curly_count;
 						}
 						if (0 === $curly_count) {
@@ -1101,12 +1094,17 @@ final class ConstructorPass extends FormatterPass {
 	private function generate($var) {
 		switch ($this->type) {
 			case self::TYPE_SNAKE_CASE:
-				return $this->generateSnakeCase($var);
-			case self::TYPE_CAMEL_CASE:
-				return $this->generateCamelCase($var);
+				$ret = $this->generateSnakeCase($var);
+				break;
 			case self::TYPE_GOLANG:
-				return $this->generateGolang($var);
+				$ret = $this->generateGolang($var);
+				break;
+			case self::TYPE_CAMEL_CASE:
+			default:
+				$ret = $this->generateCamelCase($var);
+				break;
 		}
+		return $ret;
 	}
 	private function generateCamelCase($var) {
 		$str = '$this->set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . ');' . $this->new_line;
@@ -1599,14 +1597,15 @@ final class OrderUseClauses extends FormatterPass {
 							$use_item .= $text;
 							break;
 						} elseif (ST_COMMA === $id) {
-							$use_item .= ST_SEMI_COLON . $this->new_line;
+							$use_item .= ST_SEMI_COLON;
+							$next_tokens[] = [T_WHITESPACE, $this->new_line, ];
 							$next_tokens[] = [T_USE, 'use', ];
 							break;
 						} else {
 							$use_item .= $text;
 						}
 					}
-					$use_stack[] = $use_item;
+					$use_stack[] = trim($use_item);
 					$token = new SurrogateToken();
 				}
 				if (T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id || T_TRAIT === $id || T_VARIABLE === $id) {
@@ -1636,10 +1635,11 @@ final class OrderUseClauses extends FormatterPass {
 			} else {
 				$alias = basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 			}
-			$alias = strtolower($alias);
-			$alias_list[$alias] = strtolower($use);
+			$alias = str_replace(ST_SEMI_COLON, '', strtolower($alias));
+			$alias_list[$alias] = trim(strtolower($use));
 			$alias_count[$alias] = 0;
 		}
+
 		$return = '';
 		foreach ($new_tokens as $idx => $token) {
 			if ($token instanceof SurrogateToken) {
@@ -2298,12 +2298,13 @@ final class ResizeSpaces extends FormatterPass {
 				case '*':
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
 					list($next_id, $next_text) = $this->inspect_token(+1);
-					if ('*' == $next_text) {
-						$text .= '*';
-						list($index, $token) = each($this->tkns);
-						$this->ptr = $index;
-						list($next_id, $next_text) = $this->inspect_token(+1);
-					}
+					// T_POW should be handled by proper PHP version
+					// if ('*' == $next_text) {
+					// 	$text .= '*';
+					// 	list($index, $token) = each($this->tkns);
+					// 	$this->ptr = $index;
+					// 	list($next_id, $next_text) = $this->inspect_token(+1);
+					// }
 					if (
 						T_WHITESPACE === $prev_id &&
 						T_WHITESPACE !== $next_id
@@ -2423,8 +2424,8 @@ final class ResizeSpaces extends FormatterPass {
 				case T_USE:
 					if ($this->is_token(ST_PARENTHESES_CLOSE, true)) {
 						$this->append_code($this->get_space() . $text . $this->get_space(), false);
-					} elseif ($this->is_token(ST_SEMI_COLON)) {
-						$this->append_code($text, false);
+						//} elseif ($this->is_token(ST_SEMI_COLON)) {
+						//	$this->append_code($text, false);
 					} else {
 						$this->append_code($text . $this->get_space(), false);
 					}
@@ -2442,10 +2443,11 @@ final class ResizeSpaces extends FormatterPass {
 					$this->append_code($text . $this->get_space(!$this->is_token(ST_SEMI_COLON)), false);
 					break;
 				case T_WHILE:
-					if ($this->is_token(ST_SEMI_COLON)) {
-						$this->append_code($text . $this->get_space(), false);
-						break;
-					} elseif ($this->is_token(ST_CURLY_CLOSE, true) && !$this->has_ln_before()) {
+					// if ($this->is_token(ST_SEMI_COLON)) {
+					// 	$this->append_code($text . $this->get_space(), false);
+					// 	break;
+					// } else
+					if ($this->is_token(ST_CURLY_CLOSE, true) && !$this->has_ln_before()) {
 						$this->append_code($this->get_space() . $text . $this->get_space(), false);
 						break;
 					}
@@ -2541,15 +2543,15 @@ final class ResizeSpaces extends FormatterPass {
 				case T_GOTO:
 					$this->append_code($text . $this->get_space(), false);
 					break;
-				case ST_CONCAT:
-					if (
-						!$this->is_token([ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE, T_VARIABLE, T_STRING, T_CONSTANT_ENCAPSED_STRING, T_WHITESPACE], true)
-					) {
-						$this->append_code($this->get_space() . $text, false);
-					} else {
-						$this->append_code($text, false);
-					}
-					break;
+					// case ST_CONCAT:
+					// 	if (
+					// 		!$this->is_token([ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE, T_VARIABLE, T_STRING, T_CONSTANT_ENCAPSED_STRING, T_WHITESPACE], true)
+					// 	) {
+					// 		$this->append_code($this->get_space() . $text, false);
+					// 	} else {
+					// 		$this->append_code($text, false);
+					// 	}
+					// 	break;
 				case ST_REFERENCE:
 					if (($this->is_token([T_VARIABLE], true) && $this->is_token([T_VARIABLE])) || ($this->is_token([T_VARIABLE], true) && $this->is_token([T_STRING])) || ($this->is_token([T_STRING], true) && $this->is_token([T_STRING]))) {
 						$this->append_code($this->get_space() . $text . $this->get_space(), false);
@@ -2585,7 +2587,7 @@ final class SettersAndGettersPass extends FormatterPass {
 	const TYPE_CAMEL_CASE = 'camel';
 	const TYPE_SNAKE_CASE = 'snake';
 	const TYPE_GOLANG = 'golang';
-	public function __construct($type) {
+	public function __construct($type = self::TYPE_CAMEL_CASE) {
 		if (self::TYPE_CAMEL_CASE == $type || self::TYPE_SNAKE_CASE == $type || self::TYPE_GOLANG == $type) {
 			$this->type = $type;
 		} else {
@@ -2615,10 +2617,10 @@ final class SettersAndGettersPass extends FormatterPass {
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
-						if ($id == ST_CURLY_OPEN) {
+						if (ST_CURLY_OPEN == $id) {
 							++$curly_count;
 						}
-						if ($id == ST_CURLY_CLOSE) {
+						if (ST_CURLY_CLOSE == $id) {
 							--$curly_count;
 						}
 						if (0 === $curly_count) {
@@ -2676,12 +2678,17 @@ final class SettersAndGettersPass extends FormatterPass {
 	private function generate($visibility, $var) {
 		switch ($this->type) {
 			case self::TYPE_SNAKE_CASE:
-				return $this->generateSnakeCase($visibility, $var);
-			case self::TYPE_CAMEL_CASE:
-				return $this->generateCamelCase($visibility, $var);
+				$ret = $this->generateSnakeCase($visibility, $var);
+				break;
 			case self::TYPE_GOLANG:
-				return $this->generateGolang($visibility, $var);
+				$ret = $this->generateGolang($visibility, $var);
+				break;
+			case self::TYPE_CAMEL_CASE:
+			default:
+				$ret = $this->generateCamelCase($visibility, $var);
+				break;
 		}
+		return $ret;
 	}
 	private function generateCamelCase($visibility, $var) {
 		$str = $visibility . ' function set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . '){' . $this->new_line . '$this->' . str_replace('$', '', $var) . ' = ' . $var . ';' . $this->new_line . '}' . $this->new_line;
@@ -2717,14 +2724,7 @@ class ShortArray extends FormatterPass {
 				case T_ARRAY:
 					if ($this->is_token([ST_PARENTHESES_OPEN])) {
 						$found_paren[] = self::FOUND_ARRAY;
-						while (list($index, $token) = each($this->tkns)) {
-							list($id, $text) = $this->get_token($token);
-							$this->ptr = $index;
-							if (ST_PARENTHESES_OPEN == $id) {
-								$this->append_code('[', false);
-								break;
-							}
-						}
+						$this->walk_until_paren_open();
 						break;
 					}
 				case ST_PARENTHESES_OPEN:
@@ -2745,6 +2745,18 @@ class ShortArray extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	private function walk_until_paren_open() {
+		do {
+
+			list($index, $token) = each($this->tkns);
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			if (ST_PARENTHESES_OPEN == $id) {
+				$this->append_code('[', false);
+			}
+		} while (ST_PARENTHESES_OPEN != $id);
 	}
 }
 ;
@@ -3005,14 +3017,12 @@ final class YodaComparisons extends FormatterPass {
 				}
 				while (list($ptr, $token) = each($tkns)) {
 					list($id, $text) = $this->get_token($token);
-					if (ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id || ST_PARENTHESES_CLOSE == $id || ST_SEMI_COLON == $id
-
-					) {
-						$token = prev($tkns);
-						$ptr = key($tkns);
-						list($id, $text) = $this->get_token($token);
-						break;
-					}
+					// if (ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id || ST_PARENTHESES_CLOSE == $id || ST_SEMI_COLON == $id ) {
+					// 	$token = prev($tkns);
+					// 	$ptr = key($tkns);
+					// 	list($id, $text) = $this->get_token($token);
+					// 	break;
+					// }
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
 						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE);

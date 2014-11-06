@@ -45,8 +45,8 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						$ignore_count = 0;
 						if (!$this->is_token([T_COMMENT, T_DOC_COMMENT], true)) {
 							$this->append_code($this->new_line . '{');
-						} else {
-							$this->append_code('{');
+							// } else {
+							// $this->append_code('{');
 						}
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);
@@ -97,8 +97,8 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						$ignore_count = 0;
 						if (!$this->is_token([T_COMMENT, T_DOC_COMMENT], true)) {
 							$this->append_code($this->new_line . '{');
-						} else {
-							$this->append_code('{');
+							// } else {
+							// $this->append_code('{');
 						}
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->get_token($token);

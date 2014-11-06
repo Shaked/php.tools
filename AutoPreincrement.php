@@ -12,16 +12,10 @@ final class AutoPreincrement extends FormatterPass {
 		$tkns = $this->aggregate_variables($source);
 		reset($tkns);
 		while (list($ptr, $token) = each($tkns)) {
-			if (is_null($token)) {
-				continue;
-			}
 			list($id, $text) = $this->get_token($token);
 			switch ($id) {
 				case T_INC:
 				case T_DEC:
-					if (!isset($tkns[$ptr - 1])) {
-						break;
-					}
 					$prev_token = $tkns[$ptr - 1];
 					list($prev_id, ) = $prev_token;
 					if (T_VARIABLE == $prev_id || self::CHAIN_VARIABLE == $prev_id) {
@@ -78,16 +72,15 @@ final class AutoPreincrement extends FormatterPass {
 				)) {
 					continue;
 				}
+
 				while (list($ptr, $token) = each($tkns)) {
 					list($id, $text) = $this->get_token($token);
-					if (ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id || ST_PARENTHESES_CLOSE == $id || ST_SEMI_COLON == $id
-
-					) {
-						$token = prev($tkns);
-						$ptr = key($tkns);
-						list($id, $text) = $this->get_token($token);
-						break;
-					}
+					// if (ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id || ST_PARENTHESES_CLOSE == $id || ST_SEMI_COLON == $id) {
+					// 	$token = prev($tkns);
+					// 	$ptr = key($tkns);
+					// 	list($id, $text) = $this->get_token($token);
+					// 	break;
+					// }
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
 						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE);

@@ -3,7 +3,7 @@ final class ConstructorPass extends FormatterPass {
 	const TYPE_CAMEL_CASE = 'camel';
 	const TYPE_SNAKE_CASE = 'snake';
 	const TYPE_GOLANG = 'golang';
-	public function __construct($type) {
+	public function __construct($type = self::TYPE_CAMEL_CASE) {
 		if (self::TYPE_CAMEL_CASE == $type || self::TYPE_SNAKE_CASE == $type || self::TYPE_GOLANG == $type) {
 			$this->type = $type;
 		} else {
@@ -29,10 +29,10 @@ final class ConstructorPass extends FormatterPass {
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
-						if ($id == ST_CURLY_OPEN) {
+						if (ST_CURLY_OPEN == $id) {
 							++$curly_count;
 						}
-						if ($id == ST_CURLY_CLOSE) {
+						if (ST_CURLY_CLOSE == $id) {
 							--$curly_count;
 						}
 						if (0 === $curly_count) {
@@ -86,12 +86,17 @@ final class ConstructorPass extends FormatterPass {
 	private function generate($var) {
 		switch ($this->type) {
 			case self::TYPE_SNAKE_CASE:
-				return $this->generateSnakeCase($var);
-			case self::TYPE_CAMEL_CASE:
-				return $this->generateCamelCase($var);
+				$ret = $this->generateSnakeCase($var);
+				break;
 			case self::TYPE_GOLANG:
-				return $this->generateGolang($var);
+				$ret = $this->generateGolang($var);
+				break;
+			case self::TYPE_CAMEL_CASE:
+			default:
+				$ret = $this->generateCamelCase($var);
+				break;
 		}
+		return $ret;
 	}
 	private function generateCamelCase($var) {
 		$str = '$this->set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . ');' . $this->new_line;

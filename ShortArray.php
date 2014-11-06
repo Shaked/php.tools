@@ -17,14 +17,7 @@ class ShortArray extends FormatterPass {
 				case T_ARRAY:
 					if ($this->is_token([ST_PARENTHESES_OPEN])) {
 						$found_paren[] = self::FOUND_ARRAY;
-						while (list($index, $token) = each($this->tkns)) {
-							list($id, $text) = $this->get_token($token);
-							$this->ptr = $index;
-							if (ST_PARENTHESES_OPEN == $id) {
-								$this->append_code('[', false);
-								break;
-							}
-						}
+						$this->walk_until_paren_open();
 						break;
 					}
 				case ST_PARENTHESES_OPEN:
@@ -45,5 +38,17 @@ class ShortArray extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	private function walk_until_paren_open() {
+		do {
+
+			list($index, $token) = each($this->tkns);
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			if (ST_PARENTHESES_OPEN == $id) {
+				$this->append_code('[', false);
+			}
+		} while (ST_PARENTHESES_OPEN != $id);
 	}
 }

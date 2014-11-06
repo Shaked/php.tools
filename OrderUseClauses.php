@@ -22,14 +22,15 @@ final class OrderUseClauses extends FormatterPass {
 							$use_item .= $text;
 							break;
 						} elseif (ST_COMMA === $id) {
-							$use_item .= ST_SEMI_COLON . $this->new_line;
+							$use_item .= ST_SEMI_COLON;
+							$next_tokens[] = [T_WHITESPACE, $this->new_line, ];
 							$next_tokens[] = [T_USE, 'use', ];
 							break;
 						} else {
 							$use_item .= $text;
 						}
 					}
-					$use_stack[] = $use_item;
+					$use_stack[] = trim($use_item);
 					$token = new SurrogateToken();
 				}
 				if (T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id || T_TRAIT === $id || T_VARIABLE === $id) {
@@ -59,10 +60,11 @@ final class OrderUseClauses extends FormatterPass {
 			} else {
 				$alias = basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 			}
-			$alias = strtolower($alias);
-			$alias_list[$alias] = strtolower($use);
+			$alias = str_replace(ST_SEMI_COLON, '', strtolower($alias));
+			$alias_list[$alias] = trim(strtolower($use));
 			$alias_count[$alias] = 0;
 		}
+
 		$return = '';
 		foreach ($new_tokens as $idx => $token) {
 			if ($token instanceof SurrogateToken) {

@@ -1,0 +1,31 @@
+<?php
+//passes:OrderUseClauses,AddMissingCurlyBraces,SmartLnAfterCurlyOpen,NormalizeLnAndLtrimLines,MergeParenCloseWithCurlyOpen,MergeCurlyCloseAndDoWhile,MergeDoubleArrowAndArray,ExtraCommaInArray,ResizeSpaces,Reindent,ReindentColonBlocks,ReindentLoopColonBlocks,ReindentIfColonBlocks,ReindentObjOps,EliminateDuplicatedEmptyLines,AlignEquals,AlignDoubleArrow,LeftAlignComment,RTrim,SettersAndGettersPass|golang,ConstructorPass|golang,OrderMethod,NormalizeLnAndLtrimLines,Reindent
+
+class A {
+	private $a;
+	public $b;
+	protected $c;
+	private function A(){
+		return $this->a;
+	}
+	public function B(){
+		return $this->b;
+	}
+	protected function C(){
+		return $this->c;
+	}
+	private function SetA($a){
+		$this->a = $a;
+	}
+	public function SetB($b){
+		$this->b = $b;
+	}
+	protected function SetC($c){
+		$this->c = $c;
+	}
+	function __construct($a, $b, $c){
+		$this->SetA($a);
+		$this->SetB($b);
+		$this->SetC($c);
+	}
+}
