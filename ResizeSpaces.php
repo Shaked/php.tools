@@ -215,6 +215,7 @@ final class ResizeSpaces extends FormatterPass {
 				case T_REQUIRE:
 				case T_INCLUDE_ONCE:
 				case T_REQUIRE_ONCE:
+				case T_DECLARE:
 				case T_FUNCTION:
 				case T_IF:
 				case T_FOR:
