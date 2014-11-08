@@ -19,6 +19,7 @@ if (!isset($opt['deployed'])) {
 } else {
 	include (realpath(__DIR__ . "/../codeFormatter.php"));
 }
+$isHHVM = (false !== strpos(phpversion(), 'hhvm'));
 $cases = glob(__DIR__ . "/*.in");
 echo 'Running tests...', PHP_EOL;
 $brokenTests = [];
@@ -30,7 +31,13 @@ foreach ($cases as $caseIn) {
 	$specialPasses = false;
 	foreach ($tokens as $token) {
 		list($id, $text) = get_token($token);
-		if (T_COMMENT == $id && '//version:' == substr($text, 0, 10)) {
+		if (T_COMMENT == $id && '//skipHHVM' == substr($text, 0, 10)) {
+			$version = str_replace('//skipHHVM', '', $text);
+			if ($isHHVM) {
+				echo 'S';
+				continue 2;
+			}
+		} elseif (T_COMMENT == $id && '//version:' == substr($text, 0, 10)) {
 			$version = str_replace('//version:', '', $text);
 			if (version_compare(PHP_VERSION, $version, '<')) {
 				echo 'S';
