@@ -12,7 +12,8 @@ $x = array();
  $x = array(($y ? array("t" => true) : array("f" => false)));
  print_r(array(($y ? true : false)));
  $x = array(array(array()));
- $x = array(array(array())); $y = array(array(array()));
+ $x = array(array(array()));
+ $y = array(array(array()));
  function a($foo = array()) {
 
  }
