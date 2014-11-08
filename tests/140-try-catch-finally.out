@@ -1,0 +1,15 @@
+<?php
+// comment
+// comment
+// comment
+// comment
+// comment
+// comment
+
+try {
+	doSomething();
+} catch (Exception $exc) {
+	//caught me!
+} finally {
+	// yeah... finally.
+}

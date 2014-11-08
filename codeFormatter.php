@@ -2517,6 +2517,7 @@ final class ResizeSpaces extends FormatterPass {
 				case T_AS:
 				case ST_EQUAL:
 				case T_CATCH:
+				case T_FINALLY:
 					$this->append_code($this->get_space() . $text . $this->get_space(), false);
 					break;
 				case T_ELSEIF:
