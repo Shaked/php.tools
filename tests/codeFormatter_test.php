@@ -54,7 +54,7 @@ foreach ($cases as $caseIn) {
 					$params = [];
 					$fmt->addPass($reflectionClass->newInstanceArgs(explode(',', $pass[1])));
 				} else {
-					if ('default' == $pass) {
+					if ('default' == strtolower($pass)) {
 						$fmt->addPass(new TwoCommandsInSameLine());
 						$fmt->addPass(new OrderUseClauses());
 						$fmt->addPass(new AddMissingCurlyBraces());
