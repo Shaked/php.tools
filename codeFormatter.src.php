@@ -34,6 +34,7 @@ include 'ReindentColonBlocks.php';
 include 'ReindentIfColonBlocks.php';
 include 'ReindentLoopColonBlocks.php';
 include 'ReindentObjOps.php';
+include 'RemoveUseLeadingSlash.php';
 include 'ResizeSpaces.php';
 include 'RTrim.php';
 include 'SettersAndGettersPass.php';

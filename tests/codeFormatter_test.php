@@ -54,7 +54,29 @@ foreach ($cases as $caseIn) {
 					$params = [];
 					$fmt->addPass($reflectionClass->newInstanceArgs(explode(',', $pass[1])));
 				} else {
-					$fmt->addPass(new $pass());
+					if ('default' == $pass) {
+						$fmt->addPass(new TwoCommandsInSameLine());
+						$fmt->addPass(new OrderUseClauses());
+						$fmt->addPass(new AddMissingCurlyBraces());
+						$fmt->addPass(new NormalizeLnAndLtrimLines());
+						$fmt->addPass(new MergeParenCloseWithCurlyOpen());
+						$fmt->addPass(new MergeCurlyCloseAndDoWhile());
+						$fmt->addPass(new MergeDoubleArrowAndArray());
+						$fmt->addPass(new ExtraCommaInArray());
+						$fmt->addPass(new ResizeSpaces());
+						$fmt->addPass(new Reindent());
+						$fmt->addPass(new ReindentColonBlocks());
+						$fmt->addPass(new ReindentLoopColonBlocks());
+						$fmt->addPass(new ReindentIfColonBlocks());
+						$fmt->addPass(new ReindentObjOps());
+						$fmt->addPass(new EliminateDuplicatedEmptyLines());
+						$fmt->addPass(new AlignEquals());
+						$fmt->addPass(new AlignDoubleArrow());
+						$fmt->addPass(new LeftAlignComment());
+						$fmt->addPass(new RTrim());
+					} else {
+						$fmt->addPass(new $pass());
+					}
 
 				}
 			}
