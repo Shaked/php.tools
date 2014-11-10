@@ -2137,17 +2137,26 @@ final class ReindentObjOps extends FormatterPass {
 		$alignable_objop_counter = 0;
 		$printed_placeholder = false;
 		$paren_count = 0;
+		$paren_stack = [];
 		$bracket_count = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_PARENTHESES_OPEN:
-					++$paren_count;
+					if ($this->is_token([T_ARRAY], true)) {
+						$paren_stack[] = T_ARRAY;
+					} else {
+						$paren_stack[] = 0;
+						++$paren_count;
+					}
 					$this->append_code($text, false);
 					break;
 				case ST_PARENTHESES_CLOSE:
-					--$paren_count;
+					$stack_pop = array_pop($paren_stack);
+					if (T_ARRAY != $stack_pop) {
+						--$paren_count;
+					}
 					$this->append_code($text, false);
 					break;
 				case ST_BRACKET_OPEN:
