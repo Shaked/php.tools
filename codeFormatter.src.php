@@ -60,10 +60,6 @@ include 'PsrDecorator.php';
 
 final class CodeFormatter {
 	private $passes = [];
-	private $debug = false;
-	public function __construct($debug = false) {
-		$this->debug = (bool) $debug;
-	}
 	public function addPass(FormatterPass $pass) {
 		array_unshift($this->passes, $pass);
 	}
@@ -75,22 +71,14 @@ final class CodeFormatter {
 			},
 			$this->passes
 		);
-		// $timings = [];
 		while (($pass = array_pop($passes))) {
-			// $start = microtime(true);
 			$source = $pass->format($source);
-			// $timings[get_class($pass)] = microtime(true) - $start;
 		}
-		// asort($timings, SORT_NUMERIC);
-		// foreach ($timings as $pass => $timing) {
-		// 	fwrite(STDERR, $pass . ":" . $timing . PHP_EOL);
-		// }
-		// fwrite(STDERR, "Total:" . array_sum($timings) . PHP_EOL);
 		return $source;
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['alert_xdebug', 'yoda', 'smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'timing', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
+	$opts = getopt('ho:', ['alert_xdebug', 'yoda', 'smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
@@ -108,7 +96,6 @@ if (!isset($testEnv)) {
 			'--yoda' => 'yoda-style comparisons',
 			'-h, --help' => 'this help message',
 			'-o=file' => 'output the formatted code to "file"',
-			'-v, --timing' => 'timing',
 		];
 		$maxLen = max(array_map(function ($v) {
 			return strlen($v);
@@ -120,25 +107,14 @@ if (!isset($testEnv)) {
 		die();
 	}
 
-	$debug = false;
-	if (isset($opts['v']) || isset($opts['timing'])) {
-		$debug = true;
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return !('-v' === $v || '--timing' === $v);
-				}
-			)
-		);
-	}
-
 	if (isset($opts['alert_xdebug'])) {
 		if (extension_loaded('xdebug')) {
 			fwrite(STDERR, 'Warning: XDebug is loaded. This will speed down the script. Disable it first' . PHP_EOL);
 			exit(255);
 		}
 	}
-	$fmt = new CodeFormatter($debug);
+
+	$fmt = new CodeFormatter();
 	$fmt->addPass(new TwoCommandsInSameLine());
 	if (isset($opts['setters_and_getters'])) {
 		$argv = array_values(
