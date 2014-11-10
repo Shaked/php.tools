@@ -1,0 +1,8 @@
+<?php
+class Aliased_Talker {
+	use A, B {
+		B::smallTalkinsteadofA;
+		A::bigTalkinsteadofB;
+		B::bigTalk as talk;
+	}
+}
