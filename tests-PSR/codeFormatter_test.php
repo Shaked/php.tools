@@ -42,6 +42,7 @@ foreach ($cases as $caseIn) {
 	$fmt->addPass(new AlignEquals());
 	$fmt->addPass(new AlignDoubleArrow());
 	PsrDecorator::decorate($fmt);
+	$fmt->addPass(new PSR2AlignObjOp());
 	$fmt->addPass(new LeftAlignComment());
 	$fmt->addPass(new RTrim());
 

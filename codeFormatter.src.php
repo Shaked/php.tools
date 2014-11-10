@@ -49,6 +49,7 @@ include 'PSR1ClassConstants.php';
 include 'PSR1ClassNames.php';
 include 'PSR1MethodNames.php';
 include 'PSR1OpenTags.php';
+include 'PSR2AlignObjOp.php';
 include 'PSR2CurlyOpenNextLine.php';
 include 'PSR2IndentWithSpace.php';
 include 'PSR2KeywordsLowerCase.php';
@@ -251,6 +252,10 @@ if (!isset($testEnv)) {
 			)
 		);
 	}
+	if ((isset($opts['psr1']) || isset($opts['psr2']) || isset($opts['psr'])) && isset($opts['enable_auto_align'])) {
+		$fmt->addPass(new PSR2AlignObjOp());
+	}
+
 	if (isset($opts['visibility_order'])) {
 		$fmt->addPass(new PSR2ModifierVisibilityStaticOrder());
 		$argv = array_values(
