@@ -3765,10 +3765,11 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('vho:', ['yoda', 'smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'timing', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
+	$opts = getopt('vho:', ['alert_xdebug', 'yoda', 'smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'timing', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
+			'--alert_xdebug' => 'alert xdebug',
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
@@ -3806,6 +3807,12 @@ if (!isset($testEnv)) {
 		);
 	}
 
+	if (isset($opts['alert_xdebug'])) {
+		if (extension_loaded('xdebug')) {
+			fwrite(STDERR, 'Warning: XDebug is loaded. This will speed down the script. Disable it first' . PHP_EOL);
+			exit(255);
+		}
+	}
 	$fmt = new CodeFormatter($debug);
 	$fmt->addPass(new TwoCommandsInSameLine());
 	if (isset($opts['setters_and_getters'])) {
