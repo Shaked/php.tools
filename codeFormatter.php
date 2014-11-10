@@ -1652,6 +1652,12 @@ final class OrderUseClauses extends FormatterPass {
 				$lower_text = strtolower($text);
 				if (T_STRING === $id && isset($alias_list[$lower_text])) {
 					++$alias_count[$lower_text];
+				} elseif (T_DOC_COMMENT === $id) {
+					foreach ($alias_list as $alias => $use) {
+						if (false !== stripos($text, $alias)) {
+							++$alias_count[$alias];
+						}
+					}
 				}
 				$return .= $text;
 			}
@@ -1671,6 +1677,7 @@ final class OrderUseClauses extends FormatterPass {
 			}
 			$return .= $text;
 		}
+
 		$unused_import = array_keys(
 			array_filter(
 				$alias_count, function ($v) {
