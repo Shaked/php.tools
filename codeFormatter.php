@@ -2268,13 +2268,17 @@ class RemoveUseLeadingSlash extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-
+		$last_touched_token = T_NAMESPACE;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_NAMESPACE:
+				case T_TRAIT:
+				case T_FUNCTION:
+					$last_touched_token = $id;
 				case T_NS_SEPARATOR:
-					if ($this->is_token([T_USE], true)) {
+					if (T_NAMESPACE == $last_touched_token && $this->is_token([T_USE], true)) {
 						continue;
 					}
 				default:
@@ -2284,7 +2288,8 @@ class RemoveUseLeadingSlash extends FormatterPass {
 
 		return $this->code;
 	}
-};
+}
+;
 final class ResizeSpaces extends FormatterPass {
 	private function filterWhitespaces($source) {
 		$tkns = token_get_all($source);
