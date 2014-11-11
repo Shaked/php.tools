@@ -42,13 +42,6 @@ final class ResizeSpaces extends FormatterPass {
 				case '*':
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
 					list($next_id, $next_text) = $this->inspect_token(+1);
-					// T_POW should be handled by proper PHP version
-					// if ('*' == $next_text) {
-					// 	$text .= '*';
-					// 	list($index, $token) = each($this->tkns);
-					// 	$this->ptr = $index;
-					// 	list($next_id, $next_text) = $this->inspect_token(+1);
-					// }
 					if (
 						T_WHITESPACE === $prev_id &&
 						T_WHITESPACE !== $next_id
@@ -174,8 +167,6 @@ final class ResizeSpaces extends FormatterPass {
 				case T_USE:
 					if ($this->is_token(ST_PARENTHESES_CLOSE, true)) {
 						$this->append_code($this->get_space() . $text . $this->get_space(), false);
-						//} elseif ($this->is_token(ST_SEMI_COLON)) {
-						//	$this->append_code($text, false);
 					} else {
 						$this->append_code($text . $this->get_space(), false);
 					}
@@ -193,10 +184,6 @@ final class ResizeSpaces extends FormatterPass {
 					$this->append_code($text . $this->get_space(!$this->is_token(ST_SEMI_COLON)), false);
 					break;
 				case T_WHILE:
-					// if ($this->is_token(ST_SEMI_COLON)) {
-					// 	$this->append_code($text . $this->get_space(), false);
-					// 	break;
-					// } else
 					if ($this->is_token(ST_CURLY_CLOSE, true) && !$this->has_ln_before()) {
 						$this->append_code($this->get_space() . $text . $this->get_space(), false);
 						break;
@@ -297,15 +284,6 @@ final class ResizeSpaces extends FormatterPass {
 				case T_GOTO:
 					$this->append_code($text . $this->get_space(), false);
 					break;
-					// case ST_CONCAT:
-					// 	if (
-					// 		!$this->is_token([ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE, T_VARIABLE, T_STRING, T_CONSTANT_ENCAPSED_STRING, T_WHITESPACE], true)
-					// 	) {
-					// 		$this->append_code($this->get_space() . $text, false);
-					// 	} else {
-					// 		$this->append_code($text, false);
-					// 	}
-					// 	break;
 				case ST_REFERENCE:
 					if (($this->is_token([T_VARIABLE], true) && $this->is_token([T_VARIABLE])) || ($this->is_token([T_VARIABLE], true) && $this->is_token([T_STRING])) || ($this->is_token([T_STRING], true) && $this->is_token([T_STRING]))) {
 						$this->append_code($this->get_space() . $text . $this->get_space(), false);
