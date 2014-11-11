@@ -2282,6 +2282,7 @@ class RemoveUseLeadingSlash extends FormatterPass {
 			switch ($id) {
 				case T_NAMESPACE:
 				case T_TRAIT:
+				case T_CLASS:
 				case T_FUNCTION:
 					$last_touched_token = $id;
 				case T_NS_SEPARATOR:
