@@ -2,11 +2,11 @@
 final class PSR2AlignObjOp extends FormatterPass {
 	const ALIGNABLE_TOKEN = "\x2 OBJOP%d \x3";
 	public function format($source) {
-
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
 		$context_counter = 0;
+		$context_meta_count = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -19,9 +19,14 @@ final class PSR2AlignObjOp extends FormatterPass {
 					break;
 
 				case T_OBJECT_OPERATOR:
-					$this->append_code(sprintf(self::ALIGNABLE_TOKEN, $context_counter) . $text, false);
-					break;
-
+					if (!isset($context_meta_count[$context_counter])) {
+						$context_meta_count[$context_counter] = 0;
+					}
+					if ($this->has_ln_before() || 0 == $context_meta_count[$context_counter]) {
+						$this->append_code(sprintf(self::ALIGNABLE_TOKEN, $context_counter) . $text, false);
+						++$context_meta_count[$context_counter];
+						break;
+					}
 				default:
 					$this->append_code($text, false);
 					break;
