@@ -149,8 +149,8 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case ST_CURLY_OPEN:
-					if ($this->is_token([T_STRING, T_DO, ST_PARENTHESES_CLOSE], true)) {
-						$this->append_code($this->get_space() . $text, false);
+					if ($this->is_token([T_STRING, T_DO, T_FINALLY, ST_PARENTHESES_CLOSE], true)) {
+						$this->append_code($this->get_space() . $text, !$this->has_ln_prev_token());
 						break;
 					} elseif ($this->is_token(ST_CURLY_CLOSE) || ($this->is_token([T_VARIABLE]) && $this->is_token([T_OBJECT_OPERATOR], true))) {
 						$this->append_code($text, false);
@@ -162,6 +162,12 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case ST_PARENTHESES_OPEN:
+					if ($this->is_token([T_WHILE, T_CATCH], true)) {
+						$this->append_code($this->get_space() . $text, !$this->has_ln_prev_token());
+					} else {
+						$this->append_code($text, false);
+					}
+					break;
 				case ST_PARENTHESES_CLOSE:
 					$this->append_code($text, false);
 					break;
@@ -261,9 +267,11 @@ final class ResizeSpaces extends FormatterPass {
 				case ST_IS_SMALLER:
 				case T_AS:
 				case ST_EQUAL:
+					$this->append_code($this->get_space() . $text . $this->get_space(), false);
+					break;
 				case T_CATCH:
 				case T_FINALLY:
-					$this->append_code($this->get_space() . $text . $this->get_space(), false);
+					$this->append_code($this->get_space() . $text . $this->get_space(), !$this->has_ln_prev_token());
 					break;
 				case T_ELSEIF:
 					if (!$this->is_token(ST_CURLY_CLOSE, true)) {
