@@ -35,6 +35,7 @@ include 'ReindentIfColonBlocks.php';
 include 'ReindentLoopColonBlocks.php';
 include 'ReindentObjOps.php';
 include 'RemoveUseLeadingSlash.php';
+include 'RemoveIncludeParentheses.php';
 include 'ResizeSpaces.php';
 include 'RTrim.php';
 include 'SettersAndGettersPass.php';
@@ -108,6 +109,7 @@ if (!isset($testEnv)) {
 
 	$fmt = new CodeFormatter();
 	$fmt->addPass(new TwoCommandsInSameLine());
+	$fmt->addPass(new RemoveIncludeParentheses());
 	if (isset($opts['setters_and_getters'])) {
 		$argv = array_values(
 			array_filter($argv,

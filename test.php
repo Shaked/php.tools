@@ -75,6 +75,7 @@ foreach ($cases as $caseIn) {
 				} else {
 					if ('default' == strtolower($pass)) {
 						$fmt->addPass(new TwoCommandsInSameLine());
+						$fmt->addPass(new RemoveIncludeParentheses());
 						$fmt->addPass(new OrderUseClauses());
 						$fmt->addPass(new AddMissingCurlyBraces());
 						$fmt->addPass(new NormalizeLnAndLtrimLines());
@@ -102,6 +103,7 @@ foreach ($cases as $caseIn) {
 	}
 	if (!$specialPasses) {
 		$fmt->addPass(new TwoCommandsInSameLine());
+		$fmt->addPass(new RemoveIncludeParentheses());
 		$fmt->addPass(new OrderUseClauses());
 		$fmt->addPass(new AddMissingCurlyBraces());
 		$fmt->addPass(new NormalizeLnAndLtrimLines());
@@ -164,6 +166,7 @@ foreach ($cases as $caseIn) {
 	}
 	if (!$specialPasses) {
 		$fmt->addPass(new TwoCommandsInSameLine());
+		$fmt->addPass(new RemoveIncludeParentheses());
 		$fmt->addPass(new OrderUseClauses());
 		$fmt->addPass(new AddMissingCurlyBraces());
 		$fmt->addPass(new NormalizeLnAndLtrimLines());
