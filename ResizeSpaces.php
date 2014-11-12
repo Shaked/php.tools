@@ -282,7 +282,7 @@ final class ResizeSpaces extends FormatterPass {
 				case T_STRING_CAST:
 				case T_UNSET_CAST:
 				case T_GOTO:
-					$this->append_code($text . $this->get_space(), false);
+					$this->append_code(str_replace([' ', "\t"], '', $text) . $this->get_space(), false);
 					break;
 				case ST_REFERENCE:
 					if (($this->is_token([T_VARIABLE], true) && $this->is_token([T_VARIABLE])) || ($this->is_token([T_VARIABLE], true) && $this->is_token([T_STRING])) || ($this->is_token([T_STRING], true) && $this->is_token([T_STRING]))) {
