@@ -1,5 +1,5 @@
 <?php
-include_once ('inc.php');
+include_once 'inc.php';
 function a($a) {
 	return $a;
 }
@@ -9,7 +9,7 @@ function b($c) {
 }
 error_reporting(E_ALL);
 
-include_once ('inc.php');
+include_once 'inc.php';
 function c($a) {
 	return $a;
 }
