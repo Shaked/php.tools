@@ -27,6 +27,7 @@ include 'MergeDoubleArrowAndArray.php';
 include 'MergeElseIf.php';
 include 'MergeParenCloseWithCurlyOpen.php';
 include 'NormalizeLnAndLtrimLines.php';
+include 'NormalizeIsNotEquals.php';
 include 'OrderMethod.php';
 include 'OrderUseClauses.php';
 include 'Reindent.php';
@@ -110,6 +111,7 @@ if (!isset($testEnv)) {
 	$fmt = new CodeFormatter();
 	$fmt->addPass(new TwoCommandsInSameLine());
 	$fmt->addPass(new RemoveIncludeParentheses());
+	$fmt->addPass(new NormalizeIsNotEquals());
 	if (isset($opts['setters_and_getters'])) {
 		$argv = array_values(
 			array_filter($argv,

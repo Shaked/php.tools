@@ -1463,6 +1463,27 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 	}
 }
 ;
+final class NormalizeIsNotEquals extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_IS_NOT_EQUAL:
+					$this->append_code(str_replace('<>', '!=', $text) . $this->get_space(), false);
+					break;
+				default:
+					$this->append_code($text, false);
+					break;
+			}
+		}
+
+		return $this->code;
+	}
+}
+;
 final class OrderMethod extends FormatterPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
 	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
@@ -3827,6 +3848,7 @@ if (!isset($testEnv)) {
 	$fmt = new CodeFormatter();
 	$fmt->addPass(new TwoCommandsInSameLine());
 	$fmt->addPass(new RemoveIncludeParentheses());
+	$fmt->addPass(new NormalizeIsNotEquals());
 	if (isset($opts['setters_and_getters'])) {
 		$argv = array_values(
 			array_filter($argv,
