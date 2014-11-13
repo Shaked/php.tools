@@ -193,6 +193,12 @@ abstract class FormatterPass {
 		while (--$i >= 0 && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
 		return $this->tkns[$i];
 	}
+	protected function next_token() {
+		$i = $this->ptr;
+		$tkns_size = sizeof($this->tkns) - 1;
+		while (++$i < $tkns_size && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
+		return $this->tkns[$i];
+	}
 	protected function siblings($tkns, $ptr) {
 		$i = $ptr;
 		while (--$i >= 0 && isset($tkns[$i][1]) && T_WHITESPACE === $tkns[$i][0]);
@@ -1223,6 +1229,86 @@ final class ExtraCommaInArray extends FormatterPass {
 		return $this->code;
 	}
 };
+final class GeneratePHPDoc extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$touched_visibility = false;
+		$touched_doc_comment = false;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_DOC_COMMENT:
+					$touched_doc_comment = true;
+				case T_ABSTRACT:
+				case T_PUBLIC:
+				case T_PROTECTED:
+				case T_PRIVATE:
+				case T_STATIC:
+					if (!$this->is_token([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT], true)) {
+						$touched_visibility = true;
+						$visibility_idx = $this->ptr;
+					}
+				case T_FUNCTION:
+					if ($touched_doc_comment) {
+						break;
+					}
+					if (!$touched_visibility) {
+						$orig_idx = $this->ptr;
+					} else {
+						$orig_idx = $visibility_idx;
+					}
+					list($nt_id, $nt_text) = $this->get_token($this->next_token());
+					if (T_STRING != $nt_id) {
+						$this->append_code($text, false);
+						break;
+					}
+					$this->walk_until(ST_PARENTHESES_OPEN);
+					$param_stack = [];
+					$tmp = ['type' => '', 'name' => ''];
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr = $index;
+
+						if (ST_PARENTHESES_CLOSE == $id) {
+							break;
+						}
+						if (T_STRING == $id || T_NS_SEPARATOR == $id) {
+							$tmp['type'] .= $text;
+							continue;
+						}
+						if (T_VARIABLE == $id) {
+							$tmp['name'] = $text;
+							$param_stack[] = $tmp;
+							$tmp = ['type' => '', 'name' => ''];
+							continue;
+						}
+					}
+					$func_token = &$this->tkns[$orig_idx];
+					$func_token[1] = $this->render_doc_block($param_stack) . $func_token[1];
+					$touched_visibility = false;
+			}
+		}
+		return implode('', array_map(function ($token) {
+			list(, $text) = $this->get_token($token);
+			return $text;
+		}, $this->tkns));
+	}
+
+	private function render_doc_block(array $param_stack) {
+		if (empty($param_stack)) {
+			return '';
+		}
+		$str = '/**' . $this->new_line;
+		foreach ($param_stack as $param) {
+			$str .= rtrim(' * @param ' . $param['type']) . ' ' . $param['name'] . $this->new_line;
+		}
+		$str .= ' */' . $this->new_line;
+		return $str;
+	}
+}
+;
 final class LeftAlignComment extends FormatterPass {
 	const NON_INDENTABLE_COMMENT = "/*\x2 COMMENT \x3*/";
 	public function format($source) {
@@ -3820,13 +3906,14 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('ho:', ['yoda', 'smart_linebreak_after_curly', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
+	$opts = getopt('ho:', ['yoda', 'smart_linebreak_after_curly', 'prepasses:', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
+			'--prepasses=pass1,passN' => 'call specific compiler pass, before the rest of stack',
 			'--passes=pass1,passN' => 'call specific compiler pass',
 			'--psr' => 'activate PSR1 and PSR2 styles',
 			'--psr1' => 'activate PSR1 style',
@@ -3849,6 +3936,23 @@ if (!isset($testEnv)) {
 	}
 
 	$fmt = new CodeFormatter();
+	if (isset($opts['prepasses'])) {
+		$optPasses = array_map(function ($v) {
+			return trim($v);
+		}, explode(',', $opts['prepasses']));
+		foreach ($optPasses as $optPass) {
+			if (class_exists($optPass)) {
+				$fmt->addPass(new $optPass());
+			}
+		}
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return substr($v, 0, strlen('--prepasses')) !== '--prepasses';
+				}
+			)
+		);
+	}
 	$fmt->addPass(new TwoCommandsInSameLine());
 	$fmt->addPass(new RemoveIncludeParentheses());
 	$fmt->addPass(new NormalizeIsNotEquals());
