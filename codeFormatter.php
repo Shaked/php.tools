@@ -4014,17 +4014,26 @@ if (!isset($testEnv)) {
 	} elseif (isset($argv[1]) && is_file($argv[1])) {
 		echo $fmt->formatCode(file_get_contents($argv[1]));
 	} elseif (isset($argv[1]) && is_dir($argv[1])) {
+
+		$start = microtime(true);
+		echo 'Formatting ', $argv[1], PHP_EOL;
 		$dir = new RecursiveDirectoryIterator($argv[1]);
 		$it = new RecursiveIteratorIterator($dir);
 		$files = new RegexIterator($it, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
+		$fileCount = 0;
 		foreach ($files as $file) {
 			$file = $file[0];
-			echo $file;
+			++$fileCount;
+			echo '.';
 			file_put_contents($file . '-tmp', $fmt->formatCode(file_get_contents($file)));
 			rename($file, $file . '~');
 			rename($file . '-tmp', $file);
-			echo PHP_EOL;
+			if (0 == ($fileCount % 20)) {
+				echo ' ', $fileCount, PHP_EOL;
+			}
 		}
+		echo ' ', $fileCount, ' files', PHP_EOL;
+		echo 'Took ', ceil(microtime(true) - $start), ' seconds', PHP_EOL;
 	} else {
 		echo $fmt->formatCode(file_get_contents('php://stdin'));
 	}
