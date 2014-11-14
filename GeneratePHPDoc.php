@@ -11,17 +11,19 @@ final class GeneratePHPDoc extends FormatterPass {
 			switch ($id) {
 				case T_DOC_COMMENT:
 					$touched_doc_comment = true;
+				case T_FINAL:
 				case T_ABSTRACT:
 				case T_PUBLIC:
 				case T_PROTECTED:
 				case T_PRIVATE:
 				case T_STATIC:
-					if (!$this->is_token([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT], true)) {
+					if (!$this->is_token([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT], true)) {
 						$touched_visibility = true;
 						$visibility_idx = $this->ptr;
 					}
 				case T_FUNCTION:
 					if ($touched_doc_comment) {
+						$touched_doc_comment = false;
 						break;
 					}
 					if (!$touched_visibility) {
