@@ -43,6 +43,7 @@ include 'RTrim.php';
 include 'SettersAndGettersPass.php';
 include 'ShortArray.php';
 include 'SmartLnAfterCurlyOpen.php';
+include 'SpaceBetweenMethods.php';
 include 'SurrogateToken.php';
 include 'TwoCommandsInSameLine.php';
 include 'YodaComparisons.php';
