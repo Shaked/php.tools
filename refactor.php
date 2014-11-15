@@ -188,17 +188,29 @@ abstract class FormatterPass {
 		return false;
 	}
 
-	protected function prev_token() {
+	protected function prev_token($ignore_list = []) {
+		if (empty($ignore_list)) {
+			$ignore_list[T_WHITESPACE] = true;
+		} else {
+			$ignore_list = array_flip($ignore_list);
+		}
 		$i = $this->ptr;
-		while (--$i >= 0 && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
+		while (--$i >= 0 && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
 		return $this->tkns[$i];
 	}
-	protected function next_token() {
+
+	protected function next_token($ignore_list = []) {
+		if (empty($ignore_list)) {
+			$ignore_list[T_WHITESPACE] = true;
+		} else {
+			$ignore_list = array_flip($ignore_list);
+		}
 		$i = $this->ptr;
 		$tkns_size = sizeof($this->tkns) - 1;
-		while (++$i < $tkns_size && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
+		while (++$i < $tkns_size && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
 		return $this->tkns[$i];
 	}
+
 	protected function siblings($tkns, $ptr) {
 		$i = $ptr;
 		while (--$i >= 0 && isset($tkns[$i][1]) && T_WHITESPACE === $tkns[$i][0]);

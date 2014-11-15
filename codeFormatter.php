@@ -188,17 +188,29 @@ abstract class FormatterPass {
 		return false;
 	}
 
-	protected function prev_token() {
+	protected function prev_token($ignore_list = []) {
+		if (empty($ignore_list)) {
+			$ignore_list[T_WHITESPACE] = true;
+		} else {
+			$ignore_list = array_flip($ignore_list);
+		}
 		$i = $this->ptr;
-		while (--$i >= 0 && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
+		while (--$i >= 0 && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
 		return $this->tkns[$i];
 	}
-	protected function next_token() {
+
+	protected function next_token($ignore_list = []) {
+		if (empty($ignore_list)) {
+			$ignore_list[T_WHITESPACE] = true;
+		} else {
+			$ignore_list = array_flip($ignore_list);
+		}
 		$i = $this->ptr;
 		$tkns_size = sizeof($this->tkns) - 1;
-		while (++$i < $tkns_size && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
+		while (++$i < $tkns_size && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
 		return $this->tkns[$i];
 	}
+
 	protected function siblings($tkns, $ptr) {
 		$i = $ptr;
 		while (--$i >= 0 && isset($tkns[$i][1]) && T_WHITESPACE === $tkns[$i][0]);
@@ -2799,6 +2811,65 @@ final class ResizeSpaces extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 			}
+		}
+
+		return $this->code;
+	}
+}
+;
+class ReturnNull extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$this->use_cache = true;
+		$touched_return = false;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			$this->cache = [];
+
+			if (ST_PARENTHESES_OPEN == $id && $this->is_token([T_RETURN], true)) {
+				$paren_count = 1;
+				$touched_another_valid_token = false;
+				$stack = $text;
+				while (list($index, $token) = each($this->tkns)) {
+					list($id, $text) = $this->get_token($token);
+					$this->ptr = $index;
+					$this->cache = [];
+					if (ST_PARENTHESES_OPEN == $id) {
+						++$paren_count;
+					}
+					if (ST_PARENTHESES_CLOSE == $id) {
+						--$paren_count;
+					}
+					$stack .= $text;
+					if (0 == $paren_count) {
+						break;
+					}
+					if (
+						!(
+							(T_STRING == $id && strtolower($text) == 'null') ||
+							ST_PARENTHESES_OPEN == $id ||
+							ST_PARENTHESES_CLOSE == $id
+						)
+					) {
+						$touched_another_valid_token = true;
+					}
+				}
+				if ($touched_another_valid_token) {
+					$this->append_code($stack, false);
+				}
+				continue;
+			}
+			if (T_STRING == $id && strtolower($text) == 'null') {
+				list($prev_id, ) = $this->prev_token([T_WHITESPACE, T_COMMENT, T_DOC_COMMENT]);
+				list($next_id, ) = $this->next_token([T_WHITESPACE, T_COMMENT, T_DOC_COMMENT]);
+				if (T_RETURN == $prev_id && ST_SEMI_COLON == $next_id) {
+					continue;
+				}
+			}
+
+			$this->append_code($text, false);
 		}
 
 		return $this->code;

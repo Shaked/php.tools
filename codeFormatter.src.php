@@ -39,6 +39,7 @@ include 'ReindentObjOps.php';
 include 'RemoveUseLeadingSlash.php';
 include 'RemoveIncludeParentheses.php';
 include 'ResizeSpaces.php';
+include 'ReturnNull.php';
 include 'RTrim.php';
 include 'SettersAndGettersPass.php';
 include 'ShortArray.php';
