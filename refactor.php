@@ -210,7 +210,6 @@ abstract class FormatterPass {
 		while (++$i < $tkns_size && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
 		return $this->tkns[$i];
 	}
-
 	protected function siblings($tkns, $ptr) {
 		$i = $ptr;
 		while (--$i >= 0 && isset($tkns[$i][1]) && T_WHITESPACE === $tkns[$i][0]);

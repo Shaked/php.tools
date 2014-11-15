@@ -12,7 +12,7 @@ class SpaceBetweenMethods extends FormatterPass {
 					$this->append_code($text, false);
 					$this->print_until_the_end_of(ST_CURLY_OPEN);
 					$this->print_block(ST_CURLY_OPEN, ST_CURLY_CLOSE);
-					if (!$this->is_token(ST_CURLY_CLOSE)) {
+					if (!$this->is_token([ST_CURLY_CLOSE, ST_SEMI_COLON, ST_COMMA, ST_PARENTHESES_CLOSE])) {
 						$this->append_code($this->get_crlf(), false);
 					}
 					break;
