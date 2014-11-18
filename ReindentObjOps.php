@@ -14,6 +14,14 @@ final class ReindentObjOps extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_WHILE:
+				case T_IF:
+				case T_FOR:
+				case T_FOREACH:
+					$this->append_code($text, false);
+					$this->print_until_the_end_of(ST_PARENTHESES_OPEN);
+					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+					break;
 				case ST_PARENTHESES_OPEN:
 					if ($this->is_token([T_ARRAY], true)) {
 						$paren_stack[] = T_ARRAY;
