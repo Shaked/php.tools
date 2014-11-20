@@ -2355,16 +2355,16 @@ final class ReindentObjOps extends FormatterPass {
 					$has_ln_before = ($this->has_ln_before() || $this->has_ln_prev_token());
 					if (0 === $in_objop_context && $has_ln_before) {
 						$in_objop_context = 1;
+						$this->set_indent(+1);
 					} elseif (0 === $in_objop_context && !$has_ln_before) {
 						++$alignable_objop_counter;
 						$in_objop_context = 2;
 					} elseif ($paren_count > 0) {
+						$this->set_indent(-1);
 						$in_objop_context = 0;
 					}
 					if (1 === $in_objop_context) {
-						$this->set_indent(+1);
 						$this->append_code($this->get_indent() . $text, false);
-						$this->set_indent(-1);
 					} elseif (2 === $in_objop_context) {
 						$placeholder = '';
 						if (!$printed_placeholder) {
@@ -2388,6 +2388,10 @@ final class ReindentObjOps extends FormatterPass {
 						$in_objop_context = 0;
 					}
 					$this->append_code($text, false);
+					break;
+				case T_COMMENT:
+				case T_DOC_COMMENT:
+					$this->append_code($this->get_indent() . $text, false);
 					break;
 				default:
 					$this->append_code($text, false);
@@ -2447,7 +2451,8 @@ final class ReindentObjOps extends FormatterPass {
 
 		return $this->code;
 	}
-};
+}
+;
 class RemoveUseLeadingSlash extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
