@@ -262,6 +262,21 @@ abstract class FormatterPass {
 			}
 		}
 	}
+	protected function print_and_stop_at($tknids) {
+		if (is_scalar($tknids)) {
+			$tknids = [$tknids];
+		}
+		$tknids = array_flip($tknids);
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			$this->cache = [];
+			if (isset($tknids[$id])) {
+				return [$id, $text];
+			}
+			$this->append_code($text, false);
+		}
+	}
 	protected function print_block($start, $end) {
 		$count = 1;
 		while (list($index, $token) = each($this->tkns)) {
@@ -469,6 +484,30 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		}
 
 		return [$this->code, $changed];
+	}
+}
+;
+class AddMissingParentheses extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_NEW:
+					$this->append_code($text, false);
+					list($found_id, $found_text) = $this->print_and_stop_at([ST_PARENTHESES_OPEN, T_COMMENT, T_DOC_COMMENT, ST_SEMI_COLON]);
+					if (ST_PARENTHESES_OPEN != $found_id) {
+						$this->append_code('()' . $found_text, false);
+					}
+					break;
+				default:
+					$this->append_code($text, false);
+			}
+		}
+
+		return $this->code;
 	}
 }
 ;

@@ -14,6 +14,7 @@
 include 'constants.php';
 include 'FormatterPass.php';
 include 'AddMissingCurlyBraces.php';
+include 'AddMissingParentheses.php';
 include 'AlignDoubleArrow.php';
 include 'AlignEquals.php';
 include 'AutoImport.php';
