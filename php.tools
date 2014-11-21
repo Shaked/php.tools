@@ -83,6 +83,7 @@ fi
 
 function execute(){
 	echo "$0 [command]"
+	$echo "	lint - run lint on changed files"
 	$CTAGS && echo "	ctags - generate ctags"
 	$PHPUNIT && echo "	test - execute PHPUnit"
 	$PHPUNIT && echo "	cover - execute PHPUnit with cover output"
@@ -257,6 +258,18 @@ then
 			NEW_DIRS="-d $i $NEW_DIRS"
 		done;
 		php vendor/bin/phpdoc.php $NEW_DIRS -t docs/
+	}
+fi;
+
+if [ "lint" == "$1" ];
+then
+	function execute(){
+		echo "Differential linting..."
+		files=$( git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 } ' )
+		for line in $files
+		do
+			(php -l $line &> /dev/null) || (php -l $line) && echo "$line"
+		done;
 	}
 fi;
 
