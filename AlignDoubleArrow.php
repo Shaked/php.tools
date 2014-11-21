@@ -25,6 +25,7 @@ final class AlignDoubleArrow extends FormatterPass {
 					}
 					$this->append_code($text, false);
 					break;
+
 				case T_DOUBLE_ARROW:
 					$this->append_code(
 						sprintf(
@@ -82,28 +83,21 @@ final class AlignDoubleArrow extends FormatterPass {
 
 					foreach ($lines as $idx => $line) {
 						if (false !== strpos($line, $placeholder)) {
-							$lines_with_objop[$block_count][] = $idx;
-						} else {
-							++$block_count;
-							$lines_with_objop[$block_count] = [];
+							$lines_with_objop[] = $idx;
 						}
 					}
 
-					$i = 0;
-					foreach ($lines_with_objop as $group) {
-						++$i;
-						$farthest = 0;
-						foreach ($group as $idx) {
-							$farthest = max($farthest, strpos($lines[$idx], $placeholder));
-						}
-						foreach ($group as $idx) {
-							$line = $lines[$idx];
-							$current = strpos($line, $placeholder);
-							$delta = abs($farthest - $current);
-							if ($delta > 0) {
-								$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
-								$lines[$idx] = $line;
-							}
+					$farthest = 0;
+					foreach ($lines_with_objop as $idx) {
+						$farthest = max($farthest, strpos($lines[$idx], $placeholder));
+					}
+					foreach ($lines_with_objop as $idx) {
+						$line = $lines[$idx];
+						$current = strpos($line, $placeholder);
+						$delta = abs($farthest - $current);
+						if ($delta > 0) {
+							$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
+							$lines[$idx] = $line;
 						}
 					}
 

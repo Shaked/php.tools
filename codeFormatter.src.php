@@ -199,8 +199,6 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new ReindentColonBlocks());
 	$fmt->addPass(new ReindentLoopColonBlocks());
 	$fmt->addPass(new ReindentIfColonBlocks());
-	$fmt->addPass(new ReindentObjOps());
-	$fmt->addPass(new EliminateDuplicatedEmptyLines());
 
 	if (isset($opts['enable_auto_align'])) {
 		$fmt->addPass(new AlignEquals());
@@ -213,6 +211,10 @@ if (!isset($testEnv)) {
 			)
 		);
 	}
+
+	$fmt->addPass(new ReindentObjOps());
+	$fmt->addPass(new EliminateDuplicatedEmptyLines());
+
 	if (isset($opts['indent_with_space'])) {
 		$fmt->addPass(new PSR2IndentWithSpace());
 		$argv = array_values(

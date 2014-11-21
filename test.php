@@ -89,10 +89,10 @@ foreach ($cases as $caseIn) {
 						$fmt->addPass(new ReindentColonBlocks());
 						$fmt->addPass(new ReindentLoopColonBlocks());
 						$fmt->addPass(new ReindentIfColonBlocks());
-						$fmt->addPass(new ReindentObjOps());
-						$fmt->addPass(new EliminateDuplicatedEmptyLines());
 						$fmt->addPass(new AlignEquals());
 						$fmt->addPass(new AlignDoubleArrow());
+						$fmt->addPass(new ReindentObjOps());
+						$fmt->addPass(new EliminateDuplicatedEmptyLines());
 						$fmt->addPass(new LeftAlignComment());
 						$fmt->addPass(new RTrim());
 					} else {
@@ -118,10 +118,10 @@ foreach ($cases as $caseIn) {
 		$fmt->addPass(new ReindentColonBlocks());
 		$fmt->addPass(new ReindentLoopColonBlocks());
 		$fmt->addPass(new ReindentIfColonBlocks());
-		$fmt->addPass(new ReindentObjOps());
-		$fmt->addPass(new EliminateDuplicatedEmptyLines());
 		$fmt->addPass(new AlignEquals());
 		$fmt->addPass(new AlignDoubleArrow());
+		$fmt->addPass(new ReindentObjOps());
+		$fmt->addPass(new EliminateDuplicatedEmptyLines());
 		$fmt->addPass(new LeftAlignComment());
 		$fmt->addPass(new RTrim());
 	}
@@ -182,10 +182,10 @@ foreach ($cases as $caseIn) {
 		$fmt->addPass(new ReindentColonBlocks());
 		$fmt->addPass(new ReindentLoopColonBlocks());
 		$fmt->addPass(new ReindentIfColonBlocks());
-		$fmt->addPass(new ReindentObjOps());
-		$fmt->addPass(new EliminateDuplicatedEmptyLines());
 		$fmt->addPass(new AlignEquals());
 		$fmt->addPass(new AlignDoubleArrow());
+		$fmt->addPass(new ReindentObjOps());
+		$fmt->addPass(new EliminateDuplicatedEmptyLines());
 		PsrDecorator::decorate($fmt);
 		$fmt->addPass(new PSR2AlignObjOp());
 		$fmt->addPass(new LeftAlignComment());
