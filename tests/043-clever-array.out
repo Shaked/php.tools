@@ -6,11 +6,11 @@ $a = array(
 );
 $a = array(array());
 $a = array(
-	array('k' => 'v')
+	array('k' => 'v'),
 );
 $a = array(
 	array(
 		'k' => 'v',
 		'k' => 'v',
-	)
+	),
 );

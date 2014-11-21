@@ -15,5 +15,5 @@ $expect = array(
 	// comment 4
 	, 9 => new ClassObject("Now comment 4\n\n")
 	// comment SIX
-	, 10 => new ClassObject('b')
+	, 10 => new ClassObject('b'),
 );

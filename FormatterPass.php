@@ -61,26 +61,31 @@ abstract class FormatterPass {
 		}
 		return $this->get_token($this->tkns[$this->ptr + $delta]);
 	}
-	protected function is_token($token, $prev = false) {
+	protected function is_token($token, $prev = false, $ignore_list = []) {
 		if ($this->use_cache) {
-			$key = ((int) $prev) . "\x2" . (is_array($token) ? implode("\x2", $token) : $token);
+			$key = ((int) $prev) . "\x2" . implode('', $ignore_list) . "\x2" . (is_array($token) ? implode("\x2", $token) : $token);
 			if (isset($this->cache[$key])) {
 				return $this->cache[$key];
 			}
 		}
-		$ret = $this->is_token_idx($this->ptr, $token, $prev);
+		$ret = $this->is_token_idx($this->ptr, $token, $prev, $ignore_list);
 		if ($this->use_cache) {
 			$this->cache[$key] = $ret;
 		}
 		return $ret;
 	}
-	protected function is_token_idx($idx, $token, $prev = false) {
+	protected function is_token_idx($idx, $token, $prev = false, $ignore_list = []) {
+		if (empty($ignore_list)) {
+			$ignore_list[T_WHITESPACE] = true;
+		} else {
+			$ignore_list = array_flip($ignore_list);
+		}
 		$i = $idx;
 		if ($prev) {
-			while (--$i >= 0 && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
+			while (--$i >= 0 && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
 		} else {
 			$tkns_size = sizeof($this->tkns) - 1;
-			while (++$i < $tkns_size && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
+			while (++$i < $tkns_size && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
 		}
 
 		if (!isset($this->tkns[$i])) {
@@ -125,7 +130,7 @@ abstract class FormatterPass {
 		return false;
 	}
 
-	protected function prev_token($ignore_list = []) {
+	protected function prev_token($ignore_list = [], $idx = false) {
 		if (empty($ignore_list)) {
 			$ignore_list[T_WHITESPACE] = true;
 		} else {
@@ -133,10 +138,13 @@ abstract class FormatterPass {
 		}
 		$i = $this->ptr;
 		while (--$i >= 0 && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
+		if ($idx) {
+			return $i;
+		}
 		return $this->tkns[$i];
 	}
 
-	protected function next_token($ignore_list = []) {
+	protected function next_token($ignore_list = [], $idx = false) {
 		if (empty($ignore_list)) {
 			$ignore_list[T_WHITESPACE] = true;
 		} else {
@@ -145,8 +153,12 @@ abstract class FormatterPass {
 		$i = $this->ptr;
 		$tkns_size = sizeof($this->tkns) - 1;
 		while (++$i < $tkns_size && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
+		if ($idx) {
+			return $i;
+		}
 		return $this->tkns[$i];
 	}
+
 	protected function siblings($tkns, $ptr) {
 		$i = $ptr;
 		while (--$i >= 0 && isset($tkns[$i][1]) && T_WHITESPACE === $tkns[$i][0]);
@@ -247,5 +259,12 @@ abstract class FormatterPass {
 
 	protected function has_ln($text) {
 		return (false !== strpos($text, $this->new_line));
+	}
+
+	protected function render() {
+		return implode('', array_map(function ($token) {
+			list($id, $text) = $this->get_token($token);
+			return $text;
+		}, array_filter($this->tkns)));
 	}
 }

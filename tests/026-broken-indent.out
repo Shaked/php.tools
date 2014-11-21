@@ -11,7 +11,7 @@ function func($a) {
 		foreach ($obj->Buckets->Bucket as $b) {
 			$res['b'][] = array(
 				'name' => (string) $b->N,
-				'time' => strtotime((string) $b->CD)
+				'time' => strtotime((string) $b->CD),
 			);
 		}
 	} else {foreach ($obj->Buckets->Bucket as $b) {

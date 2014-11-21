@@ -124,26 +124,31 @@ abstract class FormatterPass {
 		}
 		return $this->get_token($this->tkns[$this->ptr + $delta]);
 	}
-	protected function is_token($token, $prev = false) {
+	protected function is_token($token, $prev = false, $ignore_list = []) {
 		if ($this->use_cache) {
-			$key = ((int) $prev) . "\x2" . (is_array($token) ? implode("\x2", $token) : $token);
+			$key = ((int) $prev) . "\x2" . implode('', $ignore_list) . "\x2" . (is_array($token) ? implode("\x2", $token) : $token);
 			if (isset($this->cache[$key])) {
 				return $this->cache[$key];
 			}
 		}
-		$ret = $this->is_token_idx($this->ptr, $token, $prev);
+		$ret = $this->is_token_idx($this->ptr, $token, $prev, $ignore_list);
 		if ($this->use_cache) {
 			$this->cache[$key] = $ret;
 		}
 		return $ret;
 	}
-	protected function is_token_idx($idx, $token, $prev = false) {
+	protected function is_token_idx($idx, $token, $prev = false, $ignore_list = []) {
+		if (empty($ignore_list)) {
+			$ignore_list[T_WHITESPACE] = true;
+		} else {
+			$ignore_list = array_flip($ignore_list);
+		}
 		$i = $idx;
 		if ($prev) {
-			while (--$i >= 0 && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
+			while (--$i >= 0 && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
 		} else {
 			$tkns_size = sizeof($this->tkns) - 1;
-			while (++$i < $tkns_size && isset($this->tkns[$i][1]) && T_WHITESPACE === $this->tkns[$i][0]);
+			while (++$i < $tkns_size && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
 		}
 
 		if (!isset($this->tkns[$i])) {
@@ -188,7 +193,7 @@ abstract class FormatterPass {
 		return false;
 	}
 
-	protected function prev_token($ignore_list = []) {
+	protected function prev_token($ignore_list = [], $idx = false) {
 		if (empty($ignore_list)) {
 			$ignore_list[T_WHITESPACE] = true;
 		} else {
@@ -196,10 +201,13 @@ abstract class FormatterPass {
 		}
 		$i = $this->ptr;
 		while (--$i >= 0 && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
+		if ($idx) {
+			return $i;
+		}
 		return $this->tkns[$i];
 	}
 
-	protected function next_token($ignore_list = []) {
+	protected function next_token($ignore_list = [], $idx = false) {
 		if (empty($ignore_list)) {
 			$ignore_list[T_WHITESPACE] = true;
 		} else {
@@ -208,8 +216,12 @@ abstract class FormatterPass {
 		$i = $this->ptr;
 		$tkns_size = sizeof($this->tkns) - 1;
 		while (++$i < $tkns_size && isset($this->tkns[$i][1]) && isset($ignore_list[$this->tkns[$i][0]]));
+		if ($idx) {
+			return $i;
+		}
 		return $this->tkns[$i];
 	}
+
 	protected function siblings($tkns, $ptr) {
 		$i = $ptr;
 		while (--$i >= 0 && isset($tkns[$i][1]) && T_WHITESPACE === $tkns[$i][0]);
@@ -310,6 +322,13 @@ abstract class FormatterPass {
 
 	protected function has_ln($text) {
 		return (false !== strpos($text, $this->new_line));
+	}
+
+	protected function render() {
+		return implode('', array_map(function ($token) {
+			list($id, $text) = $this->get_token($token);
+			return $text;
+		}, array_filter($this->tkns)));
 	}
 }
 ;
@@ -1259,7 +1278,6 @@ final class ExtraCommaInArray extends FormatterPass {
 	const ST_SHORT_ARRAY_OPEN = 'SHORT_ARRAY_OPEN';
 	public function format($source) {
 		$this->tkns = token_get_all($source);
-		$this->code = '';
 
 		$context_stack = [];
 		while (list($index, $token) = each($this->tkns)) {
@@ -1269,57 +1287,51 @@ final class ExtraCommaInArray extends FormatterPass {
 				case ST_BRACKET_OPEN:
 					if (!$this->is_token([ST_BRACKET_CLOSE, T_STRING, T_VARIABLE], true)) {
 						$context_stack[] = self::ST_SHORT_ARRAY_OPEN;
+					} else {
+						$context_stack[] = ST_BRACKET_OPEN;
 					}
-					$this->append_code($text, false);
+					break;
+				case ST_BRACKET_CLOSE:
+					if (isset($context_stack[0]) && !$this->is_token(ST_BRACKET_OPEN, true)) {
+						if (self::ST_SHORT_ARRAY_OPEN == end($context_stack) && $this->has_ln_before() && !$this->is_token(ST_COMMA, true, [T_WHITESPACE, T_DOC_COMMENT, T_COMMENT])) {
+							$prev_token_idx = $this->prev_token([T_WHITESPACE, T_DOC_COMMENT, T_COMMENT], true);
+							list($tkn_id, $tkn_text) = $this->get_token($this->tkns[$prev_token_idx]);
+							$this->tkns[$prev_token_idx] = [$tkn_id, $tkn_text . ','];
+						}
+						array_pop($context_stack);
+					}
 					break;
 				case T_STRING:
 					if ($this->is_token(ST_PARENTHESES_OPEN)) {
 						$context_stack[] = T_STRING;
 					}
-					$this->append_code($text, false);
 					break;
 				case T_ARRAY:
 					if ($this->is_token(ST_PARENTHESES_OPEN)) {
 						$context_stack[] = T_ARRAY;
 					}
-					$this->append_code($text, false);
 					break;
 				case ST_PARENTHESES_OPEN:
 					if (isset($context_stack[0]) && $this->is_token(ST_PARENTHESES_CLOSE)) {
 						array_pop($context_stack);
 					}
-					$this->append_code($text, false);
 					break;
 				case ST_PARENTHESES_CLOSE:
 					if (isset($context_stack[0])) {
+						if (T_ARRAY == end($context_stack) && $this->has_ln_before() && !$this->is_token(ST_COMMA, true, [T_WHITESPACE, T_DOC_COMMENT, T_COMMENT])) {
+							$prev_token_idx = $this->prev_token([T_WHITESPACE, T_DOC_COMMENT, T_COMMENT], true);
+							list($tkn_id, $tkn_text) = $this->get_token($this->tkns[$prev_token_idx]);
+							if (T_END_HEREDOC != $tkn_id) {
+								$this->tkns[$prev_token_idx] = [$tkn_id, $tkn_text . ','];
+							}
+						}
 						array_pop($context_stack);
 					}
-					$this->append_code($text, false);
 					break;
-				default:
-					if (T_WHITESPACE != $id && self::ST_SHORT_ARRAY_OPEN === end($context_stack) && $this->is_token(ST_BRACKET_CLOSE)) {
-						array_pop($context_stack);
-						if (ST_COMMA === $id || T_END_HEREDOC === $id || T_COMMENT === $id || T_DOC_COMMENT === $id || !$this->has_ln_after()) {
-							$this->append_code($text, false);
-						} else {
-							$this->append_code($text . ',', false);
-						}
-						break;
-					} elseif (T_WHITESPACE != $id && T_ARRAY === end($context_stack) && $this->is_token(ST_PARENTHESES_CLOSE)) {
-						array_pop($context_stack);
-						if (ST_COMMA === $id || T_END_HEREDOC === $id || T_COMMENT === $id || T_DOC_COMMENT === $id || !$this->has_ln_after()) {
-							$this->append_code($text, false);
-						} else {
-							$this->append_code($text . ',', false);
-						}
-						break;
-					} else {
-						$this->append_code($text, false);
-					}
-					break;
+
 			}
 		}
-		return $this->code;
+		return $this->render();
 	}
 };
 final class GeneratePHPDoc extends FormatterPass {
@@ -4196,11 +4208,11 @@ if (!isset($testEnv)) {
 			)
 		);
 	}
+	$fmt->addPass(new ExtraCommaInArray());
 	$fmt->addPass(new NormalizeLnAndLtrimLines());
 	$fmt->addPass(new MergeParenCloseWithCurlyOpen());
 	$fmt->addPass(new MergeCurlyCloseAndDoWhile());
 	$fmt->addPass(new MergeDoubleArrowAndArray());
-	$fmt->addPass(new ExtraCommaInArray());
 
 	if (isset($opts['yoda'])) {
 		$fmt->addPass(new YodaComparisons());

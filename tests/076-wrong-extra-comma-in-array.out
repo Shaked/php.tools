@@ -2,7 +2,7 @@
 $name = array(
 	'help' => __d('cake_console',
 		'Classname to use. If its Plugin.class, both name and plugin options will be set.'
-	)
+	),
 );
 
 $name = array(

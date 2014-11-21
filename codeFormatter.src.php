@@ -177,11 +177,11 @@ if (!isset($testEnv)) {
 			)
 		);
 	}
+	$fmt->addPass(new ExtraCommaInArray());
 	$fmt->addPass(new NormalizeLnAndLtrimLines());
 	$fmt->addPass(new MergeParenCloseWithCurlyOpen());
 	$fmt->addPass(new MergeCurlyCloseAndDoWhile());
 	$fmt->addPass(new MergeDoubleArrowAndArray());
-	$fmt->addPass(new ExtraCommaInArray());
 
 	if (isset($opts['yoda'])) {
 		$fmt->addPass(new YodaComparisons());

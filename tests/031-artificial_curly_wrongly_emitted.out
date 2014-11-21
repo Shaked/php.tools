@@ -68,7 +68,7 @@ Multiline comment
 Comment 9 */
 		func(array(
 			'type' => 'CHAR',
-			'data' => substr($dt, $tch)
+			'data' => substr($dt, $tch),
 		));
 
 		$this->EOF();

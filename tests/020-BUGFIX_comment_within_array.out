@@ -1,7 +1,7 @@
 <?php
 function func() {
 	$crit = array(
-		array('k' => 1)
+		array('k' => 1),
 	);
 	$found_props = new ClassObject($crit);
 
@@ -16,7 +16,7 @@ function func() {
 }
 function func2() {
 	$crit = array(
-		array('k' => 1)
+		array('k' => 1),
 	);
 	$found_props = new ClassObject($crit);
 
