@@ -75,10 +75,7 @@ final class YodaComparisons extends FormatterPass {
 					}
 			}
 		}
-		return implode('', array_map(function ($token) {
-			list($id, $text) = $this->get_token($token);
-			return $text;
-		}, array_filter($tkns)));
+		return $this->render($tkns);
 	}
 
 	private function is_pure_variable($id) {

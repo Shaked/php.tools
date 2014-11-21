@@ -324,11 +324,14 @@ abstract class FormatterPass {
 		return (false !== strpos($text, $this->new_line));
 	}
 
-	protected function render() {
+	protected function render($tkns = null) {
+		if (null == $tkns) {
+			$tkns = $this->tkns;
+		}
 		return implode('', array_map(function ($token) {
 			list($id, $text) = $this->get_token($token);
 			return $text;
-		}, array_filter($this->tkns)));
+		}, array_filter($tkns)));
 	}
 }
 ;
