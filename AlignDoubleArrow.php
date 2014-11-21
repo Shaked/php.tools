@@ -8,6 +8,7 @@ final class AlignDoubleArrow extends FormatterPass {
 		$level_counter = 0;
 		$level_entrance_counter = [];
 		$context_counter = [];
+		$max_context_counter = [];
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -20,8 +21,12 @@ final class AlignDoubleArrow extends FormatterPass {
 						}
 						if (!isset($context_counter[$level_counter][$level_entrance_counter[$level_counter]])) {
 							$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+							$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
 						}
 						++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
+						$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
+					} elseif ($context_counter[$level_counter][$level_entrance_counter[$level_counter]] > 1) {
+						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 1;
 					}
 					$this->append_code($text, false);
 					break;
@@ -47,8 +52,10 @@ final class AlignDoubleArrow extends FormatterPass {
 					++$level_entrance_counter[$level_counter];
 					if (!isset($context_counter[$level_counter][$level_entrance_counter[$level_counter]])) {
 						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+						$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
 					}
 					++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
+					$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
 
 					$this->append_code($text, false);
 					break;
@@ -65,7 +72,7 @@ final class AlignDoubleArrow extends FormatterPass {
 			}
 		}
 
-		foreach ($context_counter as $level => $entrances) {
+		foreach ($max_context_counter as $level => $entrances) {
 			foreach ($entrances as $entrance => $context) {
 				for ($j = 0; $j <= $context; ++$j) {
 					$placeholder = sprintf(self::ALIGNABLE_EQUAL, $level, $entrance, $j);
