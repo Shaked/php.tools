@@ -308,6 +308,7 @@ abstract class FormatterPass {
 			}
 		}
 	}
+
 	protected function walk_and_accumulate_until(&$tkns, $tknid) {
 		$ret = '';
 		while (list($index, $token) = each($tkns)) {

@@ -15,5 +15,5 @@ $arr = array(
 		                                       ->getRepository('Appointment\Entity\Appointment')
 		                                       ->getRepository('Appointment\Entity\Appointment')
 		                                       ->getRepository('Appointment\Entity\Appointment'),
-	)
+	),
 );

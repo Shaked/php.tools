@@ -21,7 +21,9 @@ final class ExtraCommaInArray extends FormatterPass {
 						if (self::ST_SHORT_ARRAY_OPEN == end($context_stack) && $this->has_ln_before() && !$this->is_token(ST_COMMA, true, [T_WHITESPACE, T_DOC_COMMENT, T_COMMENT])) {
 							$prev_token_idx = $this->prev_token([T_WHITESPACE, T_DOC_COMMENT, T_COMMENT], true);
 							list($tkn_id, $tkn_text) = $this->get_token($this->tkns[$prev_token_idx]);
-							$this->tkns[$prev_token_idx] = [$tkn_id, $tkn_text . ','];
+							if (T_END_HEREDOC != $tkn_id && ST_BRACKET_OPEN != $tkn_id) {
+								$this->tkns[$prev_token_idx] = [$tkn_id, $tkn_text . ','];
+							}
 						}
 						array_pop($context_stack);
 					}
@@ -37,16 +39,18 @@ final class ExtraCommaInArray extends FormatterPass {
 					}
 					break;
 				case ST_PARENTHESES_OPEN:
-					if (isset($context_stack[0]) && $this->is_token(ST_PARENTHESES_CLOSE)) {
+					if (isset($context_stack[0]) && T_ARRAY == end($context_stack) && $this->is_token(ST_PARENTHESES_CLOSE)) {
 						array_pop($context_stack);
+					} elseif (!$this->is_token([T_ARRAY, T_STRING], true)) {
+						$context_stack[] = ST_PARENTHESES_OPEN;
 					}
 					break;
 				case ST_PARENTHESES_CLOSE:
 					if (isset($context_stack[0])) {
-						if (T_ARRAY == end($context_stack) && $this->has_ln_before() && !$this->is_token(ST_COMMA, true, [T_WHITESPACE, T_DOC_COMMENT, T_COMMENT])) {
+						if (T_ARRAY == end($context_stack) && ($this->has_ln_prev_token() || $this->has_ln_before()) && !$this->is_token(ST_COMMA, true, [T_WHITESPACE, T_DOC_COMMENT, T_COMMENT])) {
 							$prev_token_idx = $this->prev_token([T_WHITESPACE, T_DOC_COMMENT, T_COMMENT], true);
 							list($tkn_id, $tkn_text) = $this->get_token($this->tkns[$prev_token_idx]);
-							if (T_END_HEREDOC != $tkn_id) {
+							if (T_END_HEREDOC != $tkn_id && ST_PARENTHESES_OPEN != $tkn_id) {
 								$this->tkns[$prev_token_idx] = [$tkn_id, $tkn_text . ','];
 							}
 						}
