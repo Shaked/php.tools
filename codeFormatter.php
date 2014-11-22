@@ -248,6 +248,10 @@ abstract class FormatterPass {
 		list($id, $text) = $this->get_token($this->prev_token());
 		return $this->has_ln($text);
 	}
+	protected function has_ln_next_token() {
+		list($id, $text) = $this->get_token($this->next_token());
+		return $this->has_ln($text);
+	}
 	protected function substr_count_trailing($haystack, $needle) {
 		return strlen(rtrim($haystack, " \t")) - strlen(rtrim($haystack, " \t" . $needle));
 	}
@@ -550,7 +554,7 @@ final class AlignDoubleArrow extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_COMMA:
-					if (!$this->has_ln_after()) {
+					if (!$this->has_ln_after() && !$this->has_ln_next_token()) {
 						if (!isset($level_entrance_counter[$level_counter])) {
 							$level_entrance_counter[$level_counter] = 0;
 						}

@@ -15,7 +15,7 @@ final class AlignDoubleArrow extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_COMMA:
-					if (!$this->has_ln_after()) {
+					if (!$this->has_ln_after() && !$this->has_ln_next_token()) {
 						if (!isset($level_entrance_counter[$level_counter])) {
 							$level_entrance_counter[$level_counter] = 0;
 						}
