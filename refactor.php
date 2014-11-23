@@ -74,6 +74,11 @@ abstract class FormatterPass {
 	protected $tkns = [];
 	protected $use_cache = false;
 	protected $cache = [];
+	protected $ignore_futile_tokens = [
+		T_WHITESPACE,
+		T_COMMENT,
+		T_DOC_COMMENT,
+	];
 
 	abstract public function format($source);
 	protected function get_token($token) {

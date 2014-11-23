@@ -20,6 +20,7 @@ include 'AlignEquals.php';
 include 'AutoImport.php';
 include 'AutoPreincrement.php';
 include 'ConstructorPass.php';
+include 'WrongConstructorName.php';
 include 'EliminateDuplicatedEmptyLines.php';
 include 'ExtraCommaInArray.php';
 include 'GeneratePHPDoc.php';
