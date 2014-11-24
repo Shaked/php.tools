@@ -6,7 +6,8 @@ class Abc {
 	/**
 	 * @param ClassA $a
 	 * @param \Lll\llll\ppp $b
-	 * @param $c
+	 * @param array $c
+	 * @return mixed
 	 */
 	function a(ClassA $a, \Lll\llll\ppp $b = 10, $c = array()) {
 
@@ -16,7 +17,8 @@ class Abc {
 	/**
 	 * @param ClassA $a
 	 * @param \Lll\llll\ppp $b
-	 * @param $c
+	 * @param array $c
+	 * @return mixed
 	 */
 	public static function b(ClassA $a, \Lll\llll\ppp $b = 10, $c = array()) {
 
@@ -26,7 +28,8 @@ class Abc {
 	/**
 	 * @param ClassA $a
 	 * @param \Lll\llll\ppp $b
-	 * @param $c
+	 * @param array $c
+	 * @return mixed
 	 */
 	static private function b(ClassA $a, \Lll\llll\ppp $b = 10, $c = array()) {
 
