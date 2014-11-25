@@ -33,7 +33,7 @@ class WrongConstructorName extends FormatterPass {
 						}
 					}
 					if (ST_CURLY_OPEN != $id) {
-						$this->print_until_the_end_of(ST_CURLY_OPEN);
+						$this->print_until(ST_CURLY_OPEN);
 					}
 					$count = 1;
 					while (list($index, $token) = each($this->tkns)) {

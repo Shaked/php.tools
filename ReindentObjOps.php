@@ -19,7 +19,7 @@ final class ReindentObjOps extends FormatterPass {
 				case T_FOR:
 				case T_FOREACH:
 					$this->append_code($text, false);
-					$this->print_until_the_end_of(ST_PARENTHESES_OPEN);
+					$this->print_until(ST_PARENTHESES_OPEN);
 					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
 				case ST_PARENTHESES_OPEN:

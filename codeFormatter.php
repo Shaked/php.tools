@@ -261,7 +261,7 @@ abstract class FormatterPass {
 		return strlen(rtrim($haystack, " \t")) - strlen(rtrim($haystack, " \t" . $needle));
 	}
 	protected function print_until_the_end_of_string() {
-		$this->print_until_the_end_of(ST_QUOTE);
+		$this->print_until(ST_QUOTE);
 	}
 	protected function walk_until($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
@@ -272,7 +272,7 @@ abstract class FormatterPass {
 			}
 		}
 	}
-	protected function print_until_the_end_of($tknid) {
+	protected function print_until($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -1276,7 +1276,7 @@ class WrongConstructorName extends FormatterPass {
 						}
 					}
 					if (ST_CURLY_OPEN != $id) {
-						$this->print_until_the_end_of(ST_CURLY_OPEN);
+						$this->print_until(ST_CURLY_OPEN);
 					}
 					$count = 1;
 					while (list($index, $token) = each($this->tkns)) {
@@ -1749,7 +1749,7 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 					break;
 				case T_START_HEREDOC:
 					$this->append_code($text, false);
-					$this->print_until_the_end_of(T_END_HEREDOC);
+					$this->print_until(T_END_HEREDOC);
 					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
@@ -2166,7 +2166,7 @@ final class Reindent extends FormatterPass {
 					break;
 				case T_CLOSE_TAG:
 					$this->append_code($text, false);
-					$this->print_until_the_end_of(T_OPEN_TAG);
+					$this->print_until(T_OPEN_TAG);
 					break;
 				case T_START_HEREDOC:
 					$this->append_code(rtrim($text) . $this->get_crlf(), false);
@@ -2259,7 +2259,7 @@ final class ReindentColonBlocks extends FormatterPass {
 				case ST_CURLY_OPEN:
 					$this->append_code($text, false);
 					if ($this->is_token([T_VARIABLE], true)) {
-						$this->print_until_the_end_of(ST_CURLY_CLOSE);
+						$this->print_until(ST_CURLY_CLOSE);
 						break;
 					}
 					++$switch_curly_count[$switch_level];
@@ -2504,7 +2504,7 @@ final class ReindentObjOps extends FormatterPass {
 				case T_FOR:
 				case T_FOREACH:
 					$this->append_code($text, false);
-					$this->print_until_the_end_of(ST_PARENTHESES_OPEN);
+					$this->print_until(ST_PARENTHESES_OPEN);
 					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
 				case ST_PARENTHESES_OPEN:
@@ -3324,7 +3324,7 @@ class SpaceBetweenMethods extends FormatterPass {
 			switch ($id) {
 				case T_FUNCTION:
 					$this->append_code($text, false);
-					$this->print_until_the_end_of(ST_CURLY_OPEN);
+					$this->print_until(ST_CURLY_OPEN);
 					$this->print_block(ST_CURLY_OPEN, ST_CURLY_CLOSE);
 					if (!$this->is_token([ST_CURLY_CLOSE, ST_SEMI_COLON, ST_COMMA, ST_PARENTHESES_CLOSE])) {
 						$this->append_code($this->get_crlf(), false);

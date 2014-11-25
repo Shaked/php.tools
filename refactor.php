@@ -261,7 +261,7 @@ abstract class FormatterPass {
 		return strlen(rtrim($haystack, " \t")) - strlen(rtrim($haystack, " \t" . $needle));
 	}
 	protected function print_until_the_end_of_string() {
-		$this->print_until_the_end_of(ST_QUOTE);
+		$this->print_until(ST_QUOTE);
 	}
 	protected function walk_until($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
@@ -272,7 +272,7 @@ abstract class FormatterPass {
 			}
 		}
 	}
-	protected function print_until_the_end_of($tknid) {
+	protected function print_until($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;

@@ -15,7 +15,7 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 					break;
 				case T_START_HEREDOC:
 					$this->append_code($text, false);
-					$this->print_until_the_end_of(T_END_HEREDOC);
+					$this->print_until(T_END_HEREDOC);
 					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
