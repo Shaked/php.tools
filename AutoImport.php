@@ -110,8 +110,20 @@ final class AutoImportPass extends FormatterPass {
 
 		$tokens = token_get_all($source);
 		$alias_count = [];
+		$namespace_name = '';
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->get_token($token);
+			if (T_NAMESPACE == $id) {
+				while (list($index, $token) = each($tokens)) {
+					list($id, $text) = $this->get_token($token);
+					if (T_NS_SEPARATOR == $id || T_STRING == $id) {
+						$namespace_name .= $text;
+					}
+					if (ST_SEMI_COLON == $id || ST_CURLY_OPEN == $id) {
+						break;
+					}
+				}
+			}
 			if (T_USE == $id || T_NAMESPACE == $id || T_FUNCTION == $id || T_DOUBLE_COLON == $id || T_OBJECT_OPERATOR == $id) {
 				while (list($index, $token) = each($tokens)) {
 					list($id, $text) = $this->get_token($token);
@@ -171,6 +183,9 @@ final class AutoImportPass extends FormatterPass {
 			if (isset($used_alias[$alias])) {
 				continue;
 			}
+			usort($candidates, function ($a, $b) use ($namespace_name) {
+				return similar_text($a, $namespace_name) < similar_text($b, $namespace_name);
+			});
 			$replacement .= 'use ' . implode(';' . $this->new_line . '//use ', $candidates) . ';' . $this->new_line;
 		}
 
