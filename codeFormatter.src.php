@@ -24,6 +24,7 @@ include 'WrongConstructorName.php';
 include 'EliminateDuplicatedEmptyLines.php';
 include 'ExtraCommaInArray.php';
 include 'GeneratePHPDoc.php';
+include 'JoinToImplode.php';
 include 'LeftAlignComment.php';
 include 'MergeCurlyCloseAndDoWhile.php';
 include 'MergeDoubleArrowAndArray.php';
