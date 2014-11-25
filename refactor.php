@@ -500,9 +500,13 @@ if (!isset($testEnv)) {
 		foreach ($files as $file) {
 			$file = $file[0];
 			echo $file;
-			file_put_contents($file . '-tmp', $fmt->formatCode(file_get_contents($file)));
-			rename($file, $file . '~');
-			rename($file . '-tmp', $file);
+			$orig_code = file_get_contents($file);
+			$new_code = $fmt->formatCode($orig_code);
+			if ($orig_code != $new_code) {
+				file_put_contents($file . '-tmp', $new_code);
+				rename($file, $file . '~');
+				rename($file . '-tmp', $file);
+			}
 			echo PHP_EOL;
 		}
 	} else {
