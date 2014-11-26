@@ -5,6 +5,3 @@ php:
         - 5.4
         - hhvm
 script: (php -dshort_open_tag=On test.php -v) && (php -dshort_open_tag=On test.php -v --deployed)
-
-before_script:
-        - phpenv config-rm xdebug.ini
