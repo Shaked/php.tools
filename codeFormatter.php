@@ -2235,6 +2235,10 @@ final class Reindent extends FormatterPass {
 					$this->append_code($text, false);
 					break;
 
+				case T_DOC_COMMENT:
+					$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
+					$this->append_code($text, false);
+					break;
 				default:
 					$has_ln = ($this->has_ln($text));
 					if ($has_ln) {
