@@ -55,7 +55,7 @@ final class ReindentColonBlocks extends FormatterPass {
 					$has_ln = $this->has_ln($text);
 					if ($has_ln) {
 						$is_next_case_or_default = $this->token_is([T_CASE, T_DEFAULT]);
-						if (!$is_next_case_or_default && !$this->token_is(ST_CURLY_CLOSE)) {
+						if (!$is_next_case_or_default && !$this->token_is([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
 							$this->append_code($text . $this->get_indent($switch_level));
 						} else {
 							$this->append_code($text);

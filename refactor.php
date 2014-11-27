@@ -143,8 +143,24 @@ abstract class FormatterPass {
 		return $ignore_list;
 	}
 
-	protected function useful_token_is($token, $prev = false, $ignore_list = []) {
+	protected function right_useful_token_is($token) {
+		return $this->useful_token_is($token, false);
+	}
+
+	protected function left_useful_token_is($token) {
+		return $this->useful_token_is($token, true);
+	}
+
+	protected function useful_token_is($token, $prev = false) {
 		return $this->token_is($token, $prev, $this->ignore_futile_tokens);
+	}
+
+	protected function right_token_is($token, $ignore_list = []) {
+		return $this->token_is($token, false, $ignore_list);
+	}
+
+	protected function left_token_is($token, $ignore_list = []) {
+		return $this->token_is($token, true, $ignore_list);
 	}
 
 	protected function token_is($token, $prev = false, $ignore_list = []) {

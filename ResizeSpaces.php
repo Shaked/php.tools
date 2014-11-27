@@ -268,10 +268,10 @@ final class ResizeSpaces extends FormatterPass {
 					}
 					break;
 				case T_ELSE:
-					if (!$this->token_is(ST_CURLY_CLOSE, true)) {
+					if (!$this->left_useful_token_is(ST_CURLY_CLOSE)) {
 						$this->append_code($text);
 					} else {
-						$this->append_code($this->get_space() . $text . $this->get_space());
+						$this->append_code($this->get_space(!$this->left_token_is([T_COMMENT, T_DOC_COMMENT])) . $text . $this->get_space());
 					}
 					break;
 				case T_ARRAY_CAST:
