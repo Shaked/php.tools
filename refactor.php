@@ -82,10 +82,10 @@ abstract class FormatterPass {
 
 	abstract public function format($source);
 	protected function get_token($token) {
-		if (!isset($token[1])) {
-			return [$token, $token];
-		} else {
+		if (isset($token[1])) {
 			return $token;
+		} else {
+			return [$token, $token];
 		}
 	}
 	protected function append_code($code = "") {
