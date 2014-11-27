@@ -14,7 +14,7 @@ class RemoveUseLeadingSlash extends FormatterPass {
 				case T_FUNCTION:
 					$last_touched_token = $id;
 				case T_NS_SEPARATOR:
-					if (T_NAMESPACE == $last_touched_token && $this->token_is([T_USE], true)) {
+					if (T_NAMESPACE == $last_touched_token && $this->left_token_is([T_USE])) {
 						continue;
 					}
 				default:

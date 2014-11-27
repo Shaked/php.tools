@@ -83,7 +83,7 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 					break;
 				default:
 					$lc_text = strtolower($text);
-					if (!$this->token_is([T_NS_SEPARATOR], true) && ('true' === $lc_text || 'false' === $lc_text || 'null' === $lc_text)) {
+					if (!$this->left_token_is([T_NS_SEPARATOR]) && ('true' === $lc_text || 'false' === $lc_text || 'null' === $lc_text)) {
 						$text = $lc_text;
 					}
 					$this->append_code($text);

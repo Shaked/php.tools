@@ -9,7 +9,7 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ARRAY:
-					if ($this->token_is([T_DOUBLE_ARROW], true)) {
+					if ($this->left_token_is([T_DOUBLE_ARROW])) {
 						--$in_do_while_context;
 						$this->rtrim_and_append_code($text);
 						break;

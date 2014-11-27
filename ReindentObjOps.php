@@ -23,7 +23,7 @@ final class ReindentObjOps extends FormatterPass {
 					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
 				case ST_PARENTHESES_OPEN:
-					if ($this->token_is([T_ARRAY], true)) {
+					if ($this->left_token_is([T_ARRAY])) {
 						$paren_stack[] = T_ARRAY;
 					} else {
 						$paren_stack[] = 0;

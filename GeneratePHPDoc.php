@@ -17,7 +17,7 @@ final class GeneratePHPDoc extends FormatterPass {
 				case T_PROTECTED:
 				case T_PRIVATE:
 				case T_STATIC:
-					if (!$this->token_is([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT], true)) {
+					if (!$this->left_token_is([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
 						$touched_visibility = true;
 						$visibility_idx = $this->ptr;
 					}
@@ -58,7 +58,7 @@ final class GeneratePHPDoc extends FormatterPass {
 							continue;
 						}
 						if (T_VARIABLE == $id) {
-							if ($this->token_is([ST_EQUAL]) && $this->walk_until(ST_EQUAL) && $this->token_is([T_ARRAY])) {
+							if ($this->right_token_is([ST_EQUAL]) && $this->walk_until(ST_EQUAL) && $this->right_token_is([T_ARRAY])) {
 								$tmp['type'] = 'array';
 							}
 							$tmp['name'] = $text;
@@ -86,13 +86,13 @@ final class GeneratePHPDoc extends FormatterPass {
 								break;
 							}
 							if (T_RETURN == $id) {
-								if ($this->token_is([T_DNUMBER])) {
+								if ($this->right_token_is([T_DNUMBER])) {
 									$return_stack = 'float';
-								} elseif ($this->token_is([T_LNUMBER])) {
+								} elseif ($this->right_token_is([T_LNUMBER])) {
 									$return_stack = 'int';
-								} elseif ($this->token_is([T_VARIABLE])) {
+								} elseif ($this->right_token_is([T_VARIABLE])) {
 									$return_stack = 'mixed';
-								} elseif ($this->token_is([ST_SEMI_COLON])) {
+								} elseif ($this->right_token_is([ST_SEMI_COLON])) {
 									$return_stack = 'null';
 								}
 							}

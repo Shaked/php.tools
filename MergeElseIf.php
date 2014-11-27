@@ -13,7 +13,7 @@ class MergeElseIf extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_IF:
-					if ($this->token_is([T_ELSE], true) && !$this->token_is([T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO], true)) {
+					if ($this->left_token_is([T_ELSE]) && !$this->left_token_is([T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO])) {
 						$this->rtrim_and_append_code($text);
 						break;
 					}

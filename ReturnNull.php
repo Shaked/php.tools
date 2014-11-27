@@ -10,7 +10,7 @@ class ReturnNull extends FormatterPass {
 			$this->ptr = $index;
 			$this->cache = [];
 
-			if (ST_PARENTHESES_OPEN == $id && $this->token_is([T_RETURN], true)) {
+			if (ST_PARENTHESES_OPEN == $id && $this->left_token_is([T_RETURN])) {
 				$paren_count = 1;
 				$touched_another_valid_token = false;
 				$stack = $text;

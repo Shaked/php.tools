@@ -9,7 +9,7 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					$this->append_code($this->get_crlf($this->token_is(ST_CURLY_CLOSE, true)) . $text);
+					$this->append_code($this->get_crlf($this->left_token_is(ST_CURLY_CLOSE)) . $text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;

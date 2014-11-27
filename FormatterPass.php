@@ -100,7 +100,7 @@ abstract class FormatterPass {
 		return $this->token_is($token, true, $ignore_list);
 	}
 
-	protected function token_is($token, $prev = false, $ignore_list = []) {
+	private function token_is($token, $prev = false, $ignore_list = []) {
 		if ($this->use_cache) {
 			$key = ((int) $prev) . "\x2" . implode('', $ignore_list) . "\x2" . (is_array($token) ? implode("\x2", $token) : $token);
 			if (isset($this->cache[$key])) {

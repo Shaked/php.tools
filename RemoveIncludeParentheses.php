@@ -13,7 +13,7 @@ final class RemoveIncludeParentheses extends FormatterPass {
 				case T_REQUIRE_ONCE:
 					$this->append_code($text . $this->get_space());
 
-					if (!$this->token_is(ST_PARENTHESES_OPEN)) {
+					if (!$this->right_token_is(ST_PARENTHESES_OPEN)) {
 						break;
 					}
 					$this->walk_until(ST_PARENTHESES_OPEN);

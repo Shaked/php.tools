@@ -51,7 +51,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					break;
 				case T_FINAL:
 				case T_ABSTRACT:
-					if (!$this->token_is([T_CLASS])) {
+					if (!$this->right_token_is([T_CLASS])) {
 						$final_or_abstract = $text;
 						$skip_whitespaces = true;
 					} else {
@@ -62,7 +62,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					if (!is_null($visibility)) {
 						$static = $text;
 						$skip_whitespaces = true;
-					} elseif (!$this->token_is([T_VARIABLE, T_DOUBLE_COLON]) && !$this->token_is([T_NEW], true)) {
+					} elseif (!$this->right_token_is([T_VARIABLE, T_DOUBLE_COLON]) && !$this->left_token_is([T_NEW])) {
 						$static = $text;
 						$skip_whitespaces = true;
 					} else {
@@ -94,7 +94,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						$this->append_code($visibility . $this->get_space());
 					} elseif (
 						isset($found[0]) && $has_found_class_or_interface &&
-						!$this->token_is([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_COMMA, ST_PARENTHESES_OPEN], true)
+						!$this->left_token_is([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_COMMA, ST_PARENTHESES_OPEN])
 					) {
 						$this->append_code('public' . $this->get_space());
 					}
