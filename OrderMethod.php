@@ -23,20 +23,20 @@ final class OrderMethod extends FormatterPass {
 						$this->ptr = $index;
 
 						$stack .= $text;
-						if ($id == T_FUNCTION) {
+						if (T_FUNCTION == $id) {
 							$touched_method = true;
 						}
-						if ($id == T_VARIABLE && !$touched_method) {
+						if (T_VARIABLE == $id && !$touched_method) {
 							break;
 						}
-						if ($id == T_STRING && $touched_method && empty($function_name)) {
+						if (T_STRING == $id && $touched_method && empty($function_name)) {
 							$function_name = $text;
 						}
 
-						if ($id == ST_CURLY_OPEN) {
+						if (ST_CURLY_OPEN == $id) {
 							++$curly_count;
 						}
-						if ($id == ST_CURLY_CLOSE) {
+						if (ST_CURLY_CLOSE == $id) {
 							--$curly_count;
 						}
 						if (0 === $curly_count) {
@@ -74,7 +74,7 @@ final class OrderMethod extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						$return .= $text;
-						if ($id == ST_CURLY_OPEN) {
+						if (ST_CURLY_OPEN == $id) {
 							break;
 						}
 					}
@@ -84,9 +84,9 @@ final class OrderMethod extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						$class_block .= $text;
-						if ($id == ST_CURLY_OPEN) {
+						if (ST_CURLY_OPEN == $id) {
 							++$curly_count;
-						} elseif ($id == ST_CURLY_CLOSE) {
+						} elseif (ST_CURLY_CLOSE == $id) {
 							--$curly_count;
 						}
 

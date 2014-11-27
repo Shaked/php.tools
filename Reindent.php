@@ -47,7 +47,7 @@ final class Reindent extends FormatterPass {
 				case ST_BRACKET_OPEN:
 					$indent_token = [
 						'id' => $id,
-						'implicit' => true
+						'implicit' => true,
 					];
 					$this->append_code($text);
 					if ($this->has_ln_after()) {
