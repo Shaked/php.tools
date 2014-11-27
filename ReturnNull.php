@@ -1,5 +1,5 @@
 <?php
-class ReturnNull extends FormatterPass {
+class ReturnNull extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -55,5 +55,25 @@ class ReturnNull extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Simplify empty returns.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+function a(){
+	return null;
+}
+?>
+to
+<?php
+function a(){
+	return;
+}
+?>
+EOT;
 	}
 }

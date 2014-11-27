@@ -1,5 +1,5 @@
 <?php
-final class AlignDoubleArrow extends FormatterPass {
+final class AlignDoubleArrow extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d.%d.%d \x3";// level.levelentracecounter.counter
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -113,5 +113,26 @@ final class AlignDoubleArrow extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+	public function get_description() {
+		return 'Vertically align T_DOUBLE_ARROW (=>).';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a = [
+	1 => 1,
+	22 => 22,
+	333 => 333,
+];
+
+$a = [
+	1   => 1,
+	22  => 22,
+	333 => 333,
+];
+?>
+EOT;
 	}
 }

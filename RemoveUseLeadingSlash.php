@@ -1,5 +1,5 @@
 <?php
-class RemoveUseLeadingSlash extends FormatterPass {
+class RemoveUseLeadingSlash extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -23,5 +23,31 @@ class RemoveUseLeadingSlash extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Remove leading slash in T_USE imports.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+namespace NS1;
+use \B;
+use \D;
+
+new B();
+new D();
+?>
+to
+<?php
+namespace NS1;
+use B;
+use D;
+
+new B();
+new D();
+?>
+EOT;
 	}
 }

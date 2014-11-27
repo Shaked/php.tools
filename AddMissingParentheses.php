@@ -1,5 +1,5 @@
 <?php
-class AddMissingParentheses extends FormatterPass {
+class AddMissingParentheses extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -20,5 +20,19 @@ class AddMissingParentheses extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Add extra parentheses in new instantiations.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a = new SomeClass;
+
+$a = new SomeClass();
+?>
+EOT;
 	}
 }

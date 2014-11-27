@@ -1,5 +1,5 @@
 <?php
-final class YodaComparisons extends FormatterPass {
+final class YodaComparisons extends AdditionalPass {
 	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
 	const CHAIN_LITERAL = 'CHAIN_LITERAL';
 	const CHAIN_FUNC = 'CHAIN_FUNC';
@@ -207,5 +207,25 @@ final class YodaComparisons extends FormatterPass {
 		}
 		$tkns = array_values(array_filter($tkns));
 		return $tkns;
+	}
+
+	public function get_description() {
+		return 'Execute Yoda Comparisons.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+if($a == 1){
+
+}
+?>
+to
+<?php
+if(1 == $a){
+
+}
+?>
+EOT;
 	}
 }

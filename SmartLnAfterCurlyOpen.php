@@ -1,5 +1,5 @@
 <?php
-final class SmartLnAfterCurlyOpen extends FormatterPass {
+final class SmartLnAfterCurlyOpen extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -51,5 +51,23 @@ final class SmartLnAfterCurlyOpen extends FormatterPass {
 			}
 		}
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Add line break when implicit curly block is added.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+if($a) echo array();
+?>
+to
+<?php
+if($a) {
+	echo array();
+}
+?>
+EOT;
 	}
 }

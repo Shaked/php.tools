@@ -1,5 +1,5 @@
 <?php
-final class OrderMethod extends FormatterPass {
+final class OrderMethod extends AdditionalPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
 	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
 
@@ -113,5 +113,29 @@ final class OrderMethod extends FormatterPass {
 			}
 		}
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Sort methods within class in alphabetic order.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+class A {
+	function b(){}
+	function c(){}
+	function a(){}
+}
+?>
+to
+<?php
+class A {
+	function a(){}
+	function b(){}
+	function c(){}
+}
+?>
+EOT;
 	}
 }

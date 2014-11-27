@@ -1,5 +1,5 @@
 <?php
-final class GeneratePHPDoc extends FormatterPass {
+final class GeneratePHPDoc extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -124,5 +124,33 @@ final class GeneratePHPDoc extends FormatterPass {
 		}
 		$str .= ' */' . $this->new_line;
 		return $str;
+	}
+
+	public function get_description() {
+		return 'Automatically generates PHPDoc blocks';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+class A {
+	function a(Someclass $a) {
+		return 1;
+	}
+}
+?>
+to
+<?php
+class A {
+	/**
+	 * @param Someclass $a
+	 * @return int
+	 */
+	function a(Someclass $a) {
+		return 1;
+	}
+}
+?>
+EOT;
 	}
 }

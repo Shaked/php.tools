@@ -1,5 +1,5 @@
 <?php
-class JoinToImplode extends FormatterPass {
+class JoinToImplode extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 
@@ -15,4 +15,19 @@ class JoinToImplode extends FormatterPass {
 
 		return $this->code;
 	}
+
+	public function get_description() {
+		return 'Replace implode() alias (join() -> implode()).';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a = join(',', $arr);
+
+$a = implode(',', $arr);
+?>
+EOT;
+	}
+
 }

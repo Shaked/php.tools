@@ -387,6 +387,11 @@ abstract class FormatterPass {
 	}
 }
 ;
+abstract class AdditionalPass extends FormatterPass {
+	abstract public function get_description();
+	abstract public function get_example();
+}
+;
 final class AddMissingCurlyBraces extends FormatterPass {
 	public function format($source) {
 		list($tmp, $changed) = $this->addBraces($source);
@@ -557,7 +562,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 	}
 }
 ;
-class AddMissingParentheses extends FormatterPass {
+class AddMissingParentheses extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -579,9 +584,23 @@ class AddMissingParentheses extends FormatterPass {
 
 		return $this->code;
 	}
+
+	public function get_description() {
+		return 'Add extra parentheses in new instantiations.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a = new SomeClass;
+
+$a = new SomeClass();
+?>
+EOT;
+	}
 }
 ;
-final class AlignDoubleArrow extends FormatterPass {
+final class AlignDoubleArrow extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d.%d.%d \x3";// level.levelentracecounter.counter
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -696,9 +715,30 @@ final class AlignDoubleArrow extends FormatterPass {
 
 		return $this->code;
 	}
+	public function get_description() {
+		return 'Vertically align T_DOUBLE_ARROW (=>).';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a = [
+	1 => 1,
+	22 => 22,
+	333 => 333,
+];
+
+$a = [
+	1   => 1,
+	22  => 22,
+	333 => 333,
+];
+?>
+EOT;
+	}
 }
 ;
-final class AlignEquals extends FormatterPass {
+final class AlignEquals extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -787,6 +827,25 @@ final class AlignEquals extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Vertically align "=".';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a = 1;
+$bb = 22;
+$ccc = 333;
+
+$a   = 1;
+$bb  = 22;
+$ccc = 333;
+
+?>
+EOT;
 	}
 };
 final class AutoImportPass extends FormatterPass {
@@ -1041,7 +1100,7 @@ final class AutoImportPass extends FormatterPass {
 		return $return;
 	}
 };
-final class AutoPreincrement extends FormatterPass {
+final class AutoPreincrement extends AdditionalPass {
 	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
 	const CHAIN_LITERAL = 'CHAIN_LITERAL';
 	const CHAIN_FUNC = 'CHAIN_FUNC';
@@ -1160,6 +1219,22 @@ final class AutoPreincrement extends FormatterPass {
 		$tkns = array_values(array_filter($tkns));
 		return $tkns;
 	}
+
+	public function get_description() {
+		return 'Automatically convert postincrement to preincrement.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a++;
+$b--;
+
+++$a;
+--$b;
+?>
+EOT;
+	}
 };
 final class ConstructorPass extends FormatterPass {
 	const TYPE_CAMEL_CASE = 'camel';
@@ -1273,7 +1348,7 @@ final class ConstructorPass extends FormatterPass {
 		return $str;
 	}
 };
-class WrongConstructorName extends FormatterPass {
+class WrongConstructorName extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -1337,6 +1412,30 @@ class WrongConstructorName extends FormatterPass {
 
 		return $this->code;
 	}
+
+	public function get_description() {
+		return 'Update old constructor names into new ones. http://php.net/manual/en/language.oop5.decon.php';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+class A {
+	function A(){
+
+	}
+}
+?>
+to
+<?php
+class A {
+	function __construct(){
+
+	}
+}
+?>
+EOT;
+	}
 };
 final class EliminateDuplicatedEmptyLines extends FormatterPass {
 	const EMPTY_LINE = "\x2 EMPTYLINE \x3";
@@ -1390,7 +1489,7 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 		return $this->code;
 	}
 };
-class EncapsulateNamespaces extends FormatterPass {
+class EncapsulateNamespaces extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -1420,6 +1519,27 @@ class EncapsulateNamespaces extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Encapsulate namespaces with curly braces';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+namespace NS1;
+class A {
+}
+?>
+to
+<?php
+namespace NS1 {
+	class A {
+	}
+}
+?>
+EOT;
 	}
 }
 ;
@@ -1487,7 +1607,7 @@ final class ExtraCommaInArray extends FormatterPass {
 		return $this->render();
 	}
 };
-final class GeneratePHPDoc extends FormatterPass {
+final class GeneratePHPDoc extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -1613,9 +1733,37 @@ final class GeneratePHPDoc extends FormatterPass {
 		$str .= ' */' . $this->new_line;
 		return $str;
 	}
+
+	public function get_description() {
+		return 'Automatically generates PHPDoc blocks';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+class A {
+	function a(Someclass $a) {
+		return 1;
+	}
+}
+?>
+to
+<?php
+class A {
+	/**
+	 * @param Someclass $a
+	 * @return int
+	 */
+	function a(Someclass $a) {
+		return 1;
+	}
+}
+?>
+EOT;
+	}
 }
 ;
-class JoinToImplode extends FormatterPass {
+class JoinToImplode extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 
@@ -1631,6 +1779,21 @@ class JoinToImplode extends FormatterPass {
 
 		return $this->code;
 	}
+
+	public function get_description() {
+		return 'Replace implode() alias (join() -> implode()).';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a = join(',', $arr);
+
+$a = implode(',', $arr);
+?>
+EOT;
+	}
+
 }
 ;
 final class LeftAlignComment extends FormatterPass {
@@ -1758,7 +1921,7 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 /**
  * From PHP-CS-Fixer
  */
-class MergeElseIf extends FormatterPass {
+class MergeElseIf extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -1780,6 +1943,28 @@ class MergeElseIf extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Merge if with else. ';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+if($a){
+
+} else if($b) {
+
+}
+
+if($a){
+
+} elseif($b) {
+
+}
+?>
+EOT;
 	}
 }
 ;
@@ -1894,7 +2079,7 @@ final class NormalizeIsNotEquals extends FormatterPass {
 	}
 }
 ;
-final class OrderMethod extends FormatterPass {
+final class OrderMethod extends AdditionalPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
 	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
 
@@ -2008,6 +2193,30 @@ final class OrderMethod extends FormatterPass {
 			}
 		}
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Sort methods within class in alphabetic order.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+class A {
+	function b(){}
+	function c(){}
+	function a(){}
+}
+?>
+to
+<?php
+class A {
+	function a(){}
+	function b(){}
+	function c(){}
+}
+?>
+EOT;
 	}
 }
 ;
@@ -2221,6 +2430,7 @@ final class OrderUseClauses extends FormatterPass {
 
 		return $return;
 	}
+
 }
 ;
 final class Reindent extends FormatterPass {
@@ -2739,7 +2949,7 @@ final class ReindentObjOps extends FormatterPass {
 	}
 }
 ;
-class RemoveUseLeadingSlash extends FormatterPass {
+class RemoveUseLeadingSlash extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -2763,6 +2973,32 @@ class RemoveUseLeadingSlash extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Remove leading slash in T_USE imports.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+namespace NS1;
+use \B;
+use \D;
+
+new B();
+new D();
+?>
+to
+<?php
+namespace NS1;
+use B;
+use D;
+
+new B();
+new D();
+?>
+EOT;
 	}
 }
 ;
@@ -3115,7 +3351,7 @@ final class ResizeSpaces extends FormatterPass {
 	}
 }
 ;
-class ReturnNull extends FormatterPass {
+class ReturnNull extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -3171,6 +3407,26 @@ class ReturnNull extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Simplify empty returns.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+function a(){
+	return null;
+}
+?>
+to
+<?php
+function a(){
+	return;
+}
+?>
+EOT;
 	}
 }
 ;
@@ -3313,7 +3569,7 @@ final class SettersAndGettersPass extends FormatterPass {
 /**
  * From PHP-CS-Fixer
  */
-class ShortArray extends FormatterPass {
+class ShortArray extends AdditionalPass {
 	const FOUND_ARRAY = 'array';
 	const FOUND_PARENTHESES = 'paren';
 	public function format($source) {
@@ -3351,9 +3607,25 @@ class ShortArray extends FormatterPass {
 
 		return $this->code;
 	}
+
+	public function get_description() {
+		return 'Convert old array into new array. (array() -> [])';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+echo array();
+?>
+to
+<?php
+echo [];
+?>
+EOT;
+	}
 }
 ;
-final class SmartLnAfterCurlyOpen extends FormatterPass {
+final class SmartLnAfterCurlyOpen extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -3406,9 +3678,27 @@ final class SmartLnAfterCurlyOpen extends FormatterPass {
 		}
 		return $this->code;
 	}
+
+	public function get_description() {
+		return 'Add line break when implicit curly block is added.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+if($a) echo array();
+?>
+to
+<?php
+if($a) {
+	echo array();
+}
+?>
+EOT;
+	}
 }
 ;
-class SpaceBetweenMethods extends FormatterPass {
+class SpaceBetweenMethods extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -3432,6 +3722,38 @@ class SpaceBetweenMethods extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Put space between methods.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+class A {
+	function b(){
+
+	}
+	function c(){
+
+	}
+}
+?>
+to
+<?php
+class A {
+	function b(){
+
+	}
+
+	function c(){
+
+	}
+
+}
+?>
+EOT;
 	}
 }
 ;
@@ -3471,7 +3793,7 @@ final class TwoCommandsInSameLine extends FormatterPass {
 	}
 }
 ;
-final class YodaComparisons extends FormatterPass {
+final class YodaComparisons extends AdditionalPass {
 	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
 	const CHAIN_LITERAL = 'CHAIN_LITERAL';
 	const CHAIN_FUNC = 'CHAIN_FUNC';
@@ -3679,6 +4001,26 @@ final class YodaComparisons extends FormatterPass {
 		}
 		$tkns = array_values(array_filter($tkns));
 		return $tkns;
+	}
+
+	public function get_description() {
+		return 'Execute Yoda Comparisons.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+if($a == 1){
+
+}
+?>
+to
+<?php
+if(1 == $a){
+
+}
+?>
+EOT;
 	}
 };
 //PSR standards
@@ -4318,10 +4660,11 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('ho:', ['yoda', 'smart_linebreak_after_curly', 'prepasses:', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
+	$opts = getopt('ho:', ['help-pass:', 'list', 'yoda', 'smart_linebreak_after_curly', 'prepasses:', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
+			'--list' => 'list possible transformations',
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
@@ -4347,6 +4690,26 @@ if (!isset($testEnv)) {
 		die();
 	}
 
+	if (isset($opts['help-pass'])) {
+		$optPass = $opts['help-pass'];
+		if (class_exists($optPass)) {
+			$pass = new $optPass();
+			echo $argv[0], ': "', $optPass, '" - ', $pass->get_description(), PHP_EOL, PHP_EOL;
+			echo 'Example:', PHP_EOL, $pass->get_example(), PHP_EOL;
+		}
+		die();
+	}
+
+	if (isset($opts['list'])) {
+		echo 'Usage: ', $argv[0], ' --help-pass=PASSNAME', PHP_EOL;
+		$classes = get_declared_classes();
+		foreach ($classes as $class_name) {
+			if (is_subclass_of($class_name, 'AdditionalPass')) {
+				echo "\t- ", $class_name, PHP_EOL;
+			}
+		}
+		die();
+	}
 	$fmt = new CodeFormatter();
 	if (isset($opts['prepasses'])) {
 		$optPasses = array_map(function ($v) {

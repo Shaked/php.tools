@@ -1,5 +1,5 @@
 <?php
-class WrongConstructorName extends FormatterPass {
+class WrongConstructorName extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -62,5 +62,29 @@ class WrongConstructorName extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Update old constructor names into new ones. http://php.net/manual/en/language.oop5.decon.php';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+class A {
+	function A(){
+
+	}
+}
+?>
+to
+<?php
+class A {
+	function __construct(){
+
+	}
+}
+?>
+EOT;
 	}
 }

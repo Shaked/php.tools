@@ -1,5 +1,5 @@
 <?php
-class SpaceBetweenMethods extends FormatterPass {
+class SpaceBetweenMethods extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -23,5 +23,37 @@ class SpaceBetweenMethods extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Put space between methods.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+class A {
+	function b(){
+
+	}
+	function c(){
+
+	}
+}
+?>
+to
+<?php
+class A {
+	function b(){
+
+	}
+
+	function c(){
+
+	}
+
+}
+?>
+EOT;
 	}
 }

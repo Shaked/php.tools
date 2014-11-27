@@ -13,6 +13,7 @@
 //THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 include 'constants.php';
 include 'FormatterPass.php';
+include 'AdditionalPass.php';
 include 'AddMissingCurlyBraces.php';
 include 'AddMissingParentheses.php';
 include 'AlignDoubleArrow.php';
@@ -87,10 +88,11 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('ho:', ['yoda', 'smart_linebreak_after_curly', 'prepasses:', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
+	$opts = getopt('ho:', ['help-pass:', 'list', 'yoda', 'smart_linebreak_after_curly', 'prepasses:', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
+			'--list' => 'list possible transformations',
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
@@ -116,6 +118,26 @@ if (!isset($testEnv)) {
 		die();
 	}
 
+	if (isset($opts['help-pass'])) {
+		$optPass = $opts['help-pass'];
+		if (class_exists($optPass)) {
+			$pass = new $optPass();
+			echo $argv[0], ': "', $optPass, '" - ', $pass->get_description(), PHP_EOL, PHP_EOL;
+			echo 'Example:', PHP_EOL, $pass->get_example(), PHP_EOL;
+		}
+		die();
+	}
+
+	if (isset($opts['list'])) {
+		echo 'Usage: ', $argv[0], ' --help-pass=PASSNAME', PHP_EOL;
+		$classes = get_declared_classes();
+		foreach ($classes as $class_name) {
+			if (is_subclass_of($class_name, 'AdditionalPass')) {
+				echo "\t- ", $class_name, PHP_EOL;
+			}
+		}
+		die();
+	}
 	$fmt = new CodeFormatter();
 	if (isset($opts['prepasses'])) {
 		$optPasses = array_map(function ($v) {

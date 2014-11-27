@@ -1,5 +1,5 @@
 <?php
-final class AlignEquals extends FormatterPass {
+final class AlignEquals extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -88,5 +88,24 @@ final class AlignEquals extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Vertically align "=".';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a = 1;
+$bb = 22;
+$ccc = 333;
+
+$a   = 1;
+$bb  = 22;
+$ccc = 333;
+
+?>
+EOT;
 	}
 }

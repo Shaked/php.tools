@@ -2,7 +2,7 @@
 /**
  * From PHP-CS-Fixer
  */
-class ShortArray extends FormatterPass {
+class ShortArray extends AdditionalPass {
 	const FOUND_ARRAY = 'array';
 	const FOUND_PARENTHESES = 'paren';
 	public function format($source) {
@@ -39,5 +39,21 @@ class ShortArray extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Convert old array into new array. (array() -> [])';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+echo array();
+?>
+to
+<?php
+echo [];
+?>
+EOT;
 	}
 }

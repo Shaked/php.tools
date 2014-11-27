@@ -1,5 +1,5 @@
 <?php
-final class AutoPreincrement extends FormatterPass {
+final class AutoPreincrement extends AdditionalPass {
 	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
 	const CHAIN_LITERAL = 'CHAIN_LITERAL';
 	const CHAIN_FUNC = 'CHAIN_FUNC';
@@ -117,5 +117,21 @@ final class AutoPreincrement extends FormatterPass {
 		}
 		$tkns = array_values(array_filter($tkns));
 		return $tkns;
+	}
+
+	public function get_description() {
+		return 'Automatically convert postincrement to preincrement.';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a++;
+$b--;
+
+++$a;
+--$b;
+?>
+EOT;
 	}
 }

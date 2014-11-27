@@ -2,7 +2,7 @@
 /**
  * From PHP-CS-Fixer
  */
-class MergeElseIf extends FormatterPass {
+class MergeElseIf extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -24,5 +24,27 @@ class MergeElseIf extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Merge if with else. ';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+if($a){
+
+} else if($b) {
+
+}
+
+if($a){
+
+} elseif($b) {
+
+}
+?>
+EOT;
 	}
 }

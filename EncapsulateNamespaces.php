@@ -1,5 +1,5 @@
 <?php
-class EncapsulateNamespaces extends FormatterPass {
+class EncapsulateNamespaces extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -29,5 +29,26 @@ class EncapsulateNamespaces extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	public function get_description() {
+		return 'Encapsulate namespaces with curly braces';
+	}
+
+	public function get_example() {
+		return <<<'EOT'
+<?php
+namespace NS1;
+class A {
+}
+?>
+to
+<?php
+namespace NS1 {
+	class A {
+	}
+}
+?>
+EOT;
 	}
 }
