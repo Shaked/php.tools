@@ -11,6 +11,8 @@ final class OrderMethod extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_ABSTRACT:
+				case T_STATIC:
 				case T_PRIVATE:
 				case T_PROTECTED:
 				case T_PUBLIC:
@@ -31,6 +33,10 @@ final class OrderMethod extends FormatterPass {
 						}
 						if (T_STRING == $id && $touched_method && empty($function_name)) {
 							$function_name = $text;
+						}
+
+						if (0 === $curly_count && ST_SEMI_COLON == $id) {
+							break;
 						}
 
 						if (ST_CURLY_OPEN == $id) {
