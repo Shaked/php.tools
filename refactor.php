@@ -311,7 +311,7 @@ abstract class FormatterPass {
 			}
 			$tmp .= $text;
 		}
-		return $start . str_replace($placeholder, '', call_user_func([$this, $call], $tmp)) . $end;
+		return $start . str_replace($placeholder, '', $this->{$call}($tmp)) . $end;
 	}
 
 	protected function set_indent($increment) {
