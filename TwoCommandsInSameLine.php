@@ -9,11 +9,11 @@ final class TwoCommandsInSameLine extends FormatterPass {
 
 			switch ($id) {
 				case ST_SEMI_COLON:
-					if ($this->is_token(ST_SEMI_COLON, true)) {
+					if ($this->token_is(ST_SEMI_COLON, true)) {
 						break;
 					}
 					$this->append_code($text);
-					if (!$this->has_ln_after() && $this->is_token([T_VARIABLE, T_STRING])) {
+					if (!$this->has_ln_after() && $this->token_is([T_VARIABLE, T_STRING])) {
 						$this->append_code($this->new_line);
 					}
 					break;

@@ -10,7 +10,7 @@ class ReturnNull extends FormatterPass {
 			$this->ptr = $index;
 			$this->cache = [];
 
-			if (ST_PARENTHESES_OPEN == $id && $this->is_token([T_RETURN], true)) {
+			if (ST_PARENTHESES_OPEN == $id && $this->token_is([T_RETURN], true)) {
 				$paren_count = 1;
 				$touched_another_valid_token = false;
 				$stack = $text;
@@ -44,8 +44,8 @@ class ReturnNull extends FormatterPass {
 				continue;
 			}
 			if (T_STRING == $id && strtolower($text) == 'null') {
-				list($prev_id, ) = $this->prev_token([T_WHITESPACE, T_COMMENT, T_DOC_COMMENT]);
-				list($next_id, ) = $this->next_token([T_WHITESPACE, T_COMMENT, T_DOC_COMMENT]);
+				list($prev_id, ) = $this->left_token([T_WHITESPACE, T_COMMENT, T_DOC_COMMENT]);
+				list($next_id, ) = $this->right_token([T_WHITESPACE, T_COMMENT, T_DOC_COMMENT]);
 				if (T_RETURN == $prev_id && ST_SEMI_COLON == $next_id) {
 					continue;
 				}

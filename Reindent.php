@@ -73,7 +73,7 @@ final class Reindent extends FormatterPass {
 				default:
 					$has_ln = ($this->has_ln($text));
 					if ($has_ln) {
-						$is_next_curly_paren_bracket_close = $this->is_token([ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE]);
+						$is_next_curly_paren_bracket_close = $this->token_is([ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE]);
 						if (!$is_next_curly_paren_bracket_close) {
 							$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
 						} elseif ($is_next_curly_paren_bracket_close) {

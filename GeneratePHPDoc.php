@@ -17,7 +17,7 @@ final class GeneratePHPDoc extends FormatterPass {
 				case T_PROTECTED:
 				case T_PRIVATE:
 				case T_STATIC:
-					if (!$this->is_token([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT], true)) {
+					if (!$this->token_is([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT], true)) {
 						$touched_visibility = true;
 						$visibility_idx = $this->ptr;
 					}
@@ -31,7 +31,7 @@ final class GeneratePHPDoc extends FormatterPass {
 					} else {
 						$orig_idx = $visibility_idx;
 					}
-					list($nt_id, $nt_text) = $this->get_token($this->next_token());
+					list($nt_id, $nt_text) = $this->get_token($this->right_token());
 					if (T_STRING != $nt_id) {
 						$this->append_code($text);
 						break;
@@ -58,7 +58,7 @@ final class GeneratePHPDoc extends FormatterPass {
 							continue;
 						}
 						if (T_VARIABLE == $id) {
-							if ($this->is_token([ST_EQUAL]) && $this->walk_until(ST_EQUAL) && $this->is_token([T_ARRAY])) {
+							if ($this->token_is([ST_EQUAL]) && $this->walk_until(ST_EQUAL) && $this->token_is([T_ARRAY])) {
 								$tmp['type'] = 'array';
 							}
 							$tmp['name'] = $text;
@@ -69,7 +69,7 @@ final class GeneratePHPDoc extends FormatterPass {
 					}
 
 					$return_stack = '';
-					if (!$this->is_token(ST_SEMI_COLON, false, $this->ignore_futile_tokens)) {
+					if (!$this->useful_token_is(ST_SEMI_COLON, false)) {
 						$this->walk_until(ST_CURLY_OPEN);
 						$count = 1;
 						while (list($index, $token) = each($this->tkns)) {
@@ -86,13 +86,13 @@ final class GeneratePHPDoc extends FormatterPass {
 								break;
 							}
 							if (T_RETURN == $id) {
-								if ($this->is_token([T_DNUMBER])) {
+								if ($this->token_is([T_DNUMBER])) {
 									$return_stack = 'float';
-								} elseif ($this->is_token([T_LNUMBER])) {
+								} elseif ($this->token_is([T_LNUMBER])) {
 									$return_stack = 'int';
-								} elseif ($this->is_token([T_VARIABLE])) {
+								} elseif ($this->token_is([T_VARIABLE])) {
 									$return_stack = 'mixed';
-								} elseif ($this->is_token([ST_SEMI_COLON])) {
+								} elseif ($this->token_is([ST_SEMI_COLON])) {
 									$return_stack = 'null';
 								}
 							}

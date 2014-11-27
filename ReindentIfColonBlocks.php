@@ -51,7 +51,7 @@ final class ReindentIfColonBlocks extends FormatterPass {
 							}
 						} elseif (ST_CURLY_OPEN === $id) {
 							break;
-						} elseif (ST_COLON === $id && !$this->is_token([T_CLOSE_TAG])) {
+						} elseif (ST_COLON === $id && !$this->token_is([T_CLOSE_TAG])) {
 							$this->set_indent(+1);
 							break;
 						} elseif (ST_COLON === $id) {
@@ -61,9 +61,9 @@ final class ReindentIfColonBlocks extends FormatterPass {
 					break;
 				default:
 					$has_ln = $this->has_ln($text);
-					if ($has_ln && !$this->is_token([T_ENDIF, T_ELSE, T_ELSEIF])) {
+					if ($has_ln && !$this->token_is([T_ENDIF, T_ELSE, T_ELSEIF])) {
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					} elseif ($has_ln && $this->is_token([T_ENDIF, T_ELSE, T_ELSEIF])) {
+					} elseif ($has_ln && $this->token_is([T_ENDIF, T_ELSE, T_ELSEIF])) {
 						$this->set_indent(-1);
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
 						$this->set_indent(+1);

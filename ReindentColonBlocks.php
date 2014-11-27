@@ -34,7 +34,7 @@ final class ReindentColonBlocks extends FormatterPass {
 					break;
 				case ST_CURLY_OPEN:
 					$this->append_code($text);
-					if ($this->is_token([T_VARIABLE], true)) {
+					if ($this->token_is([T_VARIABLE], true)) {
 						$this->print_until(ST_CURLY_CLOSE);
 						break;
 					}
@@ -54,8 +54,8 @@ final class ReindentColonBlocks extends FormatterPass {
 				default:
 					$has_ln = $this->has_ln($text);
 					if ($has_ln) {
-						$is_next_case_or_default = $this->is_token([T_CASE, T_DEFAULT]);
-						if (!$is_next_case_or_default && !$this->is_token(ST_CURLY_CLOSE)) {
+						$is_next_case_or_default = $this->token_is([T_CASE, T_DEFAULT]);
+						if (!$is_next_case_or_default && !$this->token_is(ST_CURLY_CLOSE)) {
 							$this->append_code($text . $this->get_indent($switch_level));
 						} else {
 							$this->append_code($text);

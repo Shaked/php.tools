@@ -9,7 +9,7 @@ final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 			switch ($id) {
 				case T_WHILE:
 					$str = $text;
-					list($pt_id, $pt_text) = $this->get_token($this->prev_token());
+					list($pt_id, $pt_text) = $this->get_token($this->left_token());
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;

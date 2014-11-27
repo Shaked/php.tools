@@ -23,7 +23,7 @@ final class ReindentObjOps extends FormatterPass {
 					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
 				case ST_PARENTHESES_OPEN:
-					if ($this->is_token([T_ARRAY], true)) {
+					if ($this->token_is([T_ARRAY], true)) {
 						$paren_stack[] = T_ARRAY;
 					} else {
 						$paren_stack[] = 0;
@@ -47,7 +47,7 @@ final class ReindentObjOps extends FormatterPass {
 					$this->append_code($text);
 					break;
 				case T_OBJECT_OPERATOR:
-					$has_ln_before = ($this->has_ln_before() || $this->has_ln_prev_token());
+					$has_ln_before = ($this->has_ln_before() || $this->has_ln_left_token());
 					if (0 === $in_objop_context && $has_ln_before) {
 						$this->set_indent(-1);
 						$in_objop_context = 1;
