@@ -44,8 +44,8 @@ class ReturnNull extends AdditionalPass {
 				continue;
 			}
 			if (T_STRING == $id && strtolower($text) == 'null') {
-				list($prev_id, ) = $this->left_token([T_WHITESPACE, T_COMMENT, T_DOC_COMMENT]);
-				list($next_id, ) = $this->right_token([T_WHITESPACE, T_COMMENT, T_DOC_COMMENT]);
+				list($prev_id, ) = $this->left_useful_token();
+				list($next_id, ) = $this->right_useful_token();
 				if (T_RETURN == $prev_id && ST_SEMI_COLON == $next_id) {
 					continue;
 				}
