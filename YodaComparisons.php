@@ -8,7 +8,7 @@ final class YodaComparisons extends FormatterPass {
 	public function format($source) {
 		return $this->yodise($source);
 	}
-	private function yodise($source) {
+	protected function yodise($source) {
 		$tkns = $this->aggregate_variables($source);
 		reset($tkns);
 		while (list($ptr, $token) = each($tkns)) {
@@ -129,7 +129,7 @@ final class YodaComparisons extends FormatterPass {
 
 			if (ST_PARENTHESES_OPEN == $id) {
 				$initial_ptr = $ptr;
-				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise');
 				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
 				continue;
 			}
@@ -173,11 +173,11 @@ final class YodaComparisons extends FormatterPass {
 					// }
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE);
+						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'yodise');
 					} elseif (ST_BRACKET_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE);
+						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'yodise');
 					} elseif (ST_PARENTHESES_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise');
 					}
 
 					$stack .= $text;
@@ -207,26 +207,5 @@ final class YodaComparisons extends FormatterPass {
 		}
 		$tkns = array_values(array_filter($tkns));
 		return $tkns;
-	}
-
-	private function scan_and_replace(&$tkns, &$ptr, $start, $end) {
-		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
-		$tmp = $placeholder;
-		$tkn_count = 1;
-		while (list($ptr, $token) = each($tkns)) {
-			list($id, $text) = $this->get_token($token);
-			if ($start == $id) {
-				++$tkn_count;
-			}
-			if ($end == $id) {
-				--$tkn_count;
-			}
-			$tkns[$ptr] = null;
-			if (0 == $tkn_count) {
-				break;
-			}
-			$tmp .= $text;
-		}
-		return $start . str_replace($placeholder, '', $this->yodise($tmp)) . $end;
 	}
 }

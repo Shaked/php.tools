@@ -342,6 +342,27 @@ abstract class FormatterPass {
 			return $text;
 		}, array_filter($tkns)));
 	}
+
+	protected function scan_and_replace(&$tkns, &$ptr, $start, $end, $call) {
+		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
+		$tmp = $placeholder;
+		$tkn_count = 1;
+		while (list($ptr, $token) = each($tkns)) {
+			list($id, $text) = $this->get_token($token);
+			if ($start == $id) {
+				++$tkn_count;
+			}
+			if ($end == $id) {
+				--$tkn_count;
+			}
+			$tkns[$ptr] = null;
+			if (0 == $tkn_count) {
+				break;
+			}
+			$tmp .= $text;
+		}
+		return $start . str_replace($placeholder, '', call_user_func([$this, $call], $tmp)) . $end;
+	}
 }
 ;
 final class RefactorPass extends FormatterPass {
