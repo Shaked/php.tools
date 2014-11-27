@@ -28,7 +28,7 @@ final class AlignDoubleArrow extends FormatterPass {
 					} elseif ($context_counter[$level_counter][$level_entrance_counter[$level_counter]] > 1) {
 						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 1;
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 
 				case T_DOUBLE_ARROW:
@@ -38,8 +38,7 @@ final class AlignDoubleArrow extends FormatterPass {
 							$level_counter,
 							$level_entrance_counter[$level_counter],
 							$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
-						) . $text,
-						false
+						) . $text
 					);
 					break;
 
@@ -57,17 +56,17 @@ final class AlignDoubleArrow extends FormatterPass {
 					++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
 					$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
 
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 
 				case ST_PARENTHESES_CLOSE:
 				case ST_BRACKET_CLOSE:
 					--$level_counter;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

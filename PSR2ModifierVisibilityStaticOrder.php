@@ -14,21 +14,21 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_QUOTE:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					$this->print_until_the_end_of_string();
 					break;
 				case T_CLASS:
 					$found[] = T_CLASS;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_INTERFACE:
 					$found[] = T_INTERFACE;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case ST_CURLY_OPEN:
 				case ST_PARENTHESES_OPEN:
 					$found[] = $text;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case ST_CURLY_CLOSE:
 				case ST_PARENTHESES_CLOSE:
@@ -36,11 +36,11 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					if (1 === sizeof($found)) {
 						array_pop($found);
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_WHITESPACE:
 					if (!$skip_whitespaces) {
-						$this->append_code($text, false);
+						$this->append_code($text);
 					}
 					break;
 				case T_PUBLIC:
@@ -55,7 +55,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						$final_or_abstract = $text;
 						$skip_whitespaces = true;
 					} else {
-						$this->append_code($text, false);
+						$this->append_code($text);
 					}
 					break;
 				case T_STATIC:
@@ -66,7 +66,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						$static = $text;
 						$skip_whitespaces = true;
 					} else {
-						$this->append_code($text, false);
+						$this->append_code($text);
 					}
 					break;
 				case T_VARIABLE:
@@ -75,23 +75,23 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						null !== $final_or_abstract ||
 						null !== $static
 					) {
-						null !== $final_or_abstract && $this->append_code($final_or_abstract . $this->get_space(), false);
-						null !== $visibility && $this->append_code($visibility . $this->get_space(), false);
-						null !== $static && $this->append_code($static . $this->get_space(), false);
+						null !== $final_or_abstract && $this->append_code($final_or_abstract . $this->get_space());
+						null !== $visibility && $this->append_code($visibility . $this->get_space());
+						null !== $static && $this->append_code($static . $this->get_space());
 						$final_or_abstract = null;
 						$visibility = null;
 						$static = null;
 						$skip_whitespaces = false;
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_FUNCTION:
 					$has_found_class_or_interface = isset($found[0]) && (T_CLASS === $found[0] || T_INTERFACE === $found[0]);
 					if (isset($found[0]) && $has_found_class_or_interface && null !== $final_or_abstract) {
-						$this->append_code($final_or_abstract . $this->get_space(), false);
+						$this->append_code($final_or_abstract . $this->get_space());
 					}
 					if (isset($found[0]) && $has_found_class_or_interface && null !== $visibility) {
-						$this->append_code($visibility . $this->get_space(), false);
+						$this->append_code($visibility . $this->get_space());
 					} elseif (
 						isset($found[0]) && $has_found_class_or_interface &&
 						!$this->is_token([T_DOUBLE_ARROW, T_RETURN], true) &&
@@ -99,19 +99,19 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						!$this->is_token(ST_COMMA, true) &&
 						!$this->is_token(ST_PARENTHESES_OPEN, true)
 					) {
-						$this->append_code('public' . $this->get_space(), false);
+						$this->append_code('public' . $this->get_space());
 					}
 					if (isset($found[0]) && $has_found_class_or_interface && null !== $static) {
-						$this->append_code($static . $this->get_space(), false);
+						$this->append_code($static . $this->get_space());
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					$final_or_abstract = null;
 					$visibility = null;
 					$static = null;
 					$skip_whitespaces = false;
 					break;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

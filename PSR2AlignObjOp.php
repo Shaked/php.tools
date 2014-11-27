@@ -15,7 +15,7 @@ final class PSR2AlignObjOp extends FormatterPass {
 				case T_ARRAY:
 				case T_DOUBLE_ARROW:
 					++$context_counter;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 
 				case T_OBJECT_OPERATOR:
@@ -23,12 +23,12 @@ final class PSR2AlignObjOp extends FormatterPass {
 						$context_meta_count[$context_counter] = 0;
 					}
 					if ($this->has_ln_before() || 0 == $context_meta_count[$context_counter]) {
-						$this->append_code(sprintf(self::ALIGNABLE_TOKEN, $context_counter) . $text, false);
+						$this->append_code(sprintf(self::ALIGNABLE_TOKEN, $context_counter) . $text);
 						++$context_meta_count[$context_counter];
 						break;
 					}
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

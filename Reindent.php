@@ -25,21 +25,21 @@ final class Reindent extends FormatterPass {
 			}
 			switch ($id) {
 				case ST_QUOTE:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					$this->print_until_the_end_of_string();
 					break;
 				case T_CLOSE_TAG:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					$this->print_until(T_OPEN_TAG);
 					break;
 				case T_START_HEREDOC:
-					$this->append_code(rtrim($text) . $this->get_crlf(), false);
+					$this->append_code(rtrim($text) . $this->get_crlf());
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
 				case T_ENCAPSED_AND_WHITESPACE:
 				case T_STRING_VARNAME:
 				case T_NUM_STRING:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_CURLY_OPEN:
 				case ST_CURLY_OPEN:
@@ -49,7 +49,7 @@ final class Reindent extends FormatterPass {
 						'id' => $id,
 						'implicit' => true
 					];
-					$this->append_code($text, false);
+					$this->append_code($text);
 					if ($this->has_ln_after()) {
 						$indent_token['implicit'] = false;
 						$this->set_indent(+1);
@@ -63,12 +63,12 @@ final class Reindent extends FormatterPass {
 					if (false === $popped_id['implicit']) {
 						$this->set_indent(-1);
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 
 				case T_DOC_COMMENT:
 					$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				default:
 					$has_ln = ($this->has_ln($text));
@@ -82,7 +82,7 @@ final class Reindent extends FormatterPass {
 							$this->set_indent(+1);
 						}
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

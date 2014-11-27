@@ -11,7 +11,7 @@ final class RemoveIncludeParentheses extends FormatterPass {
 				case T_REQUIRE:
 				case T_INCLUDE_ONCE:
 				case T_REQUIRE_ONCE:
-					$this->append_code($text . $this->get_space(), false);
+					$this->append_code($text . $this->get_space());
 
 					if (!$this->is_token(ST_PARENTHESES_OPEN)) {
 						break;
@@ -32,11 +32,11 @@ final class RemoveIncludeParentheses extends FormatterPass {
 						if (0 == $count) {
 							break;
 						}
-						$this->append_code($text, false);
+						$this->append_code($text);
 					}
 					break;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

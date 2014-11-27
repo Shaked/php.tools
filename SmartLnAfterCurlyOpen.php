@@ -9,7 +9,7 @@ final class SmartLnAfterCurlyOpen extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_CURLY_OPEN:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					$curly_count = 1;
 					$stack = '';
 					$found_line_break = false;
@@ -41,12 +41,12 @@ final class SmartLnAfterCurlyOpen extends FormatterPass {
 						}
 					}
 					if ($found_line_break && !$has_ln_after) {
-						$this->append_code($this->new_line, false);
+						$this->append_code($this->new_line);
 					}
-					$this->append_code($stack, false);
+					$this->append_code($stack);
 					break;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

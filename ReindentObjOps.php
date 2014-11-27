@@ -18,7 +18,7 @@ final class ReindentObjOps extends FormatterPass {
 				case T_IF:
 				case T_FOR:
 				case T_FOREACH:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					$this->print_until(ST_PARENTHESES_OPEN);
 					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
@@ -29,22 +29,22 @@ final class ReindentObjOps extends FormatterPass {
 						$paren_stack[] = 0;
 						++$paren_count;
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case ST_PARENTHESES_CLOSE:
 					$stack_pop = array_pop($paren_stack);
 					if (T_ARRAY != $stack_pop) {
 						--$paren_count;
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case ST_BRACKET_OPEN:
 					++$bracket_count;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case ST_BRACKET_CLOSE:
 					--$bracket_count;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_OBJECT_OPERATOR:
 					$has_ln_before = ($this->has_ln_before() || $this->has_ln_prev_token());
@@ -59,39 +59,39 @@ final class ReindentObjOps extends FormatterPass {
 						$in_objop_context = 0;
 					}
 					if (1 === $in_objop_context) {
-						$this->append_code($this->get_indent() . $text, false);
+						$this->append_code($this->get_indent() . $text);
 					} elseif (2 === $in_objop_context) {
 						$placeholder = '';
 						if (!$printed_placeholder) {
 							$placeholder = sprintf(self::ALIGNABLE_OBJOP, $alignable_objop_counter);
 							$printed_placeholder = true;
 						}
-						$this->append_code($placeholder . $text, false);
+						$this->append_code($placeholder . $text);
 					} else {
-						$this->append_code($text, false);
+						$this->append_code($text);
 					}
 					break;
 				case T_VARIABLE:
 					if (0 === $paren_count && 0 === $bracket_count && 0 !== $in_objop_context) {
 						$in_objop_context = 0;
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_DOUBLE_ARROW:
 				case ST_SEMI_COLON:
 					if (0 !== $in_objop_context) {
 						$in_objop_context = 0;
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
 					if ($in_objop_context > 0) {
-						$this->append_code($this->get_indent() . $text, false);
+						$this->append_code($this->get_indent() . $text);
 						break;
 					}
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 			if ($this->has_ln($text)) {

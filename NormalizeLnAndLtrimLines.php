@@ -10,11 +10,11 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_QUOTE:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					$this->print_until_the_end_of_string();
 					break;
 				case T_START_HEREDOC:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					$this->print_until(T_END_HEREDOC);
 					break;
 				case T_COMMENT:
@@ -22,7 +22,7 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
 
 					if (T_WHITESPACE === $prev_id && ("\n" === $prev_text || "\n\n" == substr($prev_text, -2, 2))) {
-						$this->append_code(LeftAlignComment::NON_INDENTABLE_COMMENT, false);
+						$this->append_code(LeftAlignComment::NON_INDENTABLE_COMMENT);
 					}
 
 					$text = implode(
@@ -36,10 +36,10 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 						}, explode($this->new_line, $text))
 					);
 
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				default:
 					$trailing_new_line = $this->substr_count_trailing($text, $this->new_line);
@@ -48,7 +48,7 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 					} elseif (0 === $trailing_new_line && T_WHITESPACE === $id) {
 						$text = $this->get_space() . ltrim($text);
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

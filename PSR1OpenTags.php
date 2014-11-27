@@ -9,11 +9,11 @@ final class PSR1OpenTags extends FormatterPass {
 			switch ($id) {
 				case T_OPEN_TAG:
 					if ('<?php' !== $text) {
-						$this->append_code('<?php' . $this->new_line, false);
+						$this->append_code('<?php' . $this->new_line);
 						break;
 					}
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

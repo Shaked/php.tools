@@ -10,17 +10,17 @@ final class PSR1ClassConstants extends FormatterPass {
 			switch ($id) {
 				case T_CONST:
 					$uc_const = true;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_STRING:
 					if ($uc_const) {
 						$text = strtoupper($text);
 						$uc_const = false;
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

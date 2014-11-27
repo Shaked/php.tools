@@ -11,11 +11,11 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 				case T_ARRAY:
 					if ($this->is_token([T_DOUBLE_ARROW], true)) {
 						--$in_do_while_context;
-						$this->append_code($text);
+						$this->rtrim_and_append_code($text);
 						break;
 					}
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

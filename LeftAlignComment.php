@@ -29,7 +29,7 @@ final class LeftAlignComment extends FormatterPass {
 						// 	}
 						// 	$tok = strtok($this->new_line);
 						// }
-						// $this->append_code($new_text, false);
+						// $this->append_code($new_text);
 						$lines = explode($this->new_line, $text);
 						$lines = array_map(function ($v) {
 							$v = ltrim($v);
@@ -38,22 +38,22 @@ final class LeftAlignComment extends FormatterPass {
 							}
 							return $v;
 						}, $lines);
-						$this->append_code(implode($this->new_line, $lines), false);
+						$this->append_code(implode($this->new_line, $lines));
 						break;
 					}
 				case T_WHITESPACE:
 					list(, $next_text) = $this->inspect_token(1);
 					if (self::NON_INDENTABLE_COMMENT === $next_text && substr_count($text, "\n") >= 2) {
 						$text = substr($text, 0, strrpos($text, "\n") + 1);
-						$this->append_code($text, false);
+						$this->append_code($text);
 						break;
 					} elseif (self::NON_INDENTABLE_COMMENT === $next_text && substr_count($text, "\n") === 1) {
 						$text = substr($text, 0, strrpos($text, "\n") + 1);
-						$this->append_code($text, false);
+						$this->append_code($text);
 						break;
 					}
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

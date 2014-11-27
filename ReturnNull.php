@@ -39,7 +39,7 @@ class ReturnNull extends FormatterPass {
 					}
 				}
 				if ($touched_another_valid_token) {
-					$this->append_code($stack, false);
+					$this->append_code($stack);
 				}
 				continue;
 			}
@@ -51,7 +51,7 @@ class ReturnNull extends FormatterPass {
 				}
 			}
 
-			$this->append_code($text, false);
+			$this->append_code($text);
 		}
 
 		return $this->code;

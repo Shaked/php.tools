@@ -22,23 +22,23 @@ final class ReindentIfColonBlocks extends FormatterPass {
 			switch ($id) {
 				case T_ENDIF:
 					$this->set_indent(-1);
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_ELSE:
 				case T_ELSEIF:
 					$this->set_indent(-1);
 				case T_IF:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
-						$this->append_code($text, false);
+						$this->append_code($text);
 						if (ST_PARENTHESES_OPEN === $id) {
 							$paren_count = 1;
 							while (list($index, $token) = each($this->tkns)) {
 								list($id, $text) = $this->get_token($token);
 								$this->ptr = $index;
-								$this->append_code($text, false);
+								$this->append_code($text);
 								if (ST_PARENTHESES_OPEN === $id) {
 									++$paren_count;
 								}
@@ -68,7 +68,7 @@ final class ReindentIfColonBlocks extends FormatterPass {
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
 						$this->set_indent(+1);
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

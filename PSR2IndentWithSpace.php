@@ -12,10 +12,10 @@ final class PSR2IndentWithSpace extends FormatterPass {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
 				case T_WHITESPACE:
-					$this->append_code(str_replace($this->indent_char, $this->indent_spaces, $text), false);
+					$this->append_code(str_replace($this->indent_char, $this->indent_spaces, $text));
 					break;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

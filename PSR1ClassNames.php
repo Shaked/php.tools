@@ -10,7 +10,7 @@ final class PSR1ClassNames extends FormatterPass {
 			switch ($id) {
 				case T_CLASS:
 					$found_class = true;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_STRING:
 					if ($found_class) {
@@ -19,13 +19,13 @@ final class PSR1ClassNames extends FormatterPass {
 						if ($count > 0) {
 							$text = str_replace(' ', '', $tmp);
 						}
-						$this->append_code($text, false);
+						$this->append_code($text);
 
 						$found_class = false;
 						break;
 					}
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

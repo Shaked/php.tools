@@ -25,12 +25,11 @@ abstract class FormatterPass {
 			return $token;
 		}
 	}
-	protected function append_code($code = "", $trim = true) {
-		if ($trim) {
-			$this->code = rtrim($this->code) . $code;
-		} else {
-			$this->code .= $code;
-		}
+	protected function append_code($code = "") {
+		$this->code .= $code;
+	}
+	protected function rtrim_and_append_code($code = "") {
+		$this->code = rtrim($this->code) . $code;
 	}
 	protected function get_crlf_indent($in_for = false, $increment = 0) {
 		if ($in_for) {
@@ -214,7 +213,7 @@ abstract class FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			$this->cache = [];
-			$this->append_code($text, false);
+			$this->append_code($text);
 			if ($tknid == $id) {
 				break;
 			}
@@ -232,7 +231,7 @@ abstract class FormatterPass {
 			if (isset($tknids[$id])) {
 				return [$id, $text];
 			}
-			$this->append_code($text, false);
+			$this->append_code($text);
 		}
 	}
 	protected function print_block($start, $end) {
@@ -241,7 +240,7 @@ abstract class FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			$this->cache = [];
-			$this->append_code($text, false);
+			$this->append_code($text);
 
 			if ($start == $id) {
 				++$count;

@@ -18,7 +18,7 @@ class RemoveUseLeadingSlash extends FormatterPass {
 						continue;
 					}
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 			}
 		}
 

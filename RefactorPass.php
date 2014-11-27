@@ -65,9 +65,9 @@ final class RefactorPass extends FormatterPass {
 				if ($match) {
 					$buffer = str_replace($from_str, $to_str, $buffer);
 				}
-				$this->append_code($buffer, false);
+				$this->append_code($buffer);
 			} else {
-				$this->append_code($text, false);
+				$this->append_code($text);
 			}
 		}
 		return $this->code;

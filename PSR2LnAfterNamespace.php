@@ -9,27 +9,27 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					$this->append_code($this->get_crlf($this->is_token(ST_CURLY_CLOSE, true)) . $text, false);
+					$this->append_code($this->get_crlf($this->is_token(ST_CURLY_CLOSE, true)) . $text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						if (ST_SEMI_COLON === $id) {
-							$this->append_code($text, false);
+							$this->append_code($text);
 							list(, $text) = $this->inspect_token();
 							if (1 === substr_count($text, $this->new_line)) {
-								$this->append_code($this->new_line, false);
+								$this->append_code($this->new_line);
 							}
 							break;
 						} elseif (ST_CURLY_OPEN === $id) {
-							$this->append_code($text, false);
+							$this->append_code($text);
 							break;
 						} else {
-							$this->append_code($text, false);
+							$this->append_code($text);
 						}
 					}
 					break;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

@@ -33,7 +33,7 @@ final class GeneratePHPDoc extends FormatterPass {
 					}
 					list($nt_id, $nt_text) = $this->get_token($this->next_token());
 					if (T_STRING != $nt_id) {
-						$this->append_code($text, false);
+						$this->append_code($text);
 						break;
 					}
 					$this->walk_until(ST_PARENTHESES_OPEN);

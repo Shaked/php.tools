@@ -8,10 +8,10 @@ final class NormalizeIsNotEquals extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_IS_NOT_EQUAL:
-					$this->append_code(str_replace('<>', '!=', $text) . $this->get_space(), false);
+					$this->append_code(str_replace('<>', '!=', $text) . $this->get_space());
 					break;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

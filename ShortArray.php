@@ -22,17 +22,17 @@ class ShortArray extends FormatterPass {
 					}
 				case ST_PARENTHESES_OPEN:
 					$found_paren[] = self::FOUND_PARENTHESES;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 
 				case ST_PARENTHESES_CLOSE:
 					$pop_token = array_pop($found_paren);
 					if (self::FOUND_ARRAY == $pop_token) {
-						$this->append_code(']', false);
+						$this->append_code(']');
 						break;
 					}
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}
@@ -47,7 +47,7 @@ class ShortArray extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			if (ST_PARENTHESES_OPEN == $id) {
-				$this->append_code('[', false);
+				$this->append_code('[');
 			}
 		} while (ST_PARENTHESES_OPEN != $id);
 	}

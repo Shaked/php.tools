@@ -20,10 +20,10 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 				$this->ptr = $index;
 				switch ($id) {
 					case T_CLOSE_TAG:
-						$this->append_code($this->get_crlf(), false);
+						$this->append_code($this->get_crlf());
 						break;
 					default:
-						$this->append_code($text, false);
+						$this->append_code($text);
 						break;
 				}
 			}
@@ -32,7 +32,7 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 			while (list($index, $token) = each($this->tkns)) {
 				list($id, $text) = $this->get_token($token);
 				$this->ptr = $index;
-				$this->append_code($text, false);
+				$this->append_code($text);
 			}
 		}
 		$this->code = rtrim($this->code) . $this->get_crlf();

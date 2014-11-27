@@ -19,16 +19,16 @@ final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 							ST_COLON == $id ||
 							(ST_SEMI_COLON == $id && (ST_SEMI_COLON == $pt_id || ST_CURLY_OPEN == $pt_id || T_COMMENT == $pt_id || T_DOC_COMMENT == $pt_id))
 						) {
-							$this->append_code($str, false);
+							$this->append_code($str);
 							break;
 						} elseif (ST_SEMI_COLON == $id && !(ST_SEMI_COLON == $pt_id || ST_CURLY_OPEN == $pt_id || T_COMMENT == $pt_id || T_DOC_COMMENT == $pt_id)) {
-							$this->append_code($str);
+							$this->rtrim_and_append_code($str);
 							break;
 						}
 					}
 					break;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

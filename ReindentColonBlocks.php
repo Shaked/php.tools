@@ -24,16 +24,16 @@ final class ReindentColonBlocks extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_QUOTE:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					$this->print_until_the_end_of_string();
 					break;
 				case T_SWITCH:
 					++$switch_level;
 					$switch_curly_count[$switch_level] = 0;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case ST_CURLY_OPEN:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					if ($this->is_token([T_VARIABLE], true)) {
 						$this->print_until(ST_CURLY_CLOSE);
 						break;
@@ -45,23 +45,23 @@ final class ReindentColonBlocks extends FormatterPass {
 					if (0 === $switch_curly_count[$switch_level] && $switch_level > 0) {
 						--$switch_level;
 					}
-					$this->append_code($this->get_indent($switch_level) . $text, false);
+					$this->append_code($this->get_indent($switch_level) . $text);
 					break;
 				case T_DEFAULT:
 				case T_CASE:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				default:
 					$has_ln = $this->has_ln($text);
 					if ($has_ln) {
 						$is_next_case_or_default = $this->is_token([T_CASE, T_DEFAULT]);
 						if (!$is_next_case_or_default && !$this->is_token(ST_CURLY_CLOSE)) {
-							$this->append_code($text . $this->get_indent($switch_level), false);
+							$this->append_code($text . $this->get_indent($switch_level));
 						} else {
-							$this->append_code($text, false);
+							$this->append_code($text);
 						}
 					} else {
-						$this->append_code($text, false);
+						$this->append_code($text);
 					}
 					break;
 			}

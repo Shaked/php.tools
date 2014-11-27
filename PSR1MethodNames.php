@@ -10,7 +10,7 @@ final class PSR1MethodNames extends FormatterPass {
 			switch ($id) {
 				case T_FUNCTION:
 					$found_method = true;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_STRING:
 					if ($found_method) {
@@ -19,7 +19,7 @@ final class PSR1MethodNames extends FormatterPass {
 						if ($count > 0 && '' !== trim($tmp) && '_' !== substr($text, 0, 1)) {
 							$text = lcfirst(str_replace(' ', '', $tmp));
 						}
-						$this->append_code($text, false);
+						$this->append_code($text);
 
 						$found_method = false;
 						break;
@@ -27,7 +27,7 @@ final class PSR1MethodNames extends FormatterPass {
 				case ST_PARENTHESES_OPEN:
 					$found_method = false;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

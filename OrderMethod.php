@@ -99,10 +99,10 @@ final class OrderMethod extends FormatterPass {
 						'',
 						$this->orderMethods(self::OPENER_PLACEHOLDER . $class_block)
 					);
-					$this->append_code($return, false);
+					$this->append_code($return);
 					break;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

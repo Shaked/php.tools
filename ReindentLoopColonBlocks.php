@@ -33,14 +33,14 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 			switch ($id) {
 				case $close_token:
 					$this->set_indent(-1);
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case $open_token:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
-						$this->append_code($text, false);
+						$this->append_code($text);
 						if (ST_CURLY_OPEN === $id) {
 							break;
 						} elseif (ST_COLON === $id && !$this->is_token([T_CLOSE_TAG])) {
@@ -59,7 +59,7 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
 						$this->set_indent(+1);
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}
@@ -81,14 +81,14 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 			switch ($id) {
 				case T_ENDWHILE:
 					$this->set_indent(-1);
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case T_WHILE:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
-						$this->append_code($text, false);
+						$this->append_code($text);
 						if (ST_CURLY_OPEN === $id) {
 							break;
 						} elseif (ST_SEMI_COLON === $id) {
@@ -107,7 +107,7 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
 						$this->set_indent(+1);
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

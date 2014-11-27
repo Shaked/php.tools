@@ -12,18 +12,18 @@ final class TwoCommandsInSameLine extends FormatterPass {
 					if ($this->is_token(ST_SEMI_COLON, true)) {
 						break;
 					}
-					$this->append_code($text, false);
+					$this->append_code($text);
 					if (!$this->has_ln_after() && $this->is_token([T_VARIABLE, T_STRING])) {
-						$this->append_code($this->new_line, false);
+						$this->append_code($this->new_line);
 					}
 					break;
 
 				case ST_PARENTHESES_OPEN:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 
 			}

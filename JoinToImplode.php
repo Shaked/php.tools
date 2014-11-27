@@ -7,10 +7,10 @@ class JoinToImplode extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			if (T_STRING == $id && strtolower($text) == 'join' && !$this->is_token([T_STRING, T_DOUBLE_COLON, T_OBJECT_OPERATOR], true, $this->ignore_futile_tokens)) {
-				$this->append_code('implode', false);
+				$this->append_code('implode');
 				continue;
 			}
-			$this->append_code($text, false);
+			$this->append_code($text);
 		}
 
 		return $this->code;

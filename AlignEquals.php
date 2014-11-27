@@ -13,32 +13,32 @@ final class AlignEquals extends FormatterPass {
 			switch ($id) {
 				case T_FUNCTION:
 					++$context_counter;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case ST_PARENTHESES_OPEN:
 					++$paren_count;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case ST_PARENTHESES_CLOSE:
 					--$paren_count;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case ST_BRACKET_OPEN:
 					++$bracket_count;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case ST_BRACKET_CLOSE:
 					--$bracket_count;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				case ST_EQUAL:
 					if (!$paren_count && !$bracket_count) {
-						$this->append_code(sprintf(self::ALIGNABLE_EQUAL, $context_counter) . $text, false);
+						$this->append_code(sprintf(self::ALIGNABLE_EQUAL, $context_counter) . $text);
 						break;
 					}
 
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}

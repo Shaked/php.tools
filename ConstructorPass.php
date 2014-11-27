@@ -25,7 +25,7 @@ final class ConstructorPass extends FormatterPass {
 					$touched_visibility = false;
 					$touched_function = false;
 					$curly_count = null;
-					$this->append_code($text, false);
+					$this->append_code($text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
@@ -38,7 +38,7 @@ final class ConstructorPass extends FormatterPass {
 						if (0 === $curly_count) {
 							break;
 						}
-						$this->append_code($text, false);
+						$this->append_code($text);
 						if (T_PUBLIC == $id) {
 							$touched_visibility = T_PUBLIC;
 						} elseif (T_PRIVATE == $id) {
@@ -66,17 +66,17 @@ final class ConstructorPass extends FormatterPass {
 					}
 					$function_list = array_combine($function_list, $function_list);
 					if (!isset($function_list['__construct'])) {
-						$this->append_code('function __construct(' . implode(', ', $attributes) . '){' . $this->new_line, false);
+						$this->append_code('function __construct(' . implode(', ', $attributes) . '){' . $this->new_line);
 						foreach ($attributes as $var) {
-							$this->append_code($this->generate($var), false);
+							$this->append_code($this->generate($var));
 						}
-						$this->append_code('}' . $this->new_line, false);
+						$this->append_code('}' . $this->new_line);
 					}
 
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 				default:
-					$this->append_code($text, false);
+					$this->append_code($text);
 					break;
 			}
 		}
