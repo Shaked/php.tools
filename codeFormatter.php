@@ -94,18 +94,8 @@ abstract class FormatterPass {
 	protected function rtrim_and_append_code($code = "") {
 		$this->code = rtrim($this->code) . $code;
 	}
-	protected function get_crlf_indent($in_for = false, $increment = 0) {
-		if ($in_for) {
-			++$this->for_idx;
-			if ($this->for_idx > 2) {
-				$this->for_idx = 0;
-			}
-		}
-		if (0 === $this->for_idx || !$in_for) {
-			return $this->get_crlf() . $this->get_indent($increment);
-		} else {
-			return $this->get_space(false);
-		}
+	protected function get_crlf_indent() {
+		return $this->get_crlf() . $this->get_indent();
 	}
 	protected function get_crlf($true = true) {
 		return $true ? $this->new_line : "";
