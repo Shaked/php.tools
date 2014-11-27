@@ -217,7 +217,7 @@ final class AutoImportPass extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						$return .= $text;
-						if ($id == ST_CURLY_OPEN) {
+						if (ST_CURLY_OPEN == $id) {
 							break;
 						}
 					}
@@ -227,10 +227,10 @@ final class AutoImportPass extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						$namespace_block .= $text;
-						if ($id == ST_CURLY_OPEN) {
+						if (ST_CURLY_OPEN == $id) {
 							++$curly_count;
-						} elseif ($id == ST_CURLY_CLOSE) {
-							$curly_count--;
+						} elseif (ST_CURLY_CLOSE == $id) {
+							--$curly_count;
 						}
 
 						if (0 == $curly_count) {

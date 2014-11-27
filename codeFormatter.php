@@ -1066,7 +1066,7 @@ final class AutoImportPass extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						$return .= $text;
-						if ($id == ST_CURLY_OPEN) {
+						if (ST_CURLY_OPEN == $id) {
 							break;
 						}
 					}
@@ -1076,10 +1076,10 @@ final class AutoImportPass extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 						$namespace_block .= $text;
-						if ($id == ST_CURLY_OPEN) {
+						if (ST_CURLY_OPEN == $id) {
 							++$curly_count;
-						} elseif ($id == ST_CURLY_CLOSE) {
-							$curly_count--;
+						} elseif (ST_CURLY_CLOSE == $id) {
+							--$curly_count;
 						}
 
 						if (0 == $curly_count) {
@@ -1176,12 +1176,6 @@ final class AutoPreincrement extends AdditionalPass {
 
 				while (list($ptr, $token) = each($tkns)) {
 					list($id, $text) = $this->get_token($token);
-					// if (ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id || ST_PARENTHESES_CLOSE == $id || ST_SEMI_COLON == $id) {
-					// 	$token = prev($tkns);
-					// 	$ptr = key($tkns);
-					// 	list($id, $text) = $this->get_token($token);
-					// 	break;
-					// }
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
 						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap');
