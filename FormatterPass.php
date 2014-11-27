@@ -100,7 +100,7 @@ abstract class FormatterPass {
 		return $this->resolve_token_match($tkns, $idx, $token);
 	}
 
-	protected function left_useful_token($idx) {
+	protected function left_useful_token($idx = false) {
 		return $this->left_token($this->ignore_futile_tokens, $idx);
 	}
 
@@ -218,7 +218,7 @@ abstract class FormatterPass {
 		return $this->resolve_token_match($tkns, $idx, $token);
 	}
 
-	protected function right_useful_token($idx) {
+	protected function right_useful_token($idx = false) {
 		return $this->right_token($this->ignore_futile_tokens, $idx);
 	}
 

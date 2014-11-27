@@ -163,7 +163,7 @@ abstract class FormatterPass {
 		return $this->resolve_token_match($tkns, $idx, $token);
 	}
 
-	protected function left_useful_token($idx) {
+	protected function left_useful_token($idx = false) {
 		return $this->left_token($this->ignore_futile_tokens, $idx);
 	}
 
@@ -281,7 +281,7 @@ abstract class FormatterPass {
 		return $this->resolve_token_match($tkns, $idx, $token);
 	}
 
-	protected function right_useful_token($idx) {
+	protected function right_useful_token($idx = false) {
 		return $this->right_token($this->ignore_futile_tokens, $idx);
 	}
 
@@ -1589,7 +1589,7 @@ class JoinToImplode extends FormatterPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
-			if (T_STRING == $id && strtolower($text) == 'join' && !$this->left_useful_token_is([T_STRING, T_DOUBLE_COLON, T_OBJECT_OPERATOR])) {
+			if (T_STRING == $id && strtolower($text) == 'join' && !($this->left_useful_token_is([T_NEW, T_NS_SEPARATOR, T_STRING, T_DOUBLE_COLON, T_OBJECT_OPERATOR]) || $this->right_useful_token_is([T_NS_SEPARATOR, T_DOUBLE_COLON]))) {
 				$this->append_code('implode');
 				continue;
 			}
