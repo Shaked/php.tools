@@ -1098,7 +1098,7 @@ final class AutoPreincrement extends FormatterPass {
 				if (T_VARIABLE == $id) {
 					$touched_variable = true;
 				}
-				if (!$this->token_subset_is_at_idx(
+				if (!$this->right_token_subset_is_at_idx(
 					$tkns,
 					$ptr,
 					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
@@ -1130,7 +1130,7 @@ final class AutoPreincrement extends FormatterPass {
 					}
 
 					if (
-						!$this->token_subset_is_at_idx(
+						!$this->right_token_subset_is_at_idx(
 							$tkns,
 							$ptr,
 							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
@@ -3568,7 +3568,7 @@ final class YodaComparisons extends FormatterPass {
 				if (T_VARIABLE == $id) {
 					$touched_variable = true;
 				}
-				if (!$this->token_subset_is_at_idx(
+				if (!$this->right_token_subset_is_at_idx(
 					$tkns,
 					$ptr,
 					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
@@ -3599,7 +3599,7 @@ final class YodaComparisons extends FormatterPass {
 					}
 
 					if (
-						!$this->token_subset_is_at_idx(
+						!$this->right_token_subset_is_at_idx(
 							$tkns,
 							$ptr,
 							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
