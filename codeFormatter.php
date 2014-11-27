@@ -1279,7 +1279,7 @@ class WrongConstructorName extends FormatterPass {
 					break;
 				case T_CLASS:
 					$this->append_code($text);
-					if ($this->useful_token_is([T_DOUBLE_COLON], true)) {
+					if ($this->left_useful_token_is([T_DOUBLE_COLON])) {
 						break;
 					}
 					if ($touched_namespace) {
@@ -1305,7 +1305,7 @@ class WrongConstructorName extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 
-						if (T_STRING == $id && $this->useful_token_is([T_FUNCTION], true) && strtolower($text) == $class_local_name) {
+						if (T_STRING == $id && $this->left_useful_token_is([T_FUNCTION]) && strtolower($text) == $class_local_name) {
 							$text = '__construct';
 						}
 						$this->append_code($text);
@@ -1515,7 +1515,7 @@ final class GeneratePHPDoc extends FormatterPass {
 					}
 
 					$return_stack = '';
-					if (!$this->useful_token_is(ST_SEMI_COLON, false)) {
+					if (!$this->left_useful_token_is(ST_SEMI_COLON)) {
 						$this->walk_until(ST_CURLY_OPEN);
 						$count = 1;
 						while (list($index, $token) = each($this->tkns)) {
@@ -1580,7 +1580,7 @@ class JoinToImplode extends FormatterPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
-			if (T_STRING == $id && strtolower($text) == 'join' && !$this->useful_token_is([T_STRING, T_DOUBLE_COLON, T_OBJECT_OPERATOR], true)) {
+			if (T_STRING == $id && strtolower($text) == 'join' && !$this->left_useful_token_is([T_STRING, T_DOUBLE_COLON, T_OBJECT_OPERATOR])) {
 				$this->append_code('implode');
 				continue;
 			}

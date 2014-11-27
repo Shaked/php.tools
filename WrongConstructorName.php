@@ -14,7 +14,7 @@ class WrongConstructorName extends FormatterPass {
 					break;
 				case T_CLASS:
 					$this->append_code($text);
-					if ($this->useful_token_is([T_DOUBLE_COLON], true)) {
+					if ($this->left_useful_token_is([T_DOUBLE_COLON])) {
 						break;
 					}
 					if ($touched_namespace) {
@@ -40,7 +40,7 @@ class WrongConstructorName extends FormatterPass {
 						list($id, $text) = $this->get_token($token);
 						$this->ptr = $index;
 
-						if (T_STRING == $id && $this->useful_token_is([T_FUNCTION], true) && strtolower($text) == $class_local_name) {
+						if (T_STRING == $id && $this->left_useful_token_is([T_FUNCTION]) && strtolower($text) == $class_local_name) {
 							$text = '__construct';
 						}
 						$this->append_code($text);

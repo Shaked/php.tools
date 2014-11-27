@@ -69,7 +69,7 @@ final class GeneratePHPDoc extends FormatterPass {
 					}
 
 					$return_stack = '';
-					if (!$this->useful_token_is(ST_SEMI_COLON, false)) {
+					if (!$this->left_useful_token_is(ST_SEMI_COLON)) {
 						$this->walk_until(ST_CURLY_OPEN);
 						$count = 1;
 						while (list($index, $token) = each($this->tkns)) {
