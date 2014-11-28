@@ -5,7 +5,7 @@
     "license": "BSD-3-Clause",
     "keywords": ["language syntax", "formatter", "formatting", "psr1", "psr2", "coding", "style"],
     "homepage": "http://github.com/dericofilho/php.tools",
-    "bin": ["codeFormatter.php"],
+    "bin": ["codeFormatter.php","php.tools"],
     "authors": [
         {
             "name": "Carlos C",
