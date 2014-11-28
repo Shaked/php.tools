@@ -1539,6 +1539,7 @@ EOT;
 ;
 final class ExtraCommaInArray extends FormatterPass {
 	const ST_SHORT_ARRAY_OPEN = 'SHORT_ARRAY_OPEN';
+	const EMPTY_ARRAY = 'ST_EMPTY_ARRAY';
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 
@@ -1579,6 +1580,7 @@ final class ExtraCommaInArray extends FormatterPass {
 				case ST_PARENTHESES_OPEN:
 					if (isset($context_stack[0]) && T_ARRAY == end($context_stack) && $this->right_token_is(ST_PARENTHESES_CLOSE)) {
 						array_pop($context_stack);
+						$context_stack[] = self::EMPTY_ARRAY;
 					} elseif (!$this->left_token_is([T_ARRAY, T_STRING])) {
 						$context_stack[] = ST_PARENTHESES_OPEN;
 					}
