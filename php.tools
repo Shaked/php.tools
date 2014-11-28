@@ -74,6 +74,10 @@ if [ -e codeFormatter.php ];
 then
 	FMT=true
 fi
+if [ -e vendor/bin/codeFormatter.php ];
+then
+	FMT=true
+fi
 
 PHPDOC=false
 if [ -e vendor/bin/phpdoc.php ];
@@ -83,7 +87,7 @@ fi
 
 function execute(){
 	echo "$0 [command]"
-	$echo "	lint - run lint on changed files"
+	echo "	lint - run lint on changed files"
 	$CTAGS && echo "	ctags - generate ctags"
 	$PHPUNIT && echo "	test - execute PHPUnit"
 	$PHPUNIT && echo "	cover - execute PHPUnit with cover output"
