@@ -4758,8 +4758,7 @@ final class CodeFormatter {
 	}
 }
 if (!isset($testEnv)) {
-	$opts = getopt('ho:', ['help-pass:', 'list', 'yoda', 'smart_linebreak_after_curly', 'prepasses:', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
-	if (isset($opts['h']) || isset($opts['help'])) {
+	function show_help($argv) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--list' => 'list possible transformations',
@@ -4786,6 +4785,10 @@ if (!isset($testEnv)) {
 		}
 		echo PHP_EOL, 'If <target> is blank, it reads from stdin', PHP_EOL;
 		die();
+	}
+	$opts = getopt('ho:', ['help-pass:', 'list', 'yoda', 'smart_linebreak_after_curly', 'prepasses:', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
+	if (isset($opts['h']) || isset($opts['help'])) {
+		show_help($argv);
 	}
 
 	if (isset($opts['help-pass'])) {
@@ -4993,7 +4996,6 @@ if (!isset($testEnv)) {
 	} elseif (isset($argv[1]) && is_file($argv[1])) {
 		echo $fmt->formatCode(file_get_contents($argv[1]));
 	} elseif (isset($argv[1]) && is_dir($argv[1])) {
-
 		$start = microtime(true);
 		echo 'Formatting ', $argv[1], PHP_EOL;
 		$dir = new RecursiveDirectoryIterator($argv[1]);
@@ -5013,7 +5015,11 @@ if (!isset($testEnv)) {
 		}
 		echo ' ', $fileCount, ' files', PHP_EOL;
 		echo 'Took ', ceil(microtime(true) - $start), ' seconds', PHP_EOL;
-	} else {
+	} elseif (isset($argv[1]) && '-' == $argv[1]) {
 		echo $fmt->formatCode(file_get_contents('php://stdin'));
+	} elseif (isset($argv[1]) && !is_file($argv[1])) {
+		fwrite(STDERR, "File not found: " . $argv[1] . PHP_EOL);
+	} else {
+		show_help($argv);
 	}
 }
