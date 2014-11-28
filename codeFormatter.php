@@ -4670,7 +4670,14 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
-		$this->code = '';
+		$token_count = count($this->tkns) - 1;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, ) = $this->get_token($token);
+			$this->ptr = $index;
+			if (T_INLINE_HTML == $id && $this->ptr != $token_count) {
+				return $source;
+			}
+		}
 
 		list($id, $text) = $this->get_token(end($this->tkns));
 		$this->ptr = key($this->tkns);
