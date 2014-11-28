@@ -25,10 +25,16 @@ class SpaceBetweenMethods extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Put space between methods.';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php

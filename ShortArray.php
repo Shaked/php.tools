@@ -41,10 +41,16 @@ class ShortArray extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Convert old array into new array. (array() -> [])';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php

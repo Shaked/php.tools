@@ -35,7 +35,7 @@ final class OrderMethod extends AdditionalPass {
 							$function_name = $text;
 						}
 
-						if (0 === $curly_count && ST_SEMI_COLON == $id) {
+						if (null === $curly_count && ST_SEMI_COLON == $id) {
 							break;
 						}
 
@@ -115,10 +115,16 @@ final class OrderMethod extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Sort methods within class in alphabetic order.';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php

@@ -16,10 +16,16 @@ class JoinToImplode extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Replace implode() alias (join() -> implode()).';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php

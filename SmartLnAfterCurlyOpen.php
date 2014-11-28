@@ -53,10 +53,16 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Add line break when implicit curly block is added.';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php

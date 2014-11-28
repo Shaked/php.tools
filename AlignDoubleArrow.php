@@ -114,10 +114,17 @@ final class AlignDoubleArrow extends AdditionalPass {
 
 		return $this->code;
 	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Vertically align T_DOUBLE_ARROW (=>).';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php

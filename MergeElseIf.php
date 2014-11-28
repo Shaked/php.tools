@@ -25,11 +25,16 @@ class MergeElseIf extends AdditionalPass {
 
 		return $this->code;
 	}
-
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Merge if with else. ';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php

@@ -126,10 +126,16 @@ final class GeneratePHPDoc extends AdditionalPass {
 		return $str;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Automatically generates PHPDoc blocks';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php

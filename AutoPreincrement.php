@@ -113,10 +113,15 @@ final class AutoPreincrement extends AdditionalPass {
 		return $tkns;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Automatically convert postincrement to preincrement.';
 	}
-
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php

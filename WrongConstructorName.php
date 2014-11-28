@@ -32,9 +32,6 @@ class WrongConstructorName extends AdditionalPass {
 							break;
 						}
 					}
-					if (ST_CURLY_OPEN != $id) {
-						$this->print_until(ST_CURLY_OPEN);
-					}
 					$count = 1;
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
@@ -64,10 +61,16 @@ class WrongConstructorName extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Update old constructor names into new ones. http://php.net/manual/en/language.oop5.decon.php';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php

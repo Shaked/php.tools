@@ -209,10 +209,16 @@ final class YodaComparisons extends AdditionalPass {
 		return $tkns;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Execute Yoda Comparisons.';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php

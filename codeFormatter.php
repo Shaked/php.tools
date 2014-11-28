@@ -585,10 +585,16 @@ class AddMissingParentheses extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Add extra parentheses in new instantiations.';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -715,10 +721,17 @@ final class AlignDoubleArrow extends AdditionalPass {
 
 		return $this->code;
 	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Vertically align T_DOUBLE_ARROW (=>).';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -829,10 +842,16 @@ final class AlignEquals extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Vertically align "=".';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -848,6 +867,9 @@ $ccc = 333;
 EOT;
 	}
 };
+/**
+ * @codeCoverageIgnore
+ */
 final class AutoImportPass extends FormatterPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 AUTOIMPORTNS \x3*/";
 	const AUTOIMPORT_PLACEHOLDER = "/*\x2 AUTOIMPORT \x3*/";
@@ -1214,10 +1236,15 @@ final class AutoPreincrement extends AdditionalPass {
 		return $tkns;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Automatically convert postincrement to preincrement.';
 	}
-
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -1375,9 +1402,6 @@ class WrongConstructorName extends AdditionalPass {
 							break;
 						}
 					}
-					if (ST_CURLY_OPEN != $id) {
-						$this->print_until(ST_CURLY_OPEN);
-					}
 					$count = 1;
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->get_token($token);
@@ -1407,10 +1431,16 @@ class WrongConstructorName extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Update old constructor names into new ones. http://php.net/manual/en/language.oop5.decon.php';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -1515,10 +1545,16 @@ class EncapsulateNamespaces extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Encapsulate namespaces with curly braces';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -1730,10 +1766,16 @@ final class GeneratePHPDoc extends AdditionalPass {
 		return $str;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Automatically generates PHPDoc blocks';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -1776,10 +1818,16 @@ class JoinToImplode extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Replace implode() alias (join() -> implode()).';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -1940,11 +1988,16 @@ class MergeElseIf extends AdditionalPass {
 
 		return $this->code;
 	}
-
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Merge if with else. ';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -2111,7 +2164,7 @@ final class OrderMethod extends AdditionalPass {
 							$function_name = $text;
 						}
 
-						if (0 === $curly_count && ST_SEMI_COLON == $id) {
+						if (null === $curly_count && ST_SEMI_COLON == $id) {
 							break;
 						}
 
@@ -2191,10 +2244,16 @@ final class OrderMethod extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Sort methods within class in alphabetic order.';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -2971,10 +3030,16 @@ class RemoveUseLeadingSlash extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Remove leading slash in T_USE imports.';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -3405,10 +3470,16 @@ class ReturnNull extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Simplify empty returns.';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -3604,10 +3675,16 @@ class ShortArray extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Convert old array into new array. (array() -> [])';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -3675,10 +3752,16 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Add line break when implicit curly block is added.';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -3720,10 +3803,16 @@ class SpaceBetweenMethods extends AdditionalPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Put space between methods.';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
@@ -3999,10 +4088,16 @@ final class YodaComparisons extends AdditionalPass {
 		return $tkns;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_description() {
 		return 'Execute Yoda Comparisons.';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function get_example() {
 		return <<<'EOT'
 <?php
