@@ -265,11 +265,17 @@ if [ "lint" == "$1" ];
 then
 	function execute(){
 		echo "Differential linting..."
-		files=$( git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 } ' )
-		for line in $files
-		do
-			(php -l $line &> /dev/null) || (php -l $line) && echo "$line"
-		done;
+		which parallel &> /dev/null
+		if [ 0 == $? ];
+		then
+			git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 }' | parallel --no-notice php -l
+		else
+			files=$( git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 } ' )
+			for line in $files
+			do
+				(php -l $line &> /dev/null) || (php -l $line) && echo "$line"
+			done;
+		fi;
 	}
 fi;
 
