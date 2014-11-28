@@ -1,0 +1,25 @@
+{
+    "name": "dericofilho/php.tools",
+    "type": "application",
+    "description": "A script to automatically fix K&R and PSR-1/2 Coding Standard. codeFormatter.php",
+    "license": "BSD-3-Clause",
+    "keywords": ["language syntax", "formatter", "formatting", "psr1", "psr2", "coding", "style"],
+    "homepage": "http://github.com/dericofilho/php.tools",
+    "authors": [
+        {
+            "name": "Carlos C",
+            "email": "carlos.cirello.nl@gmail.com"
+        }
+    ],
+    "support": {
+	"issues": "https://github.com/dericofilho/php.tools/issues",
+        "source": "https://github.com/dericofilho/php.tools"
+    },
+    "require":{
+        "php": ">=5.4.0"
+    },
+    "require-dev": {
+        "phpunit/php-code-coverage": "2.0.*",
+        "ext-xdebug": "*"
+    }
+}
