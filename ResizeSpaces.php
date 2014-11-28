@@ -143,7 +143,11 @@ final class ResizeSpaces extends FormatterPass {
 					}
 				case ST_CURLY_OPEN:
 					if ($this->left_token_is([T_STRING, T_DO, T_FINALLY, ST_PARENTHESES_CLOSE])) {
-						$this->rtrim_and_append_code($this->get_space() . $text, !$this->has_ln_left_token());
+						if ($this->has_ln_left_token()) {
+							$this->append_code($this->get_space() . $text);
+						} else {
+							$this->rtrim_and_append_code($this->get_space() . $text);
+						}
 						break;
 					} elseif ($this->right_token_is(ST_CURLY_CLOSE) || ($this->right_token_is([T_VARIABLE]) && $this->left_token_is([T_OBJECT_OPERATOR]))) {
 						$this->append_code($text);
@@ -156,7 +160,11 @@ final class ResizeSpaces extends FormatterPass {
 					}
 				case ST_PARENTHESES_OPEN:
 					if ($this->left_token_is([T_WHILE, T_CATCH])) {
-						$this->rtrim_and_append_code($this->get_space() . $text, !$this->has_ln_left_token());
+						if ($this->has_ln_left_token()) {
+							$this->append_code($this->get_space() . $text);
+						} else {
+							$this->rtrim_and_append_code($this->get_space() . $text);
+						}
 					} else {
 						$this->append_code($text);
 					}
@@ -258,7 +266,11 @@ final class ResizeSpaces extends FormatterPass {
 					break;
 				case T_CATCH:
 				case T_FINALLY:
-					$this->rtrim_and_append_code($this->get_space() . $text . $this->get_space(), !$this->has_ln_left_token());
+					if ($this->has_ln_left_token()) {
+						$this->append_code($this->get_space() . $text . $this->get_space());
+					} else {
+						$this->rtrim_and_append_code($this->get_space() . $text . $this->get_space());
+					}
 					break;
 				case T_ELSEIF:
 					if (!$this->left_token_is(ST_CURLY_CLOSE)) {
