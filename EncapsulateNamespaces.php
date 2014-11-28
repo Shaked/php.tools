@@ -7,6 +7,14 @@ class EncapsulateNamespaces extends AdditionalPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
+			if (T_CLOSE_TAG == $id) {
+				return $source;
+			}
+		}
+		reset($this->tkns);
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
 					$this->append_code($text);
