@@ -2,41 +2,18 @@
 final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
-		$this->code = '';
 
-		$open_tag_count = 0;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, ) = $this->get_token($token);
-			if (T_OPEN_TAG === $id) {
-				++$open_tag_count;
-				break;
-			}
+		list($id, $text) = $this->get_token(end($this->tkns));
+		$this->ptr = key($this->tkns);
+
+		if (T_CLOSE_TAG == $id) {
+			unset($this->tkns[$this->ptr]);
+		} elseif (T_INLINE_HTML == $id && '' == trim($text) && $this->left_token_is(T_CLOSE_TAG)) {
+			unset($this->tkns[$this->ptr]);
+			$ptr = $this->left_token([], true);
+			unset($this->tkns[$ptr]);
 		}
 
-		reset($this->tkns);
-		if (1 === $open_tag_count) {
-			while (list($index, $token) = each($this->tkns)) {
-				list($id, $text) = $this->get_token($token);
-				$this->ptr = $index;
-				switch ($id) {
-					case T_CLOSE_TAG:
-						$this->append_code($this->get_crlf());
-						break;
-					default:
-						$this->append_code($text);
-						break;
-				}
-			}
-			$this->code = rtrim($this->code);
-		} else {
-			while (list($index, $token) = each($this->tkns)) {
-				list($id, $text) = $this->get_token($token);
-				$this->ptr = $index;
-				$this->append_code($text);
-			}
-		}
-		$this->code = rtrim($this->code) . $this->get_crlf();
-
-		return $this->code;
+		return rtrim($this->render()) . $this->new_line;
 	}
 }

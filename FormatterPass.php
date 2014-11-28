@@ -187,9 +187,11 @@ abstract class FormatterPass {
 		$found_token = $tkns[$idx];
 		if ($found_token === $token) {
 			return true;
-		} elseif (is_array($token) && is_array($found_token) && in_array($found_token[0], $token)) {
+		} elseif (is_array($token) && isset($found_token[1]) && in_array($found_token[0], $token)) {
 			return true;
-		} elseif (is_array($token) && is_string($found_token) && in_array($found_token, $token)) {
+		} elseif (is_array($token) && !isset($found_token[1]) && in_array($found_token, $token)) {
+			return true;
+		} elseif (isset($found_token[1]) && $found_token[0] == $token) {
 			return true;
 		}
 
