@@ -13,7 +13,7 @@
         }
     ],
     "support": {
-	"issues": "https://github.com/dericofilho/php.tools/issues",
+        "issues": "https://github.com/dericofilho/php.tools/issues",
         "source": "https://github.com/dericofilho/php.tools"
     },
     "require":{
@@ -22,5 +22,11 @@
     "require-dev": {
         "phpunit/php-code-coverage": "2.0.*",
         "ext-xdebug": "*"
+    },
+    "suggest": {
+        "GNU Parallel": "Parallel execution in 'php.tools'",
+        "phpunit/phpunit": "Execute tests using 'php.tools test'",
+        "phpdocumentor/phpdocumentor": "Document generation using 'php.tools test'",
+        "exuberant/ctags": "For PHP target ctags generation"
     }
 }
