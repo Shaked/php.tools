@@ -4893,7 +4893,10 @@ if (!isset($testEnv)) {
 			fwrite(STDERR, 'Custom configuration not file found' . PHP_EOL);
 			exit(255);
 		}
-		$opts = parse_ini_file($opts['config']);
+		$ini_opts = parse_ini_file($opts['config']);
+		if (!empty($ini_opts)) {
+			$opts = $ini_opts;
+		}
 	} elseif (file_exists('.php.tools.ini') && is_file('.php.tools.ini')) {
 		fwrite(STDERR, 'Configuration file found' . PHP_EOL);
 		$opts = parse_ini_file('.php.tools.ini');
