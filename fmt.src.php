@@ -490,7 +490,7 @@ if (!isset($testEnv)) {
 				fwrite(STDERR, '!');
 			}
 			if (0 == ($file_count % 20)) {
-				fwrite(STDERR, ' ', $file_count, PHP_EOL);
+				fwrite(STDERR, ' ' . $file_count . PHP_EOL);
 			}
 		}
 		fwrite(STDERR, PHP_EOL);
