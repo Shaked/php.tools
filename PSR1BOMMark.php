@@ -2,7 +2,7 @@
 final class PSR1BOMMark extends FormatterPass {
 	public function format($source) {
 		$bom = "\xef\xbb\xbf";
-		if ($bom === substr($source, 0, 3)) {
+		if (substr($source, 0, 3) === $bom) {
 			return substr($source, 3);
 		}
 		return $source;
