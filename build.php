@@ -33,6 +33,6 @@ $targets = ['fmt', 'refactor'];
 foreach ($targets as $target) {
 	echo $target;
 	file_put_contents($target . '.php', $pass->format(file_get_contents($target . '.src.php')));
-	chmod($target . '.php', 0555);
+	chmod($target . '.php', 0755);
 	echo PHP_EOL;
 }

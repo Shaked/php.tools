@@ -331,37 +331,73 @@ if (!isset($testEnv)) {
 	}
 
 	if (isset($opts['o'])) {
+		if (!is_file($argv[1])) {
+			fwrite(STDERR, "File not found: " . $argv[1] . PHP_EOL);
+			exit(255);
+		}
 		unset($argv[1]);
 		unset($argv[2]);
 		$argv = array_values($argv);
 		file_put_contents($opts['o'], $fmt->formatCode(file_get_contents($argv[1])));
-	} elseif (isset($argv[1]) && is_file($argv[1])) {
-		echo $fmt->formatCode(file_get_contents($argv[1]));
-	} elseif (isset($argv[1]) && is_dir($argv[1])) {
+	} elseif (isset($argv[1])) {
+		if ('-' == $argv[1]) {
+			echo $fmt->formatCode(file_get_contents('php://stdin'));
+			exit(0);
+		}
+		$file_not_found = false;
 		$start = microtime(true);
-		echo 'Formatting ', $argv[1], PHP_EOL;
-		$dir = new RecursiveDirectoryIterator($argv[1]);
-		$it = new RecursiveIteratorIterator($dir);
-		$files = new RegexIterator($it, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
+		fwrite(STDERR, 'Formatting ...' . PHP_EOL);
+		$missing_files = [];
 		$fileCount = 0;
-		foreach ($files as $file) {
-			$file = $file[0];
-			++$fileCount;
-			echo '.';
-			file_put_contents($file . '-tmp', $fmt->formatCode(file_get_contents($file)));
-			rename($file, $file . '~');
-			rename($file . '-tmp', $file);
+		for ($i = 1; $i < $argc; ++$i) {
+			if (!isset($argv[$i])) {
+				continue;
+			}
+			if (is_file($argv[$i])) {
+				$file = $argv[$i];
+				++$fileCount;
+				fwrite(STDERR, '.');
+				file_put_contents($file . '-tmp', $fmt->formatCode(file_get_contents($file)));
+				rename($file . '-tmp', $file);
+			} elseif (is_dir($argv[$i])) {
+				$dir = new RecursiveDirectoryIterator($argv[$i]);
+				$it = new RecursiveIteratorIterator($dir);
+				$files = new RegexIterator($it, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
+				foreach ($files as $file) {
+					$file = $file[0];
+					++$fileCount;
+					fwrite(STDERR, '.');
+					file_put_contents($file . '-tmp', $fmt->formatCode(file_get_contents($file)));
+					rename($file, $file . '~');
+					rename($file . '-tmp', $file);
+					if (0 == ($fileCount % 20)) {
+						fwrite(STDERR, ' ' . $fileCount . PHP_EOL);
+					}
+				}
+				continue;
+			} elseif (!is_file($argv[$i])) {
+				$file_not_found = true;
+				$missing_files[] = $argv[$i];
+				fwrite(STDERR, '!');
+			}
 			if (0 == ($fileCount % 20)) {
-				echo ' ', $fileCount, PHP_EOL;
+				fwrite(STDERR, ' ', $fileCount, PHP_EOL);
 			}
 		}
-		echo ' ', $fileCount, ' files', PHP_EOL;
-		echo 'Took ', ceil(microtime(true) - $start), ' seconds', PHP_EOL;
-	} elseif (isset($argv[1]) && '-' == $argv[1]) {
-		echo $fmt->formatCode(file_get_contents('php://stdin'));
-	} elseif (isset($argv[1]) && !is_file($argv[1])) {
-		fwrite(STDERR, "File not found: " . $argv[1] . PHP_EOL);
+		fwrite(STDERR, ' ' . $fileCount . ' files' . PHP_EOL);
+		fwrite(STDERR, 'Took ' . ceil(microtime(true) - $start) . ' seconds' . PHP_EOL);
+		if (sizeof($missing_files)) {
+			fwrite(STDERR, "Files not found: " . PHP_EOL);
+			foreach ($missing_files as $file) {
+				fwrite(STDERR, "\t - " . $file . PHP_EOL);
+			}
+		}
+
+		if ($file_not_found) {
+			exit(255);
+		}
 	} else {
 		show_help($argv);
 	}
+	exit(0);
 }
