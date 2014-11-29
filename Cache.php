@@ -38,8 +38,9 @@ class Cache {
 		if (empty($row)) {
 			return true;
 		}
-		if ($this->calculate_hash(file_get_contents($filename)) != $row['hash']) {
-			return true;
+		$content = file_get_contents($filename);
+		if ($this->calculate_hash($content) != $row['hash']) {
+			return $content;
 		}
 		return false;
 	}

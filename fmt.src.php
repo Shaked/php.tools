@@ -469,13 +469,16 @@ if (!isset($testEnv)) {
 
 					++$file_count;
 					if (null !== $cache) {
-						if (!$cache->is_changed($target_dir, $file)) {
+						$content = $cache->is_changed($target_dir, $file);
+						if (!$content) {
 							++$cache_hit_count;
 							continue;
 						}
+					} else {
+						$content = file_get_contents($file);
 					}
+					$fmtCode = $fmt->formatCode($content);
 					fwrite(STDERR, '.');
-					$fmtCode = $fmt->formatCode(file_get_contents($file));
 					if (null !== $cache) {
 						$cache->upsert($target_dir, $file, $fmtCode);
 					}
