@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
