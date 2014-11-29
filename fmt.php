@@ -2607,6 +2607,7 @@ final class ReindentColonBlocks extends FormatterPass {
 		}
 		reset($this->tkns);
 		$this->code = '';
+		$this->use_cache = true;
 
 		$switch_level = 0;
 		$switch_curly_count = [];
@@ -2616,6 +2617,7 @@ final class ReindentColonBlocks extends FormatterPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
+			$this->cache = [];
 			switch ($id) {
 				case ST_QUOTE:
 					$this->append_code($text);
@@ -2659,6 +2661,9 @@ final class ReindentColonBlocks extends FormatterPass {
 							$this->append_code($text);
 						} elseif ($touched_colon && T_COMMENT == $id && !$is_next_case_or_default) {
 							$this->append_code($this->get_indent($switch_level) . $text);
+							if (!$this->right_token_is([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
+								$this->append_code($this->get_indent($switch_level));
+							}
 						} elseif (!$is_next_case_or_default && !$this->right_token_is([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
 							$this->append_code($text . $this->get_indent($switch_level));
 						} else {

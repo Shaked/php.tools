@@ -17,7 +17,7 @@ switch ($f) {
 	// comment #2
 	default:
 		// comment #2 inside case;
-	break;
+		break;
 }
 
 switch ($f) {
