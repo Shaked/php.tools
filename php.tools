@@ -88,6 +88,7 @@ fi
 function execute(){
 	echo "$0 [command]"
 	echo "	lint - run lint on changed files"
+	echo "	lint all - run lint on all files"
 	$CTAGS && echo "	ctags - generate ctags"
 	$PHPUNIT && echo "	test - execute PHPUnit"
 	$PHPUNIT && echo "	cover - execute PHPUnit with cover output"
@@ -267,20 +268,36 @@ fi;
 
 if [ "lint" == "$1" ];
 then
-	function execute(){
-		echo "Differential linting..."
-		which parallel &> /dev/null
-		if [ 0 == $? ];
-		then
-			git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 }' | parallel --no-notice php -l
-		else
-			files=$( git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 } ' )
-			for line in $files
-			do
-				(php -l $line &> /dev/null) || (php -l $line) && echo "$line"
-			done;
-		fi;
-	}
+	if [ "" == "$2" ];
+	then
+		function execute(){
+			echo "Differential linting..."
+			which parallel &> /dev/null
+			if [ 0 == $? ];
+			then
+				git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 }' | parallel --no-notice php -l
+			else
+				files=$( git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 } ' )
+				for line in $files
+				do
+					(php -l $line &> /dev/null) || (php -l $line) && echo "$line"
+				done;
+			fi;
+		}
+	fi;
+	if [ "all" == "$2" ];
+	then
+		function execute(){
+			echo "Full linting..."
+			which parallel &> /dev/null
+			if [ 0 == $? ];
+			then
+				find . -ipath "*.php" | parallel --no-notice php -l
+			else
+				echo 'Needs GNU Parallel'
+			fi;
+		}
+	fi;
 fi;
 
 $FMT && if [ "fmt" == "$1" ];
