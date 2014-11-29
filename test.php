@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 # Copyright (c) 2014, Carlos C
 # All rights reserved.
@@ -30,11 +31,13 @@ if (isset($opt['testNumber'])) {
 }
 $start = microtime(true);
 $testEnv = true;
+ob_start();
 if (!isset($opt['deployed'])) {
 	include realpath(__DIR__ . "/fmt.src.php");
 } else {
 	include realpath(__DIR__ . "/fmt.php");
 }
+ob_end_clean();
 echo 'Running tests...', PHP_EOL;
 $brokenTests = [];
 
