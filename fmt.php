@@ -4743,7 +4743,6 @@ class PsrDecorator {
 	}
 };
 
-
 class Cache {
 	const DEFAULT_CACHE_FILENAME = '.php.tools.cache';
 
@@ -4826,6 +4825,7 @@ if (!isset($testEnv)) {
 			'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
 			'--list' => 'list possible transformations',
+			'--no-backup' => 'no backup file (original.php~)',
 			'--passes=pass1,passN' => 'call specific compiler pass',
 			'--prepasses=pass1,passN' => 'call specific compiler pass, before the rest of stack',
 			'--psr' => 'activate PSR1 and PSR2 styles',
@@ -4859,6 +4859,7 @@ if (!isset($testEnv)) {
 			'help-pass:',
 			'indent_with_space',
 			'list',
+			'no-backup',
 			'oracleDB::',
 			'passes:',
 			'prepasses:',
@@ -4927,7 +4928,17 @@ if (!isset($testEnv)) {
 		$cache = new Cache($opts['cache']);
 		fwrite(STDERR, 'Using cache ...' . PHP_EOL);
 	}
-
+	$backup = true;
+	if (isset($opts['no-backup'])) {
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return '--no-backup' !== $v;
+				}
+			)
+		);
+		$backup = false;
+	}
 	$fmt = new CodeFormatter();
 	if (isset($opts['prepasses'])) {
 		$optPasses = array_map(function ($v) {
@@ -5166,7 +5177,7 @@ if (!isset($testEnv)) {
 						$cache->upsert($target_dir, $file, $fmtCode);
 					}
 					file_put_contents($file . '-tmp', $fmtCode);
-					rename($file, $file . '~');
+					$backup && rename($file, $file . '~');
 					rename($file . '-tmp', $file);
 					if (0 == ($file_count % 20)) {
 						fwrite(STDERR, ' ' . $file_count . PHP_EOL);
