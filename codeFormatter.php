@@ -4718,8 +4718,11 @@ class PsrDecorator {
 	public static function PSR1(CodeFormatter $fmt) {
 		$fmt->addPass(new PSR1OpenTags());
 		$fmt->addPass(new PSR1BOMMark());
-		$fmt->addPass(new PSR1ClassNames());
 		$fmt->addPass(new PSR1ClassConstants());
+	}
+
+	public static function PSR1_naming(CodeFormatter $fmt) {
+		$fmt->addPass(new PSR1ClassNames());
 		$fmt->addPass(new PSR1MethodNames());
 	}
 
@@ -4734,6 +4737,7 @@ class PsrDecorator {
 
 	public static function decorate(CodeFormatter $fmt) {
 		self::PSR1($fmt);
+		self::PSR1_naming($fmt);
 		self::PSR2($fmt);
 	}
 };
@@ -4759,7 +4763,7 @@ final class CodeFormatter {
 }
 if (!isset($testEnv)) {
 	function show_help($argv) {
-		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
+		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--list' => 'list possible transformations',
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
@@ -4768,6 +4772,7 @@ if (!isset($testEnv)) {
 			'--prepasses=pass1,passN' => 'call specific compiler pass, before the rest of stack',
 			'--passes=pass1,passN' => 'call specific compiler pass',
 			'--psr' => 'activate PSR1 and PSR2 styles',
+			'--psr1-naming' => 'activate PSR1 style - Section 3 and 4.3 - Class and method names case.',
 			'--psr1' => 'activate PSR1 style',
 			'--psr2' => 'activate PSR2 style',
 			'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
@@ -4786,7 +4791,7 @@ if (!isset($testEnv)) {
 		echo PHP_EOL, 'If <target> is blank, it reads from stdin', PHP_EOL;
 		die();
 	}
-	$opts = getopt('ho:', ['help-pass:', 'list', 'yoda', 'smart_linebreak_after_curly', 'prepasses:', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
+	$opts = getopt('ho:', ['help-pass:', 'list', 'yoda', 'smart_linebreak_after_curly', 'prepasses:', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr1-naming', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
 	if (isset($opts['h']) || isset($opts['help'])) {
 		show_help($argv);
 	}
@@ -4939,6 +4944,16 @@ if (!isset($testEnv)) {
 			array_filter($argv,
 				function ($v) {
 					return '--psr1' !== $v;
+				}
+			)
+		);
+	}
+	if (isset($opts['psr1-naming'])) {
+		PsrDecorator::PSR1_naming($fmt);
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return '--psr1-naming' !== $v;
 				}
 			)
 		);

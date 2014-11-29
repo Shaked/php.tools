@@ -3,8 +3,11 @@ class PsrDecorator {
 	public static function PSR1(CodeFormatter $fmt) {
 		$fmt->addPass(new PSR1OpenTags());
 		$fmt->addPass(new PSR1BOMMark());
-		$fmt->addPass(new PSR1ClassNames());
 		$fmt->addPass(new PSR1ClassConstants());
+	}
+
+	public static function PSR1_naming(CodeFormatter $fmt) {
+		$fmt->addPass(new PSR1ClassNames());
 		$fmt->addPass(new PSR1MethodNames());
 	}
 
@@ -19,6 +22,7 @@ class PsrDecorator {
 
 	public static function decorate(CodeFormatter $fmt) {
 		self::PSR1($fmt);
+		self::PSR1_naming($fmt);
 		self::PSR2($fmt);
 	}
 }
