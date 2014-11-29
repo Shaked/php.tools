@@ -98,6 +98,7 @@ if (!isset($testEnv)) {
 			'--config=FILENAME' => 'configuration file. Default: .php.tools.ini',
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
+			'--ignore=PATTERN1,PATTERN2' => 'ignore file names whose names contain any PATTERN-N',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
 			'--list' => 'list possible transformations',
 			'--no-backup' => 'no backup file (original.php~)',
@@ -132,6 +133,7 @@ if (!isset($testEnv)) {
 			'enable_auto_align',
 			'help',
 			'help-pass:',
+			'ignore',
 			'indent_with_space',
 			'list',
 			'no-backup',
@@ -214,6 +216,21 @@ if (!isset($testEnv)) {
 		);
 		$backup = false;
 	}
+
+	$ignore_list = null;
+	if (isset($opts['ignore'])) {
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return substr($v, 0, strlen('--ignore')) !== '--ignore';
+				}
+			)
+		);
+		$ignore_list = array_map(function ($v) {
+			return trim($v);
+		}, explode(',', $opts['ignore']));
+	}
+
 	$fmt = new CodeFormatter();
 	if (isset($opts['prepasses'])) {
 		$optPasses = array_map(function ($v) {
@@ -439,6 +456,14 @@ if (!isset($testEnv)) {
 				$files = new RegexIterator($it, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
 				foreach ($files as $file) {
 					$file = $file[0];
+					if (null !== $ignore_list) {
+						foreach ($ignore_list as $pattern) {
+							if (false !== strpos($file, $pattern)) {
+								continue 2;
+							}
+						}
+					}
+
 					++$file_count;
 					if (null !== $cache) {
 						if (!$cache->is_changed($target_dir, $file)) {
