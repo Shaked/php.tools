@@ -17,8 +17,8 @@ $isCoverage = isset($opt['coverage']);
 if ($isCoverage) {
 	require 'vendor/autoload.php';
 	$filter = new PHP_CodeCoverage_Filter();
-	$filter->addFileToBlacklist("codeFormatter.php");
-	$filter->addFileToBlacklist("codeFormatter.src.php");
+	$filter->addFileToBlacklist("fmt.php");
+	$filter->addFileToBlacklist("fmt.src.php");
 	$filter->addFileToBlacklist("FormatterPass.php");
 	$filter->addFileToBlacklist("test.php");
 	$coverage = new PHP_CodeCoverage(null, $filter);
@@ -31,9 +31,9 @@ if (isset($opt['testNumber'])) {
 $start = microtime(true);
 $testEnv = true;
 if (!isset($opt['deployed'])) {
-	include realpath(__DIR__ . "/codeFormatter.src.php");
+	include realpath(__DIR__ . "/fmt.src.php");
 } else {
-	include realpath(__DIR__ . "/codeFormatter.php");
+	include realpath(__DIR__ . "/fmt.php");
 }
 echo 'Running tests...', PHP_EOL;
 $brokenTests = [];
