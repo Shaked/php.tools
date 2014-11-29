@@ -4764,9 +4764,10 @@ final class CodeFormatter {
 }
 if (!isset($testEnv)) {
 	function show_help($argv) {
-		echo 'Usage: ' . $argv[0] . ' [-ho] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
+		echo 'Usage: ' . $argv[0] . ' [-ho] [--config=FILENAME] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--list' => 'list possible transformations',
+			'--config=FILENAME' => 'configuration file. Default: .php.tools.ini',
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
@@ -4792,7 +4793,25 @@ if (!isset($testEnv)) {
 		echo PHP_EOL, 'If <target> is blank, it reads from stdin', PHP_EOL;
 		die();
 	}
-	$opts = getopt('ho:', ['help-pass:', 'list', 'yoda', 'smart_linebreak_after_curly', 'prepasses:', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr1-naming', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
+	$opts = getopt('ho:', ['config:', 'help-pass:', 'list', 'yoda', 'smart_linebreak_after_curly', 'prepasses:', 'passes:', 'oracleDB::', 'help', 'setters_and_getters:', 'constructor:', 'psr', 'psr1', 'psr1-naming', 'psr2', 'indent_with_space', 'enable_auto_align', 'visibility_order']);
+	if (isset($opts['config'])) {
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return substr($v, 0, strlen('--config')) !== '--config';
+				}
+			)
+		);
+		if (!file_exists($opts['config']) || !is_file($opts['config'])) {
+			fwrite(STDERR, 'Custom configuration not file found' . PHP_EOL);
+			exit(255);
+		}
+		$opts = parse_ini_file($opts['config']);
+	} elseif (file_exists('.php.tools.ini') && is_file('.php.tools.ini')) {
+		fwrite(STDERR, 'Configuration file found' . PHP_EOL);
+		$opts = parse_ini_file('.php.tools.ini');
+
+	}
 	if (isset($opts['h']) || isset($opts['help'])) {
 		show_help($argv);
 	}
