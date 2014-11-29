@@ -4864,7 +4864,7 @@ if (!isset($testEnv)) {
 			'enable_auto_align',
 			'help',
 			'help-pass:',
-			'ignore',
+			'ignore:',
 			'indent_with_space',
 			'list',
 			'no-backup',
