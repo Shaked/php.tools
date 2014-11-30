@@ -68,6 +68,8 @@ include 'PSR2LnAfterNamespace.php';
 include 'PSR2ModifierVisibilityStaticOrder.php';
 include 'PSR2SingleEmptyLineAndStripClosingTag.php';
 include 'PsrDecorator.php';
+//Laravel
+include 'LaravelStyle.php';
 
 include 'Cache.php';
 

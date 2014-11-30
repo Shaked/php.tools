@@ -1,0 +1,94 @@
+<?php namespace A;
+
+class B {
+	public function b()/*comment*/
+	{
+		if ($a) 
+		{
+			noop();
+		} 
+		elseif ($a) 
+		{
+			noop();
+		} 
+		else 
+		{
+			noop();
+		}
+
+		do {
+
+		} while ($true);
+
+		for ($i = 0; $i < 10; $i++) 
+		{
+
+		}
+
+		foreach ($arr as $v) 
+		{
+		}
+
+		switch ($a) 
+		{
+			case 1:
+				break;
+		}
+
+		try {
+			throw new Exception();
+		}/*Comment*/
+		catch (Exception $e) 
+		{
+			print_r($e);
+		} 
+		finally 
+		{
+			noop();
+		}
+	}
+
+	public function c()
+	//comment
+	{
+
+		try {
+			throw new Exception();
+		}
+		//Comment
+		//Comment2
+		catch (Exception $e) 
+		{
+			print_r($e);
+		} 
+		finally 
+		{
+			noop();
+		}
+
+		try {
+			throw new Exception();
+		}
+		catch (Exception $e) 
+		{
+			print_r($e);
+		} 
+		finally 
+		{
+			noop();
+		}
+
+		try {
+			throw new Exception();
+		}
+		catch (Exception $e) 
+		{
+			print_r($e);
+		} 
+		finally 
+		{
+			noop();
+		}
+	}
+}
+//passes:Default,LaravelStyle
