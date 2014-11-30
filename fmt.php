@@ -4908,10 +4908,10 @@ class Cache {
 
 	public function is_changed($target, $filename) {
 		$row = $this->db->querySingle('SELECT hash FROM cache WHERE target = "' . SQLite3::escapeString($target) . '" AND filename = "' . SQLite3::escapeString($filename) . '"', true);
+		$content = file_get_contents($filename);
 		if (empty($row)) {
 			return true;
 		}
-		$content = file_get_contents($filename);
 		if ($this->calculate_hash($content) != $row['hash']) {
 			return $content;
 		}
@@ -4925,7 +4925,8 @@ class Cache {
 	private function calculate_hash($content) {
 		return sprintf('%u', crc32($content));
 	}
-};
+}
+;
 
 final class CodeFormatter {
 	private $passes = [];
