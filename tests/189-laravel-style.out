@@ -3,15 +3,15 @@
 class B {
 	public function b()/*comment*/
 	{
-		if ($a) 
+		if ($a)
 		{
 			noop();
-		} 
-		elseif ($a) 
+		}
+		elseif ($a)
 		{
 			noop();
-		} 
-		else 
+		}
+		else
 		{
 			noop();
 		}
@@ -20,16 +20,16 @@ class B {
 
 		} while ($true);
 
-		for ($i = 0; $i < 10; $i++) 
+		for ($i = 0; $i < 10; $i++)
 		{
 
 		}
 
-		foreach ($arr as $v) 
+		foreach ($arr as $v)
 		{
 		}
 
-		switch ($a) 
+		switch ($a)
 		{
 			case 1:
 				break;
@@ -38,11 +38,11 @@ class B {
 		try {
 			throw new Exception();
 		}/*Comment*/
-		catch (Exception $e) 
+		catch (Exception $e)
 		{
 			print_r($e);
-		} 
-		finally 
+		}
+		finally
 		{
 			noop();
 		}
@@ -57,11 +57,11 @@ class B {
 		}
 		//Comment
 		//Comment2
-		catch (Exception $e) 
+		catch (Exception $e)
 		{
 			print_r($e);
-		} 
-		finally 
+		}
+		finally
 		{
 			noop();
 		}
@@ -69,11 +69,11 @@ class B {
 		try {
 			throw new Exception();
 		}
-		catch (Exception $e) 
+		catch (Exception $e)
 		{
 			print_r($e);
-		} 
-		finally 
+		}
+		finally
 		{
 			noop();
 		}
@@ -81,14 +81,15 @@ class B {
 		try {
 			throw new Exception();
 		}
-		catch (Exception $e) 
+		catch (Exception $e)
 		{
 			print_r($e);
-		} 
-		finally 
+		}
+		finally
 		{
 			noop();
 		}
 	}
 }
 //passes:Default,LaravelStyle
+//version:5.5.0

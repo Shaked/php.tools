@@ -3,6 +3,7 @@ class LaravelStyle extends AdditionalPass {
 	public function format($source) {
 		$source = $this->namespace_merge_with_open_tag($source);
 		$source = $this->allman_style_braces($source);
+		$source = (new RTrim())->format($source);
 		return $source;
 	}
 

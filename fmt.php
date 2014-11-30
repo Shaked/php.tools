@@ -4752,6 +4752,7 @@ class LaravelStyle extends AdditionalPass {
 	public function format($source) {
 		$source = $this->namespace_merge_with_open_tag($source);
 		$source = $this->allman_style_braces($source);
+		$source = (new RTrim())->format($source);
 		return $source;
 	}
 
@@ -4955,6 +4956,7 @@ if (!isset($testEnv)) {
 			'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--ignore=PATTERN1,PATTERN2' => 'ignore file names whose names contain any PATTERN-N',
 			'--indent_with_space' => 'use spaces instead of tabs for indentation',
+			'--laravel' => 'Apply Laravel coding style',
 			'--list' => 'list possible transformations',
 			'--no-backup' => 'no backup file (original.php~)',
 			'--passes=pass1,passN' => 'call specific compiler pass',
@@ -4990,6 +4992,7 @@ if (!isset($testEnv)) {
 			'help-pass:',
 			'ignore:',
 			'indent_with_space',
+			'laravel',
 			'list',
 			'no-backup',
 			'oracleDB::',
@@ -5271,6 +5274,17 @@ if (!isset($testEnv)) {
 			array_filter($argv,
 				function ($v) {
 					return substr($v, 0, strlen('--passes')) !== '--passes';
+				}
+			)
+		);
+	}
+
+	if (isset($opts['laravel'])) {
+		$fmt->addPass(new LaravelStyle());
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return '--laravel' !== $v;
 				}
 			)
 		);
