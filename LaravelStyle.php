@@ -4,6 +4,7 @@ class LaravelStyle extends AdditionalPass {
 		$source = $this->namespace_merge_with_open_tag($source);
 		$source = $this->allman_style_braces($source);
 		$source = (new RTrim())->format($source);
+		$source = (new TightConcat())->format($source);
 		return $source;
 	}
 

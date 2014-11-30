@@ -52,6 +52,7 @@ include 'ShortArray.php';
 include 'SmartLnAfterCurlyOpen.php';
 include 'SpaceBetweenMethods.php';
 include 'SurrogateToken.php';
+include 'TightConcat.php';
 include 'TwoCommandsInSameLine.php';
 include 'YodaComparisons.php';
 //PSR standards
