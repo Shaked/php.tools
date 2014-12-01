@@ -69,8 +69,9 @@ include 'PSR2LnAfterNamespace.php';
 include 'PSR2ModifierVisibilityStaticOrder.php';
 include 'PSR2SingleEmptyLineAndStripClosingTag.php';
 include 'PsrDecorator.php';
-//Laravel
+//Other Styles
 include 'LaravelStyle.php';
+include 'CakePHPStyle.php';
 
 include 'Cache.php';
 
@@ -98,6 +99,7 @@ if (!isset($testEnv)) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--config=FILENAME] [--cache[=FILENAME]] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--cache[=FILENAME]' => 'cache file. Default: ' . (Cache::DEFAULT_CACHE_FILENAME),
+			'--cakephp' => 'Apply CakePHP coding style',
 			'--config=FILENAME' => 'configuration file. Default: .php.tools.ini',
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
@@ -132,6 +134,7 @@ if (!isset($testEnv)) {
 		'ho:',
 		[
 			'cache::',
+			'cakephp',
 			'config:',
 			'constructor:',
 			'enable_auto_align',
@@ -432,6 +435,17 @@ if (!isset($testEnv)) {
 			array_filter($argv,
 				function ($v) {
 					return '--laravel' !== $v;
+				}
+			)
+		);
+	}
+
+	if (isset($opts['cakephp'])) {
+		$fmt->addPass(new CakePHPStyle());
+		$argv = array_values(
+			array_filter($argv,
+				function ($v) {
+					return '--cakephp' !== $v;
 				}
 			)
 		);
