@@ -76,7 +76,7 @@ class A {
 	protected $_b;
 	public $c;
 
-	function b() {
+	public function b() {
 		if($a) {
 			noop();
 		} else {
@@ -84,6 +84,13 @@ class A {
 		}
 	}
 
+	protected function _c() {
+		if($a) {
+			noop();
+		} else {
+			noop();
+		}
+	}
 }
 ?>
 EOT;
