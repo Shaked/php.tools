@@ -76,6 +76,16 @@ include 'CakePHPStyle.php';
 include 'Cache.php';
 include 'CodeFormatter.php';
 
+function extract_from_argv($argv, $item) {
+	return array_values(
+		array_filter($argv,
+			function ($v) use ($item) {
+				return substr($v, 0, strlen('--' . $item)) !== '--' . $item;
+			}
+		)
+	);
+}
+
 if (!isset($testEnv)) {
 	function show_help($argv) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--config=FILENAME] [--cache[=FILENAME]] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
@@ -141,13 +151,7 @@ if (!isset($testEnv)) {
 		]
 	);
 	if (isset($opts['config'])) {
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return substr($v, 0, strlen('--config')) !== '--config';
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'config');
 		if (!file_exists($opts['config']) || !is_file($opts['config'])) {
 			fwrite(STDERR, 'Custom configuration not file found' . PHP_EOL);
 			exit(255);
@@ -188,37 +192,19 @@ if (!isset($testEnv)) {
 
 	$cache = null;
 	if (isset($opts['cache'])) {
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return substr($v, 0, strlen('--cache')) !== '--cache';
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'cache');
 		$cache = new Cache($opts['cache']);
 		fwrite(STDERR, 'Using cache ...' . PHP_EOL);
 	}
 	$backup = true;
 	if (isset($opts['no-backup'])) {
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return '--no-backup' !== $v;
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'no-backup');
 		$backup = false;
 	}
 
 	$ignore_list = null;
 	if (isset($opts['ignore'])) {
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return substr($v, 0, strlen('--ignore')) !== '--ignore';
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'ignore');
 		$ignore_list = array_map(function ($v) {
 			return trim($v);
 		}, explode(',', $opts['ignore']));
@@ -234,45 +220,21 @@ if (!isset($testEnv)) {
 				$fmt->addPass(new $optPass());
 			}
 		}
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return substr($v, 0, strlen('--prepasses')) !== '--prepasses';
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'prepasses');
 	}
 	$fmt->addPass(new TwoCommandsInSameLine());
 	$fmt->addPass(new RemoveIncludeParentheses());
 	$fmt->addPass(new NormalizeIsNotEquals());
 	if (isset($opts['setters_and_getters'])) {
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return substr($v, 0, strlen('--setters_and_getters')) !== '--setters_and_getters';
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'setters_and_getters');
 		$fmt->addPass(new SettersAndGettersPass($opts['setters_and_getters']));
 	}
 	if (isset($opts['constructor'])) {
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return substr($v, 0, strlen('--constructor')) !== '--constructor';
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'constructor');
 		$fmt->addPass(new ConstructorPass($opts['constructor']));
 	}
 	if (isset($opts['oracleDB'])) {
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return substr($v, 0, strlen('--oracleDB')) !== '--oracleDB';
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'oracleDB');
 		$fmt->addPass(new AutoImportPass($opts['oracleDB']));
 	}
 
@@ -280,13 +242,7 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new AddMissingCurlyBraces());
 	if (isset($opts['smart_linebreak_after_curly'])) {
 		$fmt->addPass(new SmartLnAfterCurlyOpen());
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return '--smart_linebreak_after_curly' !== $v;
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'smart_linebreak_after_curly');
 	}
 	$fmt->addPass(new ExtraCommaInArray());
 	$fmt->addPass(new NormalizeLnAndLtrimLines());
@@ -296,13 +252,7 @@ if (!isset($testEnv)) {
 
 	if (isset($opts['yoda'])) {
 		$fmt->addPass(new YodaComparisons());
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return '--yoda' !== $v;
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'yoda');
 	}
 
 	$fmt->addPass(new ResizeSpaces());
@@ -314,13 +264,7 @@ if (!isset($testEnv)) {
 	if (isset($opts['enable_auto_align'])) {
 		$fmt->addPass(new AlignEquals());
 		$fmt->addPass(new AlignDoubleArrow());
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return '--enable_auto_align' !== $v;
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'enable_auto_align');
 	}
 
 	$fmt->addPass(new ReindentObjOps());
@@ -328,53 +272,23 @@ if (!isset($testEnv)) {
 
 	if (isset($opts['indent_with_space'])) {
 		$fmt->addPass(new PSR2IndentWithSpace());
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return '--indent_with_space' !== $v;
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'indent_with_space');
 	}
 	if (isset($opts['psr'])) {
 		PsrDecorator::decorate($fmt);
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return '--psr' !== $v;
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'psr');
 	}
 	if (isset($opts['psr1'])) {
 		PsrDecorator::PSR1($fmt);
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return '--psr1' !== $v;
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'psr1');
 	}
 	if (isset($opts['psr1-naming'])) {
 		PsrDecorator::PSR1_naming($fmt);
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return '--psr1-naming' !== $v;
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'psr1-naming');
 	}
 	if (isset($opts['psr2'])) {
 		PsrDecorator::PSR2($fmt);
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return '--psr2' !== $v;
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'psr2');
 	}
 	if ((isset($opts['psr1']) || isset($opts['psr2']) || isset($opts['psr'])) && isset($opts['enable_auto_align'])) {
 		$fmt->addPass(new PSR2AlignObjOp());
@@ -382,13 +296,7 @@ if (!isset($testEnv)) {
 
 	if (isset($opts['visibility_order'])) {
 		$fmt->addPass(new PSR2ModifierVisibilityStaticOrder());
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return '--visibility_order' !== $v;
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'visibility_order');
 	}
 	$fmt->addPass(new LeftAlignComment());
 	$fmt->addPass(new RTrim());
@@ -402,35 +310,17 @@ if (!isset($testEnv)) {
 				$fmt->addPass(new $optPass());
 			}
 		}
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return substr($v, 0, strlen('--passes')) !== '--passes';
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'passes');
 	}
 
 	if (isset($opts['laravel'])) {
 		$fmt->addPass(new LaravelStyle());
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return '--laravel' !== $v;
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'laravel');
 	}
 
 	if (isset($opts['cakephp'])) {
 		$fmt->addPass(new CakePHPStyle());
-		$argv = array_values(
-			array_filter($argv,
-				function ($v) {
-					return '--cakephp' !== $v;
-				}
-			)
-		);
+		$argv = extract_from_argv($argv, 'cakephp');
 	}
 
 	if (isset($opts['o'])) {
