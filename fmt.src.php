@@ -123,7 +123,7 @@ if (!isset($testEnv)) {
 		die();
 	}
 	$opts = getopt(
-		'ho:',
+		'iho:',
 		[
 			'cache::',
 			'cakephp',
@@ -323,7 +323,24 @@ if (!isset($testEnv)) {
 		$argv = extract_from_argv($argv, 'cakephp');
 	}
 
-	if (isset($opts['o'])) {
+	if (isset($opts['i'])) {
+		echo 'php.tools fmt.php interactive mode.', PHP_EOL;
+		echo 'no <?php is necessary', PHP_EOL;
+		echo 'type a lone "." to finish input.', PHP_EOL;
+		echo 'type "quit" to finish.', PHP_EOL;
+		while (true) {
+			$str = '';
+			do {
+				$line = readline('> ');
+				$str .= $line;
+			} while (!('.' == $line || 'quit' == $line));
+			if ('quit' == $line) {
+				exit(0);
+			}
+			readline_add_history(substr($str, 0, -1));
+			echo $fmt->formatCode('<?php ' . substr($str, 0, -1)), PHP_EOL;
+		}
+	} elseif (isset($opts['o'])) {
 		if (!is_file($argv[1])) {
 			fwrite(STDERR, "File not found: " . $argv[1] . PHP_EOL);
 			exit(255);
