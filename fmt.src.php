@@ -74,26 +74,8 @@ include 'LaravelStyle.php';
 include 'CakePHPStyle.php';
 
 include 'Cache.php';
+include 'CodeFormatter.php';
 
-final class CodeFormatter {
-	private $passes = [];
-	public function addPass(FormatterPass $pass) {
-		array_unshift($this->passes, $pass);
-	}
-
-	public function formatCode($source = '') {
-		$passes = array_map(
-			function ($pass) {
-				return clone $pass;
-			},
-			$this->passes
-		);
-		while (($pass = array_pop($passes))) {
-			$source = $pass->format($source);
-		}
-		return $source;
-	}
-}
 if (!isset($testEnv)) {
 	function show_help($argv) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--config=FILENAME] [--cache[=FILENAME]] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
