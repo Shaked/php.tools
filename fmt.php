@@ -5056,7 +5056,7 @@ class Cache {
 		$row = $this->db->querySingle('SELECT hash FROM cache WHERE target = "' . SQLite3::escapeString($target) . '" AND filename = "' . SQLite3::escapeString($filename) . '"', true);
 		$content = file_get_contents($filename);
 		if (empty($row)) {
-			return true;
+			return $content;
 		}
 		if ($this->calculate_hash($content) != $row['hash']) {
 			return $content;
