@@ -370,6 +370,9 @@ if (!isset($testEnv)) {
 					}
 
 					++$file_count;
+					if (0 == ($file_count % 20)) {
+						fwrite(STDERR, ' ' . $file_count . PHP_EOL);
+					}
 					if (null !== $cache) {
 						$content = $cache->is_changed($target_dir, $file);
 						if (!$content) {
@@ -387,9 +390,7 @@ if (!isset($testEnv)) {
 					file_put_contents($file . '-tmp', $fmtCode);
 					$backup && rename($file, $file . '~');
 					rename($file . '-tmp', $file);
-					if (0 == ($file_count % 20)) {
-						fwrite(STDERR, ' ' . $file_count . PHP_EOL);
-					}
+
 				}
 				continue;
 			} elseif (!is_file($argv[$i])) {
