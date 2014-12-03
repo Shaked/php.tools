@@ -324,16 +324,4 @@ abstract class FormatterPass {
 			}
 		}
 	}
-
-	protected function override_with($id, $text) {
-		$this->tkns[$this->ptr] = [$id, $text];
-	}
-
-	protected function clear() {
-		$this->tkns[$this->ptr] = null;
-	}
-
-	protected function insert_at_pointer($id, $text) {
-		array_splice($this->tkns, $this->ptr + 1, 0, [[$id, $text]]);
-	}
 }
