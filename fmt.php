@@ -234,6 +234,15 @@ abstract class FormatterPass {
 		}, array_filter($tkns)));
 	}
 
+	protected function render_light($tkns = null) {
+		if (null == $tkns) {
+			$tkns = $this->tkns;
+		}
+		return implode('', array_map(function ($token) {
+			return $token[1];
+		}, $tkns));
+	}
+
 	private function resolve_ignore_list($ignore_list = []) {
 		if (empty($ignore_list)) {
 			$ignore_list[T_WHITESPACE] = true;
@@ -1644,10 +1653,10 @@ final class ExtraCommaInArray extends FormatterPass {
 						array_pop($context_stack);
 					}
 					break;
-
 			}
+			$this->tkns[$this->ptr] = [$id, $text];
 		}
-		return $this->render();
+		return $this->render_light();
 	}
 };
 final class GeneratePHPDoc extends AdditionalPass {

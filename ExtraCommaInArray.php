@@ -59,9 +59,9 @@ final class ExtraCommaInArray extends FormatterPass {
 						array_pop($context_stack);
 					}
 					break;
-
 			}
+			$this->tkns[$this->ptr] = [$id, $text];
 		}
-		return $this->render();
+		return $this->render_light();
 	}
 }
