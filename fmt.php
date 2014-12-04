@@ -5602,12 +5602,15 @@ if (!isset($testEnv)) {
 
 				}
 				if ($concurrent) {
-					$chn->close();
+					for ($i = 0; $i < $workers; ++$i) {
+						$chn->in(null);
+					}
 					for ($i = 0; $i < $workers; ++$i) {
 						list($cache_hit, $cache_miss) = $chn_done->out();
 						$cache_hit_count += $cache_hit;
 					}
 					$chn_done->close();
+					$chn->close();
 				}
 				continue;
 			} elseif (!is_file($argv[$i])) {
