@@ -12,6 +12,111 @@
 //3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 //
 //THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+$concurrent = function_exists('pcntl_fork');
+if ($concurrent) {
+	define('PHP_INT_LENGTH', strlen(sprintf("%u", PHP_INT_MAX)));
+function cofunc(callable$fn) {
+	$pid = pcntl_fork();
+	if (-1 == $pid) {
+		trigger_error('could not fork', E_ERROR);
+	} elseif ($pid) {
+		// I am the parent
+	} else {
+		$params = [];
+		if (func_num_args() > 1) {
+			$params = array_slice(func_get_args(), 1);
+		}
+		call_user_func_array($fn, $params);
+		die();
+	}
+}
+
+class CSP_Channel {
+	private $ipc;
+	private $ipc_fn;
+	private $key;
+	private $closed = false;
+	private $msg_count = 0;
+	public function __construct($key = null) {
+		$this->ipc_fn = tempnam('/tmp', 'csp.' . uniqid('chn', true));
+		$this->key = ftok($this->ipc_fn, 'A');
+		$this->ipc = msg_get_queue($this->key, 0666);
+		msg_set_queue($this->ipc, $cfg = [
+			'msg_qbytes' => (1 * PHP_INT_LENGTH),
+		]);
+
+	}
+	public function close() {
+		$this->closed = true;
+		while ($this->msg_count > 0) {
+			$this->out();
+			--$this->msg_count;
+		}
+		msg_remove_queue($this->ipc);
+		file_exists($this->ipc_fn) && @unlink($this->ipc_fn);
+	}
+	public function in($msg) {
+		if ($this->closed || !msg_queue_exists($this->key)) {
+			return;
+		}
+		++$this->msg_count;
+		$shm = new Message();
+		$shm->store($msg);
+		@msg_send($this->ipc, 1, $shm->key(), false);
+	}
+	public function out() {
+		if ($this->closed || !msg_queue_exists($this->key)) {
+			return;
+		}
+		$msgtype = null;
+		$ipcmsg = null;
+		$error = null;
+		msg_receive($this->ipc, 1, $msgtype, (1 * PHP_INT_LENGTH) + 1, $ipcmsg, false, $error);
+		--$this->msg_count;
+		$shm = new Message($ipcmsg);
+		$ret = $shm->fetch();
+		return $ret;
+	}
+}
+class Message {
+	private $key;
+	private $shm;
+	public function __construct($key = null) {
+		if (null === $key) {
+			$key = ftok(tempnam(sys_get_temp_dir(), 'csp.' . uniqid('shm', true)), 'C');
+		}
+		$this->shm = shm_attach($key);
+		if (false === $this->shm) {
+			trigger_error('Unable to attach shared memory segment for channel', E_ERROR);
+		}
+		$this->key = $key;
+	}
+	public function store($msg) {
+		shm_put_var($this->shm, 1, $msg);
+		shm_detach($this->shm);
+	}
+	public function key() {
+		return sprintf('%0' . PHP_INT_LENGTH . 'd', (int) $this->key);
+	}
+	public function fetch() {
+		$ret = shm_get_var($this->shm, 1);
+		$this->destroy();
+		return $ret;
+
+	}
+	public function destroy() {
+		if (shm_has_var($this->shm, 1)) {
+			shm_remove_var($this->shm, 1);
+		}
+		shm_remove($this->shm);
+	}
+}
+
+function make_channel() {
+	return new CSP_Channel();
+}
+;
+}
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
 //
@@ -5387,6 +5492,10 @@ if (!isset($testEnv)) {
 		$file_count = 0;
 
 		$cache_hit_count = 0;
+		$workers = 2;
+		if ($concurrent) {
+			fwrite(STDERR, 'Starting ' . $workers . ' workers ...' . PHP_EOL);
+		}
 		for ($i = 1; $i < $argc; ++$i) {
 			if (!isset($argv[$i])) {
 				continue;
@@ -5402,6 +5511,57 @@ if (!isset($testEnv)) {
 				$dir = new RecursiveDirectoryIterator($target_dir);
 				$it = new RecursiveIteratorIterator($dir);
 				$files = new RegexIterator($it, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
+
+				if ($concurrent) {
+
+					$chn = make_channel();
+					$chn_file_done = make_channel();
+					$chn_done = make_channel();
+					cofunc(function ($chn_file_done) {
+						$count = 0;
+						while (true) {
+							$chn_file_done->out();
+							++$count;
+							fwrite(STDERR, '.');
+							if ($count % 20 == 0) {
+								fwrite(STDERR, PHP_EOL);
+							}
+						}
+					}, $chn_file_done);
+					for ($i = 0; $i < $workers; ++$i) {
+						cofunc(function ($fmt, $backup, $cache, $chn, $chn_done, $chn_file_done) {
+							$cache_hit_count = 0;
+							$cache_miss_count = 0;
+							while (true) {
+								$msg = $chn->out();
+								if ('done' == $msg) {
+									break;
+								}
+								$target_dir = $msg['target_dir'];
+								$file = $msg['file'];
+								$chn_file_done->in(1);
+								if (null !== $cache) {
+									$content = $cache->is_changed($target_dir, $file);
+									if (!$content) {
+										++$cache_hit_count;
+										continue;
+									}
+								} else {
+									$content = file_get_contents($file);
+								}
+								++$cache_miss_count;
+								$fmtCode = $fmt->formatCode($content);
+								if (null !== $cache) {
+									$cache->upsert($target_dir, $file, $fmtCode);
+								}
+								file_put_contents($file . '-tmp', $fmtCode);
+								$backup && rename($file, $file . '~');
+								rename($file . '-tmp', $file);
+							}
+							$chn_done->in([$cache_hit_count, $cache_miss_count]);
+						}, $fmt, $backup, $cache, $chn, $chn_done, $chn_file_done);
+					}
+				}
 				foreach ($files as $file) {
 					$file = $file[0];
 					if (null !== $ignore_list) {
@@ -5413,27 +5573,44 @@ if (!isset($testEnv)) {
 					}
 
 					++$file_count;
-					if (0 == ($file_count % 20)) {
-						fwrite(STDERR, ' ' . $file_count . PHP_EOL);
-					}
-					if (null !== $cache) {
-						$content = $cache->is_changed($target_dir, $file);
-						if (!$content) {
-							++$cache_hit_count;
-							continue;
-						}
+					if ($concurrent) {
+						$chn->in([
+							'target_dir' => $target_dir,
+							'file' => $file,
+						]);
 					} else {
-						$content = file_get_contents($file);
+						if (0 == ($file_count % 20)) {
+							fwrite(STDERR, ' ' . $file_count . PHP_EOL);
+						}
+						if (null !== $cache) {
+							$content = $cache->is_changed($target_dir, $file);
+							if (!$content) {
+								++$file_count;
+								++$cache_hit_count;
+								continue;
+							}
+						} else {
+							$content = file_get_contents($file);
+						}
+						$fmtCode = $fmt->formatCode($content);
+						fwrite(STDERR, '.');
+						if (null !== $cache) {
+							$cache->upsert($target_dir, $file, $fmtCode);
+						}
+						file_put_contents($file . '-tmp', $fmtCode);
+						$backup && rename($file, $file . '~');
+						rename($file . '-tmp', $file);
 					}
-					$fmtCode = $fmt->formatCode($content);
-					fwrite(STDERR, '.');
-					if (null !== $cache) {
-						$cache->upsert($target_dir, $file, $fmtCode);
-					}
-					file_put_contents($file . '-tmp', $fmtCode);
-					$backup && rename($file, $file . '~');
-					rename($file . '-tmp', $file);
 
+				}
+				if ($concurrent) {
+					for ($i = 0; $i < $workers; ++$i) {
+						$chn->in('done');
+					}
+					for ($i = 0; $i < $workers; ++$i) {
+						list($cache_hit, $cache_miss) = $chn_done->out();
+						$cache_hit_count += $cache_hit;
+					}
 				}
 				continue;
 			} elseif (!is_file($argv[$i])) {
