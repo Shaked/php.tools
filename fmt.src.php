@@ -92,7 +92,7 @@ function extract_from_argv($argv, $item) {
 
 if (!isset($testEnv)) {
 	function show_help($argv) {
-		echo 'Usage: ' . $argv[0] . ' [-ho] [--config=FILENAME] [--cache[=FILENAME]] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
+		echo 'Usage: ' . $argv[0] . ' [-ho] [--config=FILENAME] [--cache[=FILENAME]] [--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space=SIZE] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--cache[=FILENAME]' => 'cache file. Default: ' . (Cache::DEFAULT_CACHE_FILENAME),
 			'--cakephp' => 'Apply CakePHP coding style',
@@ -100,7 +100,7 @@ if (!isset($testEnv)) {
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 			'--ignore=PATTERN1,PATTERN2' => 'ignore file names whose names contain any PATTERN-N',
-			'--indent_with_space' => 'use spaces instead of tabs for indentation',
+			'--indent_with_space=SIZE' => 'use spaces instead of tabs for indentation. Default 4',
 			'--laravel' => 'Apply Laravel coding style',
 			'--list' => 'list possible transformations',
 			'--no-backup' => 'no backup file (original.php~)',
@@ -137,7 +137,7 @@ if (!isset($testEnv)) {
 			'help',
 			'help-pass:',
 			'ignore:',
-			'indent_with_space',
+			'indent_with_space::',
 			'laravel',
 			'list',
 			'no-backup',
@@ -275,7 +275,7 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new EliminateDuplicatedEmptyLines());
 
 	if (isset($opts['indent_with_space'])) {
-		$fmt->addPass(new PSR2IndentWithSpace());
+		$fmt->addPass(new PSR2IndentWithSpace($opts['indent_with_space']));
 		$argv = extract_from_argv($argv, 'indent_with_space');
 	}
 	if (isset($opts['psr'])) {
