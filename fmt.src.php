@@ -388,31 +388,22 @@ if (!isset($testEnv)) {
 				if ($concurrent) {
 
 					$chn = make_channel();
-					$chn_file_done = make_channel();
 					$chn_done = make_channel();
-					cofunc(function ($chn_file_done) {
-						$count = 0;
-						while (true) {
-							$chn_file_done->out();
-							++$count;
-							fwrite(STDERR, '.');
-							if ($count % 20 == 0) {
-								fwrite(STDERR, PHP_EOL);
-							}
-						}
-					}, $chn_file_done);
+
 					for ($i = 0; $i < $workers; ++$i) {
-						cofunc(function ($fmt, $backup, $cache, $chn, $chn_done, $chn_file_done) {
+						cofunc(function ($fmt, $backup, $cache, $chn, $chn_done, $id) {
 							$cache_hit_count = 0;
 							$cache_miss_count = 0;
 							while (true) {
 								$msg = $chn->out();
-								if ('done' == $msg) {
+								if (null === $msg) {
 									break;
 								}
 								$target_dir = $msg['target_dir'];
 								$file = $msg['file'];
-								$chn_file_done->in(1);
+								if (empty($file)) {
+									continue;
+								}
 								if (null !== $cache) {
 									$content = $cache->is_changed($target_dir, $file);
 									if (!$content) {
@@ -432,7 +423,7 @@ if (!isset($testEnv)) {
 								rename($file . '-tmp', $file);
 							}
 							$chn_done->in([$cache_hit_count, $cache_miss_count]);
-						}, $fmt, $backup, $cache, $chn, $chn_done, $chn_file_done);
+						}, $fmt, $backup, $cache, $chn, $chn_done, $i);
 					}
 				}
 				foreach ($files as $file) {
@@ -477,13 +468,12 @@ if (!isset($testEnv)) {
 
 				}
 				if ($concurrent) {
-					for ($i = 0; $i < $workers; ++$i) {
-						$chn->in('done');
-					}
+					$chn->close();
 					for ($i = 0; $i < $workers; ++$i) {
 						list($cache_hit, $cache_miss) = $chn_done->out();
 						$cache_hit_count += $cache_hit;
 					}
+					$chn_done->close();
 				}
 				continue;
 			} elseif (!is_file($argv[$i])) {
