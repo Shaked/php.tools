@@ -5155,6 +5155,7 @@ class Cache {
 		}
 
 		$this->set_db(new SQLite3($filename));
+		$this->db->busyTimeout(1000);
 		if ($start_db_creation) {
 			$this->create_db();
 		}
