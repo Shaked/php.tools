@@ -25,6 +25,10 @@ final class ResizeSpaces extends FormatterPass {
 			$this->ptr = $index;
 			$this->cache = [];
 			switch ($id) {
+				case T_CALLABLE:
+					$this->append_code($text . $this->get_space());
+					break;
+
 				case '+':
 				case '-':
 					list($prev_id, $prev_text) = $this->inspect_token(-1);
