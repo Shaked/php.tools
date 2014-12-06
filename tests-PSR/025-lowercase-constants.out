@@ -2,7 +2,7 @@
 //skipHHVM
 $x = new True();
 
-$x = false::Someclass();
+$x = False::Someclass();
 
 class True
 {
@@ -45,8 +45,8 @@ $Someclass instanceof Null;
 class Null
 {
     use True, false {
-        false::bar insteadof True;
-        true::baz insteadof False;
-        false::baz as Null;
+        False::bar insteadof True;
+        True::baz insteadof False;
+        False::baz as Null;
     }
 }
