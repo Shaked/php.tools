@@ -3518,6 +3518,7 @@ final class ResizeSpaces extends FormatterPass {
 				case T_EXTENDS:
 				case T_IMPLEMENTS:
 				case T_INSTANCEOF:
+				case T_INSTEADOF:
 				case T_LOGICAL_AND:
 				case T_LOGICAL_OR:
 				case T_LOGICAL_XOR:
@@ -4733,7 +4734,9 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 					break;
 				default:
 					$lc_text = strtolower($text);
-					if (!$this->left_token_is([T_NS_SEPARATOR]) && ('true' === $lc_text || 'false' === $lc_text || 'null' === $lc_text)) {
+					if (!$this->left_token_is([
+						T_NS_SEPARATOR, T_AS, T_CLASS, T_EXTENDS, T_IMPLEMENTS, T_INSTANCEOF, T_INTERFACE, T_NEW, T_NS_SEPARATOR, T_PAAMAYIM_NEKUDOTAYIM, T_USE, T_TRAIT, T_INSTEADOF,
+					]) && ('true' === $lc_text || 'false' === $lc_text || 'null' === $lc_text)) {
 						$text = $lc_text;
 					}
 					$this->append_code($text);

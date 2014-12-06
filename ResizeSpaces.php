@@ -240,6 +240,7 @@ final class ResizeSpaces extends FormatterPass {
 				case T_EXTENDS:
 				case T_IMPLEMENTS:
 				case T_INSTANCEOF:
+				case T_INSTEADOF:
 				case T_LOGICAL_AND:
 				case T_LOGICAL_OR:
 				case T_LOGICAL_XOR:
