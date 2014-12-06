@@ -1,0 +1,24 @@
+{
+    "name": "dericofilho/csp",
+    "type": "library",
+    "description": "Library to partially enable CSP-like concurrency model in PHP",
+    "license": "MIT",
+    "keywords": ["CSP", "concurrency"],
+    "homepage": "https://github.com/dericofilho/php.csp",
+    "authors": [
+        {
+            "name": "Carlos C",
+            "email": "carlos.cirello.nl@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/dericofilho/php.csp/issues",
+        "source": "https://github.com/dericofilho/php.csp"
+    },
+    "require":{
+        "php": ">=5.4.0"
+    },
+    "require-dev": {
+        "ext-pcntl": "*"
+    }
+}
