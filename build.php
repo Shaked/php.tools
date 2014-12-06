@@ -1,4 +1,5 @@
 <?php
+include 'vendor/dericofilho/csp/csp.php';
 include "FormatterPass.php";
 
 class Build extends FormatterPass {
@@ -29,10 +30,36 @@ class Build extends FormatterPass {
 }
 
 $pass = new Build();
+
+$chn = make_channel();
+$chn_done = make_channel();
+$workers = 2;
+echo "Starting ", $workers, " workers...", PHP_EOL;
+for ($i = 0; $i < $workers; ++$i) {
+	cofunc(function ($pass, $chn, $chn_done) {
+		while (true) {
+			$target = $chn->out();
+			if (empty($target)) {
+				break;
+			}
+			echo $target, PHP_EOL;
+			file_put_contents($target . '.php', $pass->format(file_get_contents($target . '.src.php')));
+			chmod($target . '.php', 0755);
+		}
+		$chn_done->in('done');
+	}, $pass, $chn, $chn_done);
+}
+
 $targets = ['fmt', 'refactor'];
 foreach ($targets as $target) {
-	echo $target;
-	file_put_contents($target . '.php', $pass->format(file_get_contents($target . '.src.php')));
-	chmod($target . '.php', 0755);
-	echo PHP_EOL;
+	$chn->in($target);
 }
+
+for ($i = 0; $i < $workers; ++$i) {
+	$chn->in(null);
+}
+for ($i = 0; $i < $workers; ++$i) {
+	$chn_done->out();
+}
+$chn->close();
+$chn_done->close();
