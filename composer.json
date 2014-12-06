@@ -21,7 +21,8 @@
     },
     "require-dev": {
         "phpunit/php-code-coverage": "2.0.*",
-        "ext-xdebug": "*"
+        "ext-xdebug": "*",
+        "dericofilho/csp": "1.0.*"
     },
     "suggest": {
         "GNU Parallel": "Parallel execution in 'php.tools'",
