@@ -44,7 +44,7 @@ class CSP_Channel {
 	private $key;
 	private $closed = false;
 	private $msg_count = 0;
-	public function __construct($key = null) {
+	public function __construct() {
 		$this->ipc_fn = tempnam(sys_get_temp_dir(), 'csp.' . uniqid('chn', true));
 		$this->key = ftok($this->ipc_fn, 'A');
 		$this->ipc = msg_get_queue($this->key, 0666);
