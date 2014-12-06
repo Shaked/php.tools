@@ -2,6 +2,9 @@
 final class ReindentColonBlocks extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
+		$this->use_cache = true;
+		$this->code = '';
+
 		$found_colon = false;
 		foreach ($this->tkns as $token) {
 			list($id, $text) = $this->get_token($token);
@@ -9,14 +12,13 @@ final class ReindentColonBlocks extends FormatterPass {
 				$found_colon = true;
 				break;
 			}
+			$this->append_code($text);
 		}
 		if (!$found_colon) {
 			return $source;
 		}
-		reset($this->tkns);
-		$this->code = '';
-		$this->use_cache = true;
 
+		prev($this->tkns);
 		$switch_level = 0;
 		$switch_curly_count = [];
 		$switch_curly_count[$switch_level] = 0;

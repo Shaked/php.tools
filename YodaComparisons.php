@@ -10,7 +10,6 @@ final class YodaComparisons extends AdditionalPass {
 	}
 	protected function yodise($source) {
 		$tkns = $this->aggregate_variables($source);
-		reset($tkns);
 		while (list($ptr, $token) = each($tkns)) {
 			if (is_null($token)) {
 				continue;
@@ -123,13 +122,12 @@ final class YodaComparisons extends AdditionalPass {
 
 	private function aggregate_variables($source) {
 		$tkns = token_get_all($source);
-		reset($tkns);
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->get_token($token);
 
 			if (ST_PARENTHESES_OPEN == $id) {
 				$initial_ptr = $ptr;
-				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise');
+				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
 				continue;
 			}
@@ -165,19 +163,13 @@ final class YodaComparisons extends AdditionalPass {
 				}
 				while (list($ptr, $token) = each($tkns)) {
 					list($id, $text) = $this->get_token($token);
-					// if (ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id || ST_PARENTHESES_CLOSE == $id || ST_SEMI_COLON == $id ) {
-					// 	$token = prev($tkns);
-					// 	$ptr = key($tkns);
-					// 	list($id, $text) = $this->get_token($token);
-					// 	break;
-					// }
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'yodise');
+						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					} elseif (ST_BRACKET_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'yodise');
+						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					} elseif (ST_PARENTHESES_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise');
+						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					}
 
 					$stack .= $text;

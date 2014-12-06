@@ -164,19 +164,25 @@ abstract class FormatterPass {
 		if (null == $tkns) {
 			$tkns = $this->tkns;
 		}
-		return implode('', array_map(function ($token) {
+
+		$tkns = array_filter($tkns);
+		$str = '';
+		foreach ($tkns as $token) {
 			list($id, $text) = $this->get_token($token);
-			return $text;
-		}, array_filter($tkns)));
+			$str .= $text;
+		}
+		return $str;
 	}
 
 	protected function render_light($tkns = null) {
 		if (null == $tkns) {
 			$tkns = $this->tkns;
 		}
-		return implode('', array_map(function ($token) {
-			return $token[1];
-		}, $tkns));
+		$str = '';
+		foreach ($tkns as $token) {
+			$str .= $token[1];
+		}
+		return $str;
 	}
 
 	private function resolve_ignore_list($ignore_list = []) {
@@ -241,12 +247,17 @@ abstract class FormatterPass {
 		$this->code = rtrim($this->code) . $code;
 	}
 
-	protected function scan_and_replace(&$tkns, &$ptr, $start, $end, $call) {
+	protected function scan_and_replace(&$tkns, &$ptr, $start, $end, $call, $look_for) {
+		$look_for = array_flip($look_for);
 		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
-		$tmp = $placeholder;
+		$tmp = '';
 		$tkn_count = 1;
+		$found_potential_tokens = false;
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->get_token($token);
+			if (isset($look_for[$id])) {
+				$found_potential_tokens = true;
+			}
 			if ($start == $id) {
 				++$tkn_count;
 			}
@@ -259,7 +270,11 @@ abstract class FormatterPass {
 			}
 			$tmp .= $text;
 		}
-		return $start . str_replace($placeholder, '', $this->{$call}($tmp)) . $end;
+		if ($found_potential_tokens) {
+			return $start . str_replace($placeholder, '', $this->{$call}($placeholder . $tmp)) . $end;
+		}
+		return $start . $tmp . $end;
+
 	}
 
 	protected function set_indent($increment) {

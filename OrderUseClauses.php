@@ -50,7 +50,9 @@ final class OrderUseClauses extends FormatterPass {
 				$new_tokens[] = $token;
 			}
 		}
-
+		if (empty($use_stack)) {
+			return $source;
+		}
 		natcasesort($use_stack);
 		$alias_list = [];
 		$alias_count = [];

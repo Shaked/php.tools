@@ -25,28 +25,29 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 						$this->append_code(LeftAlignComment::NON_INDENTABLE_COMMENT);
 					}
 
-					$text = implode(
-						$this->new_line,
-						array_map(function ($v) {
-							$v = ltrim($v);
-							if ('*' === substr($v, 0, 1)) {
-								$v = ' ' . $v;
-							}
-							return $v;
-						}, explode($this->new_line, $text))
-					);
+					$lines = explode($this->new_line, $text);
+					$new_text = '';
+					foreach ($lines as $v) {
+						$v = ltrim($v);
+						if ('*' === substr($v, 0, 1)) {
+							$v = ' ' . $v;
+						}
+						$new_text .= $this->new_line . $v;
+					}
 
-					$this->append_code($text);
+					$this->append_code(ltrim($new_text));
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
 					$this->append_code($text);
 					break;
 				default:
-					$trailing_new_line = $this->substr_count_trailing($text, $this->new_line);
-					if ($trailing_new_line > 0) {
-						$text = trim($text) . str_repeat($this->new_line, $trailing_new_line);
-					} elseif (0 === $trailing_new_line && T_WHITESPACE === $id) {
-						$text = $this->get_space() . ltrim($text);
+					if ($this->has_ln($text)) {
+						$trailing_new_line = $this->substr_count_trailing($text, $this->new_line);
+						if ($trailing_new_line > 0) {
+							$text = trim($text) . str_repeat($this->new_line, $trailing_new_line);
+						} elseif (0 === $trailing_new_line && T_WHITESPACE === $id) {
+							$text = $this->get_space() . ltrim($text);
+						}
 					}
 					$this->append_code($text);
 					break;

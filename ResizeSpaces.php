@@ -3,13 +3,15 @@ final class ResizeSpaces extends FormatterPass {
 	private function filterWhitespaces($source) {
 		$tkns = token_get_all($source);
 
+		$new_tkns = [];
 		foreach ($tkns as $idx => $token) {
 			if (T_WHITESPACE === $token[0] && !$this->has_ln($token[1])) {
-				unset($tkns[$idx]);
+				continue;
 			}
+			$new_tkns[] = $token;
 		}
 
-		return array_values($tkns);
+		return $new_tkns;
 	}
 
 	public function format($source) {

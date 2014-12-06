@@ -376,10 +376,7 @@ if (!isset($testEnv)) {
 		$file_count = 0;
 
 		$cache_hit_count = 0;
-		$workers = 2;
-		if ($concurrent) {
-			fwrite(STDERR, 'Starting ' . $workers . ' workers ...' . PHP_EOL);
-		}
+		$workers = 4;
 		for ($i = 1; $i < $argc; ++$i) {
 			if (!isset($argv[$i])) {
 				continue;
@@ -400,7 +397,9 @@ if (!isset($testEnv)) {
 
 					$chn = make_channel();
 					$chn_done = make_channel();
-
+					if ($concurrent) {
+						fwrite(STDERR, 'Starting ' . $workers . ' workers ...' . PHP_EOL);
+					}
 					for ($i = 0; $i < $workers; ++$i) {
 						cofunc(function ($fmt, $backup, $cache, $chn, $chn_done, $id) {
 							$cache_hit_count = 0;

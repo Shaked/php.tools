@@ -114,7 +114,7 @@ final class ReindentObjOps extends FormatterPass {
 			$block_count = 0;
 
 			foreach ($lines as $idx => $line) {
-				if (substr_count($line, $current_align_objop) > 0) {
+				if (false !== strpos($line, $current_align_objop)) {
 					$lines_with_objop[$block_count][] = $idx;
 				} else {
 					++$block_count;

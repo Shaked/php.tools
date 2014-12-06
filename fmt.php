@@ -355,19 +355,25 @@ abstract class FormatterPass {
 		if (null == $tkns) {
 			$tkns = $this->tkns;
 		}
-		return implode('', array_map(function ($token) {
+
+		$tkns = array_filter($tkns);
+		$str = '';
+		foreach ($tkns as $token) {
 			list($id, $text) = $this->get_token($token);
-			return $text;
-		}, array_filter($tkns)));
+			$str .= $text;
+		}
+		return $str;
 	}
 
 	protected function render_light($tkns = null) {
 		if (null == $tkns) {
 			$tkns = $this->tkns;
 		}
-		return implode('', array_map(function ($token) {
-			return $token[1];
-		}, $tkns));
+		$str = '';
+		foreach ($tkns as $token) {
+			$str .= $token[1];
+		}
+		return $str;
 	}
 
 	private function resolve_ignore_list($ignore_list = []) {
@@ -432,12 +438,17 @@ abstract class FormatterPass {
 		$this->code = rtrim($this->code) . $code;
 	}
 
-	protected function scan_and_replace(&$tkns, &$ptr, $start, $end, $call) {
+	protected function scan_and_replace(&$tkns, &$ptr, $start, $end, $call, $look_for) {
+		$look_for = array_flip($look_for);
 		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
-		$tmp = $placeholder;
+		$tmp = '';
 		$tkn_count = 1;
+		$found_potential_tokens = false;
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->get_token($token);
+			if (isset($look_for[$id])) {
+				$found_potential_tokens = true;
+			}
 			if ($start == $id) {
 				++$tkn_count;
 			}
@@ -450,7 +461,11 @@ abstract class FormatterPass {
 			}
 			$tmp .= $text;
 		}
-		return $start . str_replace($placeholder, '', $this->{$call}($tmp)) . $end;
+		if ($found_potential_tokens) {
+			return $start . str_replace($placeholder, '', $this->{$call}($placeholder . $tmp)) . $end;
+		}
+		return $start . $tmp . $end;
+
 	}
 
 	protected function set_indent($increment) {
@@ -1272,7 +1287,6 @@ final class AutoPreincrement extends AdditionalPass {
 	}
 	protected function swap($source) {
 		$tkns = $this->aggregate_variables($source);
-		reset($tkns);
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->get_token($token);
 			switch ($id) {
@@ -1286,10 +1300,7 @@ final class AutoPreincrement extends AdditionalPass {
 					}
 			}
 		}
-		return implode('', array_map(function ($token) {
-			list($id, $text) = $this->get_token($token);
-			return $text;
-		}, array_filter($tkns)));
+		return $this->render($tkns);
 	}
 
 	private function aggregate_variables($source) {
@@ -1300,7 +1311,7 @@ final class AutoPreincrement extends AdditionalPass {
 
 			if (ST_PARENTHESES_OPEN == $id) {
 				$initial_ptr = $ptr;
-				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap');
+				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', [T_INC, T_DEC]);
 				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
 				continue;
 			}
@@ -1339,11 +1350,11 @@ final class AutoPreincrement extends AdditionalPass {
 					list($id, $text) = $this->get_token($token);
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap');
+						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', [T_INC, T_DEC]);
 					} elseif (ST_BRACKET_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap');
+						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', [T_INC, T_DEC]);
 					} elseif (ST_PARENTHESES_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap');
+						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', [T_INC, T_DEC]);
 					}
 
 					$stack .= $text;
@@ -1732,7 +1743,7 @@ final class ExtraCommaInArray extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
-					if (!$this->left_token_is([ST_BRACKET_CLOSE, T_STRING, T_VARIABLE])) {
+					if (!$this->left_token_is([ST_BRACKET_CLOSE, T_STRING, T_VARIABLE, T_ARRAY_CAST])) {
 						$context_stack[] = self::ST_SHORT_ARRAY_OPEN;
 					} else {
 						$context_stack[] = ST_BRACKET_OPEN;
@@ -2222,28 +2233,29 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 						$this->append_code(LeftAlignComment::NON_INDENTABLE_COMMENT);
 					}
 
-					$text = implode(
-						$this->new_line,
-						array_map(function ($v) {
-							$v = ltrim($v);
-							if ('*' === substr($v, 0, 1)) {
-								$v = ' ' . $v;
-							}
-							return $v;
-						}, explode($this->new_line, $text))
-					);
+					$lines = explode($this->new_line, $text);
+					$new_text = '';
+					foreach ($lines as $v) {
+						$v = ltrim($v);
+						if ('*' === substr($v, 0, 1)) {
+							$v = ' ' . $v;
+						}
+						$new_text .= $this->new_line . $v;
+					}
 
-					$this->append_code($text);
+					$this->append_code(ltrim($new_text));
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
 					$this->append_code($text);
 					break;
 				default:
-					$trailing_new_line = $this->substr_count_trailing($text, $this->new_line);
-					if ($trailing_new_line > 0) {
-						$text = trim($text) . str_repeat($this->new_line, $trailing_new_line);
-					} elseif (0 === $trailing_new_line && T_WHITESPACE === $id) {
-						$text = $this->get_space() . ltrim($text);
+					if ($this->has_ln($text)) {
+						$trailing_new_line = $this->substr_count_trailing($text, $this->new_line);
+						if ($trailing_new_line > 0) {
+							$text = trim($text) . str_repeat($this->new_line, $trailing_new_line);
+						} elseif (0 === $trailing_new_line && T_WHITESPACE === $id) {
+							$text = $this->get_space() . ltrim($text);
+						}
 					}
 					$this->append_code($text);
 					break;
@@ -2473,7 +2485,9 @@ final class OrderUseClauses extends FormatterPass {
 				$new_tokens[] = $token;
 			}
 		}
-
+		if (empty($use_stack)) {
+			return $source;
+		}
 		natcasesort($use_stack);
 		$alias_list = [];
 		$alias_count = [];
@@ -2730,6 +2744,9 @@ final class Reindent extends FormatterPass {
 final class ReindentColonBlocks extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
+		$this->use_cache = true;
+		$this->code = '';
+
 		$found_colon = false;
 		foreach ($this->tkns as $token) {
 			list($id, $text) = $this->get_token($token);
@@ -2737,14 +2754,13 @@ final class ReindentColonBlocks extends FormatterPass {
 				$found_colon = true;
 				break;
 			}
+			$this->append_code($text);
 		}
 		if (!$found_colon) {
 			return $source;
 		}
-		reset($this->tkns);
-		$this->code = '';
-		$this->use_cache = true;
 
+		prev($this->tkns);
 		$switch_level = 0;
 		$switch_curly_count = [];
 		$switch_curly_count[$switch_level] = 0;
@@ -3120,7 +3136,7 @@ final class ReindentObjOps extends FormatterPass {
 			$block_count = 0;
 
 			foreach ($lines as $idx => $line) {
-				if (substr_count($line, $current_align_objop) > 0) {
+				if (false !== strpos($line, $current_align_objop)) {
 					$lines_with_objop[$block_count][] = $idx;
 				} else {
 					++$block_count;
@@ -3265,13 +3281,15 @@ final class ResizeSpaces extends FormatterPass {
 	private function filterWhitespaces($source) {
 		$tkns = token_get_all($source);
 
+		$new_tkns = [];
 		foreach ($tkns as $idx => $token) {
 			if (T_WHITESPACE === $token[0] && !$this->has_ln($token[1])) {
-				unset($tkns[$idx]);
+				continue;
 			}
+			$new_tkns[] = $token;
 		}
 
-		return array_values($tkns);
+		return $new_tkns;
 	}
 
 	public function format($source) {
@@ -4104,7 +4122,6 @@ final class YodaComparisons extends AdditionalPass {
 	}
 	protected function yodise($source) {
 		$tkns = $this->aggregate_variables($source);
-		reset($tkns);
 		while (list($ptr, $token) = each($tkns)) {
 			if (is_null($token)) {
 				continue;
@@ -4217,13 +4234,12 @@ final class YodaComparisons extends AdditionalPass {
 
 	private function aggregate_variables($source) {
 		$tkns = token_get_all($source);
-		reset($tkns);
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->get_token($token);
 
 			if (ST_PARENTHESES_OPEN == $id) {
 				$initial_ptr = $ptr;
-				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise');
+				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
 				continue;
 			}
@@ -4259,19 +4275,13 @@ final class YodaComparisons extends AdditionalPass {
 				}
 				while (list($ptr, $token) = each($tkns)) {
 					list($id, $text) = $this->get_token($token);
-					// if (ST_CURLY_CLOSE == $id || ST_BRACKET_CLOSE == $id || ST_PARENTHESES_CLOSE == $id || ST_SEMI_COLON == $id ) {
-					// 	$token = prev($tkns);
-					// 	$ptr = key($tkns);
-					// 	list($id, $text) = $this->get_token($token);
-					// 	break;
-					// }
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'yodise');
+						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					} elseif (ST_BRACKET_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'yodise');
+						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					} elseif (ST_PARENTHESES_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise');
+						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					}
 
 					$stack .= $text;
@@ -5537,10 +5547,7 @@ if (!isset($testEnv)) {
 		$file_count = 0;
 
 		$cache_hit_count = 0;
-		$workers = 2;
-		if ($concurrent) {
-			fwrite(STDERR, 'Starting ' . $workers . ' workers ...' . PHP_EOL);
-		}
+		$workers = 4;
 		for ($i = 1; $i < $argc; ++$i) {
 			if (!isset($argv[$i])) {
 				continue;
@@ -5561,7 +5568,9 @@ if (!isset($testEnv)) {
 
 					$chn = make_channel();
 					$chn_done = make_channel();
-
+					if ($concurrent) {
+						fwrite(STDERR, 'Starting ' . $workers . ' workers ...' . PHP_EOL);
+					}
 					for ($i = 0; $i < $workers; ++$i) {
 						cofunc(function ($fmt, $backup, $cache, $chn, $chn_done, $id) {
 							$cache_hit_count = 0;
