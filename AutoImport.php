@@ -8,7 +8,7 @@ final class AutoImportPass extends FormatterPass {
 	private $oracle = null;
 
 	public function __construct($oracleFn) {
-		$this->oracle = unserialize(file_get_contents($oracleFn));
+		$this->oracle = new SQLite3($oracleFn);
 	}
 
 	private function used_alias_list($source) {
@@ -101,11 +101,12 @@ final class AutoImportPass extends FormatterPass {
 
 	private function singleNamespace($source) {
 		$class_list = [];
-		$class_names = array_keys($this->oracle['all_classes']);
-		foreach ($class_names as $class_name) {
+		$results = $this->oracle->query("SELECT class FROM classes ORDER BY class");
+		while (($row = $results->fetchArray())) {
+			$class_name = $row['class'];
 			$class_name_parts = explode('\\', $class_name);
 			$base_class_name = '';
-			while ($cnp = array_pop($class_name_parts)) {
+			while (($cnp = array_pop($class_name_parts))) {
 				$base_class_name = $cnp . $base_class_name;
 				$class_list[strtolower($base_class_name)][] = ltrim(str_replace('\\\\', '\\', '\\' . $class_name) . ' as ' . $base_class_name, '\\');
 			}
