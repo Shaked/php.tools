@@ -1,15 +1,22 @@
 <?php
 final class ReindentObjOps extends FormatterPass {
-	const ALIGNABLE_OBJOP = "\x2 OBJOP%d \x3";
+	const ALIGNABLE_OBJOP = "\x2 OBJOP%d.%d.%d \x3";
+
+	const ALIGN_WITH_INDENT = 1;
+	const ALIGN_WITH_SPACES = 2;
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$in_objop_context = 0;// 1 - indent, 2 - don't indent, so future auto-align takes place
-		$alignable_objop_counter = 0;
-		$printed_placeholder = false;
-		$paren_count = 0;
-		$paren_stack = [];
-		$bracket_count = 0;
+
+		$level_counter = 0;
+		$level_entrance_counter = [];
+		$context_counter = [];
+		$touch_counter = [];
+		$align_type = [];
+		$printed_placeholder = [];
+		$max_context_counter = [];
+		$touched_ln = false;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -18,132 +25,194 @@ final class ReindentObjOps extends FormatterPass {
 				case T_IF:
 				case T_FOR:
 				case T_FOREACH:
+				case T_SWITCH:
 					$this->append_code($text);
 					$this->print_until(ST_PARENTHESES_OPEN);
 					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
+
+				case T_FUNCTION:
+					$this->append_code($text);
+					if (!$this->right_useful_token_is(T_STRING)) {
+						$this->print_until(ST_PARENTHESES_OPEN);
+						$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+						$this->print_until(ST_CURLY_OPEN);
+						$this->print_block(ST_CURLY_OPEN, ST_CURLY_CLOSE);
+					}
+					break;
+
+				case T_VARIABLE:
+				case T_STRING:
+					$this->append_code($text);
+					if (!isset($level_entrance_counter[$level_counter])) {
+						$level_entrance_counter[$level_counter] = 0;
+					}
+					if (!isset($context_counter[$level_counter][$level_entrance_counter[$level_counter]])) {
+						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+						$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+						$touch_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+						$align_type[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+						$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]] = 0;
+					}
+					break;
+
 				case ST_PARENTHESES_OPEN:
-					if ($this->left_token_is([T_ARRAY])) {
-						$paren_stack[] = T_ARRAY;
-					} else {
-						$paren_stack[] = 0;
-						++$paren_count;
-					}
-					$this->append_code($text);
-					break;
-				case ST_PARENTHESES_CLOSE:
-					$stack_pop = array_pop($paren_stack);
-					if (T_ARRAY != $stack_pop) {
-						--$paren_count;
-					}
-					$this->append_code($text);
-					break;
 				case ST_BRACKET_OPEN:
-					++$bracket_count;
-					$this->append_code($text);
-					break;
-				case ST_BRACKET_CLOSE:
-					--$bracket_count;
-					$this->append_code($text);
-					break;
-				case T_OBJECT_OPERATOR:
-					$has_ln_before = ($this->has_ln_before() || $this->has_ln_left_token());
-					if (0 === $in_objop_context && $has_ln_before) {
-						$this->set_indent(-1);
-						$in_objop_context = 1;
-						$this->set_indent(+1);
-					} elseif (0 === $in_objop_context && !$has_ln_before) {
-						++$alignable_objop_counter;
-						$in_objop_context = 2;
-					} elseif ($paren_count > 0) {
-						$in_objop_context = 0;
+					++$level_counter;
+					if (!isset($level_entrance_counter[$level_counter])) {
+						$level_entrance_counter[$level_counter] = 0;
 					}
-					if (1 === $in_objop_context) {
-						$this->append_code($this->get_indent() . $text);
-					} elseif (2 === $in_objop_context) {
-						$placeholder = '';
-						if (!$printed_placeholder) {
-							$placeholder = sprintf(self::ALIGNABLE_OBJOP, $alignable_objop_counter);
-							$printed_placeholder = true;
+					++$level_entrance_counter[$level_counter];
+					if (!isset($context_counter[$level_counter][$level_entrance_counter[$level_counter]])) {
+						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+						$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+						$touch_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+						$align_type[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+						$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]] = 0;
+					}
+					++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
+					$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
+
+					$this->append_code($text);
+					break;
+
+				case ST_PARENTHESES_CLOSE:
+				case ST_BRACKET_CLOSE:
+					--$level_counter;
+					$this->append_code($text);
+					break;
+
+				case T_OBJECT_OPERATOR:
+					if (0 == $touch_counter[$level_counter][$level_entrance_counter[$level_counter]]) {
+						++$touch_counter[$level_counter][$level_entrance_counter[$level_counter]];
+						if ($this->has_ln_before()) {
+							$align_type[$level_counter][$level_entrance_counter[$level_counter]] = self::ALIGN_WITH_INDENT;
+							$this->append_code($this->get_indent(+1) . $text);
+						} else {
+							$align_type[$level_counter][$level_entrance_counter[$level_counter]] = self::ALIGN_WITH_SPACES;
+							if (!isset($printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]])) {
+								$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]] = 0;
+							}
+							++$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]];
+							$this->append_code(
+								sprintf(
+									self::ALIGNABLE_OBJOP,
+									$level_counter,
+									$level_entrance_counter[$level_counter],
+									$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
+								) . $text
+							);
 						}
-						$this->append_code($placeholder . $text);
+					} elseif ($this->has_ln_before() || $this->has_ln_left_token()) {
+						++$touch_counter[$level_counter][$level_entrance_counter[$level_counter]];
+						if (self::ALIGN_WITH_SPACES == $align_type[$level_counter][$level_entrance_counter[$level_counter]]) {
+							if (!isset($printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]])) {
+								$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]] = 0;
+							}
+							++$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]];
+							$this->append_code(
+								sprintf(
+									self::ALIGNABLE_OBJOP,
+									$level_counter,
+									$level_entrance_counter[$level_counter],
+									$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
+								) . $text
+							);
+						} else {
+							$this->append_code($this->get_indent(+1) . $text);
+						}
 					} else {
 						$this->append_code($text);
 					}
 					break;
-				case T_VARIABLE:
-					if (0 === $paren_count && 0 === $bracket_count && 0 !== $in_objop_context) {
-						$in_objop_context = 0;
-					}
-					$this->append_code($text);
-					break;
-				case T_DOUBLE_ARROW:
-				case ST_SEMI_COLON:
-					if (0 !== $in_objop_context) {
-						$in_objop_context = 0;
-					}
-					$this->append_code($text);
-					break;
+
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					if ($in_objop_context > 0) {
-						$this->append_code($this->get_indent() . $text);
-						break;
+					if (
+						isset($align_type[$level_counter]) &&
+						isset($level_entrance_counter[$level_counter]) &&
+						isset($align_type[$level_counter][$level_entrance_counter[$level_counter]]) &&
+						($this->has_ln_before() || $this->has_ln_left_token())
+					) {
+						if (self::ALIGN_WITH_SPACES == $align_type[$level_counter][$level_entrance_counter[$level_counter]]) {
+							if (!isset($printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]])) {
+								$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]] = 0;
+							}
+							++$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]];
+							$this->append_code(
+								sprintf(
+									self::ALIGNABLE_OBJOP,
+									$level_counter,
+									$level_entrance_counter[$level_counter],
+									$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
+								)
+							);
+						} elseif (self::ALIGN_WITH_INDENT == $align_type[$level_counter][$level_entrance_counter[$level_counter]]) {
+							$this->append_code($this->get_indent(+1));
+						}
 					}
+					$this->append_code($text);
+					break;
+
+				case ST_COMMA:
+				case ST_SEMI_COLON:
+					if (!isset($level_entrance_counter[$level_counter])) {
+						$level_entrance_counter[$level_counter] = 0;
+					}
+					++$level_entrance_counter[$level_counter];
+					$this->append_code($text);
+					break;
+
 				default:
 					$this->append_code($text);
 					break;
 			}
-			if ($this->has_ln($text)) {
-				$printed_placeholder = false;
-			}
 		}
 
-		for ($j = $alignable_objop_counter; $j > 0; --$j) {
-			$current_align_objop = sprintf(self::ALIGNABLE_OBJOP, $j);
-			if (false === strpos($this->code, $current_align_objop)) {
-				continue;
-			}
-			if (1 === substr_count($this->code, $current_align_objop)) {
-				$this->code = str_replace($current_align_objop, '', $this->code);
-				continue;
-			}
-
-			$lines = explode($this->new_line, $this->code);
-			$lines_with_objop = [];
-			$block_count = 0;
-
-			foreach ($lines as $idx => $line) {
-				if (false !== strpos($line, $current_align_objop)) {
-					$lines_with_objop[$block_count][] = $idx;
-				} else {
-					++$block_count;
-					$lines_with_objop[$block_count] = [];
-				}
-			}
-
-			$i = 0;
-			foreach ($lines_with_objop as $group) {
-				if (1 === sizeof($group)) {
-					continue;
-				}
-				++$i;
-				$farthest_objop = 0;
-				foreach ($group as $idx) {
-					$farthest_objop = max($farthest_objop, strpos($lines[$idx], $current_align_objop));
-				}
-				foreach ($group as $idx) {
-					$line = $lines[$idx];
-					$current_objop = strpos($line, $current_align_objop);
-					$delta = abs($farthest_objop - $current_objop);
-					if ($delta > 0) {
-						$line = str_replace($current_align_objop, str_repeat(' ', $delta) . $current_align_objop, $line);
-						$lines[$idx] = $line;
+		$orig_code = $this->code;
+		foreach ($max_context_counter as $level => $entrances) {
+			foreach ($entrances as $entrance => $context) {
+				for ($j = 0; $j <= $context; ++$j) {
+					if (!isset($printed_placeholder[$level][$entrance][$j])) {
+						continue;
 					}
+					if (0 === $printed_placeholder[$level][$entrance][$j]) {
+						continue;
+					}
+
+					$placeholder = sprintf(self::ALIGNABLE_OBJOP, $level, $entrance, $j);
+					if (1 === $printed_placeholder[$level][$entrance][$j]) {
+						$this->code = str_replace($placeholder, '', $this->code);
+						continue;
+					}
+
+					$lines = explode($this->new_line, $this->code);
+					$lines_with_objop = [];
+					$block_count = 0;
+
+					foreach ($lines as $idx => $line) {
+						if (false !== strpos($line, $placeholder)) {
+							$lines_with_objop[] = $idx;
+						}
+					}
+
+					$farthest = 0;
+					foreach ($lines_with_objop as $idx) {
+						$farthest = max($farthest, strpos($lines[$idx], $placeholder));
+					}
+					foreach ($lines_with_objop as $idx) {
+						$line = $lines[$idx];
+						$current = strpos($line, $placeholder);
+						$delta = abs($farthest - $current);
+						if ($delta > 0) {
+							$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
+							$lines[$idx] = $line;
+						}
+					}
+
+					$this->code = str_replace($placeholder, '', implode($this->new_line, $lines));
 				}
 			}
-
-			$this->code = str_replace($current_align_objop, '', implode($this->new_line, $lines));
 		}
 
 		return $this->code;
