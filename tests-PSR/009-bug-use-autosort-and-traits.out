@@ -8,7 +8,7 @@ trait WarehouseTrait
 {
     public static $cache = [];
 
-    function assignWarehouses($warehouses, $update = false)
+    public function assignWarehouses($warehouses, $update = false)
     {
         if ($update) {
             $this->warehouses()->delete();

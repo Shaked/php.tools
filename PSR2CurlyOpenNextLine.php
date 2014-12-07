@@ -30,7 +30,7 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 					}
 					break;
 				case T_FUNCTION:
-					if (!$this->left_token_is([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_PARENTHESES_OPEN, ST_COMMA])) {
+					if (!$this->left_token_is([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_PARENTHESES_OPEN, ST_COMMA]) && $this->right_useful_token_is(T_STRING)) {
 						$this->append_code($text);
 						$touched_ln = false;
 						while (list($index, $token) = each($this->tkns)) {

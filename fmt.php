@@ -4649,7 +4649,7 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 					}
 					break;
 				case T_FUNCTION:
-					if (!$this->left_token_is([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_PARENTHESES_OPEN, ST_COMMA])) {
+					if (!$this->left_token_is([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_PARENTHESES_OPEN, ST_COMMA]) && $this->right_useful_token_is(T_STRING)) {
 						$this->append_code($text);
 						$touched_ln = false;
 						while (list($index, $token) = each($this->tkns)) {
@@ -4885,6 +4885,10 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					$found[] = T_INTERFACE;
 					$this->append_code($text);
 					break;
+				case T_TRAIT:
+					$found[] = T_TRAIT;
+					$this->append_code($text);
+					break;
 				case ST_CURLY_OPEN:
 				case ST_PARENTHESES_OPEN:
 					$found[] = $text;
@@ -4946,7 +4950,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					$this->append_code($text);
 					break;
 				case T_FUNCTION:
-					$has_found_class_or_interface = isset($found[0]) && (T_CLASS === $found[0] || T_INTERFACE === $found[0]);
+					$has_found_class_or_interface = isset($found[0]) && (T_CLASS === $found[0] || T_INTERFACE === $found[0] || T_TRAIT === $found[0]) && $this->right_useful_token_is(T_STRING);
 					if (isset($found[0]) && $has_found_class_or_interface && null !== $final_or_abstract) {
 						$this->append_code($final_or_abstract . $this->get_space());
 					}

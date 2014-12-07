@@ -7,7 +7,7 @@ trait SingletonTrait
 
     protected static $singleton = null;
 
-    function getInstance()
+    public static function getInstance()
     {
         if (!self::$singleton) {
             self::$singleton = new self();
