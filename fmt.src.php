@@ -94,6 +94,16 @@ function extract_from_argv($argv, $item) {
 	);
 }
 
+function extract_from_argv_short($argv, $item) {
+	return array_values(
+		array_filter($argv,
+			function ($v) use ($item) {
+				return substr($v, 0, strlen('-' . $item)) !== '-' . $item;
+			}
+		)
+	);
+}
+
 if (!isset($testEnv)) {
 	function show_help($argv, $enable_cache) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--config=FILENAME] ' . ($enable_cache ? '[--cache[=FILENAME]] ' : '') . '[--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space=SIZE] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
@@ -177,8 +187,8 @@ if (!isset($testEnv)) {
 		}
 	} elseif (file_exists('.php.tools.ini') && is_file('.php.tools.ini')) {
 		fwrite(STDERR, 'Configuration file found' . PHP_EOL);
-		$opts = parse_ini_file('.php.tools.ini');
-
+		$ini_opts = parse_ini_file('.php.tools.ini');
+		$opts = array_merge($ini_opts, $opts);
 	}
 	if (isset($opts['h']) || isset($opts['help'])) {
 		show_help($argv, $enable_cache);
@@ -356,13 +366,16 @@ if (!isset($testEnv)) {
 			echo $fmt->formatCode('<?php ' . substr($str, 0, -1)), PHP_EOL;
 		}
 	} elseif (isset($opts['o'])) {
+		$argv = extract_from_argv_short($argv, 'o');
 		if (!is_file($argv[1])) {
 			fwrite(STDERR, "File not found: " . $argv[1] . PHP_EOL);
 			exit(255);
 		}
-		unset($argv[1]);
-		unset($argv[2]);
 		$argv = array_values($argv);
+		if ('-' == $opts['o']) {
+			echo $fmt->formatCode(file_get_contents($argv[1]));
+			exit(0);
+		}
 		file_put_contents($opts['o'], $fmt->formatCode(file_get_contents($argv[1])));
 	} elseif (isset($argv[1])) {
 		if ('-' == $argv[1]) {
