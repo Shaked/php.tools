@@ -1,3 +1,4 @@
 <?php
 
+//skipShortTag
 echo 'This should be long open tag';
