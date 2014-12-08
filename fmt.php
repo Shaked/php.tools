@@ -3506,9 +3506,16 @@ final class ResizeSpaces extends FormatterPass {
 					} elseif ($this->right_token_is(ST_CURLY_CLOSE) || ($this->right_token_is([T_VARIABLE]) && $this->left_token_is([T_OBJECT_OPERATOR, ST_DOLLAR]))) {
 						$this->append_code($text);
 						break;
+					} elseif ($this->right_token_is([T_VARIABLE, T_INC, T_DEC])) {
+						$this->append_code($text . $this->get_space());
+						break;
+					} else {
+						$this->append_code($text);
+						break;
 					}
+
 				case ST_SEMI_COLON:
-					if ($this->right_token_is([T_VARIABLE, T_INC, T_DEC])) {
+					if ($this->right_token_is([T_VARIABLE, T_INC, T_DEC, T_LNUMBER, T_DNUMBER])) {
 						$this->append_code($text . $this->get_space());
 						break;
 					}
@@ -3556,7 +3563,7 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case T_STATIC:
-					$this->append_code($text . $this->get_space(!$this->right_token_is([ST_SEMI_COLON, T_DOUBLE_COLON])));
+					$this->append_code($text . $this->get_space(!$this->right_token_is([ST_SEMI_COLON, T_DOUBLE_COLON, ST_PARENTHESES_OPEN])));
 					break;
 				case T_PUBLIC:
 				case T_PRIVATE:
@@ -3589,6 +3596,9 @@ final class ResizeSpaces extends FormatterPass {
 				case T_IMPLEMENTS:
 				case T_INSTANCEOF:
 				case T_INSTEADOF:
+				case T_AS:
+					$this->append_code($this->get_space() . $text . $this->get_space());
+					break;
 				case T_LOGICAL_AND:
 				case T_LOGICAL_OR:
 				case T_LOGICAL_XOR:
@@ -3615,9 +3625,8 @@ final class ResizeSpaces extends FormatterPass {
 				case T_XOR_EQUAL:
 				case ST_IS_GREATER:
 				case ST_IS_SMALLER:
-				case T_AS:
 				case ST_EQUAL:
-					$this->append_code($this->get_space() . $text . $this->get_space());
+					$this->append_code($this->get_space(!$this->has_ln_before()) . $text . $this->get_space());
 					break;
 				case T_CATCH:
 				case T_FINALLY:
