@@ -16,7 +16,7 @@ $concurrent = function_exists('pcntl_fork');
 if ($concurrent) {
 	include 'vendor/dericofilho/csp/csp.php';
 }
-include 'constants.php';
+include 'Core/constants.php';
 include 'Core/FormatterPass.php';
 include 'Additionals/AdditionalPass.php';
 include 'Core/AddMissingCurlyBraces.php';
