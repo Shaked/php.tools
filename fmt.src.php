@@ -16,9 +16,15 @@ $concurrent = function_exists('pcntl_fork');
 if ($concurrent) {
 	include 'vendor/dericofilho/csp/csp.php';
 }
+$enable_cache = false;
+if (class_exists('SQLite3')) {
+	$enable_cache = true;
+	include 'Core/Cache.php';
+}
 include 'Core/constants.php';
 include 'Core/FormatterPass.php';
 include 'Additionals/AdditionalPass.php';
+include 'Core/CodeFormatter.php';
 
 include 'Core/AddMissingCurlyBraces.php';
 include 'Core/AutoImport.php';
@@ -77,13 +83,6 @@ include 'Additionals/SpaceBetweenMethods.php';
 include 'Additionals/TightConcat.php';
 include 'Additionals/WrongConstructorName.php';
 include 'Additionals/YodaComparisons.php';
-
-$enable_cache = false;
-if (class_exists('SQLite3')) {
-	$enable_cache = true;
-	include 'Core/Cache.php';
-}
-include 'Core/CodeFormatter.php';
 
 function extract_from_argv($argv, $item) {
 	return array_values(
