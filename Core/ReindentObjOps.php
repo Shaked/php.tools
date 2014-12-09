@@ -115,9 +115,6 @@ final class ReindentObjOps extends FormatterPass {
 					} elseif ($this->has_ln_before() || $this->has_ln_left_token()) {
 						++$touch_counter[$level_counter][$level_entrance_counter[$level_counter]];
 						if (self::ALIGN_WITH_SPACES == $align_type[$level_counter][$level_entrance_counter[$level_counter]]) {
-							if (!isset($printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]])) {
-								$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]] = 0;
-							}
 							++$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]];
 							$this->append_code(
 								sprintf(
@@ -144,9 +141,6 @@ final class ReindentObjOps extends FormatterPass {
 						($this->has_ln_before() || $this->has_ln_left_token())
 					) {
 						if (self::ALIGN_WITH_SPACES == $align_type[$level_counter][$level_entrance_counter[$level_counter]]) {
-							if (!isset($printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]])) {
-								$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]] = 0;
-							}
 							++$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]];
 							$this->append_code(
 								sprintf(

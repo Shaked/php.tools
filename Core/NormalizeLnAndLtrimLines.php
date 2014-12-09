@@ -45,8 +45,6 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 						$trailing_new_line = $this->substr_count_trailing($text, $this->new_line);
 						if ($trailing_new_line > 0) {
 							$text = trim($text) . str_repeat($this->new_line, $trailing_new_line);
-						} elseif (0 === $trailing_new_line && T_WHITESPACE === $id) {
-							$text = $this->get_space() . ltrim($text);
 						}
 					}
 					$this->append_code($text);

@@ -148,12 +148,8 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case ST_CURLY_OPEN:
-					if ($this->left_token_is([T_STRING, T_DO, T_FINALLY, ST_PARENTHESES_CLOSE])) {
-						if ($this->has_ln_left_token()) {
-							$this->append_code($this->get_space() . $text);
-						} else {
-							$this->rtrim_and_append_code($this->get_space() . $text);
-						}
+					if (!$this->has_ln_left_token() && $this->left_useful_token_is([T_STRING, T_DO, T_FINALLY, ST_PARENTHESES_CLOSE])) {
+						$this->rtrim_and_append_code($this->get_space() . $text);
 						break;
 					} elseif ($this->right_token_is(ST_CURLY_CLOSE) || ($this->right_token_is([T_VARIABLE]) && $this->left_token_is([T_OBJECT_OPERATOR, ST_DOLLAR]))) {
 						$this->append_code($text);
@@ -172,12 +168,8 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case ST_PARENTHESES_OPEN:
-					if ($this->left_token_is([T_WHILE, T_CATCH])) {
-						if ($this->has_ln_left_token()) {
-							$this->append_code($this->get_space() . $text);
-						} else {
-							$this->rtrim_and_append_code($this->get_space() . $text);
-						}
+					if (!$this->has_ln_left_token() && $this->left_useful_token_is([T_WHILE, T_CATCH])) {
+						$this->rtrim_and_append_code($this->get_space() . $text);
 					} else {
 						$this->append_code($text);
 					}

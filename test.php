@@ -23,6 +23,7 @@ if ($isCoverage) {
 	$filter->addFileToBlacklist("fmt.src.php");
 	$filter->addFileToBlacklist("FormatterPass.php");
 	$filter->addFileToBlacklist("test.php");
+	$filter->addDirectoryToBlacklist("vendor");
 	$coverage = new PHP_CodeCoverage(null, $filter);
 }
 

@@ -79,13 +79,17 @@ abstract class FormatterPass {
 	}
 
 	protected function left_token($ignore_list = [], $idx = false) {
+		$i = $this->left_token_idx($ignore_list);
+
+		return $this->tkns[$i];
+	}
+
+	protected function left_token_idx($ignore_list = []) {
 		$ignore_list = $this->resolve_ignore_list($ignore_list);
 
 		$i = $this->walk_left($this->tkns, $this->ptr, $ignore_list);
-		if ($idx) {
-			return $i;
-		}
-		return $this->tkns[$i];
+
+		return $i;
 	}
 
 	protected function left_token_is($token, $ignore_list = []) {
@@ -100,8 +104,12 @@ abstract class FormatterPass {
 		return $this->resolve_token_match($tkns, $idx, $token);
 	}
 
-	protected function left_useful_token($idx = false) {
-		return $this->left_token($this->ignore_futile_tokens, $idx);
+	protected function left_useful_token() {
+		return $this->left_token($this->ignore_futile_tokens);
+	}
+
+	protected function left_useful_token_idx() {
+		return $this->left_token_idx($this->ignore_futile_tokens);
 	}
 
 	protected function left_useful_token_is($token) {
@@ -213,14 +221,18 @@ abstract class FormatterPass {
 		return false;
 	}
 
-	protected function right_token($ignore_list = [], $idx = false) {
+	protected function right_token($ignore_list = []) {
+		$i = $this->right_token_idx($ignore_list);
+
+		return $this->tkns[$i];
+	}
+
+	protected function right_token_idx($ignore_list = []) {
 		$ignore_list = $this->resolve_ignore_list($ignore_list);
 
 		$i = $this->walk_right($this->tkns, $this->ptr, $ignore_list);
-		if ($idx) {
-			return $i;
-		}
-		return $this->tkns[$i];
+
+		return $i;
 	}
 
 	protected function right_token_is($token, $ignore_list = []) {
@@ -235,9 +247,13 @@ abstract class FormatterPass {
 		return $this->resolve_token_match($tkns, $idx, $token);
 	}
 
-	protected function right_useful_token($idx = false) {
-		return $this->right_token($this->ignore_futile_tokens, $idx);
+	protected function right_useful_token() {
+		return $this->right_token($this->ignore_futile_tokens);
 	}
+
+	// protected function right_useful_token_idx($idx = false) {
+	// 	return $this->right_token_idx($this->ignore_futile_tokens);
+	// }
 
 	protected function right_useful_token_is($token) {
 		return $this->right_token_is($token, $this->ignore_futile_tokens);
@@ -321,9 +337,10 @@ abstract class FormatterPass {
 			$this->ptr = $index;
 			$ret .= $text;
 			if ($tknid == $id) {
-				return $ret;
+				break;
 			}
 		}
+		return $ret;
 	}
 
 	private function walk_left($tkns, $idx, $ignore_list) {

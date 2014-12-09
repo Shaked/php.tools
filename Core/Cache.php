@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @codeCoverageIgnore
+ */
 class Cache {
 	const DEFAULT_CACHE_FILENAME = '.php.tools.cache';
 
