@@ -5696,18 +5696,20 @@ if (!isset($testEnv)) {
 
 		$cache_hit_count = 0;
 		$workers = 4;
-		for ($i = 1; $i < $argc; ++$i) {
-			if (!isset($argv[$i])) {
+		for ($j = 1; $j < $argc; ++$j) {
+			$arg = &$argv[$j];
+			if (!isset($arg)) {
 				continue;
 			}
-			if (is_file($argv[$i])) {
-				$file = $argv[$i];
+			if (is_file($arg)) {
+				$file = $arg;
 				++$file_count;
 				fwrite(STDERR, '.');
 				file_put_contents($file . '-tmp', $fmt->formatCode(file_get_contents($file)));
 				rename($file . '-tmp', $file);
-			} elseif (is_dir($argv[$i])) {
-				$target_dir = $argv[$i];
+			} elseif (is_dir($arg)) {
+				fwrite(STDERR, $arg . PHP_EOL);
+				$target_dir = $arg;
 				$dir = new RecursiveDirectoryIterator($target_dir);
 				$it = new RecursiveIteratorIterator($dir);
 				$files = new RegexIterator($it, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
@@ -5808,9 +5810,9 @@ if (!isset($testEnv)) {
 					$chn->close();
 				}
 				continue;
-			} elseif (!is_file($argv[$i])) {
+			} elseif (!is_file($arg)) {
 				$file_not_found = true;
-				$missing_files[] = $argv[$i];
+				$missing_files[] = $arg;
 				fwrite(STDERR, '!');
 			}
 			if (0 == ($file_count % 20)) {
