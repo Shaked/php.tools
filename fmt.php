@@ -546,6 +546,7 @@ abstract class AdditionalPass extends FormatterPass {
 	abstract public function get_example();
 }
 ;
+
 final class AddMissingCurlyBraces extends FormatterPass {
 	public function format($source) {
 		list($tmp, $changed) = $this->addBraces($source);
@@ -716,311 +717,6 @@ final class AddMissingCurlyBraces extends FormatterPass {
 	}
 }
 ;
-class AddMissingParentheses extends AdditionalPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_NEW:
-					$this->append_code($text);
-					list($found_id, $found_text) = $this->print_and_stop_at([ST_PARENTHESES_OPEN, T_COMMENT, T_DOC_COMMENT, ST_SEMI_COLON]);
-					if (ST_PARENTHESES_OPEN != $found_id) {
-						$this->append_code('()' . $found_text);
-					}
-					break;
-				default:
-					$this->append_code($text);
-			}
-		}
-
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Add extra parentheses in new instantiations.';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-$a = new SomeClass;
-
-$a = new SomeClass();
-?>
-EOT;
-	}
-}
-;
-final class AlignDoubleArrow extends AdditionalPass {
-	const ALIGNABLE_EQUAL = "\x2 EQUAL%d.%d.%d \x3";// level.levelentracecounter.counter
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-
-		$level_counter = 0;
-		$level_entrance_counter = [];
-		$context_counter = [];
-		$max_context_counter = [];
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case ST_COMMA:
-					if (!$this->has_ln_after() && !$this->has_ln_right_token()) {
-						if (!isset($level_entrance_counter[$level_counter])) {
-							$level_entrance_counter[$level_counter] = 0;
-						}
-						if (!isset($context_counter[$level_counter][$level_entrance_counter[$level_counter]])) {
-							$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
-							$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
-						}
-						++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
-						$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
-					} elseif ($context_counter[$level_counter][$level_entrance_counter[$level_counter]] > 1) {
-						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 1;
-					}
-					$this->append_code($text);
-					break;
-
-				case T_DOUBLE_ARROW:
-					$this->append_code(
-						sprintf(
-							self::ALIGNABLE_EQUAL,
-							$level_counter,
-							$level_entrance_counter[$level_counter],
-							$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
-						) . $text
-					);
-					break;
-
-				case ST_PARENTHESES_OPEN:
-				case ST_BRACKET_OPEN:
-					++$level_counter;
-					if (!isset($level_entrance_counter[$level_counter])) {
-						$level_entrance_counter[$level_counter] = 0;
-					}
-					++$level_entrance_counter[$level_counter];
-					if (!isset($context_counter[$level_counter][$level_entrance_counter[$level_counter]])) {
-						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
-						$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
-					}
-					++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
-					$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
-
-					$this->append_code($text);
-					break;
-
-				case ST_PARENTHESES_CLOSE:
-				case ST_BRACKET_CLOSE:
-					--$level_counter;
-					$this->append_code($text);
-					break;
-
-				default:
-					$this->append_code($text);
-					break;
-			}
-		}
-
-		foreach ($max_context_counter as $level => $entrances) {
-			foreach ($entrances as $entrance => $context) {
-				for ($j = 0; $j <= $context; ++$j) {
-					$placeholder = sprintf(self::ALIGNABLE_EQUAL, $level, $entrance, $j);
-					if (false === strpos($this->code, $placeholder)) {
-						continue;
-					}
-					if (1 === substr_count($this->code, $placeholder)) {
-						$this->code = str_replace($placeholder, '', $this->code);
-						continue;
-					}
-
-					$lines = explode($this->new_line, $this->code);
-					$lines_with_objop = [];
-					$block_count = 0;
-
-					foreach ($lines as $idx => $line) {
-						if (false !== strpos($line, $placeholder)) {
-							$lines_with_objop[] = $idx;
-						}
-					}
-
-					$farthest = 0;
-					foreach ($lines_with_objop as $idx) {
-						$farthest = max($farthest, strpos($lines[$idx], $placeholder));
-					}
-					foreach ($lines_with_objop as $idx) {
-						$line = $lines[$idx];
-						$current = strpos($line, $placeholder);
-						$delta = abs($farthest - $current);
-						if ($delta > 0) {
-							$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
-							$lines[$idx] = $line;
-						}
-					}
-
-					$this->code = str_replace($placeholder, '', implode($this->new_line, $lines));
-				}
-			}
-		}
-
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Vertically align T_DOUBLE_ARROW (=>).';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-$a = [
-	1 => 1,
-	22 => 22,
-	333 => 333,
-];
-
-$a = [
-	1   => 1,
-	22  => 22,
-	333 => 333,
-];
-?>
-EOT;
-	}
-}
-;
-final class AlignEquals extends AdditionalPass {
-	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		$paren_count = 0;
-		$bracket_count = 0;
-		$context_counter = 0;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_FUNCTION:
-					++$context_counter;
-					$this->append_code($text);
-					break;
-				case ST_PARENTHESES_OPEN:
-					++$paren_count;
-					$this->append_code($text);
-					break;
-				case ST_PARENTHESES_CLOSE:
-					--$paren_count;
-					$this->append_code($text);
-					break;
-				case ST_BRACKET_OPEN:
-					++$bracket_count;
-					$this->append_code($text);
-					break;
-				case ST_BRACKET_CLOSE:
-					--$bracket_count;
-					$this->append_code($text);
-					break;
-				case ST_EQUAL:
-					if (!$paren_count && !$bracket_count) {
-						$this->append_code(sprintf(self::ALIGNABLE_EQUAL, $context_counter) . $text);
-						break;
-					}
-
-				default:
-					$this->append_code($text);
-					break;
-			}
-		}
-
-		for ($j = 0; $j <= $context_counter; ++$j) {
-			$placeholder = sprintf(self::ALIGNABLE_EQUAL, $j);
-			if (false === strpos($this->code, $placeholder)) {
-				continue;
-			}
-			if (1 === substr_count($this->code, $placeholder)) {
-				$this->code = str_replace($placeholder, '', $this->code);
-				continue;
-			}
-
-			$lines = explode($this->new_line, $this->code);
-			$lines_with_objop = [];
-			$block_count = 0;
-
-			foreach ($lines as $idx => $line) {
-				if (false !== strpos($line, $placeholder)) {
-					$lines_with_objop[$block_count][] = $idx;
-				} else {
-					++$block_count;
-					$lines_with_objop[$block_count] = [];
-				}
-			}
-
-			$i = 0;
-			foreach ($lines_with_objop as $group) {
-				++$i;
-				$farthest = 0;
-				foreach ($group as $idx) {
-					$farthest = max($farthest, strpos($lines[$idx], $placeholder));
-				}
-				foreach ($group as $idx) {
-					$line = $lines[$idx];
-					$current = strpos($line, $placeholder);
-					$delta = abs($farthest - $current);
-					if ($delta > 0) {
-						$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
-						$lines[$idx] = $line;
-					}
-				}
-			}
-
-			$this->code = str_replace($placeholder, '', implode($this->new_line, $lines));
-		}
-
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Vertically align "=".';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-$a = 1;
-$bb = 22;
-$ccc = 333;
-
-$a   = 1;
-$bb  = 22;
-$ccc = 333;
-
-?>
-EOT;
-	}
-};
 /**
  * @codeCoverageIgnore
  */
@@ -1277,137 +973,6 @@ final class AutoImportPass extends FormatterPass {
 		return $return;
 	}
 };
-final class AutoPreincrement extends AdditionalPass {
-	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
-	const CHAIN_LITERAL = 'CHAIN_LITERAL';
-	const CHAIN_FUNC = 'CHAIN_FUNC';
-	const CHAIN_STRING = 'CHAIN_STRING';
-	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
-	public function format($source) {
-		return $this->swap($source);
-	}
-	protected function swap($source) {
-		$tkns = $this->aggregate_variables($source);
-		while (list($ptr, $token) = each($tkns)) {
-			list($id, $text) = $this->get_token($token);
-			switch ($id) {
-				case T_INC:
-				case T_DEC:
-					$prev_token = $tkns[$ptr - 1];
-					list($prev_id, ) = $prev_token;
-					if (T_VARIABLE == $prev_id || self::CHAIN_VARIABLE == $prev_id) {
-						list($tkns[$ptr], $tkns[$ptr - 1]) = [$tkns[$ptr - 1], $tkns[$ptr]];
-						break;
-					}
-			}
-		}
-		return $this->render($tkns);
-	}
-
-	private function aggregate_variables($source) {
-		$tkns = token_get_all($source);
-		reset($tkns);
-		while (list($ptr, $token) = each($tkns)) {
-			list($id, $text) = $this->get_token($token);
-
-			if (ST_PARENTHESES_OPEN == $id) {
-				$initial_ptr = $ptr;
-				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', [T_INC, T_DEC]);
-				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
-				continue;
-			}
-			if (ST_QUOTE == $id) {
-				$stack = $text;
-				$initial_ptr = $ptr;
-				while (list($ptr, $token) = each($tkns)) {
-					list($id, $text) = $this->get_token($token);
-					$stack .= $text;
-					$tkns[$ptr] = null;
-					if (ST_QUOTE == $id) {
-						break;
-					}
-				}
-
-				$tkns[$initial_ptr] = [self::CHAIN_STRING, $stack];
-				continue;
-			}
-
-			if (T_STRING == $id || T_VARIABLE == $id || T_NS_SEPARATOR == $id) {
-				$initial_index = $ptr;
-				$stack = $text;
-				$touched_variable = false;
-				if (T_VARIABLE == $id) {
-					$touched_variable = true;
-				}
-				if (!$this->right_token_subset_is_at_idx(
-					$tkns,
-					$ptr,
-					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
-				)) {
-					continue;
-				}
-
-				while (list($ptr, $token) = each($tkns)) {
-					list($id, $text) = $this->get_token($token);
-					$tkns[$ptr] = null;
-					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', [T_INC, T_DEC]);
-					} elseif (ST_BRACKET_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', [T_INC, T_DEC]);
-					} elseif (ST_PARENTHESES_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', [T_INC, T_DEC]);
-					}
-
-					$stack .= $text;
-
-					if (!$touched_variable && T_VARIABLE == $id) {
-						$touched_variable = true;
-					}
-
-					if (
-						!$this->right_token_subset_is_at_idx(
-							$tkns,
-							$ptr,
-							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
-						)
-					) {
-						break;
-					}
-				}
-				if (substr(trim($stack), -1, 1) == ST_PARENTHESES_CLOSE) {
-					$tkns[$initial_index] = [self::CHAIN_FUNC, $stack];
-				} elseif ($touched_variable) {
-					$tkns[$initial_index] = [self::CHAIN_VARIABLE, $stack];
-				} else {
-					$tkns[$initial_index] = [self::CHAIN_LITERAL, $stack];
-				}
-			}
-		}
-		$tkns = array_values(array_filter($tkns));
-		return $tkns;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Automatically convert postincrement to preincrement.';
-	}
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-$a++;
-$b--;
-
-++$a;
---$b;
-?>
-EOT;
-	}
-};
 final class ConstructorPass extends FormatterPass {
 	const TYPE_CAMEL_CASE = 'camel';
 	const TYPE_SNAKE_CASE = 'snake';
@@ -1518,98 +1083,6 @@ final class ConstructorPass extends FormatterPass {
 	private function generateGolang($var) {
 		$str = '$this->Set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . ');' . $this->new_line;
 		return $str;
-	}
-};
-class WrongConstructorName extends AdditionalPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		$touched_namespace = false;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_NAMESPACE:
-					$touched_namespace = true;
-					$this->append_code($text);
-					break;
-				case T_CLASS:
-					$this->append_code($text);
-					if ($this->left_useful_token_is([T_DOUBLE_COLON])) {
-						break;
-					}
-					if ($touched_namespace) {
-						break;
-					}
-					$class_local_name = '';
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
-						$this->append_code($text);
-						if (T_STRING == $id) {
-							$class_local_name = strtolower($text);
-						}
-						if (T_EXTENDS == $id || T_IMPLEMENTS == $id || ST_CURLY_OPEN == $id) {
-							break;
-						}
-					}
-					$count = 1;
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
-
-						if (T_STRING == $id && $this->left_useful_token_is([T_FUNCTION]) && strtolower($text) == $class_local_name) {
-							$text = '__construct';
-						}
-						$this->append_code($text);
-
-						if (ST_CURLY_OPEN == $id) {
-							++$count;
-						}
-						if (ST_CURLY_CLOSE == $id) {
-							--$count;
-						}
-						if (0 == $count) {
-							break;
-						}
-					}
-					break;
-				default:
-					$this->append_code($text);
-			}
-		}
-
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Update old constructor names into new ones. http://php.net/manual/en/language.oop5.decon.php';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-class A {
-	function A(){
-
-	}
-}
-?>
-to
-<?php
-class A {
-	function __construct(){
-
-	}
-}
-?>
-EOT;
 	}
 };
 final class EliminateDuplicatedEmptyLines extends FormatterPass {
@@ -1798,207 +1271,6 @@ final class ExtraCommaInArray extends FormatterPass {
 		return $this->render_light();
 	}
 };
-final class GeneratePHPDoc extends AdditionalPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		$touched_visibility = false;
-		$touched_doc_comment = false;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_DOC_COMMENT:
-					$touched_doc_comment = true;
-				case T_FINAL:
-				case T_ABSTRACT:
-				case T_PUBLIC:
-				case T_PROTECTED:
-				case T_PRIVATE:
-				case T_STATIC:
-					if (!$this->left_token_is([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
-						$touched_visibility = true;
-						$visibility_idx = $this->ptr;
-					}
-				case T_FUNCTION:
-					if ($touched_doc_comment) {
-						$touched_doc_comment = false;
-						break;
-					}
-					if (!$touched_visibility) {
-						$orig_idx = $this->ptr;
-					} else {
-						$orig_idx = $visibility_idx;
-					}
-					list($nt_id, $nt_text) = $this->get_token($this->right_token());
-					if (T_STRING != $nt_id) {
-						$this->append_code($text);
-						break;
-					}
-					$this->walk_until(ST_PARENTHESES_OPEN);
-					$param_stack = [];
-					$tmp = ['type' => '', 'name' => ''];
-					$count = 1;
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
-
-						if (ST_PARENTHESES_OPEN == $id) {
-							++$count;
-						}
-						if (ST_PARENTHESES_CLOSE == $id) {
-							--$count;
-						}
-						if (0 == $count) {
-							break;
-						}
-						if (T_STRING == $id || T_NS_SEPARATOR == $id) {
-							$tmp['type'] .= $text;
-							continue;
-						}
-						if (T_VARIABLE == $id) {
-							if ($this->right_token_is([ST_EQUAL]) && $this->walk_until(ST_EQUAL) && $this->right_token_is([T_ARRAY])) {
-								$tmp['type'] = 'array';
-							}
-							$tmp['name'] = $text;
-							$param_stack[] = $tmp;
-							$tmp = ['type' => '', 'name' => ''];
-							continue;
-						}
-					}
-
-					$return_stack = '';
-					if (!$this->left_useful_token_is(ST_SEMI_COLON)) {
-						$this->walk_until(ST_CURLY_OPEN);
-						$count = 1;
-						while (list($index, $token) = each($this->tkns)) {
-							list($id, $text) = $this->get_token($token);
-							$this->ptr = $index;
-
-							if (ST_CURLY_OPEN == $id) {
-								++$count;
-							}
-							if (ST_CURLY_CLOSE == $id) {
-								--$count;
-							}
-							if (0 == $count) {
-								break;
-							}
-							if (T_RETURN == $id) {
-								if ($this->right_token_is([T_DNUMBER])) {
-									$return_stack = 'float';
-								} elseif ($this->right_token_is([T_LNUMBER])) {
-									$return_stack = 'int';
-								} elseif ($this->right_token_is([T_VARIABLE])) {
-									$return_stack = 'mixed';
-								} elseif ($this->right_token_is([ST_SEMI_COLON])) {
-									$return_stack = 'null';
-								}
-							}
-						}
-					}
-
-					$func_token = &$this->tkns[$orig_idx];
-					$func_token[1] = $this->render_doc_block($param_stack, $return_stack) . $func_token[1];
-					$touched_visibility = false;
-			}
-		}
-
-		return implode('', array_map(function ($token) {
-			list(, $text) = $this->get_token($token);
-			return $text;
-		}, $this->tkns));
-	}
-
-	private function render_doc_block(array $param_stack, $return_stack) {
-		if (empty($param_stack) && empty($return_stack)) {
-			return '';
-		}
-		$str = '/**' . $this->new_line;
-		foreach ($param_stack as $param) {
-			$str .= rtrim(' * @param ' . $param['type']) . ' ' . $param['name'] . $this->new_line;
-		}
-		if (!empty($return_stack)) {
-			$str .= ' * @return ' . $return_stack . $this->new_line;
-		}
-		$str .= ' */' . $this->new_line;
-		return $str;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Automatically generates PHPDoc blocks';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-class A {
-	function a(Someclass $a) {
-		return 1;
-	}
-}
-?>
-to
-<?php
-class A {
-	/**
-	 * @param Someclass $a
-	 * @return int
-	 */
-	function a(Someclass $a) {
-		return 1;
-	}
-}
-?>
-EOT;
-	}
-}
-;
-class JoinToImplode extends AdditionalPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			if (T_STRING == $id && strtolower($text) == 'join' && !($this->left_useful_token_is([T_NEW, T_NS_SEPARATOR, T_STRING, T_DOUBLE_COLON, T_OBJECT_OPERATOR]) || $this->right_useful_token_is([T_NS_SEPARATOR, T_DOUBLE_COLON]))) {
-				$this->append_code('implode');
-				continue;
-			}
-			$this->append_code($text);
-		}
-
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Replace implode() alias (join() -> implode()).';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-$a = join(',', $arr);
-
-$a = implode(',', $arr);
-?>
-EOT;
-	}
-
-}
-;
 final class LeftAlignComment extends FormatterPass {
 	const NON_INDENTABLE_COMMENT = "/*\x2 COMMENT \x3*/";
 	public function format($source) {
@@ -2121,61 +1393,6 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 		return $this->code;
 	}
 };
-/**
- * From PHP-CS-Fixer
- */
-class MergeElseIf extends AdditionalPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		$paren_count = 0;
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_IF:
-					if ($this->left_token_is([T_ELSE]) && !$this->left_token_is([T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO])) {
-						$this->rtrim_and_append_code($text);
-						break;
-					}
-				default:
-					$this->append_code($text);
-					break;
-			}
-		}
-
-		return $this->code;
-	}
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Merge if with else. ';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-if($a){
-
-} else if($b) {
-
-}
-
-if($a){
-
-} elseif($b) {
-
-}
-?>
-EOT;
-	}
-}
-;
 final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -2204,6 +1421,27 @@ final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 					break;
 			}
 		}
+		return $this->code;
+	}
+}
+;
+final class NormalizeIsNotEquals extends FormatterPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_IS_NOT_EQUAL:
+					$this->append_code(str_replace('<>', '!=', $text) . $this->get_space());
+					break;
+				default:
+					$this->append_code($text);
+					break;
+			}
+		}
+
 		return $this->code;
 	}
 }
@@ -2264,174 +1502,6 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 		}
 
 		return $this->code;
-	}
-}
-;
-final class NormalizeIsNotEquals extends FormatterPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_IS_NOT_EQUAL:
-					$this->append_code(str_replace('<>', '!=', $text) . $this->get_space());
-					break;
-				default:
-					$this->append_code($text);
-					break;
-			}
-		}
-
-		return $this->code;
-	}
-}
-;
-final class OrderMethod extends AdditionalPass {
-	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
-	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
-
-	public function orderMethods($source) {
-		$tokens = token_get_all($source);
-		$return = '';
-		$function_list = [];
-		while (list($index, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_ABSTRACT:
-				case T_STATIC:
-				case T_PRIVATE:
-				case T_PROTECTED:
-				case T_PUBLIC:
-					$stack = $text;
-					$curly_count = null;
-					$touched_method = false;
-					$function_name = '';
-					while (list($index, $token) = each($tokens)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
-
-						$stack .= $text;
-						if (T_FUNCTION == $id) {
-							$touched_method = true;
-						}
-						if (T_VARIABLE == $id && !$touched_method) {
-							break;
-						}
-						if (T_STRING == $id && $touched_method && empty($function_name)) {
-							$function_name = $text;
-						}
-
-						if (null === $curly_count && ST_SEMI_COLON == $id) {
-							break;
-						}
-
-						if (ST_CURLY_OPEN == $id) {
-							++$curly_count;
-						}
-						if (ST_CURLY_CLOSE == $id) {
-							--$curly_count;
-						}
-						if (0 === $curly_count) {
-							break;
-						}
-					}
-					if (!$touched_method) {
-						$return .= $stack;
-					} else {
-						$function_list[$function_name] = $stack;
-						$return .= self::METHOD_REPLACEMENT_PLACEHOLDER;
-					}
-					break;
-				default:
-					$return .= $text;
-					break;
-			}
-		}
-		ksort($function_list);
-		foreach ($function_list as $function_body) {
-			$return = preg_replace('/' . self::METHOD_REPLACEMENT_PLACEHOLDER . '/', $function_body, $return, 1);
-		}
-		return $return;
-	}
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$return = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_CLASS:
-					$return .= $text;
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
-						$return .= $text;
-						if (ST_CURLY_OPEN == $id) {
-							break;
-						}
-					}
-					$class_block = '';
-					$curly_count = 1;
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
-						$class_block .= $text;
-						if (ST_CURLY_OPEN == $id) {
-							++$curly_count;
-						} elseif (ST_CURLY_CLOSE == $id) {
-							--$curly_count;
-						}
-
-						if (0 == $curly_count) {
-							break;
-						}
-					}
-					$return .= str_replace(
-						self::OPENER_PLACEHOLDER,
-						'',
-						$this->orderMethods(self::OPENER_PLACEHOLDER . $class_block)
-					);
-					$this->append_code($return);
-					break;
-				default:
-					$this->append_code($text);
-					break;
-			}
-		}
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Sort methods within class in alphabetic order.';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-class A {
-	function b(){}
-	function c(){}
-	function a(){}
-}
-?>
-to
-<?php
-class A {
-	function a(){}
-	function b(){}
-	function c(){}
-}
-?>
-EOT;
 	}
 }
 ;
@@ -3242,65 +2312,6 @@ final class ReindentObjOps extends FormatterPass {
 	}
 }
 ;
-class RemoveUseLeadingSlash extends AdditionalPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		$last_touched_token = null;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_NAMESPACE:
-				case T_TRAIT:
-				case T_CLASS:
-				case T_FUNCTION:
-					$last_touched_token = $id;
-				case T_NS_SEPARATOR:
-					if (T_NAMESPACE == $last_touched_token && $this->left_token_is([T_USE])) {
-						continue;
-					}
-				default:
-					$this->append_code($text);
-			}
-		}
-
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Remove leading slash in T_USE imports.';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-namespace NS1;
-use \B;
-use \D;
-
-new B();
-new D();
-?>
-to
-<?php
-namespace NS1;
-use B;
-use D;
-
-new B();
-new D();
-?>
-EOT;
-	}
-}
-;
 final class RemoveIncludeParentheses extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -3678,91 +2689,6 @@ final class ResizeSpaces extends FormatterPass {
 	}
 }
 ;
-class ReturnNull extends AdditionalPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		$this->use_cache = true;
-		$touched_return = false;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			$this->cache = [];
-
-			if (ST_PARENTHESES_OPEN == $id && $this->left_token_is([T_RETURN])) {
-				$paren_count = 1;
-				$touched_another_valid_token = false;
-				$stack = $text;
-				while (list($index, $token) = each($this->tkns)) {
-					list($id, $text) = $this->get_token($token);
-					$this->ptr = $index;
-					$this->cache = [];
-					if (ST_PARENTHESES_OPEN == $id) {
-						++$paren_count;
-					}
-					if (ST_PARENTHESES_CLOSE == $id) {
-						--$paren_count;
-					}
-					$stack .= $text;
-					if (0 == $paren_count) {
-						break;
-					}
-					if (
-						!(
-							(T_STRING == $id && strtolower($text) == 'null') ||
-							ST_PARENTHESES_OPEN == $id ||
-							ST_PARENTHESES_CLOSE == $id
-						)
-					) {
-						$touched_another_valid_token = true;
-					}
-				}
-				if ($touched_another_valid_token) {
-					$this->append_code($stack);
-				}
-				continue;
-			}
-			if (T_STRING == $id && strtolower($text) == 'null') {
-				list($prev_id, ) = $this->left_useful_token();
-				list($next_id, ) = $this->right_useful_token();
-				if (T_RETURN == $prev_id && ST_SEMI_COLON == $next_id) {
-					continue;
-				}
-			}
-
-			$this->append_code($text);
-		}
-
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Simplify empty returns.';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-function a(){
-	return null;
-}
-?>
-to
-<?php
-function a(){
-	return;
-}
-?>
-EOT;
-	}
-}
-;
 final class RTrim extends FormatterPass {
 	public function format($source) {
 		return implode(
@@ -3899,265 +2825,9 @@ final class SettersAndGettersPass extends FormatterPass {
 		return $str;
 	}
 };
-/**
- * From PHP-CS-Fixer
- */
-class ShortArray extends AdditionalPass {
-	const FOUND_ARRAY = 'array';
-	const FOUND_PARENTHESES = 'paren';
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		$found_paren = [];
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_ARRAY:
-					if ($this->right_token_is([ST_PARENTHESES_OPEN])) {
-						$found_paren[] = self::FOUND_ARRAY;
-						$this->print_and_stop_at(ST_PARENTHESES_OPEN);
-						$this->append_code(ST_BRACKET_OPEN);
-						break;
-					}
-				case ST_PARENTHESES_OPEN:
-					$found_paren[] = self::FOUND_PARENTHESES;
-					$this->append_code($text);
-					break;
-
-				case ST_PARENTHESES_CLOSE:
-					$pop_token = array_pop($found_paren);
-					if (self::FOUND_ARRAY == $pop_token) {
-						$this->append_code(ST_BRACKET_CLOSE);
-						break;
-					}
-				default:
-					$this->append_code($text);
-					break;
-			}
-		}
-
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Convert old array into new array. (array() -> [])';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-echo array();
-?>
-to
-<?php
-echo [];
-?>
-EOT;
-	}
-}
-;
-final class SmartLnAfterCurlyOpen extends AdditionalPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		$curly_count = 0;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case ST_CURLY_OPEN:
-					$this->append_code($text);
-					$curly_count = 1;
-					$stack = '';
-					$found_line_break = false;
-					$has_ln_after = $this->has_ln_after();
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
-						$this->ptr = $index;
-						$stack .= $text;
-						if (T_START_HEREDOC == $id) {
-							$stack .= $this->walk_and_accumulate_until($this->tkns, T_END_HEREDOC);
-							continue;
-						}
-						if (ST_QUOTE == $id) {
-							$stack .= $this->walk_and_accumulate_until($this->tkns, ST_QUOTE);
-							continue;
-						}
-						if (ST_CURLY_OPEN == $id) {
-							++$curly_count;
-						}
-						if (ST_CURLY_CLOSE == $id) {
-							--$curly_count;
-						}
-						if (T_WHITESPACE === $id && $this->has_ln($text)) {
-							$found_line_break = true;
-							break;
-						}
-						if (0 == $curly_count) {
-							break;
-						}
-					}
-					if ($found_line_break && !$has_ln_after) {
-						$this->append_code($this->new_line);
-					}
-					$this->append_code($stack);
-					break;
-				default:
-					$this->append_code($text);
-					break;
-			}
-		}
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Add line break when implicit curly block is added.';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-if($a) echo array();
-?>
-to
-<?php
-if($a) {
-	echo array();
-}
-?>
-EOT;
-	}
-}
-;
-class SpaceBetweenMethods extends AdditionalPass {
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		$last_touched_token = null;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_FUNCTION:
-					$this->append_code($text);
-					$this->print_until(ST_CURLY_OPEN);
-					$this->print_block(ST_CURLY_OPEN, ST_CURLY_CLOSE);
-					if (!$this->right_token_is([ST_CURLY_CLOSE, ST_SEMI_COLON, ST_COMMA, ST_PARENTHESES_CLOSE])) {
-						$this->append_code($this->get_crlf());
-					}
-					break;
-				default:
-					$this->append_code($text);
-					break;
-			}
-		}
-
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Put space between methods.';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-class A {
-	function b(){
-
-	}
-	function c(){
-
-	}
-}
-?>
-to
-<?php
-class A {
-	function b(){
-
-	}
-
-	function c(){
-
-	}
-
-}
-?>
-EOT;
-	}
-}
-;
 final class SurrogateToken {
 }
 ;
-class TightConcat extends AdditionalPass {
-	public function format($source) {
-		$whitespaces = " \t";
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case ST_CONCAT:
-					if (!$this->left_token_is([T_LNUMBER, T_DNUMBER])) {
-						$this->code = rtrim($this->code, $whitespaces);
-					}
-					if (!$this->right_token_is([T_LNUMBER, T_DNUMBER])) {
-						each($this->tkns);
-					}
-				default:
-					$this->append_code($text);
-					break;
-			}
-		}
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Ensure string concatenation does not have spaces, except when close to numbers.';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-// From
-$a = 'a' . 'b';
-$a = 'a' . 1 . 'b';
-// To
-$a = 'a'.'b';
-$a = 'a'. 1 .'b';
-?>
-EOT;
-	}
-};
 final class TwoCommandsInSameLine extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -4191,235 +2861,7 @@ final class TwoCommandsInSameLine extends FormatterPass {
 	}
 }
 ;
-final class YodaComparisons extends AdditionalPass {
-	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
-	const CHAIN_LITERAL = 'CHAIN_LITERAL';
-	const CHAIN_FUNC = 'CHAIN_FUNC';
-	const CHAIN_STRING = 'CHAIN_STRING';
-	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
-	public function format($source) {
-		return $this->yodise($source);
-	}
-	protected function yodise($source) {
-		$tkns = $this->aggregate_variables($source);
-		while (list($ptr, $token) = each($tkns)) {
-			if (is_null($token)) {
-				continue;
-			}
-			list($id, $text) = $this->get_token($token);
-			switch ($id) {
-				case T_IS_EQUAL:
-				case T_IS_IDENTICAL:
-				case T_IS_NOT_EQUAL:
-				case T_IS_NOT_IDENTICAL:
-					list($left, $right) = $this->siblings($tkns, $ptr);
-					list($left_id, $left_text) = $tkns[$left];
-					list($right_id, $right_text) = $tkns[$right];
-					if ($left_id == $right_id) {
-						continue;
-					}
 
-					$left_pure_variable = $this->is_pure_variable($left_id);
-					for ($leftmost = $left; $leftmost >= 0; --$leftmost) {
-						list($left_scan_id, $left_scan_text) = $this->get_token($tkns[$leftmost]);
-						if ($this->is_lower_precedence($left_scan_id)) {
-							++$leftmost;
-							break;
-						}
-						$left_pure_variable &= $this->is_pure_variable($left_scan_id);
-					}
-
-					$right_pure_variable = $this->is_pure_variable($right_id);
-					for ($rightmost = $right; $rightmost < sizeof($tkns) - 1; ++$rightmost) {
-						list($right_scan_id, $right_scan_text) = $this->get_token($tkns[$rightmost]);
-						if ($this->is_lower_precedence($right_scan_id)) {
-							--$rightmost;
-							break;
-						}
-						$right_pure_variable &= $this->is_pure_variable($right_scan_id);
-					}
-
-					if ($left_pure_variable && !$right_pure_variable) {
-						$orig_left_tokens = $left_tokens = implode('', array_map(function ($token) {
-							return isset($token[1]) ? $token[1] : $token;
-						}, array_slice($tkns, $leftmost, $left - $leftmost + 1)));
-						$orig_right_tokens = $right_tokens = implode('', array_map(function ($token) {
-							return isset($token[1]) ? $token[1] : $token;
-						}, array_slice($tkns, $right, $rightmost - $right + 1)));
-
-						$left_tokens = (substr($orig_right_tokens, 0, 1) == ' ' ? ' ' : '') . trim($left_tokens) . (substr($orig_right_tokens, -1, 1) == ' ' ? ' ' : '');
-						$right_tokens = (substr($orig_left_tokens, 0, 1) == ' ' ? ' ' : '') . trim($right_tokens) . (substr($orig_left_tokens, -1, 1) == ' ' ? ' ' : '');
-
-						$tkns[$leftmost] = ['REPLACED', $right_tokens];
-						$tkns[$right] = ['REPLACED', $left_tokens];
-
-						if ($leftmost != $left) {
-							for ($i = $leftmost + 1; $i <= $left; ++$i) {
-								$tkns[$i] = null;
-							}
-						}
-						if ($rightmost != $right) {
-							for ($i = $right + 1; $i <= $rightmost; ++$i) {
-								$tkns[$i] = null;
-							}
-						}
-					}
-			}
-		}
-		return $this->render($tkns);
-	}
-
-	private function is_pure_variable($id) {
-		return self::CHAIN_VARIABLE == $id || T_VARIABLE == $id || T_INC == $id || T_DEC == $id || ST_EXCLAMATION == $id || T_COMMENT == $id || T_DOC_COMMENT == $id || T_WHITESPACE == $id;
-	}
-	private function is_lower_precedence($id) {
-		switch ($id) {
-			case ST_REFERENCE:
-			case ST_BITWISE_XOR:
-			case ST_BITWISE_OR:
-			case T_BOOLEAN_AND:
-			case T_BOOLEAN_OR:
-			case ST_QUESTION:
-			case ST_COLON:
-			case ST_EQUAL:
-			case T_PLUS_EQUAL:
-			case T_MINUS_EQUAL:
-			case T_MUL_EQUAL:
-			case T_POW_EQUAL:
-			case T_DIV_EQUAL:
-			case T_CONCAT_EQUAL:
-			case T_MOD_EQUAL:
-			case T_AND_EQUAL:
-			case T_OR_EQUAL:
-			case T_XOR_EQUAL:
-			case T_SL_EQUAL:
-			case T_SR_EQUAL:
-			case T_DOUBLE_ARROW:
-			case T_LOGICAL_AND:
-			case T_LOGICAL_XOR:
-			case T_LOGICAL_OR:
-			case ST_COMMA:
-			case ST_SEMI_COLON:
-			case T_RETURN:
-			case T_THROW:
-			case T_GOTO:
-			case T_CASE:
-			case T_COMMENT:
-			case T_DOC_COMMENT:
-			case T_OPEN_TAG:
-				return true;
-		}
-		return false;
-	}
-
-	private function aggregate_variables($source) {
-		$tkns = token_get_all($source);
-		while (list($ptr, $token) = each($tkns)) {
-			list($id, $text) = $this->get_token($token);
-
-			if (ST_PARENTHESES_OPEN == $id) {
-				$initial_ptr = $ptr;
-				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
-				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
-				continue;
-			}
-			if (ST_QUOTE == $id) {
-				$stack = $text;
-				$initial_ptr = $ptr;
-				while (list($ptr, $token) = each($tkns)) {
-					list($id, $text) = $this->get_token($token);
-					$stack .= $text;
-					$tkns[$ptr] = null;
-					if (ST_QUOTE == $id) {
-						break;
-					}
-				}
-
-				$tkns[$initial_ptr] = [self::CHAIN_STRING, $stack];
-				continue;
-			}
-
-			if (T_STRING == $id || T_VARIABLE == $id || T_NS_SEPARATOR == $id) {
-				$initial_index = $ptr;
-				$stack = $text;
-				$touched_variable = false;
-				if (T_VARIABLE == $id) {
-					$touched_variable = true;
-				}
-				if (!$this->right_token_subset_is_at_idx(
-					$tkns,
-					$ptr,
-					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
-				)) {
-					continue;
-				}
-				while (list($ptr, $token) = each($tkns)) {
-					list($id, $text) = $this->get_token($token);
-					$tkns[$ptr] = null;
-					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
-					} elseif (ST_BRACKET_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
-					} elseif (ST_PARENTHESES_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
-					}
-
-					$stack .= $text;
-
-					if (!$touched_variable && T_VARIABLE == $id) {
-						$touched_variable = true;
-					}
-
-					if (
-						!$this->right_token_subset_is_at_idx(
-							$tkns,
-							$ptr,
-							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
-						)
-					) {
-						break;
-					}
-				}
-				if (substr(trim($stack), -1, 1) == ST_PARENTHESES_CLOSE) {
-					$tkns[$initial_index] = [self::CHAIN_FUNC, $stack];
-				} elseif ($touched_variable) {
-					$tkns[$initial_index] = [self::CHAIN_VARIABLE, $stack];
-				} else {
-					$tkns[$initial_index] = [self::CHAIN_LITERAL, $stack];
-				}
-			}
-		}
-		$tkns = array_values(array_filter($tkns));
-		return $tkns;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_description() {
-		return 'Execute Yoda Comparisons.';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function get_example() {
-		return <<<'EOT'
-<?php
-if($a == 1){
-
-}
-?>
-to
-<?php
-if(1 == $a){
-
-}
-?>
-EOT;
-	}
-};
-//PSR standards
 final class PSR1BOMMark extends FormatterPass {
 	public function format($source) {
 		$bom = "\xef\xbb\xbf";
@@ -5066,7 +3508,742 @@ class PsrDecorator {
 		self::PSR2($fmt);
 	}
 };
-//Other Styles
+
+class AddMissingParentheses extends AdditionalPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_NEW:
+					$this->append_code($text);
+					list($found_id, $found_text) = $this->print_and_stop_at([ST_PARENTHESES_OPEN, T_COMMENT, T_DOC_COMMENT, ST_SEMI_COLON]);
+					if (ST_PARENTHESES_OPEN != $found_id) {
+						$this->append_code('()' . $found_text);
+					}
+					break;
+				default:
+					$this->append_code($text);
+			}
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Add extra parentheses in new instantiations.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a = new SomeClass;
+
+$a = new SomeClass();
+?>
+EOT;
+	}
+}
+;
+final class AlignDoubleArrow extends AdditionalPass {
+	const ALIGNABLE_EQUAL = "\x2 EQUAL%d.%d.%d \x3";// level.levelentracecounter.counter
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+
+		$level_counter = 0;
+		$level_entrance_counter = [];
+		$context_counter = [];
+		$max_context_counter = [];
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case ST_COMMA:
+					if (!$this->has_ln_after() && !$this->has_ln_right_token()) {
+						if (!isset($level_entrance_counter[$level_counter])) {
+							$level_entrance_counter[$level_counter] = 0;
+						}
+						if (!isset($context_counter[$level_counter][$level_entrance_counter[$level_counter]])) {
+							$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+							$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+						}
+						++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
+						$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
+					} elseif ($context_counter[$level_counter][$level_entrance_counter[$level_counter]] > 1) {
+						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 1;
+					}
+					$this->append_code($text);
+					break;
+
+				case T_DOUBLE_ARROW:
+					$this->append_code(
+						sprintf(
+							self::ALIGNABLE_EQUAL,
+							$level_counter,
+							$level_entrance_counter[$level_counter],
+							$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
+						) . $text
+					);
+					break;
+
+				case ST_PARENTHESES_OPEN:
+				case ST_BRACKET_OPEN:
+					++$level_counter;
+					if (!isset($level_entrance_counter[$level_counter])) {
+						$level_entrance_counter[$level_counter] = 0;
+					}
+					++$level_entrance_counter[$level_counter];
+					if (!isset($context_counter[$level_counter][$level_entrance_counter[$level_counter]])) {
+						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+						$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+					}
+					++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
+					$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
+
+					$this->append_code($text);
+					break;
+
+				case ST_PARENTHESES_CLOSE:
+				case ST_BRACKET_CLOSE:
+					--$level_counter;
+					$this->append_code($text);
+					break;
+
+				default:
+					$this->append_code($text);
+					break;
+			}
+		}
+
+		foreach ($max_context_counter as $level => $entrances) {
+			foreach ($entrances as $entrance => $context) {
+				for ($j = 0; $j <= $context; ++$j) {
+					$placeholder = sprintf(self::ALIGNABLE_EQUAL, $level, $entrance, $j);
+					if (false === strpos($this->code, $placeholder)) {
+						continue;
+					}
+					if (1 === substr_count($this->code, $placeholder)) {
+						$this->code = str_replace($placeholder, '', $this->code);
+						continue;
+					}
+
+					$lines = explode($this->new_line, $this->code);
+					$lines_with_objop = [];
+					$block_count = 0;
+
+					foreach ($lines as $idx => $line) {
+						if (false !== strpos($line, $placeholder)) {
+							$lines_with_objop[] = $idx;
+						}
+					}
+
+					$farthest = 0;
+					foreach ($lines_with_objop as $idx) {
+						$farthest = max($farthest, strpos($lines[$idx], $placeholder));
+					}
+					foreach ($lines_with_objop as $idx) {
+						$line = $lines[$idx];
+						$current = strpos($line, $placeholder);
+						$delta = abs($farthest - $current);
+						if ($delta > 0) {
+							$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
+							$lines[$idx] = $line;
+						}
+					}
+
+					$this->code = str_replace($placeholder, '', implode($this->new_line, $lines));
+				}
+			}
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Vertically align T_DOUBLE_ARROW (=>).';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a = [
+	1 => 1,
+	22 => 22,
+	333 => 333,
+];
+
+$a = [
+	1   => 1,
+	22  => 22,
+	333 => 333,
+];
+?>
+EOT;
+	}
+}
+;
+final class AlignEquals extends AdditionalPass {
+	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$paren_count = 0;
+		$bracket_count = 0;
+		$context_counter = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_FUNCTION:
+					++$context_counter;
+					$this->append_code($text);
+					break;
+				case ST_PARENTHESES_OPEN:
+					++$paren_count;
+					$this->append_code($text);
+					break;
+				case ST_PARENTHESES_CLOSE:
+					--$paren_count;
+					$this->append_code($text);
+					break;
+				case ST_BRACKET_OPEN:
+					++$bracket_count;
+					$this->append_code($text);
+					break;
+				case ST_BRACKET_CLOSE:
+					--$bracket_count;
+					$this->append_code($text);
+					break;
+				case ST_EQUAL:
+					if (!$paren_count && !$bracket_count) {
+						$this->append_code(sprintf(self::ALIGNABLE_EQUAL, $context_counter) . $text);
+						break;
+					}
+
+				default:
+					$this->append_code($text);
+					break;
+			}
+		}
+
+		for ($j = 0; $j <= $context_counter; ++$j) {
+			$placeholder = sprintf(self::ALIGNABLE_EQUAL, $j);
+			if (false === strpos($this->code, $placeholder)) {
+				continue;
+			}
+			if (1 === substr_count($this->code, $placeholder)) {
+				$this->code = str_replace($placeholder, '', $this->code);
+				continue;
+			}
+
+			$lines = explode($this->new_line, $this->code);
+			$lines_with_objop = [];
+			$block_count = 0;
+
+			foreach ($lines as $idx => $line) {
+				if (false !== strpos($line, $placeholder)) {
+					$lines_with_objop[$block_count][] = $idx;
+				} else {
+					++$block_count;
+					$lines_with_objop[$block_count] = [];
+				}
+			}
+
+			$i = 0;
+			foreach ($lines_with_objop as $group) {
+				++$i;
+				$farthest = 0;
+				foreach ($group as $idx) {
+					$farthest = max($farthest, strpos($lines[$idx], $placeholder));
+				}
+				foreach ($group as $idx) {
+					$line = $lines[$idx];
+					$current = strpos($line, $placeholder);
+					$delta = abs($farthest - $current);
+					if ($delta > 0) {
+						$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
+						$lines[$idx] = $line;
+					}
+				}
+			}
+
+			$this->code = str_replace($placeholder, '', implode($this->new_line, $lines));
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Vertically align "=".';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a = 1;
+$bb = 22;
+$ccc = 333;
+
+$a   = 1;
+$bb  = 22;
+$ccc = 333;
+
+?>
+EOT;
+	}
+};
+final class AutoPreincrement extends AdditionalPass {
+	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
+	const CHAIN_LITERAL = 'CHAIN_LITERAL';
+	const CHAIN_FUNC = 'CHAIN_FUNC';
+	const CHAIN_STRING = 'CHAIN_STRING';
+	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
+	public function format($source) {
+		return $this->swap($source);
+	}
+	protected function swap($source) {
+		$tkns = $this->aggregate_variables($source);
+		while (list($ptr, $token) = each($tkns)) {
+			list($id, $text) = $this->get_token($token);
+			switch ($id) {
+				case T_INC:
+				case T_DEC:
+					$prev_token = $tkns[$ptr - 1];
+					list($prev_id, ) = $prev_token;
+					if (T_VARIABLE == $prev_id || self::CHAIN_VARIABLE == $prev_id) {
+						list($tkns[$ptr], $tkns[$ptr - 1]) = [$tkns[$ptr - 1], $tkns[$ptr]];
+						break;
+					}
+			}
+		}
+		return $this->render($tkns);
+	}
+
+	private function aggregate_variables($source) {
+		$tkns = token_get_all($source);
+		reset($tkns);
+		while (list($ptr, $token) = each($tkns)) {
+			list($id, $text) = $this->get_token($token);
+
+			if (ST_PARENTHESES_OPEN == $id) {
+				$initial_ptr = $ptr;
+				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', [T_INC, T_DEC]);
+				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
+				continue;
+			}
+			if (ST_QUOTE == $id) {
+				$stack = $text;
+				$initial_ptr = $ptr;
+				while (list($ptr, $token) = each($tkns)) {
+					list($id, $text) = $this->get_token($token);
+					$stack .= $text;
+					$tkns[$ptr] = null;
+					if (ST_QUOTE == $id) {
+						break;
+					}
+				}
+
+				$tkns[$initial_ptr] = [self::CHAIN_STRING, $stack];
+				continue;
+			}
+
+			if (T_STRING == $id || T_VARIABLE == $id || T_NS_SEPARATOR == $id) {
+				$initial_index = $ptr;
+				$stack = $text;
+				$touched_variable = false;
+				if (T_VARIABLE == $id) {
+					$touched_variable = true;
+				}
+				if (!$this->right_token_subset_is_at_idx(
+					$tkns,
+					$ptr,
+					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
+				)) {
+					continue;
+				}
+
+				while (list($ptr, $token) = each($tkns)) {
+					list($id, $text) = $this->get_token($token);
+					$tkns[$ptr] = null;
+					if (ST_CURLY_OPEN == $id) {
+						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', [T_INC, T_DEC]);
+					} elseif (ST_BRACKET_OPEN == $id) {
+						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', [T_INC, T_DEC]);
+					} elseif (ST_PARENTHESES_OPEN == $id) {
+						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', [T_INC, T_DEC]);
+					}
+
+					$stack .= $text;
+
+					if (!$touched_variable && T_VARIABLE == $id) {
+						$touched_variable = true;
+					}
+
+					if (
+						!$this->right_token_subset_is_at_idx(
+							$tkns,
+							$ptr,
+							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
+						)
+					) {
+						break;
+					}
+				}
+				if (substr(trim($stack), -1, 1) == ST_PARENTHESES_CLOSE) {
+					$tkns[$initial_index] = [self::CHAIN_FUNC, $stack];
+				} elseif ($touched_variable) {
+					$tkns[$initial_index] = [self::CHAIN_VARIABLE, $stack];
+				} else {
+					$tkns[$initial_index] = [self::CHAIN_LITERAL, $stack];
+				}
+			}
+		}
+		$tkns = array_values(array_filter($tkns));
+		return $tkns;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Automatically convert postincrement to preincrement.';
+	}
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a++;
+$b--;
+
+++$a;
+--$b;
+?>
+EOT;
+	}
+};
+class CakePHPStyle extends AdditionalPass {
+	public function format($source) {
+		$source = (new PSR2ModifierVisibilityStaticOrder())->format($source);
+		$source = $this->add_underscores_before_name($source);
+		return $source;
+	}
+
+	private function add_underscores_before_name($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$max_detected_indent = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_PUBLIC:
+				case T_PRIVATE:
+				case T_PROTECTED:
+					$level_touched = $id;
+					$this->append_code($text);
+					break;
+
+				case T_VARIABLE:
+					if ($this->left_useful_token_is([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC])) {
+						$text = str_replace('$_', '$', $text);
+						$text = str_replace('$_', '$', $text);
+						if (T_PROTECTED == $level_touched) {
+							$text = str_replace('$', '$_', $text);
+						} elseif (T_PRIVATE == $level_touched) {
+							$text = str_replace('$', '$__', $text);
+						}
+					}
+					$this->append_code($text);
+					$level_touched = null;
+					break;
+				case T_STRING:
+					if ($this->left_useful_token_is(T_FUNCTION)) {
+						$text = str_replace('__', '', $text);
+						$text = str_replace('_', '', $text);
+						if (T_PROTECTED == $level_touched) {
+							$text = '_' . $text;
+						} elseif (T_PRIVATE == $level_touched) {
+							$text = '__' . $text;
+						}
+					}
+					$this->append_code($text);
+					$level_touched = null;
+					break;
+				default:
+					$this->append_code($text);
+					break;
+			}
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Applies CakePHP Coding Style';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+namespace A;
+
+class A {
+	private $__a;
+	protected $_b;
+	public $c;
+
+	public function b() {
+		if($a) {
+			noop();
+		} else {
+			noop();
+		}
+	}
+
+	protected function _c() {
+		if($a) {
+			noop();
+		} else {
+			noop();
+		}
+	}
+}
+?>
+EOT;
+	}
+}
+;
+final class GeneratePHPDoc extends AdditionalPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$touched_visibility = false;
+		$touched_doc_comment = false;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_DOC_COMMENT:
+					$touched_doc_comment = true;
+				case T_FINAL:
+				case T_ABSTRACT:
+				case T_PUBLIC:
+				case T_PROTECTED:
+				case T_PRIVATE:
+				case T_STATIC:
+					if (!$this->left_token_is([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
+						$touched_visibility = true;
+						$visibility_idx = $this->ptr;
+					}
+				case T_FUNCTION:
+					if ($touched_doc_comment) {
+						$touched_doc_comment = false;
+						break;
+					}
+					if (!$touched_visibility) {
+						$orig_idx = $this->ptr;
+					} else {
+						$orig_idx = $visibility_idx;
+					}
+					list($nt_id, $nt_text) = $this->get_token($this->right_token());
+					if (T_STRING != $nt_id) {
+						$this->append_code($text);
+						break;
+					}
+					$this->walk_until(ST_PARENTHESES_OPEN);
+					$param_stack = [];
+					$tmp = ['type' => '', 'name' => ''];
+					$count = 1;
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr = $index;
+
+						if (ST_PARENTHESES_OPEN == $id) {
+							++$count;
+						}
+						if (ST_PARENTHESES_CLOSE == $id) {
+							--$count;
+						}
+						if (0 == $count) {
+							break;
+						}
+						if (T_STRING == $id || T_NS_SEPARATOR == $id) {
+							$tmp['type'] .= $text;
+							continue;
+						}
+						if (T_VARIABLE == $id) {
+							if ($this->right_token_is([ST_EQUAL]) && $this->walk_until(ST_EQUAL) && $this->right_token_is([T_ARRAY])) {
+								$tmp['type'] = 'array';
+							}
+							$tmp['name'] = $text;
+							$param_stack[] = $tmp;
+							$tmp = ['type' => '', 'name' => ''];
+							continue;
+						}
+					}
+
+					$return_stack = '';
+					if (!$this->left_useful_token_is(ST_SEMI_COLON)) {
+						$this->walk_until(ST_CURLY_OPEN);
+						$count = 1;
+						while (list($index, $token) = each($this->tkns)) {
+							list($id, $text) = $this->get_token($token);
+							$this->ptr = $index;
+
+							if (ST_CURLY_OPEN == $id) {
+								++$count;
+							}
+							if (ST_CURLY_CLOSE == $id) {
+								--$count;
+							}
+							if (0 == $count) {
+								break;
+							}
+							if (T_RETURN == $id) {
+								if ($this->right_token_is([T_DNUMBER])) {
+									$return_stack = 'float';
+								} elseif ($this->right_token_is([T_LNUMBER])) {
+									$return_stack = 'int';
+								} elseif ($this->right_token_is([T_VARIABLE])) {
+									$return_stack = 'mixed';
+								} elseif ($this->right_token_is([ST_SEMI_COLON])) {
+									$return_stack = 'null';
+								}
+							}
+						}
+					}
+
+					$func_token = &$this->tkns[$orig_idx];
+					$func_token[1] = $this->render_doc_block($param_stack, $return_stack) . $func_token[1];
+					$touched_visibility = false;
+			}
+		}
+
+		return implode('', array_map(function ($token) {
+			list(, $text) = $this->get_token($token);
+			return $text;
+		}, $this->tkns));
+	}
+
+	private function render_doc_block(array $param_stack, $return_stack) {
+		if (empty($param_stack) && empty($return_stack)) {
+			return '';
+		}
+		$str = '/**' . $this->new_line;
+		foreach ($param_stack as $param) {
+			$str .= rtrim(' * @param ' . $param['type']) . ' ' . $param['name'] . $this->new_line;
+		}
+		if (!empty($return_stack)) {
+			$str .= ' * @return ' . $return_stack . $this->new_line;
+		}
+		$str .= ' */' . $this->new_line;
+		return $str;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Automatically generates PHPDoc blocks';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+class A {
+	function a(Someclass $a) {
+		return 1;
+	}
+}
+?>
+to
+<?php
+class A {
+	/**
+	 * @param Someclass $a
+	 * @return int
+	 */
+	function a(Someclass $a) {
+		return 1;
+	}
+}
+?>
+EOT;
+	}
+}
+;
+class JoinToImplode extends AdditionalPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			if (T_STRING == $id && strtolower($text) == 'join' && !($this->left_useful_token_is([T_NEW, T_NS_SEPARATOR, T_STRING, T_DOUBLE_COLON, T_OBJECT_OPERATOR]) || $this->right_useful_token_is([T_NS_SEPARATOR, T_DOUBLE_COLON]))) {
+				$this->append_code('implode');
+				continue;
+			}
+			$this->append_code($text);
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Replace implode() alias (join() -> implode()).';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+$a = join(',', $arr);
+
+$a = implode(',', $arr);
+?>
+EOT;
+	}
+
+}
+;
 class LaravelStyle extends AdditionalPass {
 	public function format($source) {
 		$source = $this->namespace_merge_with_open_tag($source);
@@ -5191,53 +4368,512 @@ EOT;
 	}
 }
 ;
-class CakePHPStyle extends AdditionalPass {
+/**
+ * From PHP-CS-Fixer
+ */
+class MergeElseIf extends AdditionalPass {
 	public function format($source) {
-		$source = (new PSR2ModifierVisibilityStaticOrder())->format($source);
-		$source = $this->add_underscores_before_name($source);
-		return $source;
-	}
-
-	private function add_underscores_before_name($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$max_detected_indent = 0;
+		$paren_count = 0;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_PUBLIC:
+				case T_IF:
+					if ($this->left_token_is([T_ELSE]) && !$this->left_token_is([T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO])) {
+						$this->rtrim_and_append_code($text);
+						break;
+					}
+				default:
+					$this->append_code($text);
+					break;
+			}
+		}
+
+		return $this->code;
+	}
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Merge if with else. ';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+if($a){
+
+} else if($b) {
+
+}
+
+if($a){
+
+} elseif($b) {
+
+}
+?>
+EOT;
+	}
+}
+;
+final class OrderMethod extends AdditionalPass {
+	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
+	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
+
+	public function orderMethods($source) {
+		$tokens = token_get_all($source);
+		$return = '';
+		$function_list = [];
+		while (list($index, $token) = each($tokens)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_ABSTRACT:
+				case T_STATIC:
 				case T_PRIVATE:
 				case T_PROTECTED:
-					$level_touched = $id;
+				case T_PUBLIC:
+					$stack = $text;
+					$curly_count = null;
+					$touched_method = false;
+					$function_name = '';
+					while (list($index, $token) = each($tokens)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr = $index;
+
+						$stack .= $text;
+						if (T_FUNCTION == $id) {
+							$touched_method = true;
+						}
+						if (T_VARIABLE == $id && !$touched_method) {
+							break;
+						}
+						if (T_STRING == $id && $touched_method && empty($function_name)) {
+							$function_name = $text;
+						}
+
+						if (null === $curly_count && ST_SEMI_COLON == $id) {
+							break;
+						}
+
+						if (ST_CURLY_OPEN == $id) {
+							++$curly_count;
+						}
+						if (ST_CURLY_CLOSE == $id) {
+							--$curly_count;
+						}
+						if (0 === $curly_count) {
+							break;
+						}
+					}
+					if (!$touched_method) {
+						$return .= $stack;
+					} else {
+						$function_list[$function_name] = $stack;
+						$return .= self::METHOD_REPLACEMENT_PLACEHOLDER;
+					}
+					break;
+				default:
+					$return .= $text;
+					break;
+			}
+		}
+		ksort($function_list);
+		foreach ($function_list as $function_body) {
+			$return = preg_replace('/' . self::METHOD_REPLACEMENT_PLACEHOLDER . '/', $function_body, $return, 1);
+		}
+		return $return;
+	}
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$return = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_CLASS:
+					$return .= $text;
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr = $index;
+						$return .= $text;
+						if (ST_CURLY_OPEN == $id) {
+							break;
+						}
+					}
+					$class_block = '';
+					$curly_count = 1;
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr = $index;
+						$class_block .= $text;
+						if (ST_CURLY_OPEN == $id) {
+							++$curly_count;
+						} elseif (ST_CURLY_CLOSE == $id) {
+							--$curly_count;
+						}
+
+						if (0 == $curly_count) {
+							break;
+						}
+					}
+					$return .= str_replace(
+						self::OPENER_PLACEHOLDER,
+						'',
+						$this->orderMethods(self::OPENER_PLACEHOLDER . $class_block)
+					);
+					$this->append_code($return);
+					break;
+				default:
+					$this->append_code($text);
+					break;
+			}
+		}
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Sort methods within class in alphabetic order.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+class A {
+	function b(){}
+	function c(){}
+	function a(){}
+}
+?>
+to
+<?php
+class A {
+	function a(){}
+	function b(){}
+	function c(){}
+}
+?>
+EOT;
+	}
+}
+;
+class RemoveUseLeadingSlash extends AdditionalPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$last_touched_token = null;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_NAMESPACE:
+				case T_TRAIT:
+				case T_CLASS:
+				case T_FUNCTION:
+					$last_touched_token = $id;
+				case T_NS_SEPARATOR:
+					if (T_NAMESPACE == $last_touched_token && $this->left_token_is([T_USE])) {
+						continue;
+					}
+				default:
+					$this->append_code($text);
+			}
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Remove leading slash in T_USE imports.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+namespace NS1;
+use \B;
+use \D;
+
+new B();
+new D();
+?>
+to
+<?php
+namespace NS1;
+use B;
+use D;
+
+new B();
+new D();
+?>
+EOT;
+	}
+}
+;
+class ReturnNull extends AdditionalPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$this->use_cache = true;
+		$touched_return = false;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			$this->cache = [];
+
+			if (ST_PARENTHESES_OPEN == $id && $this->left_token_is([T_RETURN])) {
+				$paren_count = 1;
+				$touched_another_valid_token = false;
+				$stack = $text;
+				while (list($index, $token) = each($this->tkns)) {
+					list($id, $text) = $this->get_token($token);
+					$this->ptr = $index;
+					$this->cache = [];
+					if (ST_PARENTHESES_OPEN == $id) {
+						++$paren_count;
+					}
+					if (ST_PARENTHESES_CLOSE == $id) {
+						--$paren_count;
+					}
+					$stack .= $text;
+					if (0 == $paren_count) {
+						break;
+					}
+					if (
+						!(
+							(T_STRING == $id && strtolower($text) == 'null') ||
+							ST_PARENTHESES_OPEN == $id ||
+							ST_PARENTHESES_CLOSE == $id
+						)
+					) {
+						$touched_another_valid_token = true;
+					}
+				}
+				if ($touched_another_valid_token) {
+					$this->append_code($stack);
+				}
+				continue;
+			}
+			if (T_STRING == $id && strtolower($text) == 'null') {
+				list($prev_id, ) = $this->left_useful_token();
+				list($next_id, ) = $this->right_useful_token();
+				if (T_RETURN == $prev_id && ST_SEMI_COLON == $next_id) {
+					continue;
+				}
+			}
+
+			$this->append_code($text);
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Simplify empty returns.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+function a(){
+	return null;
+}
+?>
+to
+<?php
+function a(){
+	return;
+}
+?>
+EOT;
+	}
+}
+;
+/**
+ * From PHP-CS-Fixer
+ */
+class ShortArray extends AdditionalPass {
+	const FOUND_ARRAY = 'array';
+	const FOUND_PARENTHESES = 'paren';
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$found_paren = [];
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_ARRAY:
+					if ($this->right_token_is([ST_PARENTHESES_OPEN])) {
+						$found_paren[] = self::FOUND_ARRAY;
+						$this->print_and_stop_at(ST_PARENTHESES_OPEN);
+						$this->append_code(ST_BRACKET_OPEN);
+						break;
+					}
+				case ST_PARENTHESES_OPEN:
+					$found_paren[] = self::FOUND_PARENTHESES;
 					$this->append_code($text);
 					break;
 
-				case T_VARIABLE:
-					if ($this->left_useful_token_is([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC])) {
-						$text = str_replace('$_', '$', $text);
-						$text = str_replace('$_', '$', $text);
-						if (T_PROTECTED == $level_touched) {
-							$text = str_replace('$', '$_', $text);
-						} elseif (T_PRIVATE == $level_touched) {
-							$text = str_replace('$', '$__', $text);
-						}
+				case ST_PARENTHESES_CLOSE:
+					$pop_token = array_pop($found_paren);
+					if (self::FOUND_ARRAY == $pop_token) {
+						$this->append_code(ST_BRACKET_CLOSE);
+						break;
 					}
+				default:
 					$this->append_code($text);
-					$level_touched = null;
 					break;
-				case T_STRING:
-					if ($this->left_useful_token_is(T_FUNCTION)) {
-						$text = str_replace('__', '', $text);
-						$text = str_replace('_', '', $text);
-						if (T_PROTECTED == $level_touched) {
-							$text = '_' . $text;
-						} elseif (T_PRIVATE == $level_touched) {
-							$text = '__' . $text;
+			}
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Convert old array into new array. (array() -> [])';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+echo array();
+?>
+to
+<?php
+echo [];
+?>
+EOT;
+	}
+}
+;
+final class SmartLnAfterCurlyOpen extends AdditionalPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$curly_count = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case ST_CURLY_OPEN:
+					$this->append_code($text);
+					$curly_count = 1;
+					$stack = '';
+					$found_line_break = false;
+					$has_ln_after = $this->has_ln_after();
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr = $index;
+						$stack .= $text;
+						if (T_START_HEREDOC == $id) {
+							$stack .= $this->walk_and_accumulate_until($this->tkns, T_END_HEREDOC);
+							continue;
+						}
+						if (ST_QUOTE == $id) {
+							$stack .= $this->walk_and_accumulate_until($this->tkns, ST_QUOTE);
+							continue;
+						}
+						if (ST_CURLY_OPEN == $id) {
+							++$curly_count;
+						}
+						if (ST_CURLY_CLOSE == $id) {
+							--$curly_count;
+						}
+						if (T_WHITESPACE === $id && $this->has_ln($text)) {
+							$found_line_break = true;
+							break;
+						}
+						if (0 == $curly_count) {
+							break;
 						}
 					}
+					if ($found_line_break && !$has_ln_after) {
+						$this->append_code($this->new_line);
+					}
+					$this->append_code($stack);
+					break;
+				default:
 					$this->append_code($text);
-					$level_touched = null;
+					break;
+			}
+		}
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Add line break when implicit curly block is added.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+if($a) echo array();
+?>
+to
+<?php
+if($a) {
+	echo array();
+}
+?>
+EOT;
+	}
+}
+;
+class SpaceBetweenMethods extends AdditionalPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$last_touched_token = null;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_FUNCTION:
+					$this->append_code($text);
+					$this->print_until(ST_CURLY_OPEN);
+					$this->print_block(ST_CURLY_OPEN, ST_CURLY_CLOSE);
+					if (!$this->right_token_is([ST_CURLY_CLOSE, ST_SEMI_COLON, ST_COMMA, ST_PARENTHESES_CLOSE])) {
+						$this->append_code($this->get_crlf());
+					}
 					break;
 				default:
 					$this->append_code($text);
@@ -5252,7 +4888,7 @@ class CakePHPStyle extends AdditionalPass {
 	 * @codeCoverageIgnore
 	 */
 	public function get_description() {
-		return 'Applies CakePHP Coding Style';
+		return 'Put space between methods.';
 	}
 
 	/**
@@ -5261,34 +4897,399 @@ class CakePHPStyle extends AdditionalPass {
 	public function get_example() {
 		return <<<'EOT'
 <?php
-namespace A;
-
 class A {
-	private $__a;
-	protected $_b;
-	public $c;
+	function b(){
 
-	public function b() {
-		if($a) {
-			noop();
-		} else {
-			noop();
-		}
+	}
+	function c(){
+
+	}
+}
+?>
+to
+<?php
+class A {
+	function b(){
+
 	}
 
-	protected function _c() {
-		if($a) {
-			noop();
-		} else {
-			noop();
-		}
+	function c(){
+
 	}
+
 }
 ?>
 EOT;
 	}
 }
 ;
+class TightConcat extends AdditionalPass {
+	public function format($source) {
+		$whitespaces = " \t";
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case ST_CONCAT:
+					if (!$this->left_token_is([T_LNUMBER, T_DNUMBER])) {
+						$this->code = rtrim($this->code, $whitespaces);
+					}
+					if (!$this->right_token_is([T_LNUMBER, T_DNUMBER])) {
+						each($this->tkns);
+					}
+				default:
+					$this->append_code($text);
+					break;
+			}
+		}
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Ensure string concatenation does not have spaces, except when close to numbers.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+// From
+$a = 'a' . 'b';
+$a = 'a' . 1 . 'b';
+// To
+$a = 'a'.'b';
+$a = 'a'. 1 .'b';
+?>
+EOT;
+	}
+};
+class WrongConstructorName extends AdditionalPass {
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$touched_namespace = false;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_NAMESPACE:
+					$touched_namespace = true;
+					$this->append_code($text);
+					break;
+				case T_CLASS:
+					$this->append_code($text);
+					if ($this->left_useful_token_is([T_DOUBLE_COLON])) {
+						break;
+					}
+					if ($touched_namespace) {
+						break;
+					}
+					$class_local_name = '';
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr = $index;
+						$this->append_code($text);
+						if (T_STRING == $id) {
+							$class_local_name = strtolower($text);
+						}
+						if (T_EXTENDS == $id || T_IMPLEMENTS == $id || ST_CURLY_OPEN == $id) {
+							break;
+						}
+					}
+					$count = 1;
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->get_token($token);
+						$this->ptr = $index;
+
+						if (T_STRING == $id && $this->left_useful_token_is([T_FUNCTION]) && strtolower($text) == $class_local_name) {
+							$text = '__construct';
+						}
+						$this->append_code($text);
+
+						if (ST_CURLY_OPEN == $id) {
+							++$count;
+						}
+						if (ST_CURLY_CLOSE == $id) {
+							--$count;
+						}
+						if (0 == $count) {
+							break;
+						}
+					}
+					break;
+				default:
+					$this->append_code($text);
+			}
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Update old constructor names into new ones. http://php.net/manual/en/language.oop5.decon.php';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+class A {
+	function A(){
+
+	}
+}
+?>
+to
+<?php
+class A {
+	function __construct(){
+
+	}
+}
+?>
+EOT;
+	}
+};
+final class YodaComparisons extends AdditionalPass {
+	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
+	const CHAIN_LITERAL = 'CHAIN_LITERAL';
+	const CHAIN_FUNC = 'CHAIN_FUNC';
+	const CHAIN_STRING = 'CHAIN_STRING';
+	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
+	public function format($source) {
+		return $this->yodise($source);
+	}
+	protected function yodise($source) {
+		$tkns = $this->aggregate_variables($source);
+		while (list($ptr, $token) = each($tkns)) {
+			if (is_null($token)) {
+				continue;
+			}
+			list($id, $text) = $this->get_token($token);
+			switch ($id) {
+				case T_IS_EQUAL:
+				case T_IS_IDENTICAL:
+				case T_IS_NOT_EQUAL:
+				case T_IS_NOT_IDENTICAL:
+					list($left, $right) = $this->siblings($tkns, $ptr);
+					list($left_id, $left_text) = $tkns[$left];
+					list($right_id, $right_text) = $tkns[$right];
+					if ($left_id == $right_id) {
+						continue;
+					}
+
+					$left_pure_variable = $this->is_pure_variable($left_id);
+					for ($leftmost = $left; $leftmost >= 0; --$leftmost) {
+						list($left_scan_id, $left_scan_text) = $this->get_token($tkns[$leftmost]);
+						if ($this->is_lower_precedence($left_scan_id)) {
+							++$leftmost;
+							break;
+						}
+						$left_pure_variable &= $this->is_pure_variable($left_scan_id);
+					}
+
+					$right_pure_variable = $this->is_pure_variable($right_id);
+					for ($rightmost = $right; $rightmost < sizeof($tkns) - 1; ++$rightmost) {
+						list($right_scan_id, $right_scan_text) = $this->get_token($tkns[$rightmost]);
+						if ($this->is_lower_precedence($right_scan_id)) {
+							--$rightmost;
+							break;
+						}
+						$right_pure_variable &= $this->is_pure_variable($right_scan_id);
+					}
+
+					if ($left_pure_variable && !$right_pure_variable) {
+						$orig_left_tokens = $left_tokens = implode('', array_map(function ($token) {
+							return isset($token[1]) ? $token[1] : $token;
+						}, array_slice($tkns, $leftmost, $left - $leftmost + 1)));
+						$orig_right_tokens = $right_tokens = implode('', array_map(function ($token) {
+							return isset($token[1]) ? $token[1] : $token;
+						}, array_slice($tkns, $right, $rightmost - $right + 1)));
+
+						$left_tokens = (substr($orig_right_tokens, 0, 1) == ' ' ? ' ' : '') . trim($left_tokens) . (substr($orig_right_tokens, -1, 1) == ' ' ? ' ' : '');
+						$right_tokens = (substr($orig_left_tokens, 0, 1) == ' ' ? ' ' : '') . trim($right_tokens) . (substr($orig_left_tokens, -1, 1) == ' ' ? ' ' : '');
+
+						$tkns[$leftmost] = ['REPLACED', $right_tokens];
+						$tkns[$right] = ['REPLACED', $left_tokens];
+
+						if ($leftmost != $left) {
+							for ($i = $leftmost + 1; $i <= $left; ++$i) {
+								$tkns[$i] = null;
+							}
+						}
+						if ($rightmost != $right) {
+							for ($i = $right + 1; $i <= $rightmost; ++$i) {
+								$tkns[$i] = null;
+							}
+						}
+					}
+			}
+		}
+		return $this->render($tkns);
+	}
+
+	private function is_pure_variable($id) {
+		return self::CHAIN_VARIABLE == $id || T_VARIABLE == $id || T_INC == $id || T_DEC == $id || ST_EXCLAMATION == $id || T_COMMENT == $id || T_DOC_COMMENT == $id || T_WHITESPACE == $id;
+	}
+	private function is_lower_precedence($id) {
+		switch ($id) {
+			case ST_REFERENCE:
+			case ST_BITWISE_XOR:
+			case ST_BITWISE_OR:
+			case T_BOOLEAN_AND:
+			case T_BOOLEAN_OR:
+			case ST_QUESTION:
+			case ST_COLON:
+			case ST_EQUAL:
+			case T_PLUS_EQUAL:
+			case T_MINUS_EQUAL:
+			case T_MUL_EQUAL:
+			case T_POW_EQUAL:
+			case T_DIV_EQUAL:
+			case T_CONCAT_EQUAL:
+			case T_MOD_EQUAL:
+			case T_AND_EQUAL:
+			case T_OR_EQUAL:
+			case T_XOR_EQUAL:
+			case T_SL_EQUAL:
+			case T_SR_EQUAL:
+			case T_DOUBLE_ARROW:
+			case T_LOGICAL_AND:
+			case T_LOGICAL_XOR:
+			case T_LOGICAL_OR:
+			case ST_COMMA:
+			case ST_SEMI_COLON:
+			case T_RETURN:
+			case T_THROW:
+			case T_GOTO:
+			case T_CASE:
+			case T_COMMENT:
+			case T_DOC_COMMENT:
+			case T_OPEN_TAG:
+				return true;
+		}
+		return false;
+	}
+
+	private function aggregate_variables($source) {
+		$tkns = token_get_all($source);
+		while (list($ptr, $token) = each($tkns)) {
+			list($id, $text) = $this->get_token($token);
+
+			if (ST_PARENTHESES_OPEN == $id) {
+				$initial_ptr = $ptr;
+				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
+				continue;
+			}
+			if (ST_QUOTE == $id) {
+				$stack = $text;
+				$initial_ptr = $ptr;
+				while (list($ptr, $token) = each($tkns)) {
+					list($id, $text) = $this->get_token($token);
+					$stack .= $text;
+					$tkns[$ptr] = null;
+					if (ST_QUOTE == $id) {
+						break;
+					}
+				}
+
+				$tkns[$initial_ptr] = [self::CHAIN_STRING, $stack];
+				continue;
+			}
+
+			if (T_STRING == $id || T_VARIABLE == $id || T_NS_SEPARATOR == $id) {
+				$initial_index = $ptr;
+				$stack = $text;
+				$touched_variable = false;
+				if (T_VARIABLE == $id) {
+					$touched_variable = true;
+				}
+				if (!$this->right_token_subset_is_at_idx(
+					$tkns,
+					$ptr,
+					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
+				)) {
+					continue;
+				}
+				while (list($ptr, $token) = each($tkns)) {
+					list($id, $text) = $this->get_token($token);
+					$tkns[$ptr] = null;
+					if (ST_CURLY_OPEN == $id) {
+						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+					} elseif (ST_BRACKET_OPEN == $id) {
+						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+					} elseif (ST_PARENTHESES_OPEN == $id) {
+						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+					}
+
+					$stack .= $text;
+
+					if (!$touched_variable && T_VARIABLE == $id) {
+						$touched_variable = true;
+					}
+
+					if (
+						!$this->right_token_subset_is_at_idx(
+							$tkns,
+							$ptr,
+							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
+						)
+					) {
+						break;
+					}
+				}
+				if (substr(trim($stack), -1, 1) == ST_PARENTHESES_CLOSE) {
+					$tkns[$initial_index] = [self::CHAIN_FUNC, $stack];
+				} elseif ($touched_variable) {
+					$tkns[$initial_index] = [self::CHAIN_VARIABLE, $stack];
+				} else {
+					$tkns[$initial_index] = [self::CHAIN_LITERAL, $stack];
+				}
+			}
+		}
+		$tkns = array_values(array_filter($tkns));
+		return $tkns;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_description() {
+		return 'Execute Yoda Comparisons.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function get_example() {
+		return <<<'EOT'
+<?php
+if($a == 1){
+
+}
+?>
+to
+<?php
+if(1 == $a){
+
+}
+?>
+EOT;
+	}
+};
 
 $enable_cache = false;
 if (class_exists('SQLite3')) {
