@@ -120,6 +120,7 @@ if (!isset($testEnv)) {
 			'--no-backup' => 'no backup file (original.php~)',
 			'--passes=pass1,passN' => 'call specific compiler pass',
 			'--prepasses=pass1,passN' => 'call specific compiler pass, before the rest of stack',
+			'--profile=NAME' => 'use one of profiles present in configuration file',
 			'--psr' => 'activate PSR1 and PSR2 styles',
 			'--psr1' => 'activate PSR1 style',
 			'--psr1-naming' => 'activate PSR1 style - Section 3 and 4.3 - Class and method names case.',
@@ -159,6 +160,7 @@ if (!isset($testEnv)) {
 		'oracleDB::',
 		'passes:',
 		'prepasses:',
+		'profile:',
 		'psr',
 		'psr1',
 		'psr1-naming',
@@ -181,13 +183,20 @@ if (!isset($testEnv)) {
 			fwrite(STDERR, 'Custom configuration not file found' . PHP_EOL);
 			exit(255);
 		}
-		$ini_opts = parse_ini_file($opts['config']);
+		$ini_opts = parse_ini_file($opts['config'], true);
 		if (!empty($ini_opts)) {
 			$opts = $ini_opts;
 		}
 	} elseif (file_exists('.php.tools.ini') && is_file('.php.tools.ini')) {
 		fwrite(STDERR, 'Configuration file found' . PHP_EOL);
-		$ini_opts = parse_ini_file('.php.tools.ini');
+		$ini_opts = parse_ini_file('.php.tools.ini', true);
+		if (isset($opts['profile'])) {
+			$argv = extract_from_argv($argv, 'profile');
+			$profile = &$ini_opts[$opts['profile']];
+			if (isset($profile)) {
+				$ini_opts = $profile;
+			}
+		}
 		$opts = array_merge($ini_opts, $opts);
 	}
 	if (isset($opts['h']) || isset($opts['help'])) {
