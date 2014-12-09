@@ -1,6 +1,6 @@
 <?php
 include 'vendor/dericofilho/csp/csp.php';
-include "FormatterPass.php";
+include "Core/FormatterPass.php";
 
 class Build extends FormatterPass {
 	public function format($source) {
