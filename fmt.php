@@ -5403,7 +5403,7 @@ if (!isset($testEnv)) {
 	function show_help($argv, $enable_cache) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--config=FILENAME] ' . ($enable_cache ? '[--cache[=FILENAME]] ' : '') . '[--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space=SIZE] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
-			'--cache[=FILENAME]' => 'cache file. Default: ' . (Cache::DEFAULT_CACHE_FILENAME),
+			'--cache[=FILENAME]' => 'cache file. Default: ',
 			'--cakephp' => 'Apply CakePHP coding style',
 			'--config=FILENAME' => 'configuration file. Default: .php.tools.ini',
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
@@ -5429,6 +5429,8 @@ if (!isset($testEnv)) {
 		];
 		if (!$enable_cache) {
 			unset($options['--cache[=FILENAME]']);
+		} else {
+			$options['--cache[=FILENAME]'] .= (Cache::DEFAULT_CACHE_FILENAME);
 		}
 		$maxLen = max(array_map(function ($v) {
 			return strlen($v);
