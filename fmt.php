@@ -2484,7 +2484,7 @@ final class ResizeSpaces extends FormatterPass {
 					list($next_id, $next_text) = $this->inspect_token(+1);
 					if (
 						(T_LNUMBER === $prev_id || T_DNUMBER === $prev_id || T_VARIABLE === $prev_id || ST_PARENTHESES_CLOSE === $prev_id || T_STRING === $prev_id)
-					 	&&
+						&&
 						(T_LNUMBER === $next_id || T_DNUMBER === $next_id || T_VARIABLE === $next_id || ST_PARENTHESES_CLOSE === $next_id || T_STRING === $next_id)
 					) {
 						$this->append_code($this->get_space() . $text . $this->get_space());
