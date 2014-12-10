@@ -12,7 +12,9 @@ The rules are:
 
 4 - None of the changes may affect the core passes. This is assessed through tests (tests/* and tests-PSR/*). Each maintainer is free to choose a policy regarding tests, including having no tests whatsoever.
 
-5 - Goto 1
+5 - If all tests passes, then regenerate php.fmt using `php build.php`.
+
+6 - Goto 1
 
 
 ## Maintainer is not responding?
