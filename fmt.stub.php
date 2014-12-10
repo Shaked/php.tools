@@ -5656,7 +5656,7 @@ if (!isset($testEnv)) {
 		$opts = array_merge($ini_opts, $opts);
 	}
 	if (isset($opts['h']) || isset($opts['help'])) {
-		show_help($argv, $enable_cache, $in_phar, $in_phar);
+		show_help($argv, $enable_cache, $in_phar);
 	}
 
 	if (isset($opts['help-pass'])) {

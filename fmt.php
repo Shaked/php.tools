@@ -5546,6 +5546,7 @@ if (!isset($testEnv)) {
 		} else {
 			$options['--cache[=FILENAME]'] .= (Cache::DEFAULT_CACHE_FILENAME);
 		}
+		ksort($options);
 		$maxLen = max(array_map(function ($v) {
 			return strlen($v);
 		}, array_keys($options)));
