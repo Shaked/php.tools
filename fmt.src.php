@@ -378,15 +378,19 @@ if (!isset($testEnv)) {
 		}
 	} elseif (isset($opts['o'])) {
 		$argv = extract_from_argv_short($argv, 'o');
+		if ('-' == $opts['o'] && '-' == $argv[1]) {
+			echo $fmt->formatCode(file_get_contents('php://stdin'));
+			exit(0);
+		}
+		if ('-' == $opts['o']) {
+			echo $fmt->formatCode(file_get_contents($argv[1]));
+			exit(0);
+		}
 		if (!is_file($argv[1])) {
 			fwrite(STDERR, "File not found: " . $argv[1] . PHP_EOL);
 			exit(255);
 		}
 		$argv = array_values($argv);
-		if ('-' == $opts['o']) {
-			echo $fmt->formatCode(file_get_contents($argv[1]));
-			exit(0);
-		}
 		file_put_contents($opts['o'], $fmt->formatCode(file_get_contents($argv[1])));
 	} elseif (isset($argv[1])) {
 		if ('-' == $argv[1]) {
