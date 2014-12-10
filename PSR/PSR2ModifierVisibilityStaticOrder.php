@@ -106,6 +106,12 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						$this->append_code($static . $this->get_space());
 					}
 					$this->append_code($text);
+					if ('abstract' == strtolower($final_or_abstract)) {
+						$this->print_until(ST_SEMI_COLON);
+					} else {
+						$this->print_until(ST_CURLY_OPEN);
+						$this->print_block(ST_CURLY_OPEN, ST_CURLY_CLOSE);
+					}
 					$final_or_abstract = null;
 					$visibility = null;
 					$static = null;
