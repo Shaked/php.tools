@@ -1,4 +1,8 @@
 <?php
+if (ini_get('phar.readonly')) {
+	fwrite(STDERR, 'Please run build with -dphar.readonly=0' . PHP_EOL);
+	exit(255);
+}
 include 'vendor/dericofilho/csp/csp.php';
 include "Core/FormatterPass.php";
 
@@ -50,7 +54,7 @@ for ($i = 0; $i < $workers; ++$i) {
 	}, $pass, $chn, $chn_done);
 }
 
-$targets = ['fmt', 'refactor'];
+$targets = ['fmt', 'refactor', 'fmt.stub', 'refactor.stub'];
 foreach ($targets as $target) {
 	$chn->in($target);
 }
@@ -63,3 +67,14 @@ for ($i = 0; $i < $workers; ++$i) {
 }
 $chn->close();
 $chn_done->close();
+
+echo 'Building PHARs...';
+$phars = ['fmt', 'refactor'];
+foreach ($phars as $target) {
+	file_put_contents($target . '.stub.php', '<?php' . str_replace('#!/usr/bin/env php' . "\n" . '<?php', '', file_get_contents($target . '.stub.php')));
+	$phar = new Phar($target . '.phar', FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::KEY_AS_FILENAME, $target . '.phar');
+	$phar[$target . ".stub.php"] = file_get_contents($target . '.stub.php');
+	$phar->setStub('#!/usr/bin/env php' . "\n" . $phar->createDefaultStub($target . '.stub.php'));
+	file_put_contents($target . ".phar.sha1", sha1_file($target . '.phar'));
+}
+echo 'done', PHP_EOL;
