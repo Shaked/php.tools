@@ -227,6 +227,20 @@ abstract class FormatterPass {
 		}
 	}
 
+	protected function print_until_any($tknids) {
+		$tknids = array_flip($tknids);
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			$this->cache = [];
+			$this->append_code($text);
+			if (isset($tknids[$id])) {
+				break;
+			}
+		}
+		return $id;
+	}
+
 	protected function print_until_the_end_of_string() {
 		$this->print_until(ST_QUOTE);
 	}
