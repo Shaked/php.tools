@@ -15,7 +15,6 @@ final class ReindentObjOps extends FormatterPass {
 		$align_type = [];
 		$printed_placeholder = [];
 		$max_context_counter = [];
-		$touched_ln = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -67,21 +66,7 @@ final class ReindentObjOps extends FormatterPass {
 
 				case ST_PARENTHESES_OPEN:
 				case ST_BRACKET_OPEN:
-					++$level_counter;
-					if (!isset($level_entrance_counter[$level_counter])) {
-						$level_entrance_counter[$level_counter] = 0;
-					}
-					++$level_entrance_counter[$level_counter];
-					if (!isset($context_counter[$level_counter][$level_entrance_counter[$level_counter]])) {
-						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
-						$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
-						$touch_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
-						$align_type[$level_counter][$level_entrance_counter[$level_counter]] = 0;
-						$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]] = 0;
-					}
-					++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
-					$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
-
+					$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 					$this->append_code($text);
 					break;
 
@@ -97,6 +82,11 @@ final class ReindentObjOps extends FormatterPass {
 						if ($this->has_ln_before()) {
 							$align_type[$level_counter][$level_entrance_counter[$level_counter]] = self::ALIGN_WITH_INDENT;
 							$this->append_code($this->get_indent(+1) . $text);
+							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON]);
+							if (ST_PARENTHESES_OPEN == $found_token) {
+								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
+								$this->indent_parentheses_content();
+							}
 						} else {
 							$align_type[$level_counter][$level_entrance_counter[$level_counter]] = self::ALIGN_WITH_SPACES;
 							if (!isset($printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]])) {
@@ -126,6 +116,11 @@ final class ReindentObjOps extends FormatterPass {
 							);
 						} else {
 							$this->append_code($this->get_indent(+1) . $text);
+							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON]);
+							if (ST_PARENTHESES_OPEN == $found_token) {
+								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
+								$this->indent_parentheses_content();
+							}
 						}
 					} else {
 						$this->append_code($text);
@@ -219,5 +214,54 @@ final class ReindentObjOps extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	private function indent_parentheses_content() {
+		$count = 0;
+		$i = $this->ptr;
+		$sizeof_tokens = sizeof($this->tkns);
+		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
+			$token = &$this->tkns[$i];
+			list($id, $text) = $this->get_token($token);
+			if (T_WHITESPACE == $id && $this->has_ln($text)) {
+				$token[1] = $text . $this->get_indent(+1);
+				continue;
+			}
+			if (ST_PARENTHESES_OPEN == $id) {
+				++$count;
+			}
+			if (ST_PARENTHESES_CLOSE == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
+
+	private function increment_counters(
+		&$level_counter,
+		&$level_entrance_counter,
+		&$context_counter,
+		&$max_context_counter,
+		&$touch_counter,
+		&$align_type,
+		&$printed_placeholder
+	) {
+		++$level_counter;
+		if (!isset($level_entrance_counter[$level_counter])) {
+			$level_entrance_counter[$level_counter] = 0;
+		}
+		++$level_entrance_counter[$level_counter];
+		if (!isset($context_counter[$level_counter][$level_entrance_counter[$level_counter]])) {
+			$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+			$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+			$touch_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+			$align_type[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+			$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]] = 0;
+		}
+		++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
+		$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
+
 	}
 }
