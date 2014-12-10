@@ -103,9 +103,11 @@ function extract_from_argv_short($argv, $item) {
 		)
 	);
 }
-
+if (!isset($in_phar)) {
+	$in_phar = false;
+}
 if (!isset($testEnv)) {
-	function show_help($argv, $enable_cache) {
+	function show_help($argv, $enable_cache, $in_phar) {
 		echo 'Usage: ' . $argv[0] . ' [-ho] [--config=FILENAME] ' . ($enable_cache ? '[--cache[=FILENAME]] ' : '') . '[--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space=SIZE] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--cache[=FILENAME]' => 'cache file. Default: ',
@@ -132,6 +134,9 @@ if (!isset($testEnv)) {
 			'-h, --help' => 'this help message',
 			'-o=file' => 'output the formatted code to "file"',
 		];
+		if ($in_phar) {
+			$options['--selfupdate'] = 'self-update fmt.phar from Github';
+		}
 		if (!$enable_cache) {
 			unset($options['--cache[=FILENAME]']);
 		} else {
@@ -172,6 +177,9 @@ if (!isset($testEnv)) {
 		'visibility_order',
 		'yoda',
 	];
+	if ($in_phar) {
+		$getopt_long_options[] = 'selfupdate';
+	}
 	if (!$enable_cache) {
 		unset($getopt_long_options['cache::']);
 	}
@@ -179,6 +187,42 @@ if (!isset($testEnv)) {
 		'iho:',
 		$getopt_long_options
 	);
+	if (isset($opts['selfupdate'])) {
+		$opts = [
+			'http' => [
+				'method' => "GET",
+				'header' => "User-agent: php.tools fmt.phar selfupdate\r\n",
+			],
+		];
+
+		$context = stream_context_create($opts);
+
+		// current release
+		$releases = json_decode(file_get_contents('https://api.github.com/repos/dericofilho/php.tools/tags', false, $context), true);
+		$commit = json_decode(file_get_contents($releases[0]['commit']['url'], false, $context), true);
+		$files = json_decode(file_get_contents($commit['commit']['tree']['url'], false, $context), true);
+		foreach ($files['tree'] as $file) {
+			if ('fmt.phar' == $file['path']) {
+				$phar_file = base64_decode(json_decode(file_get_contents($file['url'], false, $context), true)['content']);
+			}
+			if ('fmt.phar.sha1' == $file['path']) {
+				$phar_sha1 = base64_decode(json_decode(file_get_contents($file['url'], false, $context), true)['content']);
+			}
+		}
+		if (!isset($phar_sha1) || !isset($phar_file)) {
+			fwrite(STDERR, 'Could not autoupdate - not release found' . PHP_EOL);
+			exit(255);
+		}
+		if (sha1_file($argv[0]) != $phar_sha1) {
+			copy($argv[0], $argv[0] . "~");
+			file_put_contents($argv[0], $phar_file);
+			chmod($argv[0], 0777&~umask());
+			fwrite(STDERR, 'Updated successfully' . PHP_EOL);
+		} else {
+			fwrite(STDERR, 'Up-to-date!' . PHP_EOL);
+		}
+		exit(0);
+	}
 	if (isset($opts['config'])) {
 		$argv = extract_from_argv($argv, 'config');
 		if (!file_exists($opts['config']) || !is_file($opts['config'])) {
@@ -202,7 +246,7 @@ if (!isset($testEnv)) {
 		$opts = array_merge($ini_opts, $opts);
 	}
 	if (isset($opts['h']) || isset($opts['help'])) {
-		show_help($argv, $enable_cache);
+		show_help($argv, $enable_cache, $in_phar);
 	}
 
 	if (isset($opts['help-pass'])) {
@@ -545,7 +589,7 @@ if (!isset($testEnv)) {
 			exit(255);
 		}
 	} else {
-		show_help($argv, $enable_cache);
+		show_help($argv, $enable_cache, $in_phar);
 	}
 	exit(0);
 }
