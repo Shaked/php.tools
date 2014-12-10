@@ -229,11 +229,18 @@ abstract class FormatterPass {
 
 	protected function print_until_any($tknids) {
 		$tknids = array_flip($tknids);
+		$whitespace_new_line = false;
+		if (isset($tknids[$this->new_line])) {
+			$whitespace_new_line = true;
+		}
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			$this->cache = [];
 			$this->append_code($text);
+			if ($whitespace_new_line && T_WHITESPACE == $id && $this->has_ln($text)) {
+				break;
+			}
 			if (isset($tknids[$id])) {
 				break;
 			}

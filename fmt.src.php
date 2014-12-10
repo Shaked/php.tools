@@ -292,7 +292,6 @@ if (!isset($testEnv)) {
 	}
 
 	$fmt->addPass(new ResizeSpaces());
-	$fmt->addPass(new Reindent());
 	$fmt->addPass(new ReindentColonBlocks());
 	$fmt->addPass(new ReindentLoopColonBlocks());
 	$fmt->addPass(new ReindentIfColonBlocks());
@@ -304,6 +303,7 @@ if (!isset($testEnv)) {
 	}
 
 	$fmt->addPass(new ReindentObjOps());
+	$fmt->addPass(new Reindent());
 	$fmt->addPass(new EliminateDuplicatedEmptyLines());
 
 	if (isset($opts['indent_with_space'])) {

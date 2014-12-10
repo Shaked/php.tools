@@ -31,6 +31,7 @@ final class ResizeSpaces extends FormatterPass {
 					$this->append_code($text);
 					$this->print_until(ST_SEMI_COLON);
 					break;
+
 				case T_CALLABLE:
 					$this->append_code($text . $this->get_space());
 					break;

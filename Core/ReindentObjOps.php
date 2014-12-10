@@ -82,7 +82,7 @@ final class ReindentObjOps extends FormatterPass {
 						if ($this->has_ln_before()) {
 							$align_type[$level_counter][$level_entrance_counter[$level_counter]] = self::ALIGN_WITH_INDENT;
 							$this->append_code($this->get_indent(+1) . $text);
-							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON]);
+							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
 							if (ST_PARENTHESES_OPEN == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 								$this->indent_parentheses_content();
@@ -93,30 +93,38 @@ final class ReindentObjOps extends FormatterPass {
 								$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]] = 0;
 							}
 							++$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]];
-							$this->append_code(
-								sprintf(
-									self::ALIGNABLE_OBJOP,
-									$level_counter,
-									$level_entrance_counter[$level_counter],
-									$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
-								) . $text
+							$placeholder = sprintf(
+								self::ALIGNABLE_OBJOP,
+								$level_counter,
+								$level_entrance_counter[$level_counter],
+								$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
 							);
+							$this->append_code($placeholder . $text);
+							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
+							if (ST_PARENTHESES_OPEN == $found_token) {
+								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
+								$this->inject_placeholder_parentheses_content($placeholder);
+							}
 						}
 					} elseif ($this->has_ln_before() || $this->has_ln_left_token()) {
 						++$touch_counter[$level_counter][$level_entrance_counter[$level_counter]];
 						if (self::ALIGN_WITH_SPACES == $align_type[$level_counter][$level_entrance_counter[$level_counter]]) {
 							++$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]];
-							$this->append_code(
-								sprintf(
-									self::ALIGNABLE_OBJOP,
-									$level_counter,
-									$level_entrance_counter[$level_counter],
-									$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
-								) . $text
+							$placeholder = sprintf(
+								self::ALIGNABLE_OBJOP,
+								$level_counter,
+								$level_entrance_counter[$level_counter],
+								$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
 							);
+							$this->append_code($placeholder . $text);
+							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
+							if (ST_PARENTHESES_OPEN == $found_token) {
+								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
+								$this->inject_placeholder_parentheses_content($placeholder);
+							}
 						} else {
 							$this->append_code($this->get_indent(+1) . $text);
-							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON]);
+							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
 							if (ST_PARENTHESES_OPEN == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 								$this->indent_parentheses_content();
@@ -166,7 +174,6 @@ final class ReindentObjOps extends FormatterPass {
 					break;
 			}
 		}
-
 		$orig_code = $this->code;
 		foreach ($max_context_counter as $level => $entrances) {
 			foreach ($entrances as $entrance => $context) {
@@ -225,6 +232,29 @@ final class ReindentObjOps extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			if (T_WHITESPACE == $id && $this->has_ln($text)) {
 				$token[1] = $text . $this->get_indent(+1);
+				continue;
+			}
+			if (ST_PARENTHESES_OPEN == $id) {
+				++$count;
+			}
+			if (ST_PARENTHESES_CLOSE == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
+
+	private function inject_placeholder_parentheses_content($placeholder) {
+		$count = 0;
+		$i = $this->ptr;
+		$sizeof_tokens = sizeof($this->tkns);
+		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
+			$token = &$this->tkns[$i];
+			list($id, $text) = $this->get_token($token);
+			if (T_WHITESPACE == $id && $this->has_ln($text)) {
+				$token[1] = str_replace($this->new_line, $this->new_line . $placeholder, $text);
 				continue;
 			}
 			if (ST_PARENTHESES_OPEN == $id) {
