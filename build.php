@@ -49,12 +49,14 @@ for ($i = 0; $i < $workers; ++$i) {
 			echo $target, PHP_EOL;
 			file_put_contents($target . '.php', $pass->format(file_get_contents($target . '.src.php')));
 			chmod($target . '.php', 0755);
+			file_put_contents($target . '.stub.php', $pass->format(file_get_contents($target . '.stub.src.php')));
+			chmod($target . '.stub.php', 0755);
 		}
 		$chn_done->in('done');
 	}, $pass, $chn, $chn_done);
 }
 
-$targets = ['fmt', 'refactor', 'fmt.stub', 'refactor.stub'];
+$targets = ['fmt', 'refactor'];
 foreach ($targets as $target) {
 	$chn->in($target);
 }
