@@ -2293,7 +2293,9 @@ final class ReindentObjOps extends FormatterPass {
 							$align_type[$level_counter][$level_entrance_counter[$level_counter]] = self::ALIGN_WITH_INDENT;
 							$this->append_code($this->get_indent(+1) . $text);
 							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
-							if (ST_PARENTHESES_OPEN == $found_token) {
+							if (ST_SEMI_COLON == $found_token) {
+								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
+							} elseif (ST_PARENTHESES_OPEN == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 								$this->indent_parentheses_content();
 							}
@@ -2311,7 +2313,9 @@ final class ReindentObjOps extends FormatterPass {
 							);
 							$this->append_code($placeholder . $text);
 							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
-							if (ST_PARENTHESES_OPEN == $found_token) {
+							if (ST_SEMI_COLON == $found_token) {
+								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
+							} elseif (ST_PARENTHESES_OPEN == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 								$this->inject_placeholder_parentheses_content($placeholder);
 							}
@@ -2328,14 +2332,18 @@ final class ReindentObjOps extends FormatterPass {
 							);
 							$this->append_code($placeholder . $text);
 							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
-							if (ST_PARENTHESES_OPEN == $found_token) {
+							if (ST_SEMI_COLON == $found_token) {
+								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
+							} elseif (ST_PARENTHESES_OPEN == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 								$this->inject_placeholder_parentheses_content($placeholder);
 							}
 						} else {
 							$this->append_code($this->get_indent(+1) . $text);
 							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
-							if (ST_PARENTHESES_OPEN == $found_token) {
+							if (ST_SEMI_COLON == $found_token) {
+								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
+							} elseif (ST_PARENTHESES_OPEN == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 								$this->indent_parentheses_content();
 							}
