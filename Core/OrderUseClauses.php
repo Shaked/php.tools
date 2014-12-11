@@ -71,7 +71,7 @@ final class OrderUseClauses extends FormatterPass {
 		foreach ($new_tokens as $idx => $token) {
 			if ($token instanceof SurrogateToken) {
 				$return .= array_shift($use_stack);
-			} elseif (T_WHITESPACE == $token[0] && $new_tokens[$idx - 1] instanceof SurrogateToken && $new_tokens[$idx + 1] instanceof SurrogateToken) {
+			} elseif (T_WHITESPACE == $token[0] && isset($new_tokens[$idx - 1], $new_tokens[$idx + 1]) && $new_tokens[$idx - 1] instanceof SurrogateToken && $new_tokens[$idx + 1] instanceof SurrogateToken) {
 				$return .= $this->new_line;
 				continue;
 			} else {

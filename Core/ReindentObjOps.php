@@ -35,6 +35,7 @@ final class ReindentObjOps extends FormatterPass {
 					if ($this->left_useful_token_is(ST_PARENTHESES_OPEN)) {
 						$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_COMMA]);
 						if (ST_PARENTHESES_OPEN == $found_token) {
+							$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 							$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 							$this->print_until(ST_PARENTHESES_CLOSE);
 						}
@@ -44,6 +45,7 @@ final class ReindentObjOps extends FormatterPass {
 				case T_FUNCTION:
 					$this->append_code($text);
 					if (!$this->right_useful_token_is(T_STRING)) {
+						$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 						$this->print_until(ST_PARENTHESES_OPEN);
 						$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 						$this->print_until(ST_CURLY_OPEN);
