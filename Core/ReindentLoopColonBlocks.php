@@ -1,5 +1,9 @@
 <?php
 final class ReindentLoopColonBlocks extends FormatterPass {
+	public function candidate($source) {
+		return true;
+	}
+
 	public function format($source) {
 		$tkns = token_get_all($source);
 		$found_endwhile = false;

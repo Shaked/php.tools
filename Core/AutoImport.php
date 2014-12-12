@@ -11,6 +11,10 @@ final class AutoImportPass extends FormatterPass {
 		$this->oracle = new SQLite3($oracleFn);
 	}
 
+	public function candidate($source) {
+		return true;
+	}
+
 	private function used_alias_list($source) {
 		$tokens = token_get_all($source);
 		$use_stack = [];

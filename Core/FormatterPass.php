@@ -18,7 +18,9 @@ abstract class FormatterPass {
 		return $direction . "\x2" . implode('', $ignore_list) . "\x2" . (is_array($token) ? implode("\x2", $token) : $token);
 	}
 
+	abstract public function candidate($source);
 	abstract public function format($source);
+
 	protected function get_token($token) {
 		if (isset($token[1])) {
 			return $token;

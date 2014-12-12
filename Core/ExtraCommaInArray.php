@@ -2,6 +2,11 @@
 final class ExtraCommaInArray extends FormatterPass {
 	const ST_SHORT_ARRAY_OPEN = 'SHORT_ARRAY_OPEN';
 	const EMPTY_ARRAY = 'ST_EMPTY_ARRAY';
+
+	public function candidate($source) {
+		return true;
+	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 

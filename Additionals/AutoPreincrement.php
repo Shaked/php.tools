@@ -5,6 +5,20 @@ final class AutoPreincrement extends AdditionalPass {
 	const CHAIN_FUNC = 'CHAIN_FUNC';
 	const CHAIN_STRING = 'CHAIN_STRING';
 	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
+	public function candidate($source) {
+		$this->tkns = token_get_all($source);
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_INC:
+				case T_DEC:
+					prev($this->tkns);
+					return true;
+			}
+		}
+		return false;
+	}
 	public function format($source) {
 		return $this->swap($source);
 	}

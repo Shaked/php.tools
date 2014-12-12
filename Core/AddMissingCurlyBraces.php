@@ -1,5 +1,8 @@
 <?php
 final class AddMissingCurlyBraces extends FormatterPass {
+	public function candidate($source) {
+		return true;
+	}
 	public function format($source) {
 		list($tmp, $changed) = $this->addBraces($source);
 		while ($changed) {

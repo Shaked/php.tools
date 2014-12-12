@@ -13,7 +13,9 @@ final class CodeFormatter {
 			$this->passes
 		);
 		while (($pass = array_pop($passes))) {
-			$source = $pass->format($source);
+			if ($pass->candidate($source)) {
+				$source = $pass->format($source);
+			}
 		}
 		return $source;
 	}

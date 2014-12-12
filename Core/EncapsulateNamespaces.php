@@ -1,17 +1,24 @@
 <?php
 class EncapsulateNamespaces extends AdditionalPass {
-	public function format($source) {
+	public function candidate($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$in_namespace_context = false;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
-			if (T_CLOSE_TAG == $id) {
-				return $source;
+			switch ($id) {
+				case T_NAMESPACE:
+					prev($this->tkns);
+					return true;
 			}
+			$this->append_code($text);
 		}
-		reset($this->tkns);
+
+		return false;
+	}
+	public function format($source) {
+		$in_namespace_context = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -25,7 +32,10 @@ class EncapsulateNamespaces extends AdditionalPass {
 					} elseif (ST_SEMI_COLON == $found_id) {
 						$in_namespace_context = true;
 						$this->append_code(ST_CURLY_OPEN);
-						$this->print_and_stop_at(T_NAMESPACE);
+						list($found_id, $found_text) = $this->print_and_stop_at([T_NAMESPACE, T_CLOSE_TAG]);
+						if (T_CLOSE_TAG == $found_id) {
+							return $source;
+						}
 						$this->append_code($this->get_crlf() . ST_CURLY_CLOSE . $this->get_crlf());
 						prev($this->tkns);
 						continue;

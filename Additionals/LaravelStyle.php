@@ -1,10 +1,18 @@
 <?php
 class LaravelStyle extends AdditionalPass {
+	public function candidate($source) {
+		return true;
+	}
+
 	public function format($source) {
 		$source = $this->namespace_merge_with_open_tag($source);
 		$source = $this->allman_style_braces($source);
 		$source = (new RTrim())->format($source);
-		$source = (new TightConcat())->format($source);
+
+		$fmt = new TightConcat();
+		if ($fmt->candidate($source)) {
+			$source = $fmt->format($source);
+		}
 		return $source;
 	}
 

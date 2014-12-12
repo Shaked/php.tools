@@ -1,5 +1,8 @@
 <?php
 final class NormalizeLnAndLtrimLines extends FormatterPass {
+	public function candidate($source) {
+		return true;
+	}
 	public function format($source) {
 		$source = str_replace(["\r\n", "\n\r", "\r", "\n"], $this->new_line, $source);
 

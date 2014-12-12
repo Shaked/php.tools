@@ -5,11 +5,24 @@
 class ShortArray extends AdditionalPass {
 	const FOUND_ARRAY = 'array';
 	const FOUND_PARENTHESES = 'paren';
-	public function format($source) {
+	public function candidate($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$found_paren = [];
 
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_ARRAY:
+					prev($this->tkns);
+					return true;
+			}
+			$this->append_code($text);
+		}
+		return false;
+	}
+	public function format($source) {
+		$found_paren = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;

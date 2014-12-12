@@ -4,6 +4,11 @@ final class ReindentObjOps extends FormatterPass {
 
 	const ALIGN_WITH_INDENT = 1;
 	const ALIGN_WITH_SPACES = 2;
+
+	public function candidate($source) {
+		return true;
+	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';

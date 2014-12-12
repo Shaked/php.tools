@@ -1,5 +1,8 @@
 <?php
 final class RTrim extends FormatterPass {
+	public function candidate($source) {
+		return true;
+	}
 	public function format($source) {
 		return implode(
 			$this->new_line,

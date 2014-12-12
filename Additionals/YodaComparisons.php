@@ -5,6 +5,9 @@ final class YodaComparisons extends AdditionalPass {
 	const CHAIN_FUNC = 'CHAIN_FUNC';
 	const CHAIN_STRING = 'CHAIN_STRING';
 	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
+	public function candidate($source) {
+		return true;
+	}
 	public function format($source) {
 		return $this->yodise($source);
 	}

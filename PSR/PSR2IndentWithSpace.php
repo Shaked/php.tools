@@ -7,7 +7,9 @@ final class PSR2IndentWithSpace extends FormatterPass {
 			$this->size = $size;
 		}
 	}
-
+	public function candidate($source) {
+		return true;
+	}
 	public function format($source) {
 		$indent_spaces = str_repeat(' ', (int) $this->size);
 		$this->tkns = token_get_all($source);

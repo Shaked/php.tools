@@ -1,8 +1,23 @@
 <?php
 class WrongConstructorName extends AdditionalPass {
-	public function format($source) {
+	public function candidate($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_NAMESPACE:
+				case T_CLASS:
+					prev($this->tkns);
+					return true;
+			}
+			$this->append_code($text);
+		}
+		return false;
+	}
+	public function format($source) {
 		$touched_namespace = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);

@@ -1,5 +1,8 @@
 <?php
 final class Reindent extends FormatterPass {
+	public function candidate($source) {
+		return true;
+	}
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';

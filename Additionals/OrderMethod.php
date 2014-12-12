@@ -67,6 +67,11 @@ final class OrderMethod extends AdditionalPass {
 		}
 		return $return;
 	}
+
+	public function candidate($source) {
+		return true;
+	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$return = '';

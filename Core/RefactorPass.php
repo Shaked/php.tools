@@ -30,7 +30,9 @@ final class RefactorPass extends FormatterPass {
 	private function getTo() {
 		return $this->to;
 	}
-
+	public function candidate($source) {
+		return true;
+	}
 	public function format($source) {
 		$from = $this->getFrom();
 		$from_size = sizeof($from);

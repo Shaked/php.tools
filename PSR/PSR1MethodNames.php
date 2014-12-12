@@ -1,10 +1,25 @@
 <?php
 final class PSR1MethodNames extends FormatterPass {
-	public function format($source) {
+	public function candidate($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$found_method = false;
 
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_FUNCTION:
+				case T_STRING:
+				case ST_PARENTHESES_OPEN:
+					prev($this->tkns);
+					return true;
+			}
+			$this->append_code($text);
+		}
+		return false;
+	}
+	public function format($source) {
+		$found_method = false;
 		$method_replace_list = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);

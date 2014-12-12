@@ -1,9 +1,23 @@
 <?php
 class TightConcat extends AdditionalPass {
-	public function format($source) {
-		$whitespaces = " \t";
+	public function candidate($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case ST_CONCAT:
+					prev($this->tkns);
+					return true;
+			}
+			$this->append_code($text);
+		}
+		return false;
+	}
+	public function format($source) {
+		$whitespaces = " \t";
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;

@@ -1,7 +1,14 @@
 <?php
 class CakePHPStyle extends AdditionalPass {
+	public function candidate($source) {
+		return true;
+	}
+
 	public function format($source) {
-		$source = (new PSR2ModifierVisibilityStaticOrder())->format($source);
+		$fmt = new PSR2ModifierVisibilityStaticOrder();
+		if ($fmt->candidate($source)) {
+			$source = $fmt->format($source);
+		}
 		$source = $this->add_underscores_before_name($source);
 		return $source;
 	}

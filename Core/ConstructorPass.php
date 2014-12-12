@@ -3,6 +3,7 @@ final class ConstructorPass extends FormatterPass {
 	const TYPE_CAMEL_CASE = 'camel';
 	const TYPE_SNAKE_CASE = 'snake';
 	const TYPE_GOLANG = 'golang';
+
 	public function __construct($type = self::TYPE_CAMEL_CASE) {
 		if (self::TYPE_CAMEL_CASE == $type || self::TYPE_SNAKE_CASE == $type || self::TYPE_GOLANG == $type) {
 			$this->type = $type;
@@ -11,10 +12,24 @@ final class ConstructorPass extends FormatterPass {
 		}
 	}
 
-	public function format($source) {
+	public function candidate($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_CLASS:
+					prev($this->tkns);
+					return true;
+			}
+			$this->append_code($text);
+		}
+		return false;
+	}
+
+	public function format($source) {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;

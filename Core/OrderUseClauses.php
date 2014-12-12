@@ -1,6 +1,9 @@
 <?php
 final class OrderUseClauses extends FormatterPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERBY \x3*/";
+	public function candidate($source) {
+		return true;
+	}
 	private function singleNamespace($source) {
 		$tokens = token_get_all($source);
 		$use_stack = [];

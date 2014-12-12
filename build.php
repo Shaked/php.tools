@@ -7,6 +7,9 @@ include 'vendor/dericofilho/csp/csp.php';
 include "Core/FormatterPass.php";
 
 class Build extends FormatterPass {
+	public function candidate($source) {
+		return true;
+	}
 	public function format($source) {
 		$this->tkns = SplFixedArray::fromArray(token_get_all($source));
 		$this->code = '';
