@@ -217,6 +217,29 @@ abstract class FormatterPass {
 		}
 	}
 
+	protected function print_curly_block() {
+		$count = 1;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			$this->cache = [];
+			$this->append_code($text);
+
+			if (ST_CURLY_OPEN == $id) {
+				++$count;
+			}
+			if (T_CURLY_OPEN == $id) {
+				++$count;
+			}
+			if (ST_CURLY_CLOSE == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
+
 	protected function print_until($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);

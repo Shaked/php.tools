@@ -16,6 +16,10 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_START_HEREDOC:
+					$this->append_code($text);
+					$this->print_until(T_END_HEREDOC);
+					break;
 				case ST_QUOTE:
 					$this->append_code($text);
 					$this->print_until_the_end_of_string();
@@ -113,7 +117,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						$this->print_until(ST_SEMI_COLON);
 					} else {
 						$this->print_until(ST_CURLY_OPEN);
-						$this->print_block(ST_CURLY_OPEN, ST_CURLY_CLOSE);
+						$this->print_curly_block();
 					}
 					$final_or_abstract = null;
 					$visibility = null;

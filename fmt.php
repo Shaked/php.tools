@@ -407,6 +407,29 @@ abstract class FormatterPass {
 		}
 	}
 
+	protected function print_curly_block() {
+		$count = 1;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			$this->cache = [];
+			$this->append_code($text);
+
+			if (ST_CURLY_OPEN == $id) {
+				++$count;
+			}
+			if (T_CURLY_OPEN == $id) {
+				++$count;
+			}
+			if (ST_CURLY_CLOSE == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
+
 	protected function print_until($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -3475,6 +3498,10 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_START_HEREDOC:
+					$this->append_code($text);
+					$this->print_until(T_END_HEREDOC);
+					break;
 				case ST_QUOTE:
 					$this->append_code($text);
 					$this->print_until_the_end_of_string();
@@ -3735,6 +3762,10 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_START_HEREDOC:
+					$this->append_code($text);
+					$this->print_until(T_END_HEREDOC);
+					break;
 				case ST_QUOTE:
 					$this->append_code($text);
 					$this->print_until_the_end_of_string();
@@ -3832,7 +3863,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						$this->print_until(ST_SEMI_COLON);
 					} else {
 						$this->print_until(ST_CURLY_OPEN);
-						$this->print_block(ST_CURLY_OPEN, ST_CURLY_CLOSE);
+						$this->print_curly_block();
 					}
 					$final_or_abstract = null;
 					$visibility = null;

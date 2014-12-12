@@ -12,6 +12,10 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_START_HEREDOC:
+					$this->append_code($text);
+					$this->print_until(T_END_HEREDOC);
+					break;
 				case ST_QUOTE:
 					$this->append_code($text);
 					$this->print_until_the_end_of_string();
