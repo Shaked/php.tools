@@ -1,22 +1,15 @@
 <?php
 final class SmartLnAfterCurlyOpen extends AdditionalPass {
-	public function candidate($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case ST_CURLY_OPEN:
-					prev($this->tkns);
-					return true;
-			}
-			$this->append_code($text);
+	public function candidate($source, $found_tokens) {
+		if (isset($found_tokens[ST_CURLY_OPEN])) {
+			return true;
 		}
+
 		return false;
 	}
 	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
 		$curly_count = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);

@@ -2,7 +2,7 @@
 final class EliminateDuplicatedEmptyLines extends FormatterPass {
 	const EMPTY_LINE = "\x2 EMPTYLINE \x3";
 
-	public function candidate($source) {
+	public function candidate($source, $found_tokens) {
 		return true;
 	}
 

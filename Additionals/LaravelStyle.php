@@ -1,6 +1,8 @@
 <?php
 class LaravelStyle extends AdditionalPass {
-	public function candidate($source) {
+	private $found_tokens;
+	public function candidate($source, $found_tokens) {
+		$this->found_tokens = $found_tokens;
 		return true;
 	}
 
@@ -10,7 +12,7 @@ class LaravelStyle extends AdditionalPass {
 		$source = (new RTrim())->format($source);
 
 		$fmt = new TightConcat();
-		if ($fmt->candidate($source)) {
+		if ($fmt->candidate($source, $this->found_tokens)) {
 			$source = $fmt->format($source);
 		}
 		return $source;

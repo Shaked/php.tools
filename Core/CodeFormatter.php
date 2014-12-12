@@ -12,11 +12,25 @@ final class CodeFormatter {
 			},
 			$this->passes
 		);
+		$found_tokens = [];
+		$tkns = token_get_all($source);
+		foreach ($tkns as $token) {
+			list($id, $text) = $this->get_token($token);
+			$found_tokens[$id] = $id;
+		}
 		while (($pass = array_pop($passes))) {
-			if ($pass->candidate($source)) {
+			if ($pass->candidate($source, $found_tokens)) {
 				$source = $pass->format($source);
 			}
 		}
 		return $source;
+	}
+
+	protected function get_token($token) {
+		if (isset($token[1])) {
+			return $token;
+		} else {
+			return [$token, $token];
+		}
 	}
 }

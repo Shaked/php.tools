@@ -7,7 +7,7 @@ final class PSR2IndentWithSpace extends FormatterPass {
 			$this->size = $size;
 		}
 	}
-	public function candidate($source) {
+	public function candidate($source, $found_tokens) {
 		return true;
 	}
 	public function format($source) {

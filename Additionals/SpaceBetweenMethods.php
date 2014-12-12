@@ -1,22 +1,15 @@
 <?php
 class SpaceBetweenMethods extends AdditionalPass {
-	public function candidate($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_FUNCTION:
-					prev($this->tkns);
-					return true;
-			}
-			$this->append_code($text);
+	public function candidate($source, $found_tokens) {
+		if (isset($found_tokens[T_FUNCTION])) {
+			return true;
 		}
+
 		return false;
 	}
 	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
 		$last_touched_token = null;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);

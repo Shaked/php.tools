@@ -7,7 +7,7 @@ include 'vendor/dericofilho/csp/csp.php';
 include "Core/FormatterPass.php";
 
 class Build extends FormatterPass {
-	public function candidate($source) {
+	public function candidate($source, $found_tokens) {
 		return true;
 	}
 	public function format($source) {

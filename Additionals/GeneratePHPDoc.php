@@ -1,6 +1,6 @@
 <?php
 final class GeneratePHPDoc extends AdditionalPass {
-	public function candidate($source) {
+	public function candidate($source, $found_tokens) {
 		return true;
 	}
 	public function format($source) {

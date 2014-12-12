@@ -1,12 +1,14 @@
 <?php
 class CakePHPStyle extends AdditionalPass {
-	public function candidate($source) {
+	private $found_tokens;
+	public function candidate($source, $found_tokens) {
+		$this->found_tokens = $found_tokens;
 		return true;
 	}
 
 	public function format($source) {
 		$fmt = new PSR2ModifierVisibilityStaticOrder();
-		if ($fmt->candidate($source)) {
+		if ($fmt->candidate($source, $this->found_tokens)) {
 			$source = $fmt->format($source);
 		}
 		$source = $this->add_underscores_before_name($source);

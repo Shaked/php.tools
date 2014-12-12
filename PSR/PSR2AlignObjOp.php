@@ -1,26 +1,16 @@
 <?php
 final class PSR2AlignObjOp extends FormatterPass {
 	const ALIGNABLE_TOKEN = "\x2 OBJOP%d \x3";
-	public function candidate($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case ST_SEMI_COLON:
-				case T_ARRAY:
-				case T_DOUBLE_ARROW:
-				case T_OBJECT_OPERATOR:
-					prev($this->tkns);
-					return true;
-			}
-			$this->append_code($text);
+	public function candidate($source, $found_tokens) {
+		if (isset($found_tokens[ST_SEMI_COLON]) || isset($found_tokens[T_ARRAY]) || isset($found_tokens[T_DOUBLE_ARROW]) || isset($found_tokens[T_OBJECT_OPERATOR])) {
+			return true;
 		}
+
 		return false;
 	}
 	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
 		$context_counter = 0;
 		$context_meta_count = [];
 		while (list($index, $token) = each($this->tkns)) {

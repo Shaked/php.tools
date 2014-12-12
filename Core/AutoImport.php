@@ -11,7 +11,7 @@ final class AutoImportPass extends FormatterPass {
 		$this->oracle = new SQLite3($oracleFn);
 	}
 
-	public function candidate($source) {
+	public function candidate($source, $found_tokens) {
 		return true;
 	}
 
