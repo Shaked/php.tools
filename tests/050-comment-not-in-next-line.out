@@ -4,5 +4,5 @@ $arr = array(
 	$bbb, // Comment 2
 );
 
-call1();// Comment 3
-call_longer_name();// Comment 4
+call1(); // Comment 3
+call_longer_name(); // Comment 4

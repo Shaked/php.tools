@@ -168,7 +168,7 @@ final class ResizeSpaces extends FormatterPass {
 					}
 
 				case ST_SEMI_COLON:
-					if ($this->right_token_is([T_VARIABLE, T_INC, T_DEC, T_LNUMBER, T_DNUMBER])) {
+					if ($this->right_token_is([T_VARIABLE, T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_COMMENT, T_DOC_COMMENT])) {
 						$this->append_code($text . $this->get_space());
 						break;
 					}
