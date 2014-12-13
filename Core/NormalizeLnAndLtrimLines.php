@@ -5,6 +5,7 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 	}
 	public function format($source) {
 		$source = str_replace(["\r\n", "\n\r", "\r", "\n"], $this->new_line, $source);
+		$source = preg_replace('/\h+$/m', '', $source);
 
 		$this->tkns = token_get_all($source);
 		$this->code = '';

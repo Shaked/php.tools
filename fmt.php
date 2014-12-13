@@ -1679,6 +1679,7 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 	}
 	public function format($source) {
 		$source = str_replace(["\r\n", "\n\r", "\r", "\n"], $this->new_line, $source);
+		$source = preg_replace('/\h+$/m', '', $source);
 
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -3039,15 +3040,7 @@ final class RTrim extends FormatterPass {
 		return true;
 	}
 	public function format($source) {
-		return implode(
-			$this->new_line,
-			array_map(
-				function ($v) {
-					return rtrim($v);
-				},
-				explode($this->new_line, $source)
-			)
-		);
+		return preg_replace('/\h+$/m', '', $source);
 	}
 };
 final class SettersAndGettersPass extends FormatterPass {
