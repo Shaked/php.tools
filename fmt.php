@@ -6048,6 +6048,9 @@ if (!isset($testEnv)) {
 		foreach ($optPasses as $optPass) {
 			if (class_exists($optPass)) {
 				$fmt->addPass(new $optPass());
+			} elseif (is_file('Additionals/' . $optPass . '.php')) {
+				include 'Additionals/' . $optPass . '.php';
+				$fmt->addPass(new $optPass());
 			}
 		}
 		$argv = extract_from_argv($argv, 'prepasses');
@@ -6137,6 +6140,9 @@ if (!isset($testEnv)) {
 		}, explode(',', $opts['passes']));
 		foreach ($optPasses as $optPass) {
 			if (class_exists($optPass)) {
+				$fmt->addPass(new $optPass());
+			} elseif (is_file('Additionals/' . $optPass . '.php')) {
+				include 'Additionals/' . $optPass . '.php';
 				$fmt->addPass(new $optPass());
 			}
 		}

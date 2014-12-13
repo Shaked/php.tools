@@ -14,75 +14,75 @@
 //THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 $concurrent = function_exists('pcntl_fork');
 if ($concurrent) {
-	include 'vendor/dericofilho/csp/csp.php';
+	require 'vendor/dericofilho/csp/csp.php';
 }
 $enable_cache = false;
 if (class_exists('SQLite3')) {
 	$enable_cache = true;
-	include 'Core/Cache.php';
+	require 'Core/Cache.php';
 }
-include 'Core/constants.php';
-include 'Core/FormatterPass.php';
-include 'Additionals/AdditionalPass.php';
-include 'Core/CodeFormatter.php';
+require 'Core/constants.php';
+require 'Core/FormatterPass.php';
+require 'Additionals/AdditionalPass.php';
+require 'Core/CodeFormatter.php';
 
-include 'Core/AddMissingCurlyBraces.php';
-include 'Core/AutoImport.php';
-include 'Core/ConstructorPass.php';
-include 'Core/EliminateDuplicatedEmptyLines.php';
-include 'Core/EncapsulateNamespaces.php';
-include 'Core/ExtraCommaInArray.php';
-include 'Core/LeftAlignComment.php';
-include 'Core/MergeCurlyCloseAndDoWhile.php';
-include 'Core/MergeDoubleArrowAndArray.php';
-include 'Core/MergeParenCloseWithCurlyOpen.php';
-include 'Core/NormalizeIsNotEquals.php';
-include 'Core/NormalizeLnAndLtrimLines.php';
-include 'Core/OrderUseClauses.php';
-include 'Core/Reindent.php';
-include 'Core/ReindentColonBlocks.php';
-include 'Core/ReindentIfColonBlocks.php';
-include 'Core/ReindentLoopColonBlocks.php';
-include 'Core/ReindentObjOps.php';
-include 'Core/RemoveIncludeParentheses.php';
-include 'Core/ResizeSpaces.php';
-include 'Core/RTrim.php';
-include 'Core/SettersAndGettersPass.php';
-include 'Core/SurrogateToken.php';
-include 'Core/TwoCommandsInSameLine.php';
+require 'Core/AddMissingCurlyBraces.php';
+require 'Core/AutoImport.php';
+require 'Core/ConstructorPass.php';
+require 'Core/EliminateDuplicatedEmptyLines.php';
+require 'Core/EncapsulateNamespaces.php';
+require 'Core/ExtraCommaInArray.php';
+require 'Core/LeftAlignComment.php';
+require 'Core/MergeCurlyCloseAndDoWhile.php';
+require 'Core/MergeDoubleArrowAndArray.php';
+require 'Core/MergeParenCloseWithCurlyOpen.php';
+require 'Core/NormalizeIsNotEquals.php';
+require 'Core/NormalizeLnAndLtrimLines.php';
+require 'Core/OrderUseClauses.php';
+require 'Core/Reindent.php';
+require 'Core/ReindentColonBlocks.php';
+require 'Core/ReindentIfColonBlocks.php';
+require 'Core/ReindentLoopColonBlocks.php';
+require 'Core/ReindentObjOps.php';
+require 'Core/RemoveIncludeParentheses.php';
+require 'Core/ResizeSpaces.php';
+require 'Core/RTrim.php';
+require 'Core/SettersAndGettersPass.php';
+require 'Core/SurrogateToken.php';
+require 'Core/TwoCommandsInSameLine.php';
 
-include 'PSR/PSR1BOMMark.php';
-include 'PSR/PSR1ClassConstants.php';
-include 'PSR/PSR1ClassNames.php';
-include 'PSR/PSR1MethodNames.php';
-include 'PSR/PSR1OpenTags.php';
-include 'PSR/PSR2AlignObjOp.php';
-include 'PSR/PSR2CurlyOpenNextLine.php';
-include 'PSR/PSR2IndentWithSpace.php';
-include 'PSR/PSR2KeywordsLowerCase.php';
-include 'PSR/PSR2LnAfterNamespace.php';
-include 'PSR/PSR2ModifierVisibilityStaticOrder.php';
-include 'PSR/PSR2SingleEmptyLineAndStripClosingTag.php';
-include 'PSR/PsrDecorator.php';
+require 'PSR/PSR1BOMMark.php';
+require 'PSR/PSR1ClassConstants.php';
+require 'PSR/PSR1ClassNames.php';
+require 'PSR/PSR1MethodNames.php';
+require 'PSR/PSR1OpenTags.php';
+require 'PSR/PSR2AlignObjOp.php';
+require 'PSR/PSR2CurlyOpenNextLine.php';
+require 'PSR/PSR2IndentWithSpace.php';
+require 'PSR/PSR2KeywordsLowerCase.php';
+require 'PSR/PSR2LnAfterNamespace.php';
+require 'PSR/PSR2ModifierVisibilityStaticOrder.php';
+require 'PSR/PSR2SingleEmptyLineAndStripClosingTag.php';
+require 'PSR/PsrDecorator.php';
 
-include 'Additionals/AddMissingParentheses.php';
-include 'Additionals/AlignDoubleArrow.php';
-include 'Additionals/AlignEquals.php';
-include 'Additionals/AutoPreincrement.php';
-include 'Additionals/CakePHPStyle.php';
-include 'Additionals/GeneratePHPDoc.php';
-include 'Additionals/JoinToImplode.php';
-include 'Additionals/LaravelStyle.php';
-include 'Additionals/MergeElseIf.php';
-include 'Additionals/OrderMethod.php';
-include 'Additionals/RemoveUseLeadingSlash.php';
-include 'Additionals/ReturnNull.php';
-include 'Additionals/ShortArray.php';
-include 'Additionals/SmartLnAfterCurlyOpen.php';
-include 'Additionals/SpaceBetweenMethods.php';
-include 'Additionals/TightConcat.php';
-include 'Additionals/WrongConstructorName.php';
-include 'Additionals/YodaComparisons.php';
+require 'Additionals/AddMissingParentheses.php';
+require 'Additionals/AlignDoubleArrow.php';
+require 'Additionals/AlignEquals.php';
+require 'Additionals/AutoPreincrement.php';
+require 'Additionals/CakePHPStyle.php';
+require 'Additionals/GeneratePHPDoc.php';
+require 'Additionals/JoinToImplode.php';
+require 'Additionals/LaravelStyle.php';
+require 'Additionals/MergeElseIf.php';
+require 'Additionals/OrderMethod.php';
+require 'Additionals/RemoveUseLeadingSlash.php';
+require 'Additionals/ReturnNull.php';
+require 'Additionals/ShortArray.php';
+require 'Additionals/SmartLnAfterCurlyOpen.php';
+require 'Additionals/SpaceBetweenMethods.php';
+require 'Additionals/TightConcat.php';
+require 'Additionals/WrongConstructorName.php';
+require 'Additionals/YodaComparisons.php';
 
 function extract_from_argv($argv, $item) {
 	return array_values(
@@ -299,6 +299,9 @@ if (!isset($testEnv)) {
 		foreach ($optPasses as $optPass) {
 			if (class_exists($optPass)) {
 				$fmt->addPass(new $optPass());
+			} elseif (is_file('Additionals/' . $optPass . '.php')) {
+				include 'Additionals/' . $optPass . '.php';
+				$fmt->addPass(new $optPass());
 			}
 		}
 		$argv = extract_from_argv($argv, 'prepasses');
@@ -388,6 +391,9 @@ if (!isset($testEnv)) {
 		}, explode(',', $opts['passes']));
 		foreach ($optPasses as $optPass) {
 			if (class_exists($optPass)) {
+				$fmt->addPass(new $optPass());
+			} elseif (is_file('Additionals/' . $optPass . '.php')) {
+				include 'Additionals/' . $optPass . '.php';
 				$fmt->addPass(new $optPass());
 			}
 		}

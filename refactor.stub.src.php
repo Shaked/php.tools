@@ -5,6 +5,6 @@ if (version_compare(phpversion(), '5.5.0', '<')) {
 	exit(255);
 }
 
-include 'refactor.php';
+require 'refactor.php';
 
 __HALT_COMPILER();

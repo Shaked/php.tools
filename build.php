@@ -17,7 +17,7 @@ class Build extends FormatterPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_INCLUDE:
+				case T_REQUIRE:
 					list($id, $text) = $this->walk_until(T_CONSTANT_ENCAPSED_STRING);
 					$included = token_get_all(file_get_contents(str_replace(['"', "'"], '', $text)));
 					if (T_OPEN_TAG == $included[0][0]) {
