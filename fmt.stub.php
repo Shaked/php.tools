@@ -1880,8 +1880,6 @@ final class OrderUseClauses extends FormatterPass {
 		}
 		if ($namespace_count <= 1 && $touched_t_use) {
 			return $this->singleNamespace($source);
-		} elseif ($namespace_count <= 1) {
-			return $source;
 		}
 
 		$return = '';
@@ -1941,15 +1939,13 @@ final class OrderUseClauses extends FormatterPass {
 							$namespace_block .= $text;
 						}
 					}
-					if ($touched_t_use) {
-						$return .= str_replace(
-							self::OPENER_PLACEHOLDER,
-							'',
-							$this->singleNamespace(self::OPENER_PLACEHOLDER . $namespace_block)
-						);
-					} else {
-						$return .= $namespace_block;
-					}
+
+					$return .= str_replace(
+						self::OPENER_PLACEHOLDER,
+						'',
+						$this->singleNamespace(self::OPENER_PLACEHOLDER . $namespace_block)
+					);
+
 					break;
 				default:
 					$return .= $text;
