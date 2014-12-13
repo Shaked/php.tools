@@ -21,7 +21,6 @@ if ($isCoverage) {
 	$filter = new PHP_CodeCoverage_Filter();
 	$filter->addFileToBlacklist("fmt.php");
 	$filter->addFileToBlacklist("fmt.src.php");
-	$filter->addFileToBlacklist("FormatterPass.php");
 	$filter->addFileToBlacklist("test.php");
 	$filter->addDirectoryToBlacklist("vendor");
 	$coverage = new PHP_CodeCoverage(null, $filter);
