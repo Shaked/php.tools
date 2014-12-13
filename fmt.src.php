@@ -214,6 +214,9 @@ if (!isset($testEnv)) {
 			fwrite(STDERR, 'Could not autoupdate - not release found' . PHP_EOL);
 			exit(255);
 		}
+		if ($in_phar) {
+			$argv[0] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[0];
+		}
 		if (sha1_file($argv[0]) != $phar_sha1) {
 			copy($argv[0], $argv[0] . "~");
 			file_put_contents($argv[0], $phar_file);
