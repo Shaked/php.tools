@@ -1,10 +1,12 @@
 language: php
+sudo: false
 
 php:
         - 5.6
         - 5.5
         - 5.4
 
-script: (php -dshort_open_tag=On test.php -v) && (php -dshort_open_tag=On test.php -v --deployed)
+script: (php -dshort_open_tag=On test.php -v --coveralls) && (php -dshort_open_tag=On test.php -v --deployed)
 
-sudo: false
+after_script:
+        - php vendor/bin/coveralls

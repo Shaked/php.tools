@@ -3,6 +3,7 @@ php.tools
 
 ## Build statuses
 - Master: [![Build Status](https://travis-ci.org/dericofilho/php.tools.svg?branch=master)](https://travis-ci.org/dericofilho/php.tools)
+- Coverage [![Coverage Status](https://coveralls.io/repos/dericofilho/php.tools/badge.png)](https://coveralls.io/r/dericofilho/php.tools)
 
 ## Requirements
 - Git

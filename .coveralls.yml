@@ -1,0 +1,6 @@
+repo_token: XbQczcGDOCu28ca6dvvHUHxrSu60m0nkR
+service_name: travis-ci
+
+coverage_clover: ./clover.xml
+src_dir: .
+json_path: coveralls-upload.json

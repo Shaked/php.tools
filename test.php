@@ -14,8 +14,9 @@
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 $isHHVM = (false !== strpos(phpversion(), 'hhvm'));
 $shortTagEnabled = ini_get('short_open_tag');
-$opt = getopt('v', ['verbose', 'deployed', 'coverage', 'testNumber:', 'stop']);
-$isCoverage = isset($opt['coverage']);
+$opt = getopt('v', ['verbose', 'deployed', 'coverage', 'coveralls', 'testNumber:', 'stop']);
+$isCoverage = isset($opt['coverage']) || isset($opt['coveralls']);
+$isCoveralls = isset($opt['coveralls']);
 if ($isCoverage) {
 	require 'vendor/autoload.php';
 	$filter = new PHP_CodeCoverage_Filter();
@@ -238,9 +239,13 @@ if (isset($opt['v']) || isset($opt['verbose'])) {
 	}
 }
 echo "Took ", (microtime(true) - $start), PHP_EOL;
-if ($isCoverage) {
-	$writer = new PHP_CodeCoverage_Report_HTML;
-	$isCoverage && $writer->process($coverage, './cover/');
+if ($isCoverage && !$isCoveralls) {
+	$writer = new PHP_CodeCoverage_Report_HTML();
+	$writer->process($coverage, './cover/');
+}
+if ($isCoveralls) {
+	$writer = new PHP_CodeCoverage_Report_Clover();
+	$writer->process($coverage, './clover.xml');
 }
 
 if (sizeof($brokenTests) > 0) {
