@@ -433,6 +433,9 @@ if (!isset($testEnv)) {
 			echo $fmt->formatCode(file_get_contents('php://stdin'));
 			exit(0);
 		}
+		if ($in_phar) {
+			$argv[1] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[1];
+		}
 		if ('-' == $opts['o']) {
 			echo $fmt->formatCode(file_get_contents($argv[1]));
 			exit(0);
@@ -456,10 +459,14 @@ if (!isset($testEnv)) {
 
 		$cache_hit_count = 0;
 		$workers = 4;
+
 		for ($j = 1; $j < $argc; ++$j) {
 			$arg = &$argv[$j];
 			if (!isset($arg)) {
 				continue;
+			}
+			if ($in_phar) {
+				$arg = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $arg;
 			}
 			if (is_file($arg)) {
 				$file = $arg;
