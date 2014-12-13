@@ -4249,7 +4249,9 @@ $ccc = 333;
 EOT;
 	}
 };
-final class AutoPreincrement extends AdditionalPass {
+class AutoPreincrement extends AdditionalPass {
+	protected $candidate_tokens = [T_INC, T_DEC];
+	protected $check_against_concat = false;
 	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
 	const CHAIN_LITERAL = 'CHAIN_LITERAL';
 	const CHAIN_FUNC = 'CHAIN_FUNC';
@@ -4267,17 +4269,29 @@ final class AutoPreincrement extends AdditionalPass {
 	}
 	protected function swap($source) {
 		$tkns = $this->aggregate_variables($source);
+		$touched_concat = false;
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->get_token($token);
 			switch ($id) {
+				case ST_CONCAT:
+					$touched_concat = true;
+					break;
 				case T_INC:
 				case T_DEC:
 					$prev_token = $tkns[$ptr - 1];
 					list($prev_id, ) = $prev_token;
-					if (T_VARIABLE == $prev_id || self::CHAIN_VARIABLE == $prev_id) {
+					if (
+						(
+							!$this->check_against_concat
+							||
+							($this->check_against_concat && !$touched_concat)
+						) &&
+						(T_VARIABLE == $prev_id || self::CHAIN_VARIABLE == $prev_id)
+					) {
 						list($tkns[$ptr], $tkns[$ptr - 1]) = [$tkns[$ptr - 1], $tkns[$ptr]];
 						break;
 					}
+					$touched_concat = false;
 			}
 		}
 		return $this->render($tkns);
@@ -4291,7 +4305,7 @@ final class AutoPreincrement extends AdditionalPass {
 
 			if (ST_PARENTHESES_OPEN == $id) {
 				$initial_ptr = $ptr;
-				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', [T_INC, T_DEC]);
+				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidate_tokens);
 				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
 				continue;
 			}
@@ -4330,11 +4344,11 @@ final class AutoPreincrement extends AdditionalPass {
 					list($id, $text) = $this->get_token($token);
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', [T_INC, T_DEC]);
+						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
 					} elseif (ST_BRACKET_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', [T_INC, T_DEC]);
+						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', $this->candidate_tokens);
 					} elseif (ST_PARENTHESES_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', [T_INC, T_DEC]);
+						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidate_tokens);
 					}
 
 					$stack .= $text;
@@ -4908,6 +4922,10 @@ EOT;
 	}
 }
 ;
+class MildAutoPreincrement extends AutoPreincrement {
+	protected $candidate_tokens = [];
+	protected $check_against_concat = true;
+};
 final class OrderMethod extends AdditionalPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
 	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
