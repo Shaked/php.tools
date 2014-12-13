@@ -11,4 +11,4 @@ before_script: composer install --dev
 script: (php -dshort_open_tag=On test.php -v --coveralls) && (php -dshort_open_tag=On test.php -v --deployed)
 
 after_script:
-        - php vendor/bin/coveralls
+        - php vendor/bin/coveralls -v
