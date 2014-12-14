@@ -4426,6 +4426,7 @@ class CakePHPStyle extends AdditionalPass {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_STRING:
 				case T_VARIABLE:
 					if (
 						$this->left_useful_token_is([
