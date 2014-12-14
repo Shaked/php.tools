@@ -43,9 +43,9 @@ final class ResizeSpaces extends FormatterPass {
 				case '+':
 				case '-':
 					if (
-						$this->left_useful_token_is([T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST])
+						$this->left_useful_token_is([T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
 						&&
-						$this->right_useful_token_is([T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST])
+						$this->right_useful_token_is([T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
 					) {
 						$this->append_code($this->get_space() . $text . $this->get_space());
 					} else {
@@ -316,8 +316,8 @@ final class ResizeSpaces extends FormatterPass {
 					$this->append_code(str_replace([' ', "\t"], '', $text) . $this->get_space());
 					break;
 				case ST_REFERENCE:
-					$space_before = !$this->left_useful_token_is([ST_EQUAL, ST_PARENTHESES_OPEN, T_ARRAY, T_AS, T_DOUBLE_ARROW]);
-					$space_after = !$touched_function && !$this->left_useful_token_is([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW]);
+					$space_before = !$this->left_useful_token_is([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]) && !$this->left_useful_token_is(T_ARRAY);
+					$space_after = !$touched_function && !$this->left_useful_token_is([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]);
 					$this->append_code($this->get_space($space_before) . $text . $this->get_space($space_after));
 					break;
 				default:
