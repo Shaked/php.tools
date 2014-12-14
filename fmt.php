@@ -2092,8 +2092,8 @@ final class ReindentColonBlocks extends FormatterPass {
 					break;
 				case ST_CURLY_OPEN:
 					$this->append_code($text);
-					if ($this->left_token_is([T_VARIABLE])) {
-						$this->print_until(ST_CURLY_CLOSE);
+					if ($this->left_token_is([T_VARIABLE, T_OBJECT_OPERATOR])) {
+						$this->print_curly_block();
 						break;
 					}
 					++$switch_curly_count[$switch_level];
