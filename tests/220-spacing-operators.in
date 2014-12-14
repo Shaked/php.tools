@@ -7,3 +7,4 @@ foreach ($this->_files as &$file) {
 
 foreach ($this->_files as $k => &$file) {
 }
+array(&$Schema, $table);

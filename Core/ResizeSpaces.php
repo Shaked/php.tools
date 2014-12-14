@@ -317,7 +317,7 @@ final class ResizeSpaces extends FormatterPass {
 					break;
 				case ST_REFERENCE:
 					$space_before = !$this->left_useful_token_is([ST_EQUAL, ST_PARENTHESES_OPEN, T_ARRAY, T_AS, T_DOUBLE_ARROW]);
-					$space_after = !$touched_function && !$this->left_useful_token_is([ST_EQUAL, T_AS, T_DOUBLE_ARROW]);
+					$space_after = !$touched_function && !$this->left_useful_token_is([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW]);
 					$this->append_code($this->get_space($space_before) . $text . $this->get_space($space_after));
 					break;
 				default:
