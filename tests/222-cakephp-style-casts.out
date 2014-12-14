@@ -2,3 +2,4 @@
 //passes:Default,CakePHPStyle
 (int)$a;
 (int)func();
+(bool)(int)$a;
