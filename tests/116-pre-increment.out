@@ -9,9 +9,9 @@ if (++$a) {
 
 ++$a;
 $this->a[++$a];
-$this->a {++$b}(++$a);
+$this->a{++$b}(++$a);
 $this->a(++$a);
-$this->a {++$b}();
+$this->a{++$b}();
 
 echo "a" . ++$i;
 
@@ -23,9 +23,9 @@ if (--$a) {
 
 --$a;
 $this->a[--$a];
-$this->a {--$b}(--$a);
+$this->a{--$b}(--$a);
 $this->a(--$a);
-$this->a {--$b}();
+$this->a{--$b}();
 
 echo "a" . --$i;
 
