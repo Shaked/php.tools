@@ -1,0 +1,6 @@
+<?php
+//passes:Default,CakePHPStyle
+class A {
+	public function __construct(){
+	}
+}

@@ -4442,7 +4442,24 @@ class CakePHPStyle extends AdditionalPass {
 					$level_touched = null;
 					break;
 				case T_STRING:
-					if ($this->left_useful_token_is(T_FUNCTION)) {
+					if (
+						$this->left_useful_token_is(T_FUNCTION) &&
+						'__construct' != $text &&
+						'__destruct' != $text &&
+						'__call' != $text &&
+						'__callStatic' != $text &&
+						'__get' != $text &&
+						'__set' != $text &&
+						'__isset' != $text &&
+						'__unset' != $text &&
+						'__sleep' != $text &&
+						'__wakeup' != $text &&
+						'__toString' != $text &&
+						'__invoke' != $text &&
+						'__set_state' != $text &&
+						'__clone' != $text &&
+						' __debugInfo' != $text
+					) {
 						$text = str_replace('__', '', $text);
 						$text = str_replace('_', '', $text);
 						if (T_PROTECTED == $level_touched) {
