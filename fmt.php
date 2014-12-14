@@ -4400,6 +4400,7 @@ EOT;
 };
 class CakePHPStyle extends AdditionalPass {
 	private $found_tokens;
+
 	public function candidate($source, $found_tokens) {
 		$this->found_tokens = $found_tokens;
 		return true;
@@ -4410,12 +4411,49 @@ class CakePHPStyle extends AdditionalPass {
 		if ($fmt->candidate($source, $this->found_tokens)) {
 			$source = $fmt->format($source);
 		}
+		$fmt = new MergeElseIf();
+		if ($fmt->candidate($source, $this->found_tokens)) {
+			$source = $fmt->format($source);
+		}
 		$source = $this->add_underscores_before_name($source);
 		$source = $this->remove_space_after_casts($source);
 		$source = $this->merge_equals_with_reference($source);
+		$source = $this->resize_spaces($source);
 		return $source;
 	}
-
+	private function resize_spaces($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$max_detected_indent = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_COMMENT:
+				case T_DOC_COMMENT:
+					if (!$this->has_ln_before() && $this->left_token_is(ST_CURLY_OPEN)) {
+						$this->rtrim_and_append_code($this->get_space() . $text);
+						break;
+					} elseif ($this->right_useful_token_is(T_CONSTANT_ENCAPSED_STRING)) {
+						$this->append_code($text . $this->get_space());
+						break;
+					}
+					$this->append_code($text);
+					break;
+				case T_CLOSE_TAG:
+					if (!$this->has_ln_before()) {
+						$this->rtrim_and_append_code($this->get_space() . $text);
+						break;
+					}
+					$this->append_code($text);
+					break;
+				default:
+					$this->append_code($text);
+					break;
+			}
+		}
+		return $this->code;
+	}
 	private function merge_equals_with_reference($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -4452,6 +4490,7 @@ class CakePHPStyle extends AdditionalPass {
 				case T_UNSET_CAST:
 				case T_STRING:
 				case T_VARIABLE:
+				case ST_PARENTHESES_OPEN:
 					if (
 						$this->left_useful_token_is([
 							T_ARRAY_CAST,
