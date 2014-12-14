@@ -4497,8 +4497,12 @@ class CakePHPStyle extends AdditionalPass {
 						'__clone' != $text &&
 						' __debugInfo' != $text
 					) {
-						$text = str_replace('__', '', $text);
-						$text = str_replace('_', '', $text);
+						if (substr($text, 0, 2) == '__') {
+							$text = substr($text, 2);
+						}
+						if (substr($text, 0, 1) == '_') {
+							$text = substr($text, 1);
+						}
 						if (T_PROTECTED == $level_touched) {
 							$text = '_' . $text;
 						} elseif (T_PRIVATE == $level_touched) {

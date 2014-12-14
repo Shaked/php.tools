@@ -3,4 +3,6 @@
 class A {
 	public function __construct() {
 	}
+	public function controller_redirects() {
+	}
 }
