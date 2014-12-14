@@ -25,7 +25,6 @@ class CakePHPStyle extends AdditionalPass {
 	private function resize_spaces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$max_detected_indent = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -58,7 +57,6 @@ class CakePHPStyle extends AdditionalPass {
 	private function merge_equals_with_reference($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$max_detected_indent = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -77,7 +75,6 @@ class CakePHPStyle extends AdditionalPass {
 	private function remove_space_after_casts($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$max_detected_indent = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -116,7 +113,6 @@ class CakePHPStyle extends AdditionalPass {
 	private function add_underscores_before_name($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$max_detected_indent = 0;
 		$level_touched = null;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
