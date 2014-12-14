@@ -4522,6 +4522,7 @@ class CakePHPStyle extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$max_detected_indent = 0;
+		$level_touched = null;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
 			$this->ptr = $index;
@@ -4534,7 +4535,7 @@ class CakePHPStyle extends AdditionalPass {
 					break;
 
 				case T_VARIABLE:
-					if ($this->left_useful_token_is([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC])) {
+					if (null !== $level_touched && $this->left_useful_token_is([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC])) {
 						$text = str_replace('$_', '$', $text);
 						$text = str_replace('$_', '$', $text);
 						if (T_PROTECTED == $level_touched) {
@@ -4548,6 +4549,7 @@ class CakePHPStyle extends AdditionalPass {
 					break;
 				case T_STRING:
 					if (
+						null !== $level_touched &&
 						$this->left_useful_token_is(T_FUNCTION) &&
 						'_' != $text &&
 						'__' != $text &&
