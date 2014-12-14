@@ -6041,9 +6041,11 @@ if (!isset($testEnv)) {
 	}
 
 	$cache = null;
+	$cache_fn = null;
 	if ($enable_cache && isset($opts['cache'])) {
 		$argv = extract_from_argv($argv, 'cache');
-		$cache = new Cache($opts['cache']);
+		$cache_fn = $opts['cache'];
+		$cache = new Cache($cache_fn);
 		fwrite(STDERR, 'Using cache ...' . PHP_EOL);
 	}
 	$backup = true;
@@ -6258,7 +6260,11 @@ if (!isset($testEnv)) {
 						fwrite(STDERR, 'Starting ' . $workers . ' workers ...' . PHP_EOL);
 					}
 					for ($i = 0; $i < $workers; ++$i) {
-						cofunc(function ($fmt, $backup, $cache, $chn, $chn_done, $id) {
+						cofunc(function ($fmt, $backup, $cache_fn, $chn, $chn_done, $id) {
+							$cache = null;
+							if (null !== $cache_fn) {
+								$cache = new Cache($cache_fn);
+							}
 							$cache_hit_count = 0;
 							$cache_miss_count = 0;
 							while (true) {
@@ -6290,7 +6296,7 @@ if (!isset($testEnv)) {
 								rename($file . '-tmp', $file);
 							}
 							$chn_done->in([$cache_hit_count, $cache_miss_count]);
-						}, $fmt, $backup, $cache, $chn, $chn_done, $i);
+						}, $fmt, $backup, $cache_fn, $chn, $chn_done, $i);
 					}
 				}
 				foreach ($files as $file) {
