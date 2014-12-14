@@ -144,6 +144,8 @@ class CakePHPStyle extends AdditionalPass {
 				case T_STRING:
 					if (
 						$this->left_useful_token_is(T_FUNCTION) &&
+						'_' != $text &&
+						'__' != $text &&
 						'__construct' != $text &&
 						'__destruct' != $text &&
 						'__call' != $text &&
