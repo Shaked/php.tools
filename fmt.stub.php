@@ -4416,9 +4416,40 @@ class CakePHPStyle extends AdditionalPass {
 			$source = $fmt->format($source);
 		}
 		$source = $this->add_underscores_before_name($source);
+		$source = $this->remove_space_after_casts($source);
 		return $source;
 	}
 
+	private function remove_space_after_casts($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$max_detected_indent = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->get_token($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_VARIABLE:
+					if (
+						$this->left_useful_token_is([
+							T_ARRAY_CAST,
+							T_BOOL_CAST,
+							T_DOUBLE_CAST,
+							T_INT_CAST,
+							T_OBJECT_CAST,
+							T_STRING_CAST,
+							T_UNSET_CAST,
+						])
+					) {
+						$this->rtrim_and_append_code($text);
+						break;
+					}
+				default:
+					$this->append_code($text);
+					break;
+			}
+		}
+		return $this->code;
+	}
 	private function add_underscores_before_name($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
