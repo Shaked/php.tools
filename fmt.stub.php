@@ -2735,6 +2735,7 @@ final class ResizeSpaces extends FormatterPass {
 
 		$in_ternary_operator = false;
 		$short_ternary_operator = false;
+		$touched_function = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->get_token($token);
@@ -2867,6 +2868,7 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case ST_CURLY_OPEN:
+					$touched_function = false;
 					if (!$this->has_ln_left_token() && $this->left_useful_token_is([T_STRING, T_DO, T_FINALLY, ST_PARENTHESES_CLOSE])) {
 						$this->rtrim_and_append_code($this->get_space() . $text);
 						break;
@@ -2928,6 +2930,10 @@ final class ResizeSpaces extends FormatterPass {
 				case T_STATIC:
 					$this->append_code($text . $this->get_space(!$this->right_token_is([ST_SEMI_COLON, T_DOUBLE_COLON, ST_PARENTHESES_OPEN])));
 					break;
+				case T_FUNCTION:
+					$touched_function = true;
+					$this->append_code($text . $this->get_space(!$this->right_token_is(ST_SEMI_COLON)));
+					break;
 				case T_PUBLIC:
 				case T_PRIVATE:
 				case T_PROTECTED:
@@ -2941,7 +2947,6 @@ final class ResizeSpaces extends FormatterPass {
 				case T_INCLUDE_ONCE:
 				case T_REQUIRE_ONCE:
 				case T_DECLARE:
-				case T_FUNCTION:
 				case T_IF:
 				case T_FOR:
 				case T_FOREACH:
@@ -3024,13 +3029,10 @@ final class ResizeSpaces extends FormatterPass {
 					$this->append_code(str_replace([' ', "\t"], '', $text) . $this->get_space());
 					break;
 				case ST_REFERENCE:
-					if (($this->left_token_is([T_VARIABLE]) && $this->right_token_is([T_VARIABLE])) || ($this->left_token_is([T_VARIABLE]) && $this->right_token_is([T_STRING])) || ($this->left_token_is([T_STRING]) && $this->right_token_is([T_STRING]))) {
-						$this->append_code($this->get_space() . $text . $this->get_space());
-						break;
-					} elseif ($this->left_token_is([T_STRING])) {
-						$this->append_code($this->get_space() . $text);
-						break;
-					}
+					$space_before = !$this->left_useful_token_is([ST_EQUAL, ST_PARENTHESES_OPEN, T_ARRAY]);
+					$space_after = !$touched_function && !$this->left_useful_token_is(ST_EQUAL);
+					$this->append_code($this->get_space($space_before) . $text . $this->get_space($space_after));
+					break;
 				default:
 					$this->append_code($text);
 					break;
