@@ -427,6 +427,9 @@ abstract class FormatterPass {
 			if (T_CURLY_OPEN == $id) {
 				++$count;
 			}
+			if (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+				++$count;
+			}
 			if (ST_CURLY_CLOSE == $id) {
 				--$count;
 			}
