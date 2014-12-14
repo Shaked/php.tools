@@ -1,0 +1,9 @@
+<?php
+$obj->property + array();
+$params + array();
+$now->format('U') + (int) $expires;
+foreach ($this->_files as &$file) {
+}
+
+foreach ($this->_files as $k => &$file) {
+}
