@@ -5535,6 +5535,7 @@ class SpaceBetweenMethods extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -5546,7 +5547,7 @@ class SpaceBetweenMethods extends AdditionalPass {
 				case T_FUNCTION:
 					$this->append_code($text);
 					$this->print_until(ST_CURLY_OPEN);
-					$this->print_block(ST_CURLY_OPEN, ST_CURLY_CLOSE);
+					$this->print_curly_block();
 					if (!$this->right_token_is([ST_CURLY_CLOSE, ST_SEMI_COLON, ST_COMMA, ST_PARENTHESES_CLOSE])) {
 						$this->append_code($this->get_crlf());
 					}
