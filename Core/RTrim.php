@@ -4,6 +4,6 @@ final class RTrim extends FormatterPass {
 		return true;
 	}
 	public function format($source) {
-		return preg_replace('/\h+$/m', '', $source);
+		return preg_replace('/\h+$/mu', '', $source);
 	}
 }
