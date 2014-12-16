@@ -2331,7 +2331,7 @@ final class ReindentObjOps extends FormatterPass {
 						$this->print_until(ST_PARENTHESES_OPEN);
 						$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 						$this->print_until(ST_CURLY_OPEN);
-						$this->print_block(ST_CURLY_OPEN, ST_CURLY_CLOSE);
+						$this->print_curly_block();
 					}
 					break;
 
@@ -4587,7 +4587,7 @@ class EncapsulateNamespaces extends AdditionalPass {
 					list($found_id, $found_text) = $this->print_and_stop_at([ST_CURLY_OPEN, ST_SEMI_COLON]);
 					if (ST_CURLY_OPEN == $found_id) {
 						$this->append_code($found_text);
-						$this->print_block(ST_CURLY_OPEN, ST_CURLY_CLOSE);
+						$this->print_curly_block();
 					} elseif (ST_SEMI_COLON == $found_id) {
 						$in_namespace_context = true;
 						$this->append_code(ST_CURLY_OPEN);
