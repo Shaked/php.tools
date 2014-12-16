@@ -44,6 +44,7 @@ final class Reindent extends FormatterPass {
 				case T_NUM_STRING:
 					$this->append_code($text);
 					break;
+				case T_DOLLAR_OPEN_CURLY_BRACES:
 				case T_CURLY_OPEN:
 				case ST_CURLY_OPEN:
 				case ST_PARENTHESES_OPEN:
