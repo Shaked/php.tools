@@ -4265,6 +4265,22 @@ class AutoPreincrement extends AdditionalPass {
 				continue;
 			}
 
+			if (ST_DOLLAR == $id) {
+				$initial_index = $ptr;
+				$tkns[$ptr] = null;
+				$stack = '';
+				while (list($ptr, $token) = each($tkns)) {
+					list($id, $text) = $this->get_token($token);
+					$tkns[$ptr] = null;
+					$stack .= $text;
+					if (ST_CURLY_OPEN == $id) {
+						break;
+					}
+				}
+				$stack = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
+				$tkns[$initial_index] = [self::CHAIN_VARIABLE, '$' . $stack];
+			}
+
 			if (T_STRING == $id || T_VARIABLE == $id || T_NS_SEPARATOR == $id) {
 				$initial_index = $ptr;
 				$stack = $text;
