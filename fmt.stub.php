@@ -2504,7 +2504,7 @@ final class ReindentObjOps extends FormatterPass {
 
 					$farthest = 0;
 					foreach ($lines_with_objop as $idx) {
-						$farthest = max($farthest, strpos($lines[$idx], $placeholder));
+						$farthest = max($farthest, strpos($lines[$idx], $placeholder . '->'));
 					}
 					foreach ($lines_with_objop as $idx) {
 						$line = $lines[$idx];
@@ -2520,7 +2520,6 @@ final class ReindentObjOps extends FormatterPass {
 				}
 			}
 		}
-
 		return $this->code;
 	}
 
