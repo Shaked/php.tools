@@ -6138,7 +6138,7 @@ if (!isset($testEnv)) {
 		if (sha1_file($argv[0]) != $phar_sha1) {
 			copy($argv[0], $argv[0] . "~");
 			file_put_contents($argv[0], $phar_file);
-			chmod($argv[0], 0777&~umask());
+			chmod($argv[0], 0777 & ~umask());
 			fwrite(STDERR, 'Updated successfully' . PHP_EOL);
 		} else {
 			fwrite(STDERR, 'Up-to-date!' . PHP_EOL);
