@@ -1,2 +1,3 @@
-<?php while (true) {echo 's'?>x<?php
+<?php while (true) {echo 's';
 }
+?>x

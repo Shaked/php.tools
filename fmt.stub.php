@@ -783,6 +783,10 @@ final class AddMissingCurlyBraces extends FormatterPass {
 								--$ignore_count;
 							}
 							$this->append_code($text);
+							if (ST_SEMI_COLON != $id && $this->right_token_is(T_CLOSE_TAG)) {
+								$this->append_code(ST_SEMI_COLON);
+								break;
+							}
 							if (T_INLINE_HTML == $id && !$this->right_token_is(T_OPEN_TAG)) {
 								$this->append_code('<?php');
 							}
