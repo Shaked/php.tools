@@ -6242,7 +6242,9 @@ if (!isset($testEnv)) {
 			exit(255);
 		}
 		if ($in_phar) {
-			$argv[0] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[0];
+			if(!file_exists($argv[0])){
+				$argv[0] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[0];
+			}
 		}
 		if (sha1_file($argv[0]) != $phar_sha1) {
 			copy($argv[0], $argv[0] . "~");
@@ -6466,7 +6468,9 @@ if (!isset($testEnv)) {
 			exit(0);
 		}
 		if ($in_phar) {
-			$argv[1] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[1];
+			if(!file_exists($argv[1])){
+				$argv[1] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[1];
+			}
 		}
 		if ('-' == $opts['o']) {
 			echo $fmt->formatCode(file_get_contents($argv[1]));
@@ -6498,7 +6502,9 @@ if (!isset($testEnv)) {
 				continue;
 			}
 			if ($in_phar) {
-				$arg = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $arg;
+				if(!file_exists($arg)){
+					$arg = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $arg;
+				}
 			}
 			if (is_file($arg)) {
 				$file = $arg;
