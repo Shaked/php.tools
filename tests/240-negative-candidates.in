@@ -1,0 +1,3 @@
+<?php
+//passes:MergeNamespaceWithOpenTag,NoSpaceAfterPHPDocBlocks
+$a . $b;

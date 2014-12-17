@@ -79,14 +79,12 @@ class AutoPreincrement extends AdditionalPass {
 				$initial_index = $ptr;
 				$tkns[$ptr] = null;
 				$stack = '';
-				while (list($ptr, $token) = each($tkns)) {
+				do {
+					list($ptr, $token) = each($tkns);
 					list($id, $text) = $this->get_token($token);
 					$tkns[$ptr] = null;
 					$stack .= $text;
-					if (ST_CURLY_OPEN == $id) {
-						break;
-					}
-				}
+				} while (ST_CURLY_OPEN != $id);
 				$stack = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
 				$tkns[$initial_index] = [self::CHAIN_VARIABLE, '$' . $stack];
 			}
