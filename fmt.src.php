@@ -74,6 +74,7 @@ require 'Additionals/GeneratePHPDoc.php';
 require 'Additionals/JoinToImplode.php';
 require 'Additionals/LaravelStyle.php';
 require 'Additionals/MergeElseIf.php';
+require 'Additionals/MergeNamespaceWithOpenTag.php';
 require 'Additionals/MildAutoPreincrement.php';
 require 'Additionals/NoSpaceAfterPHPDocBlocks.php';
 require 'Additionals/OrderMethod.php';
