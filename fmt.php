@@ -3140,7 +3140,7 @@ final class TwoCommandsInSameLine extends FormatterPass {
 						break;
 					}
 					$this->append_code($text);
-					if (!$this->has_ln_after() && $this->right_token_is([T_VARIABLE, T_STRING])) {
+					if (!$this->has_ln_after() && $this->right_token_is([T_VARIABLE, T_STRING, T_CONTINUE, T_BREAK, T_ECHO, T_PRINT])) {
 						$this->append_code($this->new_line);
 					}
 					break;
