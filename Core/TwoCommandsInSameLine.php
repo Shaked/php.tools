@@ -1,6 +1,6 @@
 <?php
 final class TwoCommandsInSameLine extends FormatterPass {
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
@@ -17,7 +17,7 @@ final class TwoCommandsInSameLine extends FormatterPass {
 					}
 					$this->appendCode($text);
 					if (!$this->hasLnAfter() && $this->rightTokenIs([T_VARIABLE, T_STRING, T_CONTINUE, T_BREAK, T_ECHO, T_PRINT])) {
-						$this->appendCode($this->new_line);
+						$this->appendCode($this->newLine);
 					}
 					break;
 

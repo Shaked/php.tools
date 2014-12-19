@@ -1,7 +1,7 @@
 <?php
 class RemoveUseLeadingSlash extends AdditionalPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_NAMESPACE]) || isset($found_tokens[T_TRAIT]) || isset($found_tokens[T_CLASS]) || isset($found_tokens[T_FUNCTION]) || isset($found_tokens[T_NS_SEPARATOR])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_NAMESPACE]) || isset($foundTokens[T_TRAIT]) || isset($foundTokens[T_CLASS]) || isset($foundTokens[T_FUNCTION]) || isset($foundTokens[T_NS_SEPARATOR])) {
 			return true;
 		}
 

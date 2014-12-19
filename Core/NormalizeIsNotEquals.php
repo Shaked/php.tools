@@ -1,7 +1,7 @@
 <?php
 final class NormalizeIsNotEquals extends FormatterPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_IS_NOT_EQUAL])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_IS_NOT_EQUAL])) {
 			return true;
 		}
 

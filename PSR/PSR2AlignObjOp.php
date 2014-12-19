@@ -1,8 +1,8 @@
 <?php
 final class PSR2AlignObjOp extends FormatterPass {
 	const ALIGNABLE_TOKEN = "\x2 OBJOP%d \x3";
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[ST_SEMI_COLON]) || isset($found_tokens[T_ARRAY]) || isset($found_tokens[T_DOUBLE_ARROW]) || isset($found_tokens[T_OBJECT_OPERATOR])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[ST_SEMI_COLON]) || isset($foundTokens[T_ARRAY]) || isset($foundTokens[T_DOUBLE_ARROW]) || isset($foundTokens[T_OBJECT_OPERATOR])) {
 			return true;
 		}
 
@@ -49,7 +49,7 @@ final class PSR2AlignObjOp extends FormatterPass {
 				continue;
 			}
 
-			$lines = explode($this->new_line, $this->code);
+			$lines = explode($this->newLine, $this->code);
 			$lines_with_objop = [];
 			$block_count = 0;
 
@@ -76,7 +76,7 @@ final class PSR2AlignObjOp extends FormatterPass {
 				}
 			}
 
-			$this->code = str_replace($placeholder, '', implode($this->new_line, $lines));
+			$this->code = str_replace($placeholder, '', implode($this->newLine, $lines));
 		}
 		return $this->code;
 	}

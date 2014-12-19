@@ -1,7 +1,7 @@
 <?php
 class MergeNamespaceWithOpenTag extends AdditionalPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_NAMESPACE])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
 		}
 
@@ -16,7 +16,7 @@ class MergeNamespaceWithOpenTag extends AdditionalPass {
 			switch ($id) {
 				case T_NAMESPACE:
 					if ($this->leftTokenIs(T_OPEN_TAG)) {
-						$this->rtrimAndAppendCode($this->new_line . $text);
+						$this->rtrimAndAppendCode($this->newLine . $text);
 						break 2;
 					}
 

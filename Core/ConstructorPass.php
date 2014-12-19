@@ -12,8 +12,8 @@ final class ConstructorPass extends FormatterPass {
 		}
 	}
 
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_CLASS])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_CLASS])) {
 			return true;
 		}
 		return false;
@@ -73,11 +73,11 @@ final class ConstructorPass extends FormatterPass {
 					}
 					$function_list = array_combine($function_list, $function_list);
 					if (!isset($function_list['__construct'])) {
-						$this->appendCode('function __construct(' . implode(', ', $attributes) . '){' . $this->new_line);
+						$this->appendCode('function __construct(' . implode(', ', $attributes) . '){' . $this->newLine);
 						foreach ($attributes as $var) {
 							$this->appendCode($this->generate($var));
 						}
-						$this->appendCode('}' . $this->new_line);
+						$this->appendCode('}' . $this->newLine);
 					}
 
 					$this->appendCode($text);
@@ -106,15 +106,15 @@ final class ConstructorPass extends FormatterPass {
 		return $ret;
 	}
 	private function generateCamelCase($var) {
-		$str = '$this->set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . ');' . $this->new_line;
+		$str = '$this->set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . ');' . $this->newLine;
 		return $str;
 	}
 	private function generateSnakeCase($var) {
-		$str = '$this->set_' . (str_replace('$', '', $var)) . '(' . $var . ');' . $this->new_line;
+		$str = '$this->set_' . (str_replace('$', '', $var)) . '(' . $var . ');' . $this->newLine;
 		return $str;
 	}
 	private function generateGolang($var) {
-		$str = '$this->Set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . ');' . $this->new_line;
+		$str = '$this->Set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . ');' . $this->newLine;
 		return $str;
 	}
 }

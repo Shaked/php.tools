@@ -1,7 +1,7 @@
 <?php
 final class RemoveIncludeParentheses extends FormatterPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_INCLUDE]) || isset($found_tokens[T_REQUIRE]) || isset($found_tokens[T_INCLUDE_ONCE]) || isset($found_tokens[T_REQUIRE_ONCE])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_INCLUDE]) || isset($foundTokens[T_REQUIRE]) || isset($foundTokens[T_INCLUDE_ONCE]) || isset($foundTokens[T_REQUIRE_ONCE])) {
 			return true;
 		}
 

@@ -68,7 +68,7 @@ final class OrderMethod extends AdditionalPass {
 		return $return;
 	}
 
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 

@@ -17,14 +17,14 @@ final class CodeFormatter {
 			},
 			$this->passes
 		);
-		$found_tokens = [];
+		$foundTokens = [];
 		$tkns = token_get_all($source);
 		foreach ($tkns as $token) {
 			list($id, $text) = $this->getToken($token);
-			$found_tokens[$id] = $id;
+			$foundTokens[$id] = $id;
 		}
 		while (($pass = array_pop($passes))) {
-			if ($pass->candidate($source, $found_tokens)) {
+			if ($pass->candidate($source, $foundTokens)) {
 				$source = $pass->format($source);
 			}
 		}

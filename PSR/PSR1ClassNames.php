@@ -1,7 +1,7 @@
 <?php
 final class PSR1ClassNames extends FormatterPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_CLASS]) || isset($found_tokens[T_STRING])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_CLASS]) || isset($foundTokens[T_STRING])) {
 			return true;
 		}
 

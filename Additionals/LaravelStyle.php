@@ -1,8 +1,8 @@
 <?php
 class LaravelStyle extends AdditionalPass {
-	private $found_tokens;
-	public function candidate($source, $found_tokens) {
-		$this->found_tokens = $found_tokens;
+	private $foundTokens;
+	public function candidate($source, $foundTokens) {
+		$this->found_tokens = $foundTokens;
 		return true;
 	}
 
@@ -47,16 +47,16 @@ class LaravelStyle extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_WHITESPACE:
-					if ($this->hasLn($text) && false !== strpos($text, $this->indent_char)) {
+					if ($this->hasLn($text) && false !== strpos($text, $this->indentChar)) {
 						$max_detected_indent = 0;
 						$current_detected_indent = 0;
 						$len = strlen($text);
 						for ($i = 0; $i < $len; ++$i) {
-							if ($this->new_line == $text[$i]) {
+							if ($this->newLine == $text[$i]) {
 								$max_detected_indent = max($max_detected_indent, $current_detected_indent);
 								$current_detected_indent = 0;
 							}
-							if ($this->indent_char == $text[$i]) {
+							if ($this->indentChar == $text[$i]) {
 								++$current_detected_indent;
 							}
 						}

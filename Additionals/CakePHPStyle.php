@@ -1,9 +1,9 @@
 <?php
 class CakePHPStyle extends AdditionalPass {
-	private $found_tokens;
+	private $foundTokens;
 
-	public function candidate($source, $found_tokens) {
-		$this->found_tokens = $found_tokens;
+	public function candidate($source, $foundTokens) {
+		$this->found_tokens = $foundTokens;
 		return true;
 	}
 

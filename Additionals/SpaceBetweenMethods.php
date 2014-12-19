@@ -1,7 +1,7 @@
 <?php
 class SpaceBetweenMethods extends AdditionalPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_FUNCTION])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_FUNCTION])) {
 			return true;
 		}
 

@@ -1,7 +1,7 @@
 <?php
 final class SmartLnAfterCurlyOpen extends AdditionalPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[ST_CURLY_OPEN])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[ST_CURLY_OPEN])) {
 			return true;
 		}
 
@@ -48,7 +48,7 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 						}
 					}
 					if ($found_line_break && !$has_ln_after) {
-						$this->appendCode($this->new_line);
+						$this->appendCode($this->newLine);
 					}
 					$this->appendCode($stack);
 					break;

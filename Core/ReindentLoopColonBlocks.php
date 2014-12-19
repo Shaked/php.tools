@@ -1,6 +1,6 @@
 <?php
 final class ReindentLoopColonBlocks extends FormatterPass {
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 
@@ -57,10 +57,10 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 					break;
 				default:
 					if ($this->hasLn($text) && !$this->rightTokenIs([$close_token])) {
-						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 					} elseif ($this->hasLn($text) && $this->rightTokenIs([$close_token])) {
 						$this->setIndent(-1);
-						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 						$this->setIndent(+1);
 					}
 					$this->appendCode($text);
@@ -105,10 +105,10 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 					break;
 				default:
 					if ($this->hasLn($text) && !$this->rightTokenIs([T_ENDWHILE])) {
-						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 					} elseif ($this->hasLn($text) && $this->rightTokenIs([T_ENDWHILE])) {
 						$this->setIndent(-1);
-						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 						$this->setIndent(+1);
 					}
 					$this->appendCode($text);

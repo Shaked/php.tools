@@ -7,8 +7,8 @@ class AutoPreincrement extends AdditionalPass {
 	const CHAIN_FUNC = 'CHAIN_FUNC';
 	const CHAIN_STRING = 'CHAIN_STRING';
 	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_INC]) || isset($found_tokens[T_DEC])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_INC]) || isset($foundTokens[T_DEC])) {
 			return true;
 		}
 

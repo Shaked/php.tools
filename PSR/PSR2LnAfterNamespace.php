@@ -1,7 +1,7 @@
 <?php
 final class PSR2LnAfterNamespace extends FormatterPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_NAMESPACE])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
 		}
 
@@ -23,8 +23,8 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 						if (ST_SEMI_COLON === $id) {
 							$this->appendCode($text);
 							list(, $text) = $this->inspectToken();
-							if (1 === substr_count($text, $this->new_line)) {
-								$this->appendCode($this->new_line);
+							if (1 === substr_count($text, $this->newLine)) {
+								$this->appendCode($this->newLine);
 							}
 							break;
 						} elseif (ST_CURLY_OPEN === $id) {

@@ -1,7 +1,7 @@
 <?php
 final class MergeDoubleArrowAndArray extends FormatterPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_ARRAY])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_ARRAY])) {
 			return true;
 		}
 

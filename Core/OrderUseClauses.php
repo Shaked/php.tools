@@ -1,8 +1,8 @@
 <?php
 final class OrderUseClauses extends FormatterPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERBY \x3*/";
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_USE])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_USE])) {
 			return true;
 		}
 
@@ -30,7 +30,7 @@ final class OrderUseClauses extends FormatterPass {
 							break;
 						} elseif (ST_COMMA === $id) {
 							$use_item .= ST_SEMI_COLON;
-							$next_tokens[] = [T_WHITESPACE, $this->new_line, ];
+							$next_tokens[] = [T_WHITESPACE, $this->newLine, ];
 							$next_tokens[] = [T_USE, 'use', ];
 							break;
 						} else {
@@ -42,14 +42,14 @@ final class OrderUseClauses extends FormatterPass {
 				}
 				if (T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id || T_TRAIT === $id || T_VARIABLE === $id) {
 					if (sizeof($use_stack) > 0) {
-						$new_tokens[] = $this->new_line;
-						$new_tokens[] = $this->new_line;
+						$new_tokens[] = $this->newLine;
+						$new_tokens[] = $this->newLine;
 					}
 					$new_tokens[] = $token;
 					break 2;
 				} elseif ($touched_namespace && (T_DOC_COMMENT === $id || T_COMMENT === $id)) {
 					if (sizeof($use_stack) > 0) {
-						$new_tokens[] = $this->new_line;
+						$new_tokens[] = $this->newLine;
 					}
 					$new_tokens[] = $token;
 					break 2;
@@ -79,7 +79,7 @@ final class OrderUseClauses extends FormatterPass {
 			if ($token instanceof SurrogateToken) {
 				$return .= array_shift($use_stack);
 			} elseif (T_WHITESPACE == $token[0] && isset($new_tokens[$idx - 1], $new_tokens[$idx + 1]) && $new_tokens[$idx - 1] instanceof SurrogateToken && $new_tokens[$idx + 1] instanceof SurrogateToken) {
-				$return .= $this->new_line;
+				$return .= $this->newLine;
 				continue;
 			} else {
 				list($id, $text) = $this->getToken($token);
@@ -120,7 +120,7 @@ final class OrderUseClauses extends FormatterPass {
 			)
 		);
 		foreach ($unused_import as $v) {
-			$return = str_ireplace($alias_list[$v] . $this->new_line, null, $return);
+			$return = str_ireplace($alias_list[$v] . $this->newLine, null, $return);
 		}
 
 		return $return;

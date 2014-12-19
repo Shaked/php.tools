@@ -1,6 +1,6 @@
 <?php
 final class GeneratePHPDoc extends AdditionalPass {
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
@@ -118,14 +118,14 @@ final class GeneratePHPDoc extends AdditionalPass {
 		if (empty($param_stack) && empty($return_stack)) {
 			return '';
 		}
-		$str = '/**' . $this->new_line;
+		$str = '/**' . $this->newLine;
 		foreach ($param_stack as $param) {
-			$str .= rtrim(' * @param ' . $param['type']) . ' ' . $param['name'] . $this->new_line;
+			$str .= rtrim(' * @param ' . $param['type']) . ' ' . $param['name'] . $this->newLine;
 		}
 		if (!empty($return_stack)) {
-			$str .= ' * @return ' . $return_stack . $this->new_line;
+			$str .= ' * @return ' . $return_stack . $this->newLine;
 		}
-		$str .= ' */' . $this->new_line;
+		$str .= ' */' . $this->newLine;
 		return $str;
 	}
 

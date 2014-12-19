@@ -1,6 +1,6 @@
 <?php
 final class PSR1OpenTags extends FormatterPass {
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
@@ -12,7 +12,7 @@ final class PSR1OpenTags extends FormatterPass {
 			switch ($id) {
 				case T_OPEN_TAG:
 					if ('<?php' !== $text) {
-						$this->appendCode('<?php' . $this->new_line);
+						$this->appendCode('<?php' . $this->newLine);
 						break;
 					}
 				default:

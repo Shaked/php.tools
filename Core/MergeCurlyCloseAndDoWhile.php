@@ -1,7 +1,7 @@
 <?php
 final class MergeCurlyCloseAndDoWhile extends FormatterPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_WHILE])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_WHILE])) {
 			return true;
 		}
 

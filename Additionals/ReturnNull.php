@@ -1,7 +1,7 @@
 <?php
 class ReturnNull extends AdditionalPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_RETURN])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_RETURN])) {
 			return true;
 		}
 
@@ -10,7 +10,7 @@ class ReturnNull extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$this->use_cache = true;
+		$this->useCache = true;
 		$touched_return = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);

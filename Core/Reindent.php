@@ -1,12 +1,12 @@
 <?php
 final class Reindent extends FormatterPass {
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$this->use_cache = true;
+		$this->useCache = true;
 		$found_stack = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -71,7 +71,7 @@ final class Reindent extends FormatterPass {
 					break;
 
 				case T_DOC_COMMENT:
-					$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+					$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 					$this->appendCode($text);
 					break;
 				default:
@@ -79,10 +79,10 @@ final class Reindent extends FormatterPass {
 					if ($has_ln) {
 						$is_next_curly_paren_bracket_close = $this->rightTokenIs([ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE]);
 						if (!$is_next_curly_paren_bracket_close) {
-							$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 						} elseif ($is_next_curly_paren_bracket_close) {
 							$this->setIndent(-1);
-							$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 							$this->setIndent(+1);
 						}
 					}

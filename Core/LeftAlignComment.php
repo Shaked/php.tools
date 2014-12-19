@@ -1,7 +1,7 @@
 <?php
 final class LeftAlignComment extends FormatterPass {
 	const NON_INDENTABLE_COMMENT = "/*\x2 COMMENT \x3*/";
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
@@ -33,7 +33,7 @@ final class LeftAlignComment extends FormatterPass {
 						// 	$tok = strtok($this->new_line);
 						// }
 						// $this->append_code($new_text);
-						$lines = explode($this->new_line, $text);
+						$lines = explode($this->newLine, $text);
 						$lines = array_map(function ($v) {
 							$v = ltrim($v);
 							if ('*' === substr($v, 0, 1)) {
@@ -41,7 +41,7 @@ final class LeftAlignComment extends FormatterPass {
 							}
 							return $v;
 						}, $lines);
-						$this->appendCode(implode($this->new_line, $lines));
+						$this->appendCode(implode($this->newLine, $lines));
 						break;
 					}
 				case T_WHITESPACE:

@@ -30,7 +30,7 @@ final class RefactorPass extends FormatterPass {
 	private function getTo() {
 		return $this->to;
 	}
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {

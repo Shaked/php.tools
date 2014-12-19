@@ -1,6 +1,6 @@
 <?php
 final class ReindentIfColonBlocks extends FormatterPass {
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
@@ -65,10 +65,10 @@ final class ReindentIfColonBlocks extends FormatterPass {
 				default:
 					$has_ln = $this->hasLn($text);
 					if ($has_ln && !$this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF])) {
-						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 					} elseif ($has_ln && $this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF])) {
 						$this->setIndent(-1);
-						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 						$this->setIndent(+1);
 					}
 					$this->appendCode($text);

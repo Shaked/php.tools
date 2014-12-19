@@ -1,10 +1,10 @@
 <?php
 final class NormalizeLnAndLtrimLines extends FormatterPass {
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
-		$source = str_replace(["\r\n", "\n\r", "\r", "\n"], $this->new_line, $source);
+		$source = str_replace(["\r\n", "\n\r", "\r", "\n"], $this->newLine, $source);
 		$source = preg_replace('/\h+$/mu', '', $source);
 
 		$this->tkns = token_get_all($source);
@@ -29,14 +29,14 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 						$this->appendCode(LeftAlignComment::NON_INDENTABLE_COMMENT);
 					}
 
-					$lines = explode($this->new_line, $text);
+					$lines = explode($this->newLine, $text);
 					$new_text = '';
 					foreach ($lines as $v) {
 						$v = ltrim($v);
 						if ('*' === substr($v, 0, 1)) {
 							$v = ' ' . $v;
 						}
-						$new_text .= $this->new_line . $v;
+						$new_text .= $this->newLine . $v;
 					}
 
 					$this->appendCode(ltrim($new_text));
@@ -46,9 +46,9 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 					break;
 				default:
 					if ($this->hasLn($text)) {
-						$trailing_new_line = $this->substrCountTrailing($text, $this->new_line);
+						$trailing_new_line = $this->substrCountTrailing($text, $this->newLine);
 						if ($trailing_new_line > 0) {
-							$text = trim($text) . str_repeat($this->new_line, $trailing_new_line);
+							$text = trim($text) . str_repeat($this->newLine, $trailing_new_line);
 						}
 					}
 					$this->appendCode($text);

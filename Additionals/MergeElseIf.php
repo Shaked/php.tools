@@ -3,8 +3,8 @@
  * From PHP-CS-Fixer
  */
 class MergeElseIf extends AdditionalPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_ELSE])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_ELSE])) {
 			return true;
 		}
 

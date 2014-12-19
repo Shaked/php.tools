@@ -1,6 +1,6 @@
 <?php
 final class AddMissingCurlyBraces extends FormatterPass {
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
@@ -17,7 +17,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 	private function addBraces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$this->use_cache = true;
+		$this->useCache = true;
 		$changed = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -47,7 +47,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						$while_in_next_token = $this->rightTokenIs([T_WHILE, T_DO]);
 						$ignore_count = 0;
 						if (!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) {
-							$this->rtrimAndAppendCode($this->new_line . '{');
+							$this->rtrimAndAppendCode($this->newLine . '{');
 						}
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->getToken($token);
@@ -104,7 +104,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						$while_in_next_token = $this->rightTokenIs([T_WHILE, T_DO]);
 						$ignore_count = 0;
 						if (!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) {
-							$this->rtrimAndAppendCode($this->new_line . '{');
+							$this->rtrimAndAppendCode($this->newLine . '{');
 						}
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->getToken($token);

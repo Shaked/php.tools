@@ -1,11 +1,11 @@
 <?php
 final class ReindentColonBlocks extends FormatterPass {
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
 		$this->tkns = token_get_all($source);
-		$this->use_cache = true;
+		$this->useCache = true;
 		$this->code = '';
 
 		$found_colon = false;

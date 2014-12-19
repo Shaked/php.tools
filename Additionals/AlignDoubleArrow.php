@@ -1,7 +1,7 @@
 <?php
 final class AlignDoubleArrow extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d.%d.%d \x3"; // level.levelentracecounter.counter
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
@@ -86,7 +86,7 @@ final class AlignDoubleArrow extends AdditionalPass {
 						continue;
 					}
 
-					$lines = explode($this->new_line, $this->code);
+					$lines = explode($this->newLine, $this->code);
 					$lines_with_objop = [];
 					$block_count = 0;
 
@@ -110,7 +110,7 @@ final class AlignDoubleArrow extends AdditionalPass {
 						}
 					}
 
-					$this->code = str_replace($placeholder, '', implode($this->new_line, $lines));
+					$this->code = str_replace($placeholder, '', implode($this->newLine, $lines));
 				}
 			}
 		}

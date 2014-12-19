@@ -1,6 +1,6 @@
 <?php
 final class ResizeSpaces extends FormatterPass {
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	private function filterWhitespaces($source) {
@@ -20,7 +20,7 @@ final class ResizeSpaces extends FormatterPass {
 	public function format($source) {
 		$this->tkns = $this->filterWhitespaces($source);
 		$this->code = '';
-		$this->use_cache = true;
+		$this->useCache = true;
 
 		$in_ternary_operator = false;
 		$short_ternary_operator = false;

@@ -1,7 +1,7 @@
 <?php
 class NoSpaceAfterPHPDocBlocks extends FormatterPass {
-	public function candidate($source, $found_tokens) {
-		if (isset($found_tokens[T_DOC_COMMENT])) {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_DOC_COMMENT])) {
 			return true;
 		}
 

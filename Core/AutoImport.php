@@ -11,7 +11,7 @@ final class AutoImportPass extends FormatterPass {
 		$this->oracle = new SQLite3($oracleFn);
 	}
 
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 
@@ -36,7 +36,7 @@ final class AutoImportPass extends FormatterPass {
 							$use_item .= $text;
 							break;
 						} elseif (ST_COMMA === $id) {
-							$use_item .= ST_SEMI_COLON . $this->new_line;
+							$use_item .= ST_SEMI_COLON . $this->newLine;
 							$next_tokens[] = [T_USE, 'use', ];
 							break;
 						} else {
@@ -48,14 +48,14 @@ final class AutoImportPass extends FormatterPass {
 				}
 				if (T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id || T_TRAIT === $id || T_VARIABLE === $id) {
 					if (sizeof($use_stack) > 0) {
-						$new_tokens[] = $this->new_line;
-						$new_tokens[] = $this->new_line;
+						$new_tokens[] = $this->newLine;
+						$new_tokens[] = $this->newLine;
 					}
 					$new_tokens[] = $token;
 					break 2;
 				} elseif ($touched_namespace && (T_DOC_COMMENT === $id || T_COMMENT === $id)) {
 					if (sizeof($use_stack) > 0) {
-						$new_tokens[] = $this->new_line;
+						$new_tokens[] = $this->newLine;
 					}
 					$new_tokens[] = $token;
 					break 2;
@@ -173,7 +173,7 @@ final class AutoImportPass extends FormatterPass {
 				$touched_function = true;
 			}
 			if (!$touched_function && $touched_namespace && (T_FINAL == $id || T_STATIC == $id || T_USE == $id || T_CLASS == $id || T_INTERFACE == $id || T_TRAIT == $id)) {
-				$return .= self::AUTOIMPORT_PLACEHOLDER . $this->new_line;
+				$return .= self::AUTOIMPORT_PLACEHOLDER . $this->newLine;
 				$return .= $text;
 
 				break;
@@ -194,10 +194,10 @@ final class AutoImportPass extends FormatterPass {
 			usort($candidates, function ($a, $b) use ($namespace_name) {
 				return similar_text($a, $namespace_name) < similar_text($b, $namespace_name);
 			});
-			$replacement .= 'use ' . implode(';' . $this->new_line . '//use ', $candidates) . ';' . $this->new_line;
+			$replacement .= 'use ' . implode(';' . $this->newLine . '//use ', $candidates) . ';' . $this->newLine;
 		}
 
-		$return = str_replace(self::AUTOIMPORT_PLACEHOLDER . $this->new_line, $replacement, $return);
+		$return = str_replace(self::AUTOIMPORT_PLACEHOLDER . $this->newLine, $replacement, $return);
 		return $return;
 	}
 	public function format($source = '') {

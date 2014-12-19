@@ -1,7 +1,7 @@
 <?php
 final class AlignEquals extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
@@ -56,7 +56,7 @@ final class AlignEquals extends AdditionalPass {
 				continue;
 			}
 
-			$lines = explode($this->new_line, $this->code);
+			$lines = explode($this->newLine, $this->code);
 			$lines_with_objop = [];
 			$block_count = 0;
 
@@ -87,7 +87,7 @@ final class AlignEquals extends AdditionalPass {
 				}
 			}
 
-			$this->code = str_replace($placeholder, '', implode($this->new_line, $lines));
+			$this->code = str_replace($placeholder, '', implode($this->newLine, $lines));
 		}
 
 		return $this->code;

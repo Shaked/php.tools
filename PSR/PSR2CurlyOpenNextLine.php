@@ -1,10 +1,10 @@
 <?php
 final class PSR2CurlyOpenNextLine extends FormatterPass {
-	public function candidate($source, $found_tokens) {
+	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
-		$this->indent_char = '    ';
+		$this->indentChar = '    ';
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
