@@ -147,13 +147,13 @@ class AutoPreincrement extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Automatically convert postincrement to preincrement.';
 	}
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 $a++;

@@ -1,5 +1,5 @@
 <?php
 abstract class AdditionalPass extends FormatterPass {
-	abstract public function get_description();
-	abstract public function get_example();
+	abstract public function getDescription();
+	abstract public function getExample();
 }

@@ -71,14 +71,14 @@ class WrongConstructorName extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Update old constructor names into new ones. http://php.net/manual/en/language.oop5.decon.php';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 class A {

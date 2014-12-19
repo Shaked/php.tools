@@ -33,14 +33,14 @@ class MergeElseIf extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Merge if with else. ';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 if($a){

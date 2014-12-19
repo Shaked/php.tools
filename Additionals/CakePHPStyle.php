@@ -187,14 +187,14 @@ class CakePHPStyle extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Applies CakePHP Coding Style';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 namespace A;

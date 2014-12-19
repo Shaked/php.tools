@@ -670,8 +670,8 @@ abstract class FormatterPass {
 }
 ;
 abstract class AdditionalPass extends FormatterPass {
-	abstract public function get_description();
-	abstract public function get_example();
+	abstract public function getDescription();
+	abstract public function getExample();
 }
 ;
 final class CodeFormatter {
@@ -3920,14 +3920,14 @@ class AddMissingParentheses extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Add extra parentheses in new instantiations.';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 $a = new SomeClass;
@@ -4060,14 +4060,14 @@ final class AlignDoubleArrow extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Vertically align T_DOUBLE_ARROW (=>).';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 $a = [
@@ -4183,14 +4183,14 @@ final class AlignEquals extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Vertically align "=".';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 $a = 1;
@@ -4353,13 +4353,13 @@ class AutoPreincrement extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Automatically convert postincrement to preincrement.';
 	}
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 $a++;
@@ -4559,14 +4559,14 @@ class CakePHPStyle extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Applies CakePHP Coding Style';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 namespace A;
@@ -4642,14 +4642,14 @@ class EncapsulateNamespaces extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Encapsulate namespaces with curly braces';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 namespace NS1;
@@ -4800,14 +4800,14 @@ final class GeneratePHPDoc extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Automatically generates PHPDoc blocks';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 class A {
@@ -4868,14 +4868,14 @@ class JoinToImplode extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Replace implode() alias (join() -> implode()).';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 $a = join(',', $arr);
@@ -4991,14 +4991,14 @@ class LaravelStyle extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Applies Laravel Coding Style';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php namespace A;
 
@@ -5055,14 +5055,14 @@ class MergeElseIf extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Merge if with else. ';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 if($a){
@@ -5116,14 +5116,14 @@ class MergeNamespaceWithOpenTag extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Ensure there is no more than one linebreak before namespace';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 
@@ -5173,14 +5173,14 @@ class NoSpaceAfterPHPDocBlocks extends FormatterPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Remove empty lines after PHPDoc blocks.';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 /**
@@ -5323,14 +5323,14 @@ final class OrderMethod extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Sort methods within class in alphabetic order.';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 class A {
@@ -5387,14 +5387,14 @@ class RemoveUseLeadingSlash extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Remove leading slash in T_USE imports.';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 namespace NS1;
@@ -5485,14 +5485,14 @@ class ReturnNull extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Simplify empty returns.';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 function a(){
@@ -5560,14 +5560,14 @@ class ShortArray extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Convert old array into new array. (array() -> [])';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 echo array();
@@ -5644,14 +5644,14 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Add line break when implicit curly block is added.';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 if($a) echo array();
@@ -5703,14 +5703,14 @@ class SpaceBetweenMethods extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Put space between methods.';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 class A {
@@ -5773,14 +5773,14 @@ class TightConcat extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Ensure string concatenation does not have spaces, except when close to numbers.';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 // From
@@ -5865,14 +5865,14 @@ class WrongConstructorName extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Update old constructor names into new ones. http://php.net/manual/en/language.oop5.decon.php';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 class A {
@@ -6100,14 +6100,14 @@ final class YodaComparisons extends AdditionalPass {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_description() {
+	public function getDescription() {
 		return 'Execute Yoda Comparisons.';
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function get_example() {
+	public function getExample() {
 		return <<<'EOT'
 <?php
 if($a == 1){
@@ -6300,8 +6300,8 @@ if (!isset($testEnv)) {
 		$optPass = $opts['help-pass'];
 		if (class_exists($optPass)) {
 			$pass = new $optPass();
-			echo $argv[0], ': "', $optPass, '" - ', $pass->get_description(), PHP_EOL, PHP_EOL;
-			echo 'Example:', PHP_EOL, $pass->get_example(), PHP_EOL;
+			echo $argv[0], ': "', $optPass, '" - ', $pass->getDescription(), PHP_EOL, PHP_EOL;
+			echo 'Example:', PHP_EOL, $pass->getExample(), PHP_EOL;
 		}
 		die();
 	}

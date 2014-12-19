@@ -263,8 +263,8 @@ if (!isset($testEnv)) {
 		$optPass = $opts['help-pass'];
 		if (class_exists($optPass)) {
 			$pass = new $optPass();
-			echo $argv[0], ': "', $optPass, '" - ', $pass->get_description(), PHP_EOL, PHP_EOL;
-			echo 'Example:', PHP_EOL, $pass->get_example(), PHP_EOL;
+			echo $argv[0], ': "', $optPass, '" - ', $pass->getDescription(), PHP_EOL, PHP_EOL;
+			echo 'Example:', PHP_EOL, $pass->getExample(), PHP_EOL;
 		}
 		die();
 	}
