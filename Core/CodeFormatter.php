@@ -5,6 +5,11 @@ final class CodeFormatter {
 		array_unshift($this->passes, $pass);
 	}
 
+	public function getPassesNames() {
+		return array_map(function ($v) {
+			return get_class($v);
+		}, $this->passes);
+	}
 	public function formatCode($source = '') {
 		$passes = array_map(
 			function ($pass) {

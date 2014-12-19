@@ -111,7 +111,7 @@ if (!isset($in_phar)) {
 }
 if (!isset($testEnv)) {
 	function show_help($argv, $enable_cache, $in_phar) {
-		echo 'Usage: ' . $argv[0] . ' [-ho] [--config=FILENAME] ' . ($enable_cache ? '[--cache[=FILENAME]] ' : '') . '[--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space=SIZE] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
+		echo 'Usage: ' . $argv[0] . ' [-hv] [-o=FILENAME] [--config=FILENAME] ' . ($enable_cache ? '[--cache[=FILENAME]] ' : '') . '[--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space=SIZE] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--cache[=FILENAME]' => 'cache file. Default: ',
 			'--cakephp' => 'Apply CakePHP coding style',
@@ -136,6 +136,7 @@ if (!isset($testEnv)) {
 			'--yoda' => 'yoda-style comparisons',
 			'-h, --help' => 'this help message',
 			'-o=file' => 'output the formatted code to "file"',
+			'-v' => 'verbose',
 		];
 		if ($in_phar) {
 			$options['--selfupdate'] = 'self-update fmt.phar from Github';
@@ -188,7 +189,7 @@ if (!isset($testEnv)) {
 		unset($getopt_long_options['cache::']);
 	}
 	$opts = getopt(
-		'iho:',
+		'ihvo:',
 		$getopt_long_options
 	);
 	if (isset($opts['selfupdate'])) {
@@ -218,7 +219,7 @@ if (!isset($testEnv)) {
 			exit(255);
 		}
 		if ($in_phar) {
-			if(!file_exists($argv[0])){
+			if (!file_exists($argv[0])) {
 				$argv[0] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[0];
 			}
 		}
@@ -420,6 +421,11 @@ if (!isset($testEnv)) {
 		$argv = extract_from_argv($argv, 'cakephp');
 	}
 
+	if (isset($opts['v'])) {
+		$argv = extract_from_argv_short($argv, 'v');
+		fwrite(STDERR, 'Used passes: ' . implode(', ', $fmt->getPassesNames()) . PHP_EOL);
+	}
+
 	if (isset($opts['i'])) {
 		echo 'php.tools fmt.php interactive mode.', PHP_EOL;
 		echo 'no <?php is necessary', PHP_EOL;
@@ -444,7 +450,7 @@ if (!isset($testEnv)) {
 			exit(0);
 		}
 		if ($in_phar) {
-			if(!file_exists($argv[1])){
+			if (!file_exists($argv[1])) {
 				$argv[1] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[1];
 			}
 		}
@@ -478,7 +484,7 @@ if (!isset($testEnv)) {
 				continue;
 			}
 			if ($in_phar) {
-				if(!file_exists($arg)){
+				if (!file_exists($arg)) {
 					$arg = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $arg;
 				}
 			}
