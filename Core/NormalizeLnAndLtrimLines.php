@@ -10,23 +10,23 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_QUOTE:
-					$this->append_code($text);
-					$this->print_until_the_end_of_string();
+					$this->appendCode($text);
+					$this->printUntilTheEndOfString();
 					break;
 				case T_START_HEREDOC:
-					$this->append_code($text);
-					$this->print_until(T_END_HEREDOC);
+					$this->appendCode($text);
+					$this->printUntil(T_END_HEREDOC);
 					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					list($prev_id, $prev_text) = $this->inspect_token(-1);
+					list($prev_id, $prev_text) = $this->inspectToken(-1);
 
 					if (T_WHITESPACE === $prev_id && ("\n" === $prev_text || "\n\n" == substr($prev_text, -2, 2))) {
-						$this->append_code(LeftAlignComment::NON_INDENTABLE_COMMENT);
+						$this->appendCode(LeftAlignComment::NON_INDENTABLE_COMMENT);
 					}
 
 					$lines = explode($this->new_line, $text);
@@ -39,19 +39,19 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 						$new_text .= $this->new_line . $v;
 					}
 
-					$this->append_code(ltrim($new_text));
+					$this->appendCode(ltrim($new_text));
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				default:
-					if ($this->has_ln($text)) {
-						$trailing_new_line = $this->substr_count_trailing($text, $this->new_line);
+					if ($this->hasLn($text)) {
+						$trailing_new_line = $this->substrCountTrailing($text, $this->new_line);
 						if ($trailing_new_line > 0) {
 							$text = trim($text) . str_repeat($this->new_line, $trailing_new_line);
 						}
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

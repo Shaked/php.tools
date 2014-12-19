@@ -21,7 +21,7 @@ final class SettersAndGettersPass extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CLASS:
@@ -34,9 +34,9 @@ final class SettersAndGettersPass extends FormatterPass {
 					$touched_visibility = false;
 					$touched_function = false;
 					$curly_count = null;
-					$this->append_code($text);
+					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						if (ST_CURLY_OPEN == $id) {
 							++$curly_count;
@@ -47,7 +47,7 @@ final class SettersAndGettersPass extends FormatterPass {
 						if (0 === $curly_count) {
 							break;
 						}
-						$this->append_code($text);
+						$this->appendCode($text);
 						if (T_PUBLIC == $id) {
 							$touched_visibility = T_PUBLIC;
 						} elseif (T_PRIVATE == $id) {
@@ -82,14 +82,14 @@ final class SettersAndGettersPass extends FormatterPass {
 									continue 2;
 								}
 							}
-							$this->append_code($str);
+							$this->appendCode($str);
 						}
 					}
 
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

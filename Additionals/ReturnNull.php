@@ -13,16 +13,16 @@ class ReturnNull extends AdditionalPass {
 		$this->use_cache = true;
 		$touched_return = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
 
-			if (ST_PARENTHESES_OPEN == $id && $this->left_token_is([T_RETURN])) {
+			if (ST_PARENTHESES_OPEN == $id && $this->leftTokenIs([T_RETURN])) {
 				$paren_count = 1;
 				$touched_another_valid_token = false;
 				$stack = $text;
 				while (list($index, $token) = each($this->tkns)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$this->ptr = $index;
 					$this->cache = [];
 					if (ST_PARENTHESES_OPEN == $id) {
@@ -46,19 +46,19 @@ class ReturnNull extends AdditionalPass {
 					}
 				}
 				if ($touched_another_valid_token) {
-					$this->append_code($stack);
+					$this->appendCode($stack);
 				}
 				continue;
 			}
 			if (T_STRING == $id && strtolower($text) == 'null') {
-				list($prev_id, ) = $this->left_useful_token();
-				list($next_id, ) = $this->right_useful_token();
+				list($prev_id, ) = $this->leftUsefulToken();
+				list($next_id, ) = $this->rightUsefulToken();
 				if (T_RETURN == $prev_id && ST_SEMI_COLON == $next_id) {
 					continue;
 				}
 			}
 
-			$this->append_code($text);
+			$this->appendCode($text);
 		}
 
 		return $this->code;

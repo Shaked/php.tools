@@ -21,7 +21,7 @@ class AutoPreincrement extends AdditionalPass {
 		$tkns = $this->aggregate_variables($source);
 		$touched_concat = false;
 		while (list($ptr, $token) = each($tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			switch ($id) {
 				case ST_CONCAT:
 					$touched_concat = true;
@@ -51,11 +51,11 @@ class AutoPreincrement extends AdditionalPass {
 		$tkns = token_get_all($source);
 		reset($tkns);
 		while (list($ptr, $token) = each($tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 
 			if (ST_PARENTHESES_OPEN == $id) {
 				$initial_ptr = $ptr;
-				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidate_tokens);
+				$tmp = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidate_tokens);
 				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
 				continue;
 			}
@@ -63,7 +63,7 @@ class AutoPreincrement extends AdditionalPass {
 				$stack = $text;
 				$initial_ptr = $ptr;
 				while (list($ptr, $token) = each($tkns)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$stack .= $text;
 					$tkns[$ptr] = null;
 					if (ST_QUOTE == $id) {
@@ -81,11 +81,11 @@ class AutoPreincrement extends AdditionalPass {
 				$stack = '';
 				do {
 					list($ptr, $token) = each($tkns);
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$tkns[$ptr] = null;
 					$stack .= $text;
 				} while (ST_CURLY_OPEN != $id);
-				$stack = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
+				$stack = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
 				$tkns[$initial_index] = [self::CHAIN_VARIABLE, '$' . $stack];
 			}
 
@@ -96,7 +96,7 @@ class AutoPreincrement extends AdditionalPass {
 				if (T_VARIABLE == $id) {
 					$touched_variable = true;
 				}
-				if (!$this->right_token_subset_is_at_idx(
+				if (!$this->rightTokenSubsetIsAtIdx(
 					$tkns,
 					$ptr,
 					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
@@ -105,14 +105,14 @@ class AutoPreincrement extends AdditionalPass {
 				}
 
 				while (list($ptr, $token) = each($tkns)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
 					} elseif (ST_BRACKET_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', $this->candidate_tokens);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', $this->candidate_tokens);
 					} elseif (ST_PARENTHESES_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidate_tokens);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidate_tokens);
 					}
 
 					$stack .= $text;
@@ -122,7 +122,7 @@ class AutoPreincrement extends AdditionalPass {
 					}
 
 					if (
-						!$this->right_token_subset_is_at_idx(
+						!$this->rightTokenSubsetIsAtIdx(
 							$tkns,
 							$ptr,
 							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]

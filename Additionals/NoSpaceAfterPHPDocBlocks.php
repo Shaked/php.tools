@@ -11,17 +11,17 @@ class NoSpaceAfterPHPDocBlocks extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_WHITESPACE:
-					if ($this->has_ln($text) && $this->left_token_is(T_DOC_COMMENT)) {
+					if ($this->hasLn($text) && $this->leftTokenIs(T_DOC_COMMENT)) {
 						$text = substr(strrchr($text, 10), 0);
-						$this->append_code($text);
+						$this->appendCode($text);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 

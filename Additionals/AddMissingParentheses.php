@@ -11,18 +11,18 @@ class AddMissingParentheses extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NEW:
-					$this->append_code($text);
-					list($found_id, $found_text) = $this->print_and_stop_at([ST_PARENTHESES_OPEN, T_COMMENT, T_DOC_COMMENT, ST_SEMI_COLON]);
+					$this->appendCode($text);
+					list($found_id, $found_text) = $this->printAndStopAt([ST_PARENTHESES_OPEN, T_COMMENT, T_DOC_COMMENT, ST_SEMI_COLON]);
 					if (ST_PARENTHESES_OPEN != $found_id) {
-						$this->append_code('()' . $found_text);
+						$this->appendCode('()' . $found_text);
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 

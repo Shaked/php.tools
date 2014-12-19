@@ -9,69 +9,69 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_START_HEREDOC:
-					$this->append_code($text);
-					$this->print_until(T_END_HEREDOC);
+					$this->appendCode($text);
+					$this->printUntil(T_END_HEREDOC);
 					break;
 				case ST_QUOTE:
-					$this->append_code($text);
-					$this->print_until_the_end_of_string();
+					$this->appendCode($text);
+					$this->printUntilTheEndOfString();
 					break;
 				case T_INTERFACE:
 				case T_TRAIT:
 				case T_CLASS:
-					$this->append_code($text);
+					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						if (ST_CURLY_OPEN === $id) {
-							$this->append_code($this->get_crlf_indent());
+							$this->appendCode($this->getCrlfIndent());
 							prev($this->tkns);
 							break;
 						} else {
-							$this->append_code($text);
+							$this->appendCode($text);
 						}
 					}
 					break;
 				case T_FUNCTION:
-					if (!$this->left_token_is([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_PARENTHESES_OPEN, ST_COMMA]) && $this->right_useful_token_is(T_STRING)) {
-						$this->append_code($text);
+					if (!$this->leftTokenIs([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_PARENTHESES_OPEN, ST_COMMA]) && $this->rightUsefulTokenIs(T_STRING)) {
+						$this->appendCode($text);
 						$touched_ln = false;
 						while (list($index, $token) = each($this->tkns)) {
-							list($id, $text) = $this->get_token($token);
+							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
-							if (T_WHITESPACE == $id && $this->has_ln($text)) {
+							if (T_WHITESPACE == $id && $this->hasLn($text)) {
 								$touched_ln = true;
 							}
 							if (ST_CURLY_OPEN === $id && !$touched_ln) {
-								$this->append_code($this->get_crlf_indent());
+								$this->appendCode($this->getCrlfIndent());
 								prev($this->tkns);
 								break;
 							} elseif (ST_CURLY_OPEN === $id) {
 								prev($this->tkns);
 								break;
 							} else {
-								$this->append_code($text);
+								$this->appendCode($text);
 							}
 						}
 						break;
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 				case ST_CURLY_OPEN:
-					$this->append_code($text);
-					$this->set_indent(+1);
+					$this->appendCode($text);
+					$this->setIndent(+1);
 					break;
 				case ST_CURLY_CLOSE:
-					$this->set_indent(-1);
-					$this->append_code($text);
+					$this->setIndent(-1);
+					$this->appendCode($text);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

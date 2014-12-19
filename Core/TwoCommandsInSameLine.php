@@ -7,26 +7,26 @@ final class TwoCommandsInSameLine extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 
 			switch ($id) {
 				case ST_SEMI_COLON:
-					if ($this->left_token_is(ST_SEMI_COLON)) {
+					if ($this->leftTokenIs(ST_SEMI_COLON)) {
 						break;
 					}
-					$this->append_code($text);
-					if (!$this->has_ln_after() && $this->right_token_is([T_VARIABLE, T_STRING, T_CONTINUE, T_BREAK, T_ECHO, T_PRINT])) {
-						$this->append_code($this->new_line);
+					$this->appendCode($text);
+					if (!$this->hasLnAfter() && $this->rightTokenIs([T_VARIABLE, T_STRING, T_CONTINUE, T_BREAK, T_ECHO, T_PRINT])) {
+						$this->appendCode($this->new_line);
 					}
 					break;
 
 				case ST_PARENTHESES_OPEN:
-					$this->append_code($text);
-					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+					$this->appendCode($text);
+					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 			}

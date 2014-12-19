@@ -5,7 +5,7 @@ class JoinToImplode extends AdditionalPass {
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_STRING:
@@ -14,19 +14,19 @@ class JoinToImplode extends AdditionalPass {
 						return true;
 					}
 			}
-			$this->append_code($text);
+			$this->appendCode($text);
 		}
 		return false;
 	}
 	public function format($source) {
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			if (T_STRING == $id && strtolower($text) == 'join' && !($this->left_useful_token_is([T_NEW, T_NS_SEPARATOR, T_STRING, T_DOUBLE_COLON, T_OBJECT_OPERATOR, T_FUNCTION]) || $this->right_useful_token_is([T_NS_SEPARATOR, T_DOUBLE_COLON]))) {
-				$this->append_code('implode');
+			if (T_STRING == $id && strtolower($text) == 'join' && !($this->leftUsefulTokenIs([T_NEW, T_NS_SEPARATOR, T_STRING, T_DOUBLE_COLON, T_OBJECT_OPERATOR, T_FUNCTION]) || $this->rightUsefulTokenIs([T_NS_SEPARATOR, T_DOUBLE_COLON]))) {
+				$this->appendCode('implode');
 				continue;
 			}
-			$this->append_code($text);
+			$this->appendCode($text);
 		}
 
 		return $this->code;

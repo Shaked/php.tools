@@ -12,17 +12,17 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 		$this->code = '';
 		$in_do_while_context = 0;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ARRAY:
-					if ($this->left_token_is([T_DOUBLE_ARROW])) {
+					if ($this->leftTokenIs([T_DOUBLE_ARROW])) {
 						--$in_do_while_context;
-						$this->rtrim_and_append_code($text);
+						$this->rtrimAndAppendCode($text);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

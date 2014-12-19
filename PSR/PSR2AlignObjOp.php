@@ -14,27 +14,27 @@ final class PSR2AlignObjOp extends FormatterPass {
 		$context_counter = 0;
 		$context_meta_count = [];
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_SEMI_COLON:
 				case T_ARRAY:
 				case T_DOUBLE_ARROW:
 					++$context_counter;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case T_OBJECT_OPERATOR:
 					if (!isset($context_meta_count[$context_counter])) {
 						$context_meta_count[$context_counter] = 0;
 					}
-					if ($this->has_ln_before() || 0 == $context_meta_count[$context_counter]) {
-						$this->append_code(sprintf(self::ALIGNABLE_TOKEN, $context_counter) . $text);
+					if ($this->hasLnBefore() || 0 == $context_meta_count[$context_counter]) {
+						$this->appendCode(sprintf(self::ALIGNABLE_TOKEN, $context_counter) . $text);
 						++$context_meta_count[$context_counter];
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

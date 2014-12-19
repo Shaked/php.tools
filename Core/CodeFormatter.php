@@ -20,7 +20,7 @@ final class CodeFormatter {
 		$found_tokens = [];
 		$tkns = token_get_all($source);
 		foreach ($tkns as $token) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$found_tokens[$id] = $id;
 		}
 		while (($pass = array_pop($passes))) {
@@ -31,7 +31,7 @@ final class CodeFormatter {
 		return $source;
 	}
 
-	protected function get_token($token) {
+	protected function getToken($token) {
 		if (isset($token[1])) {
 			return $token;
 		} else {

@@ -13,12 +13,12 @@ final class PSR1MethodNames extends FormatterPass {
 		$found_method = false;
 		$method_replace_list = [];
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_FUNCTION:
 					$found_method = true;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_STRING:
 					if ($found_method) {
@@ -30,7 +30,7 @@ final class PSR1MethodNames extends FormatterPass {
 						}
 
 						$method_replace_list[$orig_text] = $text;
-						$this->append_code($text);
+						$this->appendCode($text);
 
 						$found_method = false;
 						break;
@@ -38,7 +38,7 @@ final class PSR1MethodNames extends FormatterPass {
 				case ST_PARENTHESES_OPEN:
 					$found_method = false;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -46,18 +46,18 @@ final class PSR1MethodNames extends FormatterPass {
 		$this->tkns = token_get_all($this->code);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_STRING:
-					if (isset($method_replace_list[$text]) && $this->right_useful_token_is(ST_PARENTHESES_OPEN)) {
+					if (isset($method_replace_list[$text]) && $this->rightUsefulTokenIs(ST_PARENTHESES_OPEN)) {
 
-						$this->append_code($method_replace_list[$text]);
+						$this->appendCode($method_replace_list[$text]);
 						break;
 					}
 
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

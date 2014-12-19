@@ -26,29 +26,29 @@ class CakePHPStyle extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					if (!$this->has_ln_before() && $this->left_token_is(ST_CURLY_OPEN)) {
-						$this->rtrim_and_append_code($this->get_space() . $text);
+					if (!$this->hasLnBefore() && $this->leftTokenIs(ST_CURLY_OPEN)) {
+						$this->rtrimAndAppendCode($this->getSpace() . $text);
 						break;
-					} elseif ($this->right_useful_token_is(T_CONSTANT_ENCAPSED_STRING)) {
-						$this->append_code($text . $this->get_space());
+					} elseif ($this->rightUsefulTokenIs(T_CONSTANT_ENCAPSED_STRING)) {
+						$this->appendCode($text . $this->getSpace());
 						break;
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_CLOSE_TAG:
-					if (!$this->has_ln_before()) {
-						$this->rtrim_and_append_code($this->get_space() . $text);
+					if (!$this->hasLnBefore()) {
+						$this->rtrimAndAppendCode($this->getSpace() . $text);
 						break;
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -58,16 +58,16 @@ class CakePHPStyle extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_REFERENCE:
-					if ($this->left_useful_token_is(ST_EQUAL)) {
-						$this->rtrim_and_append_code($text . $this->get_space());
+					if ($this->leftUsefulTokenIs(ST_EQUAL)) {
+						$this->rtrimAndAppendCode($text . $this->getSpace());
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 		return $this->code;
@@ -76,7 +76,7 @@ class CakePHPStyle extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ARRAY_CAST:
@@ -90,7 +90,7 @@ class CakePHPStyle extends AdditionalPass {
 				case T_VARIABLE:
 				case ST_PARENTHESES_OPEN:
 					if (
-						$this->left_useful_token_is([
+						$this->leftUsefulTokenIs([
 							T_ARRAY_CAST,
 							T_BOOL_CAST,
 							T_DOUBLE_CAST,
@@ -100,11 +100,11 @@ class CakePHPStyle extends AdditionalPass {
 							T_UNSET_CAST,
 						])
 					) {
-						$this->rtrim_and_append_code($text);
+						$this->rtrimAndAppendCode($text);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -115,18 +115,18 @@ class CakePHPStyle extends AdditionalPass {
 		$this->code = '';
 		$level_touched = null;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_PUBLIC:
 				case T_PRIVATE:
 				case T_PROTECTED:
 					$level_touched = $id;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case T_VARIABLE:
-					if (null !== $level_touched && $this->left_useful_token_is([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC])) {
+					if (null !== $level_touched && $this->leftUsefulTokenIs([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC])) {
 						$text = str_replace('$_', '$', $text);
 						$text = str_replace('$_', '$', $text);
 						if (T_PROTECTED == $level_touched) {
@@ -135,13 +135,13 @@ class CakePHPStyle extends AdditionalPass {
 							$text = str_replace('$', '$__', $text);
 						}
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					$level_touched = null;
 					break;
 				case T_STRING:
 					if (
 						null !== $level_touched &&
-						$this->left_useful_token_is(T_FUNCTION) &&
+						$this->leftUsefulTokenIs(T_FUNCTION) &&
 						'_' != $text &&
 						'__' != $text &&
 						'__construct' != $text &&
@@ -172,11 +172,11 @@ class CakePHPStyle extends AdditionalPass {
 							$text = '__' . $text;
 						}
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					$level_touched = null;
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

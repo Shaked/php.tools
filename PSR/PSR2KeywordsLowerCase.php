@@ -7,7 +7,7 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ABSTRACT:
@@ -82,21 +82,21 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 				case T_WHILE:
 				case T_XOR_EQUAL:
 				case T_YIELD:
-					$this->append_code(strtolower($text));
+					$this->appendCode(strtolower($text));
 					break;
 				default:
 					$lc_text = strtolower($text);
 					if (
-						!$this->left_useful_token_is([
+						!$this->leftUsefulTokenIs([
 							T_NS_SEPARATOR, T_AS, T_CLASS, T_EXTENDS, T_IMPLEMENTS, T_INSTANCEOF, T_INTERFACE, T_NEW, T_NS_SEPARATOR, T_PAAMAYIM_NEKUDOTAYIM, T_USE, T_TRAIT, T_INSTEADOF, T_CONST,
 						]) &&
-						!$this->right_useful_token_is([
+						!$this->rightUsefulTokenIs([
 							T_NS_SEPARATOR, T_AS, T_CLASS, T_EXTENDS, T_IMPLEMENTS, T_INSTANCEOF, T_INTERFACE, T_NEW, T_NS_SEPARATOR, T_PAAMAYIM_NEKUDOTAYIM, T_USE, T_TRAIT, T_INSTEADOF, T_CONST,
 						]) &&
 						('true' === $lc_text || 'false' === $lc_text || 'null' === $lc_text)) {
 						$text = $lc_text;
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

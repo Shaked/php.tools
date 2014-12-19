@@ -55,7 +55,7 @@ foreach ($cases as $caseIn) {
 	$tokens = token_get_all($content);
 	$specialPasses = false;
 	foreach ($tokens as $token) {
-		list($id, $text) = get_token($token);
+		list($id, $text) = getToken($token);
 		if (T_COMMENT == $id && '//skipHHVM' == substr($text, 0, 10)) {
 			$version = str_replace('//skipHHVM', '', $text);
 			if ($isHHVM) {
@@ -164,7 +164,7 @@ if (!$bailOut) {
 		$tokens = token_get_all($content);
 		$specialPasses = false;
 		foreach ($tokens as $token) {
-			list($id, $text) = get_token($token);
+			list($id, $text) = getToken($token);
 			if (T_COMMENT == $id && '//version:' == substr($text, 0, 10)) {
 				$version = str_replace('//version:', '', $text);
 				if (version_compare(PHP_VERSION, $version, '<')) {
@@ -254,7 +254,7 @@ if (sizeof($brokenTests) > 0) {
 }
 exit(0);
 
-function get_token($token) {
+function getToken($token) {
 	if (is_string($token)) {
 		return [$token, $token];
 	} else {

@@ -9,7 +9,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 		$touched_visibility = false;
 		$touched_doc_comment = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_DOC_COMMENT:
@@ -20,7 +20,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 				case T_PROTECTED:
 				case T_PRIVATE:
 				case T_STATIC:
-					if (!$this->left_token_is([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
+					if (!$this->leftTokenIs([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
 						$touched_visibility = true;
 						$visibility_idx = $this->ptr;
 					}
@@ -34,17 +34,17 @@ final class GeneratePHPDoc extends AdditionalPass {
 					} else {
 						$orig_idx = $visibility_idx;
 					}
-					list($nt_id, $nt_text) = $this->get_token($this->right_token());
+					list($nt_id, $nt_text) = $this->getToken($this->rightToken());
 					if (T_STRING != $nt_id) {
-						$this->append_code($text);
+						$this->appendCode($text);
 						break;
 					}
-					$this->walk_until(ST_PARENTHESES_OPEN);
+					$this->walkUntil(ST_PARENTHESES_OPEN);
 					$param_stack = [];
 					$tmp = ['type' => '', 'name' => ''];
 					$count = 1;
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 
 						if (ST_PARENTHESES_OPEN == $id) {
@@ -61,7 +61,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 							continue;
 						}
 						if (T_VARIABLE == $id) {
-							if ($this->right_token_is([ST_EQUAL]) && $this->walk_until(ST_EQUAL) && $this->right_token_is([T_ARRAY])) {
+							if ($this->rightTokenIs([ST_EQUAL]) && $this->walkUntil(ST_EQUAL) && $this->rightTokenIs([T_ARRAY])) {
 								$tmp['type'] = 'array';
 							}
 							$tmp['name'] = $text;
@@ -72,11 +72,11 @@ final class GeneratePHPDoc extends AdditionalPass {
 					}
 
 					$return_stack = '';
-					if (!$this->left_useful_token_is(ST_SEMI_COLON)) {
-						$this->walk_until(ST_CURLY_OPEN);
+					if (!$this->leftUsefulTokenIs(ST_SEMI_COLON)) {
+						$this->walkUntil(ST_CURLY_OPEN);
 						$count = 1;
 						while (list($index, $token) = each($this->tkns)) {
-							list($id, $text) = $this->get_token($token);
+							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
 
 							if (ST_CURLY_OPEN == $id) {
@@ -89,13 +89,13 @@ final class GeneratePHPDoc extends AdditionalPass {
 								break;
 							}
 							if (T_RETURN == $id) {
-								if ($this->right_token_is([T_DNUMBER])) {
+								if ($this->rightTokenIs([T_DNUMBER])) {
 									$return_stack = 'float';
-								} elseif ($this->right_token_is([T_LNUMBER])) {
+								} elseif ($this->rightTokenIs([T_LNUMBER])) {
 									$return_stack = 'int';
-								} elseif ($this->right_token_is([T_VARIABLE])) {
+								} elseif ($this->rightTokenIs([T_VARIABLE])) {
 									$return_stack = 'mixed';
-								} elseif ($this->right_token_is([ST_SEMI_COLON])) {
+								} elseif ($this->rightTokenIs([ST_SEMI_COLON])) {
 									$return_stack = 'null';
 								}
 							}
@@ -109,7 +109,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 		}
 
 		return implode('', array_map(function ($token) {
-			list(, $text) = $this->get_token($token);
+			list(, $text) = $this->getToken($token);
 			return $text;
 		}, $this->tkns));
 	}

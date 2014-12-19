@@ -11,22 +11,22 @@ final class RemoveIncludeParentheses extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_INCLUDE:
 				case T_REQUIRE:
 				case T_INCLUDE_ONCE:
 				case T_REQUIRE_ONCE:
-					$this->append_code($text . $this->get_space());
+					$this->appendCode($text . $this->getSpace());
 
-					if (!$this->right_token_is(ST_PARENTHESES_OPEN)) {
+					if (!$this->rightTokenIs(ST_PARENTHESES_OPEN)) {
 						break;
 					}
-					$this->walk_until(ST_PARENTHESES_OPEN);
+					$this->walkUntil(ST_PARENTHESES_OPEN);
 					$count = 1;
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$this->cache = [];
 
@@ -39,11 +39,11 @@ final class RemoveIncludeParentheses extends FormatterPass {
 						if (0 == $count) {
 							break;
 						}
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

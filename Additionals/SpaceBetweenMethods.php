@@ -13,19 +13,19 @@ class SpaceBetweenMethods extends AdditionalPass {
 		$this->code = '';
 		$last_touched_token = null;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_FUNCTION:
-					$this->append_code($text);
-					$this->print_until(ST_CURLY_OPEN);
-					$this->print_curly_block();
-					if (!$this->right_token_is([ST_CURLY_CLOSE, ST_SEMI_COLON, ST_COMMA, ST_PARENTHESES_CLOSE])) {
-						$this->append_code($this->get_crlf());
+					$this->appendCode($text);
+					$this->printUntil(ST_CURLY_OPEN);
+					$this->printCurlyBlock();
+					if (!$this->rightTokenIs([ST_CURLY_CLOSE, ST_SEMI_COLON, ST_COMMA, ST_PARENTHESES_CLOSE])) {
+						$this->appendCode($this->getCrlf());
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

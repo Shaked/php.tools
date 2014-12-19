@@ -12,25 +12,25 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 		$this->code = '';
 		$curly_count = 0;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_CURLY_OPEN:
-					$this->append_code($text);
+					$this->appendCode($text);
 					$curly_count = 1;
 					$stack = '';
 					$found_line_break = false;
-					$has_ln_after = $this->has_ln_after();
+					$has_ln_after = $this->hasLnAfter();
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$stack .= $text;
 						if (T_START_HEREDOC == $id) {
-							$stack .= $this->walk_and_accumulate_until($this->tkns, T_END_HEREDOC);
+							$stack .= $this->walkAndAccumulateUntil($this->tkns, T_END_HEREDOC);
 							continue;
 						}
 						if (ST_QUOTE == $id) {
-							$stack .= $this->walk_and_accumulate_until($this->tkns, ST_QUOTE);
+							$stack .= $this->walkAndAccumulateUntil($this->tkns, ST_QUOTE);
 							continue;
 						}
 						if (ST_CURLY_OPEN == $id) {
@@ -39,7 +39,7 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 						if (ST_CURLY_CLOSE == $id) {
 							--$curly_count;
 						}
-						if (T_WHITESPACE === $id && $this->has_ln($text)) {
+						if (T_WHITESPACE === $id && $this->hasLn($text)) {
 							$found_line_break = true;
 							break;
 						}
@@ -48,12 +48,12 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 						}
 					}
 					if ($found_line_break && !$has_ln_after) {
-						$this->append_code($this->new_line);
+						$this->appendCode($this->new_line);
 					}
-					$this->append_code($stack);
+					$this->appendCode($stack);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

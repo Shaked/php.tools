@@ -263,18 +263,18 @@ abstract class FormatterPass {
 	protected $cache = [];
 	protected $ignore_futile_tokens = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
 
-	protected function append_code($code = "") {
+	protected function appendCode($code = "") {
 		$this->code .= $code;
 	}
 
-	private function calculate_cache_key($direction, $ignore_list, $token) {
+	private function calculateCacheKey($direction, $ignore_list, $token) {
 		return $direction . "\x2" . implode('', $ignore_list) . "\x2" . (is_array($token) ? implode("\x2", $token) : $token);
 	}
 
 	abstract public function candidate($source, $found_tokens);
 	abstract public function format($source);
 
-	protected function get_token($token) {
+	protected function getToken($token) {
 		if (isset($token[1])) {
 			return $token;
 		} else {
@@ -282,118 +282,118 @@ abstract class FormatterPass {
 		}
 	}
 
-	protected function get_crlf($true = true) {
+	protected function getCrlf($true = true) {
 		return $true ? $this->new_line : "";
 	}
 
-	protected function get_crlf_indent() {
-		return $this->get_crlf() . $this->get_indent();
+	protected function getCrlfIndent() {
+		return $this->getCrlf() . $this->getIndent();
 	}
 
-	protected function get_indent($increment = 0) {
+	protected function getIndent($increment = 0) {
 		return str_repeat($this->indent_char, $this->indent + $increment);
 	}
 
-	protected function get_space($true = true) {
+	protected function getSpace($true = true) {
 		return $true ? " " : "";
 	}
 
-	protected function has_ln($text) {
+	protected function hasLn($text) {
 		return (false !== strpos($text, $this->new_line));
 	}
 
-	protected function has_ln_after() {
+	protected function hasLnAfter() {
 		$id = null;
 		$text = null;
-		list($id, $text) = $this->inspect_token();
-		return T_WHITESPACE === $id && $this->has_ln($text);
+		list($id, $text) = $this->inspectToken();
+		return T_WHITESPACE === $id && $this->hasLn($text);
 	}
 
-	protected function has_ln_before() {
+	protected function hasLnBefore() {
 		$id = null;
 		$text = null;
-		list($id, $text) = $this->inspect_token(-1);
-		return T_WHITESPACE === $id && $this->has_ln($text);
+		list($id, $text) = $this->inspectToken(-1);
+		return T_WHITESPACE === $id && $this->hasLn($text);
 	}
 
-	protected function has_ln_left_token() {
-		list($id, $text) = $this->get_token($this->left_token());
-		return $this->has_ln($text);
+	protected function hasLnLeftToken() {
+		list($id, $text) = $this->getToken($this->leftToken());
+		return $this->hasLn($text);
 	}
 
-	protected function has_ln_right_token() {
-		list($id, $text) = $this->get_token($this->right_token());
-		return $this->has_ln($text);
+	protected function hasLnRightToken() {
+		list($id, $text) = $this->getToken($this->rightToken());
+		return $this->hasLn($text);
 	}
 
-	protected function inspect_token($delta = 1) {
+	protected function inspectToken($delta = 1) {
 		if (!isset($this->tkns[$this->ptr + $delta])) {
 			return [null, null];
 		}
-		return $this->get_token($this->tkns[$this->ptr + $delta]);
+		return $this->getToken($this->tkns[$this->ptr + $delta]);
 	}
 
-	protected function left_token($ignore_list = [], $idx = false) {
-		$i = $this->left_token_idx($ignore_list);
+	protected function leftToken($ignore_list = [], $idx = false) {
+		$i = $this->leftTokenIdx($ignore_list);
 
 		return $this->tkns[$i];
 	}
 
-	protected function left_token_idx($ignore_list = []) {
-		$ignore_list = $this->resolve_ignore_list($ignore_list);
+	protected function leftTokenIdx($ignore_list = []) {
+		$ignore_list = $this->resolveIgnoreList($ignore_list);
 
-		$i = $this->walk_left($this->tkns, $this->ptr, $ignore_list);
+		$i = $this->walkLeft($this->tkns, $this->ptr, $ignore_list);
 
 		return $i;
 	}
 
-	protected function left_token_is($token, $ignore_list = []) {
-		return $this->token_is('left', $token, $ignore_list);
+	protected function leftTokenIs($token, $ignore_list = []) {
+		return $this->tokenIs('left', $token, $ignore_list);
 	}
 
-	protected function left_token_subset_is_at_idx($tkns, $idx, $token, $ignore_list = []) {
-		$ignore_list = $this->resolve_ignore_list($ignore_list);
+	protected function leftTokenSubsetIsAtIdx($tkns, $idx, $token, $ignore_list = []) {
+		$ignore_list = $this->resolveIgnoreList($ignore_list);
 
-		$idx = $this->walk_left($tkns, $idx, $ignore_list);
+		$idx = $this->walkLeft($tkns, $idx, $ignore_list);
 
-		return $this->resolve_token_match($tkns, $idx, $token);
+		return $this->resolveTokenMatch($tkns, $idx, $token);
 	}
 
-	protected function left_useful_token() {
-		return $this->left_token($this->ignore_futile_tokens);
+	protected function leftUsefulToken() {
+		return $this->leftToken($this->ignore_futile_tokens);
 	}
 
-	protected function left_useful_token_idx() {
-		return $this->left_token_idx($this->ignore_futile_tokens);
+	protected function leftUsefulTokenIdx() {
+		return $this->leftTokenIdx($this->ignore_futile_tokens);
 	}
 
-	protected function left_useful_token_is($token) {
-		return $this->left_token_is($token, $this->ignore_futile_tokens);
+	protected function leftUsefulTokenIs($token) {
+		return $this->leftTokenIs($token, $this->ignore_futile_tokens);
 	}
 
-	protected function print_and_stop_at($tknids) {
+	protected function printAndStopAt($tknids) {
 		if (is_scalar($tknids)) {
 			$tknids = [$tknids];
 		}
 		$tknids = array_flip($tknids);
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
 			if (isset($tknids[$id])) {
 				return [$id, $text];
 			}
-			$this->append_code($text);
+			$this->appendCode($text);
 		}
 	}
 
-	protected function print_block($start, $end) {
+	protected function printBlock($start, $end) {
 		$count = 1;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
-			$this->append_code($text);
+			$this->appendCode($text);
 
 			if ($start == $id) {
 				++$count;
@@ -407,13 +407,13 @@ abstract class FormatterPass {
 		}
 	}
 
-	protected function print_curly_block() {
+	protected function printCurlyBlock() {
 		$count = 1;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
-			$this->append_code($text);
+			$this->appendCode($text);
 
 			if (ST_CURLY_OPEN == $id) {
 				++$count;
@@ -433,30 +433,30 @@ abstract class FormatterPass {
 		}
 	}
 
-	protected function print_until($tknid) {
+	protected function printUntil($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
-			$this->append_code($text);
+			$this->appendCode($text);
 			if ($tknid == $id) {
 				break;
 			}
 		}
 	}
 
-	protected function print_until_any($tknids) {
+	protected function printUntilAny($tknids) {
 		$tknids = array_flip($tknids);
 		$whitespace_new_line = false;
 		if (isset($tknids[$this->new_line])) {
 			$whitespace_new_line = true;
 		}
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
-			$this->append_code($text);
-			if ($whitespace_new_line && T_WHITESPACE == $id && $this->has_ln($text)) {
+			$this->appendCode($text);
+			if ($whitespace_new_line && T_WHITESPACE == $id && $this->hasLn($text)) {
 				break;
 			}
 			if (isset($tknids[$id])) {
@@ -466,8 +466,8 @@ abstract class FormatterPass {
 		return $id;
 	}
 
-	protected function print_until_the_end_of_string() {
-		$this->print_until(ST_QUOTE);
+	protected function printUntilTheEndOfString() {
+		$this->printUntil(ST_QUOTE);
 	}
 
 	protected function render($tkns = null) {
@@ -478,13 +478,13 @@ abstract class FormatterPass {
 		$tkns = array_filter($tkns);
 		$str = '';
 		foreach ($tkns as $token) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$str .= $text;
 		}
 		return $str;
 	}
 
-	protected function render_light($tkns = null) {
+	protected function renderLight($tkns = null) {
 		if (null == $tkns) {
 			$tkns = $this->tkns;
 		}
@@ -495,7 +495,7 @@ abstract class FormatterPass {
 		return $str;
 	}
 
-	private function resolve_ignore_list($ignore_list = []) {
+	private function resolveIgnoreList($ignore_list = []) {
 		if (empty($ignore_list)) {
 			$ignore_list[T_WHITESPACE] = true;
 		} else {
@@ -504,7 +504,7 @@ abstract class FormatterPass {
 		return $ignore_list;
 	}
 
-	private function resolve_token_match($tkns, $idx, $token) {
+	private function resolveTokenMatch($tkns, $idx, $token) {
 		if (!isset($tkns[$idx])) {
 			return false;
 		}
@@ -523,56 +523,56 @@ abstract class FormatterPass {
 		return false;
 	}
 
-	protected function right_token($ignore_list = []) {
-		$i = $this->right_token_idx($ignore_list);
+	protected function rightToken($ignore_list = []) {
+		$i = $this->rightTokenIdx($ignore_list);
 
 		return $this->tkns[$i];
 	}
 
-	protected function right_token_idx($ignore_list = []) {
-		$ignore_list = $this->resolve_ignore_list($ignore_list);
+	protected function rightTokenIdx($ignore_list = []) {
+		$ignore_list = $this->resolveIgnoreList($ignore_list);
 
-		$i = $this->walk_right($this->tkns, $this->ptr, $ignore_list);
+		$i = $this->walkRight($this->tkns, $this->ptr, $ignore_list);
 
 		return $i;
 	}
 
-	protected function right_token_is($token, $ignore_list = []) {
-		return $this->token_is('right', $token, $ignore_list);
+	protected function rightTokenIs($token, $ignore_list = []) {
+		return $this->tokenIs('right', $token, $ignore_list);
 	}
 
-	protected function right_token_subset_is_at_idx($tkns, $idx, $token, $ignore_list = []) {
-		$ignore_list = $this->resolve_ignore_list($ignore_list);
+	protected function rightTokenSubsetIsAtIdx($tkns, $idx, $token, $ignore_list = []) {
+		$ignore_list = $this->resolveIgnoreList($ignore_list);
 
-		$idx = $this->walk_right($tkns, $idx, $ignore_list);
+		$idx = $this->walkRight($tkns, $idx, $ignore_list);
 
-		return $this->resolve_token_match($tkns, $idx, $token);
+		return $this->resolveTokenMatch($tkns, $idx, $token);
 	}
 
-	protected function right_useful_token() {
-		return $this->right_token($this->ignore_futile_tokens);
+	protected function rightUsefulToken() {
+		return $this->rightToken($this->ignore_futile_tokens);
 	}
 
 	// protected function right_useful_token_idx($idx = false) {
 	// 	return $this->right_token_idx($this->ignore_futile_tokens);
 	// }
 
-	protected function right_useful_token_is($token) {
-		return $this->right_token_is($token, $this->ignore_futile_tokens);
+	protected function rightUsefulTokenIs($token) {
+		return $this->rightTokenIs($token, $this->ignore_futile_tokens);
 	}
 
-	protected function rtrim_and_append_code($code = "") {
+	protected function rtrimAndAppendCode($code = "") {
 		$this->code = rtrim($this->code) . $code;
 	}
 
-	protected function scan_and_replace(&$tkns, &$ptr, $start, $end, $call, $look_for) {
+	protected function scanAndReplace(&$tkns, &$ptr, $start, $end, $call, $look_for) {
 		$look_for = array_flip($look_for);
 		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
 		$tmp = '';
 		$tkn_count = 1;
 		$found_potential_tokens = false;
 		while (list($ptr, $token) = each($tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			if (isset($look_for[$id])) {
 				$found_potential_tokens = true;
 			}
@@ -595,7 +595,7 @@ abstract class FormatterPass {
 
 	}
 
-	protected function set_indent($increment) {
+	protected function setIndent($increment) {
 		$this->indent += $increment;
 		if ($this->indent < 0) {
 			$this->indent = 0;
@@ -603,39 +603,39 @@ abstract class FormatterPass {
 	}
 
 	protected function siblings($tkns, $ptr) {
-		$ignore_list = $this->resolve_ignore_list([T_WHITESPACE]);
-		$left = $this->walk_left($tkns, $ptr, $ignore_list);
-		$right = $this->walk_right($tkns, $ptr, $ignore_list);
+		$ignore_list = $this->resolveIgnoreList([T_WHITESPACE]);
+		$left = $this->walkLeft($tkns, $ptr, $ignore_list);
+		$right = $this->walkRight($tkns, $ptr, $ignore_list);
 		return [$left, $right];
 	}
 
-	protected function substr_count_trailing($haystack, $needle) {
+	protected function substrCountTrailing($haystack, $needle) {
 		return strlen(rtrim($haystack, " \t")) - strlen(rtrim($haystack, " \t" . $needle));
 	}
 
-	protected function token_is($direction, $token, $ignore_list = []) {
+	protected function tokenIs($direction, $token, $ignore_list = []) {
 		if ('left' != $direction) {
 			$direction = 'right';
 		}
 		if (!$this->use_cache) {
-			return $this->{$direction . '_token_subset_is_at_idx'}($this->tkns, $this->ptr, $token, $ignore_list);
+			return $this->{$direction . 'tokenSubsetIsAtIdx'}($this->tkns, $this->ptr, $token, $ignore_list);
 		}
 
-		$key = $this->calculate_cache_key($direction, $ignore_list, $token);
+		$key = $this->calculateCacheKey($direction, $ignore_list, $token);
 		if (isset($this->cache[$key])) {
 			return $this->cache[$key];
 		}
 
-		$ret = $this->{$direction . '_token_subset_is_at_idx'}($this->tkns, $this->ptr, $token, $ignore_list);
+		$ret = $this->{$direction . 'tokenSubsetIsAtIdx'}($this->tkns, $this->ptr, $token, $ignore_list);
 		$this->cache[$key] = $ret;
 
 		return $ret;
 	}
 
-	protected function walk_and_accumulate_until(&$tkns, $tknid) {
+	protected function walkAndAccumulateUntil(&$tkns, $tknid) {
 		$ret = '';
 		while (list($index, $token) = each($tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$ret .= $text;
 			if ($tknid == $id) {
@@ -645,22 +645,22 @@ abstract class FormatterPass {
 		return $ret;
 	}
 
-	private function walk_left($tkns, $idx, $ignore_list) {
+	private function walkLeft($tkns, $idx, $ignore_list) {
 		$i = $idx;
 		while (--$i >= 0 && isset($tkns[$i][1]) && isset($ignore_list[$tkns[$i][0]]));
 		return $i;
 	}
 
-	private function walk_right($tkns, $idx, $ignore_list) {
+	private function walkRight($tkns, $idx, $ignore_list) {
 		$i = $idx;
 		$tkns_size = sizeof($tkns) - 1;
 		while (++$i < $tkns_size && isset($tkns[$i][1]) && isset($ignore_list[$tkns[$i][0]]));
 		return $i;
 	}
 
-	protected function walk_until($tknid) {
+	protected function walkUntil($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			if ($id == $tknid) {
 				return [$id, $text];
@@ -695,7 +695,7 @@ final class CodeFormatter {
 		$found_tokens = [];
 		$tkns = token_get_all($source);
 		foreach ($tkns as $token) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$found_tokens[$id] = $id;
 		}
 		while (($pass = array_pop($passes))) {
@@ -706,7 +706,7 @@ final class CodeFormatter {
 		return $source;
 	}
 
-	protected function get_token($token) {
+	protected function getToken($token) {
 		if (isset($token[1])) {
 			return $token;
 		} else {
@@ -736,17 +736,17 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		$this->use_cache = true;
 		$changed = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
 			switch ($id) {
 				case T_WHILE:
 				case T_FOREACH:
 				case T_FOR:
-					$this->append_code($text);
+					$this->appendCode($text);
 					$paren_count = null;
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$this->cache = [];
 						if (ST_PARENTHESES_OPEN === $id) {
@@ -754,25 +754,25 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						} elseif (ST_PARENTHESES_CLOSE === $id) {
 							--$paren_count;
 						}
-						$this->append_code($text);
-						if (0 === $paren_count && !$this->right_token_is([T_COMMENT, T_DOC_COMMENT])) {
+						$this->appendCode($text);
+						if (0 === $paren_count && !$this->rightTokenIs([T_COMMENT, T_DOC_COMMENT])) {
 							break;
 						}
 					}
-					if (!$this->right_token_is([ST_CURLY_OPEN, ST_COLON, ST_SEMI_COLON])) {
-						$while_in_next_token = $this->right_token_is([T_WHILE, T_DO]);
+					if (!$this->rightTokenIs([ST_CURLY_OPEN, ST_COLON, ST_SEMI_COLON])) {
+						$while_in_next_token = $this->rightTokenIs([T_WHILE, T_DO]);
 						$ignore_count = 0;
-						if (!$this->left_token_is([T_COMMENT, T_DOC_COMMENT])) {
-							$this->rtrim_and_append_code($this->new_line . '{');
+						if (!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) {
+							$this->rtrimAndAppendCode($this->new_line . '{');
 						}
 						while (list($index, $token) = each($this->tkns)) {
-							list($id, $text) = $this->get_token($token);
+							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
 							$this->cache = [];
 
 							if (ST_QUOTE == $id) {
-								$this->append_code($text);
-								$this->print_until_the_end_of_string();
+								$this->appendCode($text);
+								$this->printUntilTheEndOfString();
 								continue;
 							}
 
@@ -781,29 +781,29 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
 								--$ignore_count;
 							}
-							$this->append_code($text);
-							if (ST_SEMI_COLON != $id && $this->right_token_is(T_CLOSE_TAG)) {
-								$this->append_code(ST_SEMI_COLON);
+							$this->appendCode($text);
+							if (ST_SEMI_COLON != $id && $this->rightTokenIs(T_CLOSE_TAG)) {
+								$this->appendCode(ST_SEMI_COLON);
 								break;
 							}
-							if (T_INLINE_HTML == $id && !$this->right_token_is(T_OPEN_TAG)) {
-								$this->append_code('<?php');
+							if (T_INLINE_HTML == $id && !$this->rightTokenIs(T_OPEN_TAG)) {
+								$this->appendCode('<?php');
 							}
-							if ($ignore_count <= 0 && !($this->right_token_is([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN, ST_EQUAL]) || ($while_in_next_token && $this->right_token_is([T_WHILE]))) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
+							if ($ignore_count <= 0 && !($this->rightTokenIs([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN, ST_EQUAL]) || ($while_in_next_token && $this->rightTokenIs([T_WHILE]))) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
 								break;
 							}
 						}
-						$this->append_code($this->get_crlf_indent() . '}' . $this->get_crlf_indent());
+						$this->appendCode($this->getCrlfIndent() . '}' . $this->getCrlfIndent());
 						$changed = true;
 						break 2;
 					}
 					break;
 				case T_IF:
 				case T_ELSEIF:
-					$this->append_code($text);
+					$this->appendCode($text);
 					$paren_count = null;
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$this->cache = [];
 						if (ST_PARENTHESES_OPEN === $id) {
@@ -811,25 +811,25 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						} elseif (ST_PARENTHESES_CLOSE === $id) {
 							--$paren_count;
 						}
-						$this->append_code($text);
-						if (0 === $paren_count && !$this->right_token_is([T_COMMENT, T_DOC_COMMENT])) {
+						$this->appendCode($text);
+						if (0 === $paren_count && !$this->rightTokenIs([T_COMMENT, T_DOC_COMMENT])) {
 							break;
 						}
 					}
-					if (!$this->right_token_is([ST_CURLY_OPEN, ST_COLON])) {
-						$while_in_next_token = $this->right_token_is([T_WHILE, T_DO]);
+					if (!$this->rightTokenIs([ST_CURLY_OPEN, ST_COLON])) {
+						$while_in_next_token = $this->rightTokenIs([T_WHILE, T_DO]);
 						$ignore_count = 0;
-						if (!$this->left_token_is([T_COMMENT, T_DOC_COMMENT])) {
-							$this->rtrim_and_append_code($this->new_line . '{');
+						if (!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) {
+							$this->rtrimAndAppendCode($this->new_line . '{');
 						}
 						while (list($index, $token) = each($this->tkns)) {
-							list($id, $text) = $this->get_token($token);
+							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
 							$this->cache = [];
 
 							if (ST_QUOTE == $id) {
-								$this->append_code($text);
-								$this->print_until_the_end_of_string();
+								$this->appendCode($text);
+								$this->printUntilTheEndOfString();
 								continue;
 							}
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
@@ -837,33 +837,33 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
 								--$ignore_count;
 							}
-							$this->append_code($text);
-							if (T_INLINE_HTML == $id && !$this->right_token_is(T_OPEN_TAG)) {
-								$this->append_code('<?php');
+							$this->appendCode($text);
+							if (T_INLINE_HTML == $id && !$this->rightTokenIs(T_OPEN_TAG)) {
+								$this->appendCode('<?php');
 							}
-							if ($ignore_count <= 0 && !($this->right_token_is([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN]) || ($while_in_next_token && $this->right_token_is([T_WHILE]))) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
+							if ($ignore_count <= 0 && !($this->rightTokenIs([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN]) || ($while_in_next_token && $this->rightTokenIs([T_WHILE]))) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
 								break;
 							}
 						}
-						$this->append_code($this->get_crlf_indent() . '}' . $this->get_crlf_indent());
+						$this->appendCode($this->getCrlfIndent() . '}' . $this->getCrlfIndent());
 						$changed = true;
 						break 2;
 					}
 					break;
 				case T_ELSE:
-					$this->append_code($text);
-					if (!$this->right_token_is([ST_CURLY_OPEN, ST_COLON, T_IF])) {
-						$while_in_next_token = $this->right_token_is([T_WHILE, T_DO]);
+					$this->appendCode($text);
+					if (!$this->rightTokenIs([ST_CURLY_OPEN, ST_COLON, T_IF])) {
+						$while_in_next_token = $this->rightTokenIs([T_WHILE, T_DO]);
 						$ignore_count = 0;
-						$this->rtrim_and_append_code('{');
+						$this->rtrimAndAppendCode('{');
 						while (list($index, $token) = each($this->tkns)) {
-							list($id, $text) = $this->get_token($token);
+							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
 							$this->cache = [];
 
 							if (ST_QUOTE == $id) {
-								$this->append_code($text);
-								$this->print_until_the_end_of_string();
+								$this->appendCode($text);
+								$this->printUntilTheEndOfString();
 								continue;
 							}
 
@@ -872,28 +872,28 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
 								--$ignore_count;
 							}
-							$this->append_code($text);
-							if (T_INLINE_HTML == $id && !$this->right_token_is(T_OPEN_TAG)) {
-								$this->append_code('<?php');
+							$this->appendCode($text);
+							if (T_INLINE_HTML == $id && !$this->rightTokenIs(T_OPEN_TAG)) {
+								$this->appendCode('<?php');
 							}
-							if ($ignore_count <= 0 && !($this->right_token_is([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN]) || ($while_in_next_token && $this->right_token_is([T_WHILE]))) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
+							if ($ignore_count <= 0 && !($this->rightTokenIs([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN]) || ($while_in_next_token && $this->rightTokenIs([T_WHILE]))) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
 								break;
 							}
 						}
-						$this->append_code($this->get_crlf_indent() . '}' . $this->get_crlf_indent());
+						$this->appendCode($this->getCrlfIndent() . '}' . $this->getCrlfIndent());
 						$changed = true;
 						break 2;
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			$this->append_code($text);
+			$this->appendCode($text);
 		}
 
 		return [$this->code, $changed];
@@ -925,14 +925,14 @@ final class AutoImportPass extends FormatterPass {
 		while (list(, $pop_token) = each($tokens)) {
 			$next_tokens[] = $pop_token;
 			while (($token = array_shift($next_tokens))) {
-				list($id, $text) = $this->get_token($token);
+				list($id, $text) = $this->getToken($token);
 				if (T_NAMESPACE == $id) {
 					$touched_namespace = true;
 				}
 				if (T_USE === $id) {
 					$use_item = $text;
 					while (list(, $token) = each($tokens)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						if (ST_SEMI_COLON === $id) {
 							$use_item .= $text;
 							break;
@@ -980,7 +980,7 @@ final class AutoImportPass extends FormatterPass {
 		}
 		foreach ($new_tokens as $token) {
 			if (!($token instanceof SurrogateToken)) {
-				list($id, $text) = $this->get_token($token);
+				list($id, $text) = $this->getToken($token);
 				$lower_text = strtolower($text);
 				if (T_STRING === $id && isset($alias_list[$lower_text])) {
 					++$alias_count[$lower_text];
@@ -989,7 +989,7 @@ final class AutoImportPass extends FormatterPass {
 		}
 
 		while (list(, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$lower_text = strtolower($text);
 			if (T_STRING === $id && isset($alias_list[$lower_text])) {
 				++$alias_count[$lower_text];
@@ -1021,10 +1021,10 @@ final class AutoImportPass extends FormatterPass {
 		$alias_count = [];
 		$namespace_name = '';
 		while (list($index, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			if (T_NAMESPACE == $id) {
 				while (list($index, $token) = each($tokens)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					if (T_NS_SEPARATOR == $id || T_STRING == $id) {
 						$namespace_name .= $text;
 					}
@@ -1035,7 +1035,7 @@ final class AutoImportPass extends FormatterPass {
 			}
 			if (T_USE == $id || T_NAMESPACE == $id || T_FUNCTION == $id || T_DOUBLE_COLON == $id || T_OBJECT_OPERATOR == $id) {
 				while (list($index, $token) = each($tokens)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					if (ST_SEMI_COLON == $id || ST_PARENTHESES_OPEN == $id || ST_CURLY_OPEN == $id) {
 						break;
 					}
@@ -1043,7 +1043,7 @@ final class AutoImportPass extends FormatterPass {
 			}
 			if (T_CLASS == $id) {
 				while (list($index, $token) = each($tokens)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					if (T_EXTENDS == $id || T_IMPLEMENTS == $id || ST_CURLY_OPEN == $id) {
 						break;
 					}
@@ -1065,7 +1065,7 @@ final class AutoImportPass extends FormatterPass {
 		$touched_function = false;
 		$return = '';
 		while (list(, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 
 			if (T_NAMESPACE == $id) {
 				$touched_namespace = true;
@@ -1082,7 +1082,7 @@ final class AutoImportPass extends FormatterPass {
 			$return .= $text;
 		}
 		while (list(, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$return .= $text;
 		}
 
@@ -1105,7 +1105,7 @@ final class AutoImportPass extends FormatterPass {
 		$namespace_count = 0;
 		$tokens = token_get_all($source);
 		while (list(, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			if (T_NAMESPACE == $id) {
 				++$namespace_count;
 			}
@@ -1117,13 +1117,13 @@ final class AutoImportPass extends FormatterPass {
 		$return = '';
 		reset($tokens);
 		while (list($index, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
 					$return .= $text;
 					while (list($index, $token) = each($tokens)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$return .= $text;
 						if (ST_CURLY_OPEN == $id) {
@@ -1133,7 +1133,7 @@ final class AutoImportPass extends FormatterPass {
 					$namespace_block = '';
 					$curly_count = 1;
 					while (list($index, $token) = each($tokens)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$namespace_block .= $text;
 						if (ST_CURLY_OPEN == $id) {
@@ -1184,7 +1184,7 @@ final class ConstructorPass extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CLASS:
@@ -1193,9 +1193,9 @@ final class ConstructorPass extends FormatterPass {
 					$touched_visibility = false;
 					$touched_function = false;
 					$curly_count = null;
-					$this->append_code($text);
+					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						if (ST_CURLY_OPEN == $id) {
 							++$curly_count;
@@ -1206,7 +1206,7 @@ final class ConstructorPass extends FormatterPass {
 						if (0 === $curly_count) {
 							break;
 						}
-						$this->append_code($text);
+						$this->appendCode($text);
 						if (T_PUBLIC == $id) {
 							$touched_visibility = T_PUBLIC;
 						} elseif (T_PRIVATE == $id) {
@@ -1234,17 +1234,17 @@ final class ConstructorPass extends FormatterPass {
 					}
 					$function_list = array_combine($function_list, $function_list);
 					if (!isset($function_list['__construct'])) {
-						$this->append_code('function __construct(' . implode(', ', $attributes) . '){' . $this->new_line);
+						$this->appendCode('function __construct(' . implode(', ', $attributes) . '){' . $this->new_line);
 						foreach ($attributes as $var) {
-							$this->append_code($this->generate($var));
+							$this->appendCode($this->generate($var));
 						}
-						$this->append_code('}' . $this->new_line);
+						$this->appendCode('}' . $this->new_line);
 					}
 
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -1292,15 +1292,15 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 		$paren_count = 0;
 		$bracket_count = 0;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_WHITESPACE:
 					$text = str_replace($this->new_line, self::EMPTY_LINE . $this->new_line, $text);
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -1327,7 +1327,7 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 
 		$this->code = str_replace(self::EMPTY_LINE, '', implode($this->new_line, $lines));
 
-		list($id, $text) = $this->get_token(array_pop($this->tkns));
+		list($id, $text) = $this->getToken(array_pop($this->tkns));
 		if (T_WHITESPACE === $id && '' === trim($text)) {
 			$this->code = rtrim($this->code) . $this->new_line;
 		}
@@ -1348,61 +1348,61 @@ final class ExtraCommaInArray extends FormatterPass {
 
 		$context_stack = [];
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
-					if (!$this->left_token_is([ST_BRACKET_CLOSE, T_STRING, T_VARIABLE, T_ARRAY_CAST])) {
+					if (!$this->leftTokenIs([ST_BRACKET_CLOSE, T_STRING, T_VARIABLE, T_ARRAY_CAST])) {
 						$context_stack[] = self::ST_SHORT_ARRAY_OPEN;
 					} else {
 						$context_stack[] = ST_BRACKET_OPEN;
 					}
 					break;
 				case ST_BRACKET_CLOSE:
-					if (isset($context_stack[0]) && !$this->left_token_is(ST_BRACKET_OPEN)) {
-						if (self::ST_SHORT_ARRAY_OPEN == end($context_stack) && ($this->has_ln_left_token() || $this->has_ln_before()) && !$this->left_useful_token_is(ST_COMMA)) {
-							$prev_token_idx = $this->left_useful_token_idx();
-							list($tkn_id, $tkn_text) = $this->get_token($this->tkns[$prev_token_idx]);
+					if (isset($context_stack[0]) && !$this->leftTokenIs(ST_BRACKET_OPEN)) {
+						if (self::ST_SHORT_ARRAY_OPEN == end($context_stack) && ($this->hasLnLeftToken() || $this->hasLnBefore()) && !$this->leftUsefulTokenIs(ST_COMMA)) {
+							$prev_token_idx = $this->leftUsefulTokenIdx();
+							list($tkn_id, $tkn_text) = $this->getToken($this->tkns[$prev_token_idx]);
 							if (T_END_HEREDOC != $tkn_id && ST_BRACKET_OPEN != $tkn_id) {
 								$this->tkns[$prev_token_idx] = [$tkn_id, $tkn_text . ','];
 							}
-						} elseif (self::ST_SHORT_ARRAY_OPEN == end($context_stack) && !($this->has_ln_left_token() || $this->has_ln_before()) && $this->left_useful_token_is(ST_COMMA)) {
-							$prev_token_idx = $this->left_useful_token_idx();
-							list($tkn_id, $tkn_text) = $this->get_token($this->tkns[$prev_token_idx]);
+						} elseif (self::ST_SHORT_ARRAY_OPEN == end($context_stack) && !($this->hasLnLeftToken() || $this->hasLnBefore()) && $this->leftUsefulTokenIs(ST_COMMA)) {
+							$prev_token_idx = $this->leftUsefulTokenIdx();
+							list($tkn_id, $tkn_text) = $this->getToken($this->tkns[$prev_token_idx]);
 							$this->tkns[$prev_token_idx] = [$tkn_id, rtrim($tkn_text, ',')];
 						}
 						array_pop($context_stack);
 					}
 					break;
 				case T_STRING:
-					if ($this->right_token_is(ST_PARENTHESES_OPEN)) {
+					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
 						$context_stack[] = T_STRING;
 					}
 					break;
 				case T_ARRAY:
-					if ($this->right_token_is(ST_PARENTHESES_OPEN)) {
+					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
 						$context_stack[] = T_ARRAY;
 					}
 					break;
 				case ST_PARENTHESES_OPEN:
-					if (isset($context_stack[0]) && T_ARRAY == end($context_stack) && $this->right_token_is(ST_PARENTHESES_CLOSE)) {
+					if (isset($context_stack[0]) && T_ARRAY == end($context_stack) && $this->rightTokenIs(ST_PARENTHESES_CLOSE)) {
 						array_pop($context_stack);
 						$context_stack[] = self::EMPTY_ARRAY;
-					} elseif (!$this->left_token_is([T_ARRAY, T_STRING])) {
+					} elseif (!$this->leftTokenIs([T_ARRAY, T_STRING])) {
 						$context_stack[] = ST_PARENTHESES_OPEN;
 					}
 					break;
 				case ST_PARENTHESES_CLOSE:
 					if (isset($context_stack[0])) {
-						if (T_ARRAY == end($context_stack) && ($this->has_ln_left_token() || $this->has_ln_before()) && !$this->left_useful_token_is(ST_COMMA)) {
-							$prev_token_idx = $this->left_useful_token_idx();
-							list($tkn_id, $tkn_text) = $this->get_token($this->tkns[$prev_token_idx]);
+						if (T_ARRAY == end($context_stack) && ($this->hasLnLeftToken() || $this->hasLnBefore()) && !$this->leftUsefulTokenIs(ST_COMMA)) {
+							$prev_token_idx = $this->leftUsefulTokenIdx();
+							list($tkn_id, $tkn_text) = $this->getToken($this->tkns[$prev_token_idx]);
 							if (T_END_HEREDOC != $tkn_id && ST_PARENTHESES_OPEN != $tkn_id) {
 								$this->tkns[$prev_token_idx] = [$tkn_id, $tkn_text . ','];
 							}
-						} elseif (T_ARRAY == end($context_stack) && !($this->has_ln_left_token() || $this->has_ln_before()) && $this->left_useful_token_is(ST_COMMA)) {
-							$prev_token_idx = $this->left_useful_token_idx();
-							list($tkn_id, $tkn_text) = $this->get_token($this->tkns[$prev_token_idx]);
+						} elseif (T_ARRAY == end($context_stack) && !($this->hasLnLeftToken() || $this->hasLnBefore()) && $this->leftUsefulTokenIs(ST_COMMA)) {
+							$prev_token_idx = $this->leftUsefulTokenIdx();
+							list($tkn_id, $tkn_text) = $this->getToken($this->tkns[$prev_token_idx]);
 							$this->tkns[$prev_token_idx] = [$tkn_id, rtrim($tkn_text, ',')];
 						}
 						array_pop($context_stack);
@@ -1411,7 +1411,7 @@ final class ExtraCommaInArray extends FormatterPass {
 			}
 			$this->tkns[$this->ptr] = [$id, $text];
 		}
-		return $this->render_light();
+		return $this->renderLight();
 	}
 };
 final class LeftAlignComment extends FormatterPass {
@@ -1423,7 +1423,7 @@ final class LeftAlignComment extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			if (self::NON_INDENTABLE_COMMENT === $text) {
 				continue;
@@ -1431,7 +1431,7 @@ final class LeftAlignComment extends FormatterPass {
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					list(, $prev_text) = $this->inspect_token(-1);
+					list(, $prev_text) = $this->inspectToken(-1);
 					if (self::NON_INDENTABLE_COMMENT === $prev_text) {
 						// Benchmark me
 						// $new_text = '';
@@ -1456,22 +1456,22 @@ final class LeftAlignComment extends FormatterPass {
 							}
 							return $v;
 						}, $lines);
-						$this->append_code(implode($this->new_line, $lines));
+						$this->appendCode(implode($this->new_line, $lines));
 						break;
 					}
 				case T_WHITESPACE:
-					list(, $next_text) = $this->inspect_token(1);
+					list(, $next_text) = $this->inspectToken(1);
 					if (self::NON_INDENTABLE_COMMENT === $next_text && substr_count($text, "\n") >= 2) {
 						$text = substr($text, 0, strrpos($text, "\n") + 1);
-						$this->append_code($text);
+						$this->appendCode($text);
 						break;
 					} elseif (self::NON_INDENTABLE_COMMENT === $next_text && substr_count($text, "\n") === 1) {
 						$text = substr($text, 0, strrpos($text, "\n") + 1);
-						$this->append_code($text);
+						$this->appendCode($text);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -1491,14 +1491,14 @@ final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_WHILE:
 					$str = $text;
-					list($pt_id, $pt_text) = $this->get_token($this->left_token());
+					list($pt_id, $pt_text) = $this->getToken($this->leftToken());
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$str .= $text;
 						if (
@@ -1506,16 +1506,16 @@ final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 							ST_COLON == $id ||
 							(ST_SEMI_COLON == $id && (ST_SEMI_COLON == $pt_id || ST_CURLY_OPEN == $pt_id || T_COMMENT == $pt_id || T_DOC_COMMENT == $pt_id))
 						) {
-							$this->append_code($str);
+							$this->appendCode($str);
 							break;
 						} elseif (ST_SEMI_COLON == $id && !(ST_SEMI_COLON == $pt_id || ST_CURLY_OPEN == $pt_id || T_COMMENT == $pt_id || T_DOC_COMMENT == $pt_id)) {
-							$this->rtrim_and_append_code($str);
+							$this->rtrimAndAppendCode($str);
 							break;
 						}
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -1536,17 +1536,17 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 		$this->code = '';
 		$in_do_while_context = 0;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ARRAY:
-					if ($this->left_token_is([T_DOUBLE_ARROW])) {
+					if ($this->leftTokenIs([T_DOUBLE_ARROW])) {
 						--$in_do_while_context;
-						$this->rtrim_and_append_code($text);
+						$this->rtrimAndAppendCode($text);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -1567,26 +1567,26 @@ final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_CURLY_OPEN:
-					if ($this->left_token_is([T_ELSE, T_STRING, ST_PARENTHESES_CLOSE])) {
-						$this->rtrim_and_append_code($text);
+					if ($this->leftTokenIs([T_ELSE, T_STRING, ST_PARENTHESES_CLOSE])) {
+						$this->rtrimAndAppendCode($text);
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 				case T_ELSE:
 				case T_ELSEIF:
-					if ($this->left_token_is(ST_CURLY_CLOSE)) {
-						$this->rtrim_and_append_code($text);
+					if ($this->leftTokenIs(ST_CURLY_CLOSE)) {
+						$this->rtrimAndAppendCode($text);
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -1607,14 +1607,14 @@ final class NormalizeIsNotEquals extends FormatterPass {
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_IS_NOT_EQUAL:
-					$this->append_code(str_replace('<>', '!=', $text) . $this->get_space());
+					$this->appendCode(str_replace('<>', '!=', $text) . $this->getSpace());
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -1634,23 +1634,23 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_QUOTE:
-					$this->append_code($text);
-					$this->print_until_the_end_of_string();
+					$this->appendCode($text);
+					$this->printUntilTheEndOfString();
 					break;
 				case T_START_HEREDOC:
-					$this->append_code($text);
-					$this->print_until(T_END_HEREDOC);
+					$this->appendCode($text);
+					$this->printUntil(T_END_HEREDOC);
 					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					list($prev_id, $prev_text) = $this->inspect_token(-1);
+					list($prev_id, $prev_text) = $this->inspectToken(-1);
 
 					if (T_WHITESPACE === $prev_id && ("\n" === $prev_text || "\n\n" == substr($prev_text, -2, 2))) {
-						$this->append_code(LeftAlignComment::NON_INDENTABLE_COMMENT);
+						$this->appendCode(LeftAlignComment::NON_INDENTABLE_COMMENT);
 					}
 
 					$lines = explode($this->new_line, $text);
@@ -1663,19 +1663,19 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 						$new_text .= $this->new_line . $v;
 					}
 
-					$this->append_code(ltrim($new_text));
+					$this->appendCode(ltrim($new_text));
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				default:
-					if ($this->has_ln($text)) {
-						$trailing_new_line = $this->substr_count_trailing($text, $this->new_line);
+					if ($this->hasLn($text)) {
+						$trailing_new_line = $this->substrCountTrailing($text, $this->new_line);
 						if ($trailing_new_line > 0) {
 							$text = trim($text) . str_repeat($this->new_line, $trailing_new_line);
 						}
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -1702,14 +1702,14 @@ final class OrderUseClauses extends FormatterPass {
 		while (list(, $pop_token) = each($tokens)) {
 			$next_tokens[] = $pop_token;
 			while (($token = array_shift($next_tokens))) {
-				list($id, $text) = $this->get_token($token);
+				list($id, $text) = $this->getToken($token);
 				if (T_NAMESPACE == $id) {
 					$touched_namespace = true;
 				}
 				if (T_USE === $id) {
 					$use_item = $text;
 					while (list(, $token) = each($tokens)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						if (ST_SEMI_COLON === $id) {
 							$use_item .= $text;
 							break;
@@ -1767,7 +1767,7 @@ final class OrderUseClauses extends FormatterPass {
 				$return .= $this->new_line;
 				continue;
 			} else {
-				list($id, $text) = $this->get_token($token);
+				list($id, $text) = $this->getToken($token);
 				$lower_text = strtolower($text);
 				if (T_STRING === $id && isset($alias_list[$lower_text])) {
 					++$alias_count[$lower_text];
@@ -1783,7 +1783,7 @@ final class OrderUseClauses extends FormatterPass {
 		}
 
 		while (list(, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$lower_text = strtolower($text);
 			if (T_STRING === $id && isset($alias_list[$lower_text])) {
 				++$alias_count[$lower_text];
@@ -1815,7 +1815,7 @@ final class OrderUseClauses extends FormatterPass {
 		$tokens = token_get_all($source);
 		$touched_t_use = false;
 		while (list(, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			if (T_USE === $id) {
 				$touched_t_use = true;
 			}
@@ -1830,14 +1830,14 @@ final class OrderUseClauses extends FormatterPass {
 		$return = '';
 		reset($tokens);
 		while (list($index, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
 					$return .= $text;
 					$touched_t_use = false;
 					while (list($index, $token) = each($tokens)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$return .= $text;
 						if (ST_CURLY_OPEN == $id || ST_SEMI_COLON == $id) {
@@ -1848,7 +1848,7 @@ final class OrderUseClauses extends FormatterPass {
 						$namespace_block = '';
 						$curly_count = 1;
 						while (list($index, $token) = each($tokens)) {
-							list($id, $text) = $this->get_token($token);
+							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
 							$namespace_block .= $text;
 
@@ -1869,7 +1869,7 @@ final class OrderUseClauses extends FormatterPass {
 					} elseif (ST_SEMI_COLON === $id) {
 						$namespace_block = '';
 						while (list($index, $token) = each($tokens)) {
-							list($id, $text) = $this->get_token($token);
+							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
 
 							if (T_USE === $id) {
@@ -1912,7 +1912,7 @@ final class Reindent extends FormatterPass {
 		$this->use_cache = true;
 		$found_stack = [];
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
 
@@ -1920,32 +1920,32 @@ final class Reindent extends FormatterPass {
 				(
 					T_WHITESPACE === $id ||
 					(T_COMMENT === $id && '//' == substr($text, 0, 2))
-				) && $this->has_ln($text)
+				) && $this->hasLn($text)
 			) {
 				$bottom_found_stack = end($found_stack);
 				if (isset($bottom_found_stack['implicit']) && $bottom_found_stack['implicit']) {
 					$idx = sizeof($found_stack) - 1;
 					$found_stack[$idx]['implicit'] = false;
-					$this->set_indent(+1);
+					$this->setIndent(+1);
 				}
 			}
 			switch ($id) {
 				case ST_QUOTE:
-					$this->append_code($text);
-					$this->print_until_the_end_of_string();
+					$this->appendCode($text);
+					$this->printUntilTheEndOfString();
 					break;
 				case T_CLOSE_TAG:
-					$this->append_code($text);
-					$this->print_until(T_OPEN_TAG);
+					$this->appendCode($text);
+					$this->printUntil(T_OPEN_TAG);
 					break;
 				case T_START_HEREDOC:
-					$this->append_code(rtrim($text) . $this->get_crlf());
+					$this->appendCode(rtrim($text) . $this->getCrlf());
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
 				case T_ENCAPSED_AND_WHITESPACE:
 				case T_STRING_VARNAME:
 				case T_NUM_STRING:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_DOLLAR_OPEN_CURLY_BRACES:
 				case T_CURLY_OPEN:
@@ -1956,10 +1956,10 @@ final class Reindent extends FormatterPass {
 						'id' => $id,
 						'implicit' => true,
 					];
-					$this->append_code($text);
-					if ($this->has_ln_after()) {
+					$this->appendCode($text);
+					if ($this->hasLnAfter()) {
 						$indent_token['implicit'] = false;
-						$this->set_indent(+1);
+						$this->setIndent(+1);
 					}
 					$found_stack[] = $indent_token;
 					break;
@@ -1968,28 +1968,28 @@ final class Reindent extends FormatterPass {
 				case ST_BRACKET_CLOSE:
 					$popped_id = array_pop($found_stack);
 					if (false === $popped_id['implicit']) {
-						$this->set_indent(-1);
+						$this->setIndent(-1);
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case T_DOC_COMMENT:
-					$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					$this->append_code($text);
+					$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+					$this->appendCode($text);
 					break;
 				default:
-					$has_ln = ($this->has_ln($text));
+					$has_ln = ($this->hasLn($text));
 					if ($has_ln) {
-						$is_next_curly_paren_bracket_close = $this->right_token_is([ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE]);
+						$is_next_curly_paren_bracket_close = $this->rightTokenIs([ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE]);
 						if (!$is_next_curly_paren_bracket_close) {
-							$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
+							$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
 						} elseif ($is_next_curly_paren_bracket_close) {
-							$this->set_indent(-1);
-							$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-							$this->set_indent(+1);
+							$this->setIndent(-1);
+							$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+							$this->setIndent(+1);
 						}
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -2009,12 +2009,12 @@ final class ReindentColonBlocks extends FormatterPass {
 
 		$found_colon = false;
 		foreach ($this->tkns as $token) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			if (T_DEFAULT == $id || T_CASE == $id || T_SWITCH == $id) {
 				$found_colon = true;
 				break;
 			}
-			$this->append_code($text);
+			$this->appendCode($text);
 		}
 		if (!$found_colon) {
 			return $source;
@@ -2027,26 +2027,26 @@ final class ReindentColonBlocks extends FormatterPass {
 		$is_next_case_or_default = false;
 		$touched_colon = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
 			switch ($id) {
 				case ST_QUOTE:
-					$this->append_code($text);
-					$this->print_until_the_end_of_string();
+					$this->appendCode($text);
+					$this->printUntilTheEndOfString();
 					break;
 
 				case T_SWITCH:
 					++$switch_level;
 					$switch_curly_count[$switch_level] = 0;
 					$touched_colon = false;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case ST_CURLY_OPEN:
-					$this->append_code($text);
-					if ($this->left_token_is([T_VARIABLE, T_OBJECT_OPERATOR, ST_DOLLAR])) {
-						$this->print_curly_block();
+					$this->appendCode($text);
+					if ($this->leftTokenIs([T_VARIABLE, T_OBJECT_OPERATOR, ST_DOLLAR])) {
+						$this->printCurlyBlock();
 						break;
 					}
 					++$switch_curly_count[$switch_level];
@@ -2057,38 +2057,38 @@ final class ReindentColonBlocks extends FormatterPass {
 					if (0 === $switch_curly_count[$switch_level] && $switch_level > 0) {
 						--$switch_level;
 					}
-					$this->append_code($this->get_indent($switch_level) . $text);
+					$this->appendCode($this->getIndent($switch_level) . $text);
 					break;
 
 				case T_DEFAULT:
 				case T_CASE:
 					$touched_colon = false;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case ST_COLON:
 					$touched_colon = true;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				default:
-					$has_ln = $this->has_ln($text);
+					$has_ln = $this->hasLn($text);
 					if ($has_ln) {
-						$is_next_case_or_default = $this->right_useful_token_is([T_CASE, T_DEFAULT]);
+						$is_next_case_or_default = $this->rightUsefulTokenIs([T_CASE, T_DEFAULT]);
 						if ($touched_colon && T_COMMENT == $id && $is_next_case_or_default) {
-							$this->append_code($text);
+							$this->appendCode($text);
 						} elseif ($touched_colon && T_COMMENT == $id && !$is_next_case_or_default) {
-							$this->append_code($this->get_indent($switch_level) . $text);
-							if (!$this->right_token_is([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
-								$this->append_code($this->get_indent($switch_level));
+							$this->appendCode($this->getIndent($switch_level) . $text);
+							if (!$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
+								$this->appendCode($this->getIndent($switch_level));
 							}
-						} elseif (!$is_next_case_or_default && !$this->right_token_is([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
-							$this->append_code($text . $this->get_indent($switch_level));
+						} elseif (!$is_next_case_or_default && !$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
+							$this->appendCode($text . $this->getIndent($switch_level));
 						} else {
-							$this->append_code($text);
+							$this->appendCode($text);
 						}
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 			}
@@ -2104,7 +2104,7 @@ final class ReindentIfColonBlocks extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$found_colon = false;
 		foreach ($this->tkns as $token) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			if (ST_COLON == trim($text)) {
 				$found_colon = true;
 				break;
@@ -2117,28 +2117,28 @@ final class ReindentIfColonBlocks extends FormatterPass {
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ENDIF:
-					$this->set_indent(-1);
-					$this->append_code($text);
+					$this->setIndent(-1);
+					$this->appendCode($text);
 					break;
 				case T_ELSE:
 				case T_ELSEIF:
-					$this->set_indent(-1);
+					$this->setIndent(-1);
 				case T_IF:
-					$this->append_code($text);
+					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
-						$this->append_code($text);
+						$this->appendCode($text);
 						if (ST_PARENTHESES_OPEN === $id) {
 							$paren_count = 1;
 							while (list($index, $token) = each($this->tkns)) {
-								list($id, $text) = $this->get_token($token);
+								list($id, $text) = $this->getToken($token);
 								$this->ptr = $index;
-								$this->append_code($text);
+								$this->appendCode($text);
 								if (ST_PARENTHESES_OPEN === $id) {
 									++$paren_count;
 								}
@@ -2151,8 +2151,8 @@ final class ReindentIfColonBlocks extends FormatterPass {
 							}
 						} elseif (ST_CURLY_OPEN === $id) {
 							break;
-						} elseif (ST_COLON === $id && !$this->right_token_is([T_CLOSE_TAG])) {
-							$this->set_indent(+1);
+						} elseif (ST_COLON === $id && !$this->rightTokenIs([T_CLOSE_TAG])) {
+							$this->setIndent(+1);
 							break;
 						} elseif (ST_COLON === $id) {
 							break;
@@ -2160,15 +2160,15 @@ final class ReindentIfColonBlocks extends FormatterPass {
 					}
 					break;
 				default:
-					$has_ln = $this->has_ln($text);
-					if ($has_ln && !$this->right_token_is([T_ENDIF, T_ELSE, T_ELSEIF])) {
-						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					} elseif ($has_ln && $this->right_token_is([T_ENDIF, T_ELSE, T_ELSEIF])) {
-						$this->set_indent(-1);
-						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-						$this->set_indent(+1);
+					$has_ln = $this->hasLn($text);
+					if ($has_ln && !$this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF])) {
+						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+					} elseif ($has_ln && $this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF])) {
+						$this->setIndent(-1);
+						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+						$this->setIndent(+1);
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -2186,7 +2186,7 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		$found_endforeach = false;
 		$found_endfor = false;
 		foreach ($tkns as $token) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			if (!$found_endwhile && T_ENDWHILE == $id) {
 				$source = $this->format_while_blocks($source);
 				$found_endwhile = true;
@@ -2208,23 +2208,23 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case $close_token:
-					$this->set_indent(-1);
-					$this->append_code($text);
+					$this->setIndent(-1);
+					$this->appendCode($text);
 					break;
 				case $open_token:
-					$this->append_code($text);
+					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
-						$this->append_code($text);
+						$this->appendCode($text);
 						if (ST_CURLY_OPEN === $id) {
 							break;
-						} elseif (ST_COLON === $id && !$this->right_token_is([T_CLOSE_TAG])) {
-							$this->set_indent(+1);
+						} elseif (ST_COLON === $id && !$this->rightTokenIs([T_CLOSE_TAG])) {
+							$this->setIndent(+1);
 							break;
 						} elseif (ST_COLON === $id) {
 							break;
@@ -2232,14 +2232,14 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 					}
 					break;
 				default:
-					if ($this->has_ln($text) && !$this->right_token_is([$close_token])) {
-						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					} elseif ($this->has_ln($text) && $this->right_token_is([$close_token])) {
-						$this->set_indent(-1);
-						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-						$this->set_indent(+1);
+					if ($this->hasLn($text) && !$this->rightTokenIs([$close_token])) {
+						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+					} elseif ($this->hasLn($text) && $this->rightTokenIs([$close_token])) {
+						$this->setIndent(-1);
+						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+						$this->setIndent(+1);
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -2256,38 +2256,38 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ENDWHILE:
-					$this->set_indent(-1);
-					$this->append_code($text);
+					$this->setIndent(-1);
+					$this->appendCode($text);
 					break;
 				case T_WHILE:
-					$this->append_code($text);
+					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
-						$this->append_code($text);
+						$this->appendCode($text);
 						if (ST_CURLY_OPEN === $id) {
 							break;
 						} elseif (ST_SEMI_COLON === $id) {
 							break;
 						} elseif (ST_COLON === $id) {
-							$this->set_indent(+1);
+							$this->setIndent(+1);
 							break;
 						}
 					}
 					break;
 				default:
-					if ($this->has_ln($text) && !$this->right_token_is([T_ENDWHILE])) {
-						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					} elseif ($this->has_ln($text) && $this->right_token_is([T_ENDWHILE])) {
-						$this->set_indent(-1);
-						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-						$this->set_indent(+1);
+					if ($this->hasLn($text) && !$this->rightTokenIs([T_ENDWHILE])) {
+						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+					} elseif ($this->hasLn($text) && $this->rightTokenIs([T_ENDWHILE])) {
+						$this->setIndent(-1);
+						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+						$this->setIndent(+1);
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -2317,7 +2317,7 @@ final class ReindentObjOps extends FormatterPass {
 		$max_context_counter = [];
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_WHILE:
@@ -2325,37 +2325,37 @@ final class ReindentObjOps extends FormatterPass {
 				case T_FOR:
 				case T_FOREACH:
 				case T_SWITCH:
-					$this->append_code($text);
-					$this->print_until(ST_PARENTHESES_OPEN);
-					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+					$this->appendCode($text);
+					$this->printUntil(ST_PARENTHESES_OPEN);
+					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
 
 				case T_NEW:
-					$this->append_code($text);
-					if ($this->left_useful_token_is(ST_PARENTHESES_OPEN)) {
-						$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_COMMA]);
+					$this->appendCode($text);
+					if ($this->leftUsefulTokenIs(ST_PARENTHESES_OPEN)) {
+						$found_token = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_COMMA]);
 						if (ST_PARENTHESES_OPEN == $found_token) {
 							$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
-							$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-							$this->print_until_any([ST_PARENTHESES_CLOSE, ST_COMMA]);
+							$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+							$this->printUntilAny([ST_PARENTHESES_CLOSE, ST_COMMA]);
 						}
 					}
 					break;
 
 				case T_FUNCTION:
-					$this->append_code($text);
-					if (!$this->right_useful_token_is(T_STRING)) {
+					$this->appendCode($text);
+					if (!$this->rightUsefulTokenIs(T_STRING)) {
 						// $this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
-						$this->print_until(ST_PARENTHESES_OPEN);
-						$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-						$this->print_until(ST_CURLY_OPEN);
-						$this->print_curly_block();
+						$this->printUntil(ST_PARENTHESES_OPEN);
+						$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+						$this->printUntil(ST_CURLY_OPEN);
+						$this->printCurlyBlock();
 					}
 					break;
 
 				case T_VARIABLE:
 				case T_STRING:
-					$this->append_code($text);
+					$this->appendCode($text);
 					if (!isset($level_entrance_counter[$level_counter])) {
 						$level_entrance_counter[$level_counter] = 0;
 					}
@@ -2371,22 +2371,22 @@ final class ReindentObjOps extends FormatterPass {
 				case ST_PARENTHESES_OPEN:
 				case ST_BRACKET_OPEN:
 					$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case ST_PARENTHESES_CLOSE:
 				case ST_BRACKET_CLOSE:
 					--$level_counter;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case T_OBJECT_OPERATOR:
 					if (0 == $touch_counter[$level_counter][$level_entrance_counter[$level_counter]]) {
 						++$touch_counter[$level_counter][$level_entrance_counter[$level_counter]];
-						if ($this->has_ln_before()) {
+						if ($this->hasLnBefore()) {
 							$align_type[$level_counter][$level_entrance_counter[$level_counter]] = self::ALIGN_WITH_INDENT;
-							$this->append_code($this->get_indent(+1) . $text);
-							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
+							$this->appendCode($this->getIndent(+1) . $text);
+							$found_token = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
 							if (ST_SEMI_COLON == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 							} elseif (ST_PARENTHESES_OPEN == $found_token) {
@@ -2405,8 +2405,8 @@ final class ReindentObjOps extends FormatterPass {
 								$level_entrance_counter[$level_counter],
 								$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
 							);
-							$this->append_code($placeholder . $text);
-							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
+							$this->appendCode($placeholder . $text);
+							$found_token = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
 							if (ST_SEMI_COLON == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 							} elseif (ST_PARENTHESES_OPEN == $found_token) {
@@ -2414,7 +2414,7 @@ final class ReindentObjOps extends FormatterPass {
 								$this->inject_placeholder_parentheses_content($placeholder);
 							}
 						}
-					} elseif ($this->has_ln_before() || $this->has_ln_left_token()) {
+					} elseif ($this->hasLnBefore() || $this->hasLnLeftToken()) {
 						++$touch_counter[$level_counter][$level_entrance_counter[$level_counter]];
 						if (self::ALIGN_WITH_SPACES == $align_type[$level_counter][$level_entrance_counter[$level_counter]]) {
 							++$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]];
@@ -2424,8 +2424,8 @@ final class ReindentObjOps extends FormatterPass {
 								$level_entrance_counter[$level_counter],
 								$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
 							);
-							$this->append_code($placeholder . $text);
-							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
+							$this->appendCode($placeholder . $text);
+							$found_token = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
 							if (ST_SEMI_COLON == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 							} elseif (ST_PARENTHESES_OPEN == $found_token) {
@@ -2433,8 +2433,8 @@ final class ReindentObjOps extends FormatterPass {
 								$this->inject_placeholder_parentheses_content($placeholder);
 							}
 						} else {
-							$this->append_code($this->get_indent(+1) . $text);
-							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
+							$this->appendCode($this->getIndent(+1) . $text);
+							$found_token = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
 							if (ST_SEMI_COLON == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 							} elseif (ST_PARENTHESES_OPEN == $found_token) {
@@ -2443,7 +2443,7 @@ final class ReindentObjOps extends FormatterPass {
 							}
 						}
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 
@@ -2453,11 +2453,11 @@ final class ReindentObjOps extends FormatterPass {
 						isset($align_type[$level_counter]) &&
 						isset($level_entrance_counter[$level_counter]) &&
 						isset($align_type[$level_counter][$level_entrance_counter[$level_counter]]) &&
-						($this->has_ln_before() || $this->has_ln_left_token())
+						($this->hasLnBefore() || $this->hasLnLeftToken())
 					) {
 						if (self::ALIGN_WITH_SPACES == $align_type[$level_counter][$level_entrance_counter[$level_counter]]) {
 							++$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]];
-							$this->append_code(
+							$this->appendCode(
 								sprintf(
 									self::ALIGNABLE_OBJOP,
 									$level_counter,
@@ -2466,10 +2466,10 @@ final class ReindentObjOps extends FormatterPass {
 								)
 							);
 						} elseif (self::ALIGN_WITH_INDENT == $align_type[$level_counter][$level_entrance_counter[$level_counter]]) {
-							$this->append_code($this->get_indent(+1));
+							$this->appendCode($this->getIndent(+1));
 						}
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case ST_COMMA:
@@ -2478,11 +2478,11 @@ final class ReindentObjOps extends FormatterPass {
 						$level_entrance_counter[$level_counter] = 0;
 					}
 					++$level_entrance_counter[$level_counter];
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -2540,9 +2540,9 @@ final class ReindentObjOps extends FormatterPass {
 		$sizeof_tokens = sizeof($this->tkns);
 		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
 			$token = &$this->tkns[$i];
-			list($id, $text) = $this->get_token($token);
-			if (T_WHITESPACE == $id && $this->has_ln($text)) {
-				$token[1] = $text . $this->get_indent(+1);
+			list($id, $text) = $this->getToken($token);
+			if (T_WHITESPACE == $id && $this->hasLn($text)) {
+				$token[1] = $text . $this->getIndent(+1);
 				continue;
 			}
 			if (ST_PARENTHESES_OPEN == $id) {
@@ -2563,8 +2563,8 @@ final class ReindentObjOps extends FormatterPass {
 		$sizeof_tokens = sizeof($this->tkns);
 		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
 			$token = &$this->tkns[$i];
-			list($id, $text) = $this->get_token($token);
-			if (T_WHITESPACE == $id && $this->has_ln($text)) {
+			list($id, $text) = $this->getToken($token);
+			if (T_WHITESPACE == $id && $this->hasLn($text)) {
 				$token[1] = str_replace($this->new_line, $this->new_line . $placeholder, $text);
 				continue;
 			}
@@ -2619,22 +2619,22 @@ final class RemoveIncludeParentheses extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_INCLUDE:
 				case T_REQUIRE:
 				case T_INCLUDE_ONCE:
 				case T_REQUIRE_ONCE:
-					$this->append_code($text . $this->get_space());
+					$this->appendCode($text . $this->getSpace());
 
-					if (!$this->right_token_is(ST_PARENTHESES_OPEN)) {
+					if (!$this->rightTokenIs(ST_PARENTHESES_OPEN)) {
 						break;
 					}
-					$this->walk_until(ST_PARENTHESES_OPEN);
+					$this->walkUntil(ST_PARENTHESES_OPEN);
 					$count = 1;
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$this->cache = [];
 
@@ -2647,11 +2647,11 @@ final class RemoveIncludeParentheses extends FormatterPass {
 						if (0 == $count) {
 							break;
 						}
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -2669,7 +2669,7 @@ final class ResizeSpaces extends FormatterPass {
 
 		$new_tkns = [];
 		foreach ($tkns as $idx => $token) {
-			if (T_WHITESPACE === $token[0] && !$this->has_ln($token[1])) {
+			if (T_WHITESPACE === $token[0] && !$this->hasLn($token[1])) {
 				continue;
 			}
 			$new_tkns[] = $token;
@@ -2689,51 +2689,51 @@ final class ResizeSpaces extends FormatterPass {
 		$touched_use = false;
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
 			switch ($id) {
 				case T_START_HEREDOC:
-					$this->append_code($text);
-					$this->print_until(ST_SEMI_COLON);
+					$this->appendCode($text);
+					$this->printUntil(ST_SEMI_COLON);
 					break;
 
 				case T_CALLABLE:
-					$this->append_code($text . $this->get_space());
+					$this->appendCode($text . $this->getSpace());
 					break;
 
 				case '+':
 				case '-':
 					if (
-						$this->left_useful_token_is([T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
+						$this->leftUsefulTokenIs([T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
 						&&
-						$this->right_useful_token_is([T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
+						$this->rightUsefulTokenIs([T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
 					) {
-						$this->append_code($this->get_space() . $text . $this->get_space());
+						$this->appendCode($this->getSpace() . $text . $this->getSpace());
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 				case '*':
-					list($prev_id, $prev_text) = $this->inspect_token(-1);
-					list($next_id, $next_text) = $this->inspect_token(+1);
+					list($prev_id, $prev_text) = $this->inspectToken(-1);
+					list($next_id, $next_text) = $this->inspectToken(+1);
 					if (
 						T_WHITESPACE === $prev_id &&
 						T_WHITESPACE !== $next_id
 					) {
-						$this->append_code($text . $this->get_space());
+						$this->appendCode($text . $this->getSpace());
 					} elseif (
 						T_WHITESPACE !== $prev_id &&
 						T_WHITESPACE === $next_id
 					) {
-						$this->append_code($this->get_space() . $text);
+						$this->appendCode($this->getSpace() . $text);
 					} elseif (
 						T_WHITESPACE !== $prev_id &&
 						T_WHITESPACE !== $next_id
 					) {
-						$this->append_code($this->get_space() . $text . $this->get_space());
+						$this->appendCode($this->getSpace() . $text . $this->getSpace());
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 
@@ -2745,117 +2745,117 @@ final class ResizeSpaces extends FormatterPass {
 				case ST_CONCAT:
 					if (ST_QUESTION == $id) {
 						$in_ternary_operator = true;
-						$short_ternary_operator = $this->right_token_is(ST_COLON);
+						$short_ternary_operator = $this->rightTokenIs(ST_COLON);
 					}
-					list($prev_id, $prev_text) = $this->inspect_token(-1);
-					list($next_id, $next_text) = $this->inspect_token(+1);
+					list($prev_id, $prev_text) = $this->inspectToken(-1);
+					list($next_id, $next_text) = $this->inspectToken(+1);
 					if (
 						T_WHITESPACE === $prev_id &&
 						T_WHITESPACE !== $next_id
 					) {
-						$this->append_code($text . $this->get_space(!$this->right_token_is(ST_COLON)));
+						$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_COLON)));
 						break;
 					} elseif (
 						T_WHITESPACE !== $prev_id &&
 						T_WHITESPACE === $next_id
 					) {
-						$this->append_code($this->get_space() . $text);
+						$this->appendCode($this->getSpace() . $text);
 						break;
 					} elseif (
 						T_WHITESPACE !== $prev_id &&
 						T_WHITESPACE !== $next_id
 					) {
-						$this->append_code($this->get_space() . $text . $this->get_space(!$this->right_token_is(ST_COLON)));
+						$this->appendCode($this->getSpace() . $text . $this->getSpace(!$this->rightTokenIs(ST_COLON)));
 						break;
 					}
 				case ST_COLON:
-					list($prev_id, $prev_text) = $this->inspect_token(-1);
-					list($next_id, $next_text) = $this->inspect_token(+1);
+					list($prev_id, $prev_text) = $this->inspectToken(-1);
+					list($next_id, $next_text) = $this->inspectToken(+1);
 					if (
 						$in_ternary_operator &&
 						T_WHITESPACE === $prev_id &&
 						T_WHITESPACE !== $next_id
 					) {
-						$this->append_code($text . $this->get_space());
+						$this->appendCode($text . $this->getSpace());
 						$in_ternary_operator = false;
 					} elseif (
 						$in_ternary_operator &&
 						T_WHITESPACE !== $prev_id &&
 						T_WHITESPACE === $next_id
 					) {
-						$this->append_code($this->get_space(!$short_ternary_operator) . $text);
+						$this->appendCode($this->getSpace(!$short_ternary_operator) . $text);
 						$in_ternary_operator = false;
 					} elseif (
 						$in_ternary_operator &&
 						T_WHITESPACE !== $prev_id &&
 						T_WHITESPACE !== $next_id
 					) {
-						$this->append_code($this->get_space(!$short_ternary_operator) . $text . $this->get_space());
+						$this->appendCode($this->getSpace(!$short_ternary_operator) . $text . $this->getSpace());
 						$in_ternary_operator = false;
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 
 				case T_PRINT:
-					$this->append_code($text . $this->get_space(!$this->right_token_is([ST_PARENTHESES_OPEN])));
+					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_PARENTHESES_OPEN])));
 					break;
 				case T_ARRAY:
-					if ($this->right_token_is([T_VARIABLE, ST_REFERENCE])) {
-						$this->append_code($text . $this->get_space());
+					if ($this->rightTokenIs([T_VARIABLE, ST_REFERENCE])) {
+						$this->appendCode($text . $this->getSpace());
 						break;
-					} elseif ($this->right_token_is(ST_PARENTHESES_OPEN)) {
-						$this->append_code($text);
+					} elseif ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
+						$this->appendCode($text);
 						break;
 					}
 				case T_STRING:
-					if ($this->right_token_is([T_VARIABLE, T_DOUBLE_ARROW])) {
-						$this->append_code($text . $this->get_space());
+					if ($this->rightTokenIs([T_VARIABLE, T_DOUBLE_ARROW])) {
+						$this->appendCode($text . $this->getSpace());
 						break;
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 						break;
 					}
 				case ST_CURLY_OPEN:
 					$touched_function = false;
-					if (!$touched_use && $this->left_useful_token_is([T_VARIABLE, T_STRING]) && $this->right_useful_token_is([T_VARIABLE, T_STRING])) {
-						$this->append_code($text);
+					if (!$touched_use && $this->leftUsefulTokenIs([T_VARIABLE, T_STRING]) && $this->rightUsefulTokenIs([T_VARIABLE, T_STRING])) {
+						$this->appendCode($text);
 						break;
-					} elseif (!$this->has_ln_left_token() && $this->left_useful_token_is([T_STRING, T_DO, T_FINALLY, ST_PARENTHESES_CLOSE])) {
-						$this->rtrim_and_append_code($this->get_space() . $text);
+					} elseif (!$this->hasLnLeftToken() && $this->leftUsefulTokenIs([T_STRING, T_DO, T_FINALLY, ST_PARENTHESES_CLOSE])) {
+						$this->rtrimAndAppendCode($this->getSpace() . $text);
 						break;
-					} elseif ($this->right_token_is(ST_CURLY_CLOSE) || ($this->right_token_is([T_VARIABLE]) && $this->left_token_is([T_OBJECT_OPERATOR, ST_DOLLAR]))) {
-						$this->append_code($text);
+					} elseif ($this->rightTokenIs(ST_CURLY_CLOSE) || ($this->rightTokenIs([T_VARIABLE]) && $this->leftTokenIs([T_OBJECT_OPERATOR, ST_DOLLAR]))) {
+						$this->appendCode($text);
 						break;
-					} elseif ($this->right_token_is([T_VARIABLE, T_INC, T_DEC])) {
-						$this->append_code($text . $this->get_space());
+					} elseif ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC])) {
+						$this->appendCode($text . $this->getSpace());
 						break;
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 						break;
 					}
 
 				case ST_SEMI_COLON:
 					$touched_use = false;
-					if ($this->right_token_is([T_VARIABLE, T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_COMMENT, T_DOC_COMMENT])) {
-						$this->append_code($text . $this->get_space());
+					if ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_COMMENT, T_DOC_COMMENT])) {
+						$this->appendCode($text . $this->getSpace());
 						break;
 					}
 				case ST_PARENTHESES_OPEN:
-					if (!$this->has_ln_left_token() && $this->left_useful_token_is([T_WHILE, T_CATCH])) {
-						$this->rtrim_and_append_code($this->get_space() . $text);
+					if (!$this->hasLnLeftToken() && $this->leftUsefulTokenIs([T_WHILE, T_CATCH])) {
+						$this->rtrimAndAppendCode($this->getSpace() . $text);
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 				case ST_PARENTHESES_CLOSE:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_USE:
-					if ($this->left_token_is(ST_PARENTHESES_CLOSE)) {
-						$this->append_code($this->get_space() . $text . $this->get_space());
+					if ($this->leftTokenIs(ST_PARENTHESES_CLOSE)) {
+						$this->appendCode($this->getSpace() . $text . $this->getSpace());
 					} else {
-						$this->append_code($text . $this->get_space());
+						$this->appendCode($text . $this->getSpace());
 					}
 					$touched_use = true;
 					break;
@@ -2869,24 +2869,24 @@ final class ResizeSpaces extends FormatterPass {
 				case T_FINAL:
 				case T_CASE:
 				case T_BREAK:
-					$this->append_code($text . $this->get_space(!$this->right_token_is(ST_SEMI_COLON)));
+					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_SEMI_COLON)));
 					break;
 				case T_WHILE:
-					if ($this->left_token_is(ST_CURLY_CLOSE) && !$this->has_ln_before()) {
-						$this->append_code($this->get_space() . $text . $this->get_space());
+					if ($this->leftTokenIs(ST_CURLY_CLOSE) && !$this->hasLnBefore()) {
+						$this->appendCode($this->getSpace() . $text . $this->getSpace());
 						break;
 					}
 				case T_DOUBLE_ARROW:
-					if (T_DOUBLE_ARROW == $id && $this->left_token_is([T_CONSTANT_ENCAPSED_STRING, T_STRING, T_VARIABLE, T_LNUMBER, T_DNUMBER, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE, ST_CURLY_CLOSE, ST_QUOTE])) {
-						$this->rtrim_and_append_code($this->get_space() . $text . $this->get_space());
+					if (T_DOUBLE_ARROW == $id && $this->leftTokenIs([T_CONSTANT_ENCAPSED_STRING, T_STRING, T_VARIABLE, T_LNUMBER, T_DNUMBER, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE, ST_CURLY_CLOSE, ST_QUOTE])) {
+						$this->rtrimAndAppendCode($this->getSpace() . $text . $this->getSpace());
 						break;
 					}
 				case T_STATIC:
-					$this->append_code($text . $this->get_space(!$this->right_token_is([ST_SEMI_COLON, T_DOUBLE_COLON, ST_PARENTHESES_OPEN])));
+					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_SEMI_COLON, T_DOUBLE_COLON, ST_PARENTHESES_OPEN])));
 					break;
 				case T_FUNCTION:
 					$touched_function = true;
-					$this->append_code($text . $this->get_space(!$this->right_token_is(ST_SEMI_COLON)));
+					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_SEMI_COLON)));
 					break;
 				case T_PUBLIC:
 				case T_PRIVATE:
@@ -2909,17 +2909,17 @@ final class ResizeSpaces extends FormatterPass {
 				case ST_COMMA:
 				case T_CLONE:
 				case T_CONTINUE:
-					$this->append_code($text . $this->get_space(!$this->right_token_is(ST_SEMI_COLON)));
+					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_SEMI_COLON)));
 					break;
 				case T_CLASS:
-					$this->append_code($text . $this->get_space(!$this->right_token_is(ST_SEMI_COLON) && !$this->left_token_is([T_DOUBLE_COLON])));
+					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_SEMI_COLON) && !$this->leftTokenIs([T_DOUBLE_COLON])));
 					break;
 				case T_EXTENDS:
 				case T_IMPLEMENTS:
 				case T_INSTANCEOF:
 				case T_INSTEADOF:
 				case T_AS:
-					$this->append_code($this->get_space() . $text . $this->get_space());
+					$this->appendCode($this->getSpace() . $text . $this->getSpace());
 					break;
 				case T_LOGICAL_AND:
 				case T_LOGICAL_OR:
@@ -2948,28 +2948,28 @@ final class ResizeSpaces extends FormatterPass {
 				case ST_IS_GREATER:
 				case ST_IS_SMALLER:
 				case ST_EQUAL:
-					$this->append_code($this->get_space(!$this->has_ln_before()) . $text . $this->get_space());
+					$this->appendCode($this->getSpace(!$this->hasLnBefore()) . $text . $this->getSpace());
 					break;
 				case T_CATCH:
 				case T_FINALLY:
-					if ($this->has_ln_left_token()) {
-						$this->append_code($this->get_space() . $text . $this->get_space());
+					if ($this->hasLnLeftToken()) {
+						$this->appendCode($this->getSpace() . $text . $this->getSpace());
 					} else {
-						$this->rtrim_and_append_code($this->get_space() . $text . $this->get_space());
+						$this->rtrimAndAppendCode($this->getSpace() . $text . $this->getSpace());
 					}
 					break;
 				case T_ELSEIF:
-					if (!$this->left_token_is(ST_CURLY_CLOSE)) {
-						$this->append_code($text . $this->get_space());
+					if (!$this->leftTokenIs(ST_CURLY_CLOSE)) {
+						$this->appendCode($text . $this->getSpace());
 					} else {
-						$this->append_code($this->get_space() . $text . $this->get_space());
+						$this->appendCode($this->getSpace() . $text . $this->getSpace());
 					}
 					break;
 				case T_ELSE:
-					if (!$this->left_useful_token_is(ST_CURLY_CLOSE)) {
-						$this->append_code($text);
+					if (!$this->leftUsefulTokenIs(ST_CURLY_CLOSE)) {
+						$this->appendCode($text);
 					} else {
-						$this->append_code($this->get_space(!$this->left_token_is([T_COMMENT, T_DOC_COMMENT])) . $text . $this->get_space());
+						$this->appendCode($this->getSpace(!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) . $text . $this->getSpace());
 					}
 					break;
 				case T_ARRAY_CAST:
@@ -2980,15 +2980,15 @@ final class ResizeSpaces extends FormatterPass {
 				case T_STRING_CAST:
 				case T_UNSET_CAST:
 				case T_GOTO:
-					$this->append_code(str_replace([' ', "\t"], '', $text) . $this->get_space());
+					$this->appendCode(str_replace([' ', "\t"], '', $text) . $this->getSpace());
 					break;
 				case ST_REFERENCE:
-					$space_before = !$this->left_useful_token_is([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]) && !$this->left_useful_token_is(T_ARRAY);
-					$space_after = !$touched_function && !$this->left_useful_token_is([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]);
-					$this->append_code($this->get_space($space_before) . $text . $this->get_space($space_after));
+					$space_before = !$this->leftUsefulTokenIs([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]) && !$this->leftUsefulTokenIs(T_ARRAY);
+					$space_after = !$touched_function && !$this->leftUsefulTokenIs([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]);
+					$this->appendCode($this->getSpace($space_before) . $text . $this->getSpace($space_after));
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3027,7 +3027,7 @@ final class SettersAndGettersPass extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CLASS:
@@ -3040,9 +3040,9 @@ final class SettersAndGettersPass extends FormatterPass {
 					$touched_visibility = false;
 					$touched_function = false;
 					$curly_count = null;
-					$this->append_code($text);
+					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						if (ST_CURLY_OPEN == $id) {
 							++$curly_count;
@@ -3053,7 +3053,7 @@ final class SettersAndGettersPass extends FormatterPass {
 						if (0 === $curly_count) {
 							break;
 						}
-						$this->append_code($text);
+						$this->appendCode($text);
 						if (T_PUBLIC == $id) {
 							$touched_visibility = T_PUBLIC;
 						} elseif (T_PRIVATE == $id) {
@@ -3088,14 +3088,14 @@ final class SettersAndGettersPass extends FormatterPass {
 									continue 2;
 								}
 							}
-							$this->append_code($str);
+							$this->appendCode($str);
 						}
 					}
 
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3144,26 +3144,26 @@ final class TwoCommandsInSameLine extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 
 			switch ($id) {
 				case ST_SEMI_COLON:
-					if ($this->left_token_is(ST_SEMI_COLON)) {
+					if ($this->leftTokenIs(ST_SEMI_COLON)) {
 						break;
 					}
-					$this->append_code($text);
-					if (!$this->has_ln_after() && $this->right_token_is([T_VARIABLE, T_STRING, T_CONTINUE, T_BREAK, T_ECHO, T_PRINT])) {
-						$this->append_code($this->new_line);
+					$this->appendCode($text);
+					if (!$this->hasLnAfter() && $this->rightTokenIs([T_VARIABLE, T_STRING, T_CONTINUE, T_BREAK, T_ECHO, T_PRINT])) {
+						$this->appendCode($this->new_line);
 					}
 					break;
 
 				case ST_PARENTHESES_OPEN:
-					$this->append_code($text);
-					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+					$this->appendCode($text);
+					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 			}
@@ -3199,22 +3199,22 @@ final class PSR1ClassConstants extends FormatterPass {
 		$this->code = '';
 		$uc_const = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CONST:
 					$uc_const = true;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_STRING:
 					if ($uc_const) {
 						$text = strtoupper($text);
 						$uc_const = false;
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3234,12 +3234,12 @@ final class PSR1ClassNames extends FormatterPass {
 		$this->code = '';
 		$found_class = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CLASS:
 					$found_class = true;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_STRING:
 					if ($found_class) {
@@ -3248,13 +3248,13 @@ final class PSR1ClassNames extends FormatterPass {
 						if ($count > 0) {
 							$text = str_replace(' ', '', $tmp);
 						}
-						$this->append_code($text);
+						$this->appendCode($text);
 
 						$found_class = false;
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3276,12 +3276,12 @@ final class PSR1MethodNames extends FormatterPass {
 		$found_method = false;
 		$method_replace_list = [];
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_FUNCTION:
 					$found_method = true;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_STRING:
 					if ($found_method) {
@@ -3293,7 +3293,7 @@ final class PSR1MethodNames extends FormatterPass {
 						}
 
 						$method_replace_list[$orig_text] = $text;
-						$this->append_code($text);
+						$this->appendCode($text);
 
 						$found_method = false;
 						break;
@@ -3301,7 +3301,7 @@ final class PSR1MethodNames extends FormatterPass {
 				case ST_PARENTHESES_OPEN:
 					$found_method = false;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3309,18 +3309,18 @@ final class PSR1MethodNames extends FormatterPass {
 		$this->tkns = token_get_all($this->code);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_STRING:
-					if (isset($method_replace_list[$text]) && $this->right_useful_token_is(ST_PARENTHESES_OPEN)) {
+					if (isset($method_replace_list[$text]) && $this->rightUsefulTokenIs(ST_PARENTHESES_OPEN)) {
 
-						$this->append_code($method_replace_list[$text]);
+						$this->appendCode($method_replace_list[$text]);
 						break;
 					}
 
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3336,16 +3336,16 @@ final class PSR1OpenTags extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_OPEN_TAG:
 					if ('<?php' !== $text) {
-						$this->append_code('<?php' . $this->new_line);
+						$this->appendCode('<?php' . $this->new_line);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3368,27 +3368,27 @@ final class PSR2AlignObjOp extends FormatterPass {
 		$context_counter = 0;
 		$context_meta_count = [];
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_SEMI_COLON:
 				case T_ARRAY:
 				case T_DOUBLE_ARROW:
 					++$context_counter;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case T_OBJECT_OPERATOR:
 					if (!isset($context_meta_count[$context_counter])) {
 						$context_meta_count[$context_counter] = 0;
 					}
-					if ($this->has_ln_before() || 0 == $context_meta_count[$context_counter]) {
-						$this->append_code(sprintf(self::ALIGNABLE_TOKEN, $context_counter) . $text);
+					if ($this->hasLnBefore() || 0 == $context_meta_count[$context_counter]) {
+						$this->appendCode(sprintf(self::ALIGNABLE_TOKEN, $context_counter) . $text);
 						++$context_meta_count[$context_counter];
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3446,69 +3446,69 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_START_HEREDOC:
-					$this->append_code($text);
-					$this->print_until(T_END_HEREDOC);
+					$this->appendCode($text);
+					$this->printUntil(T_END_HEREDOC);
 					break;
 				case ST_QUOTE:
-					$this->append_code($text);
-					$this->print_until_the_end_of_string();
+					$this->appendCode($text);
+					$this->printUntilTheEndOfString();
 					break;
 				case T_INTERFACE:
 				case T_TRAIT:
 				case T_CLASS:
-					$this->append_code($text);
+					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						if (ST_CURLY_OPEN === $id) {
-							$this->append_code($this->get_crlf_indent());
+							$this->appendCode($this->getCrlfIndent());
 							prev($this->tkns);
 							break;
 						} else {
-							$this->append_code($text);
+							$this->appendCode($text);
 						}
 					}
 					break;
 				case T_FUNCTION:
-					if (!$this->left_token_is([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_PARENTHESES_OPEN, ST_COMMA]) && $this->right_useful_token_is(T_STRING)) {
-						$this->append_code($text);
+					if (!$this->leftTokenIs([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_PARENTHESES_OPEN, ST_COMMA]) && $this->rightUsefulTokenIs(T_STRING)) {
+						$this->appendCode($text);
 						$touched_ln = false;
 						while (list($index, $token) = each($this->tkns)) {
-							list($id, $text) = $this->get_token($token);
+							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
-							if (T_WHITESPACE == $id && $this->has_ln($text)) {
+							if (T_WHITESPACE == $id && $this->hasLn($text)) {
 								$touched_ln = true;
 							}
 							if (ST_CURLY_OPEN === $id && !$touched_ln) {
-								$this->append_code($this->get_crlf_indent());
+								$this->appendCode($this->getCrlfIndent());
 								prev($this->tkns);
 								break;
 							} elseif (ST_CURLY_OPEN === $id) {
 								prev($this->tkns);
 								break;
 							} else {
-								$this->append_code($text);
+								$this->appendCode($text);
 							}
 						}
 						break;
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 				case ST_CURLY_OPEN:
-					$this->append_code($text);
-					$this->set_indent(+1);
+					$this->appendCode($text);
+					$this->setIndent(+1);
 					break;
 				case ST_CURLY_CLOSE:
-					$this->set_indent(-1);
-					$this->append_code($text);
+					$this->setIndent(-1);
+					$this->appendCode($text);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3531,16 +3531,16 @@ final class PSR2IndentWithSpace extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
 				case T_WHITESPACE:
-					$this->append_code(str_replace($this->indent_char, $indent_spaces, $text));
+					$this->appendCode(str_replace($this->indent_char, $indent_spaces, $text));
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3555,7 +3555,7 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ABSTRACT:
@@ -3630,21 +3630,21 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 				case T_WHILE:
 				case T_XOR_EQUAL:
 				case T_YIELD:
-					$this->append_code(strtolower($text));
+					$this->appendCode(strtolower($text));
 					break;
 				default:
 					$lc_text = strtolower($text);
 					if (
-						!$this->left_useful_token_is([
+						!$this->leftUsefulTokenIs([
 							T_NS_SEPARATOR, T_AS, T_CLASS, T_EXTENDS, T_IMPLEMENTS, T_INSTANCEOF, T_INTERFACE, T_NEW, T_NS_SEPARATOR, T_PAAMAYIM_NEKUDOTAYIM, T_USE, T_TRAIT, T_INSTEADOF, T_CONST,
 						]) &&
-						!$this->right_useful_token_is([
+						!$this->rightUsefulTokenIs([
 							T_NS_SEPARATOR, T_AS, T_CLASS, T_EXTENDS, T_IMPLEMENTS, T_INSTANCEOF, T_INTERFACE, T_NEW, T_NS_SEPARATOR, T_PAAMAYIM_NEKUDOTAYIM, T_USE, T_TRAIT, T_INSTEADOF, T_CONST,
 						]) &&
 						('true' === $lc_text || 'false' === $lc_text || 'null' === $lc_text)) {
 						$text = $lc_text;
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3664,31 +3664,31 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					$this->append_code($this->get_crlf($this->left_token_is(ST_CURLY_CLOSE)) . $text);
+					$this->appendCode($this->getCrlf($this->leftTokenIs(ST_CURLY_CLOSE)) . $text);
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						if (ST_SEMI_COLON === $id) {
-							$this->append_code($text);
-							list(, $text) = $this->inspect_token();
+							$this->appendCode($text);
+							list(, $text) = $this->inspectToken();
 							if (1 === substr_count($text, $this->new_line)) {
-								$this->append_code($this->new_line);
+								$this->appendCode($this->new_line);
 							}
 							break;
 						} elseif (ST_CURLY_OPEN === $id) {
-							$this->append_code($text);
+							$this->appendCode($text);
 							break;
 						} else {
-							$this->append_code($text);
+							$this->appendCode($text);
 						}
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3710,33 +3710,33 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 		$static = null;
 		$skip_whitespaces = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_START_HEREDOC:
-					$this->append_code($text);
-					$this->print_until(T_END_HEREDOC);
+					$this->appendCode($text);
+					$this->printUntil(T_END_HEREDOC);
 					break;
 				case ST_QUOTE:
-					$this->append_code($text);
-					$this->print_until_the_end_of_string();
+					$this->appendCode($text);
+					$this->printUntilTheEndOfString();
 					break;
 				case T_CLASS:
 					$found[] = T_CLASS;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_INTERFACE:
 					$found[] = T_INTERFACE;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_TRAIT:
 					$found[] = T_TRAIT;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_CURLY_OPEN:
 				case ST_PARENTHESES_OPEN:
 					$found[] = $text;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_CURLY_CLOSE:
 				case ST_PARENTHESES_CLOSE:
@@ -3744,11 +3744,11 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					if (1 === sizeof($found)) {
 						array_pop($found);
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_WHITESPACE:
 					if (!$skip_whitespaces) {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 				case T_PUBLIC:
@@ -3759,22 +3759,22 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					break;
 				case T_FINAL:
 				case T_ABSTRACT:
-					if (!$this->right_token_is([T_CLASS])) {
+					if (!$this->rightTokenIs([T_CLASS])) {
 						$final_or_abstract = $text;
 						$skip_whitespaces = true;
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 				case T_STATIC:
 					if (!is_null($visibility)) {
 						$static = $text;
 						$skip_whitespaces = true;
-					} elseif (!$this->right_token_is([T_VARIABLE, T_DOUBLE_COLON]) && !$this->left_token_is([T_NEW])) {
+					} elseif (!$this->rightTokenIs([T_VARIABLE, T_DOUBLE_COLON]) && !$this->leftTokenIs([T_NEW])) {
 						$static = $text;
 						$skip_whitespaces = true;
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 				case T_VARIABLE:
@@ -3783,38 +3783,38 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						null !== $final_or_abstract ||
 						null !== $static
 					) {
-						null !== $final_or_abstract && $this->append_code($final_or_abstract . $this->get_space());
-						null !== $visibility && $this->append_code($visibility . $this->get_space());
-						null !== $static && $this->append_code($static . $this->get_space());
+						null !== $final_or_abstract && $this->appendCode($final_or_abstract . $this->getSpace());
+						null !== $visibility && $this->appendCode($visibility . $this->getSpace());
+						null !== $static && $this->appendCode($static . $this->getSpace());
 						$final_or_abstract = null;
 						$visibility = null;
 						$static = null;
 						$skip_whitespaces = false;
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_FUNCTION:
-					$has_found_class_or_interface = isset($found[0]) && (T_CLASS === $found[0] || T_INTERFACE === $found[0] || T_TRAIT === $found[0]) && $this->right_useful_token_is(T_STRING);
+					$has_found_class_or_interface = isset($found[0]) && (T_CLASS === $found[0] || T_INTERFACE === $found[0] || T_TRAIT === $found[0]) && $this->rightUsefulTokenIs(T_STRING);
 					if (isset($found[0]) && $has_found_class_or_interface && null !== $final_or_abstract) {
-						$this->append_code($final_or_abstract . $this->get_space());
+						$this->appendCode($final_or_abstract . $this->getSpace());
 					}
 					if (isset($found[0]) && $has_found_class_or_interface && null !== $visibility) {
-						$this->append_code($visibility . $this->get_space());
+						$this->appendCode($visibility . $this->getSpace());
 					} elseif (
 						isset($found[0]) && $has_found_class_or_interface &&
-						!$this->left_token_is([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_COMMA, ST_PARENTHESES_OPEN])
+						!$this->leftTokenIs([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_COMMA, ST_PARENTHESES_OPEN])
 					) {
-						$this->append_code('public' . $this->get_space());
+						$this->appendCode('public' . $this->getSpace());
 					}
 					if (isset($found[0]) && $has_found_class_or_interface && null !== $static) {
-						$this->append_code($static . $this->get_space());
+						$this->appendCode($static . $this->getSpace());
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					if ('abstract' == strtolower($final_or_abstract)) {
-						$this->print_until(ST_SEMI_COLON);
+						$this->printUntil(ST_SEMI_COLON);
 					} else {
-						$this->print_until(ST_CURLY_OPEN);
-						$this->print_curly_block();
+						$this->printUntil(ST_CURLY_OPEN);
+						$this->printCurlyBlock();
 					}
 					$final_or_abstract = null;
 					$visibility = null;
@@ -3822,7 +3822,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					$skip_whitespaces = false;
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3837,21 +3837,21 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$token_count = count($this->tkns) - 1;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, ) = $this->get_token($token);
+			list($id, ) = $this->getToken($token);
 			$this->ptr = $index;
 			if (T_INLINE_HTML == $id && $this->ptr != $token_count) {
 				return $source;
 			}
 		}
 
-		list($id, $text) = $this->get_token(end($this->tkns));
+		list($id, $text) = $this->getToken(end($this->tkns));
 		$this->ptr = key($this->tkns);
 
 		if (T_CLOSE_TAG == $id) {
 			unset($this->tkns[$this->ptr]);
-		} elseif (T_INLINE_HTML == $id && '' == trim($text) && $this->left_token_is(T_CLOSE_TAG)) {
+		} elseif (T_INLINE_HTML == $id && '' == trim($text) && $this->leftTokenIs(T_CLOSE_TAG)) {
 			unset($this->tkns[$this->ptr]);
-			$ptr = $this->left_token_idx([]);
+			$ptr = $this->leftTokenIdx([]);
 			unset($this->tkns[$ptr]);
 		}
 
@@ -3899,18 +3899,18 @@ class AddMissingParentheses extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NEW:
-					$this->append_code($text);
-					list($found_id, $found_text) = $this->print_and_stop_at([ST_PARENTHESES_OPEN, T_COMMENT, T_DOC_COMMENT, ST_SEMI_COLON]);
+					$this->appendCode($text);
+					list($found_id, $found_text) = $this->printAndStopAt([ST_PARENTHESES_OPEN, T_COMMENT, T_DOC_COMMENT, ST_SEMI_COLON]);
 					if (ST_PARENTHESES_OPEN != $found_id) {
-						$this->append_code('()' . $found_text);
+						$this->appendCode('()' . $found_text);
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 
@@ -3953,11 +3953,11 @@ final class AlignDoubleArrow extends AdditionalPass {
 		$max_context_counter = [];
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_COMMA:
-					if (!$this->has_ln_after() && !$this->has_ln_right_token()) {
+					if (!$this->hasLnAfter() && !$this->hasLnRightToken()) {
 						if (!isset($level_entrance_counter[$level_counter])) {
 							$level_entrance_counter[$level_counter] = 0;
 						}
@@ -3970,11 +3970,11 @@ final class AlignDoubleArrow extends AdditionalPass {
 					} elseif ($context_counter[$level_counter][$level_entrance_counter[$level_counter]] > 1) {
 						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 1;
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case T_DOUBLE_ARROW:
-					$this->append_code(
+					$this->appendCode(
 						sprintf(
 							self::ALIGNABLE_EQUAL,
 							$level_counter,
@@ -3998,17 +3998,17 @@ final class AlignDoubleArrow extends AdditionalPass {
 					++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
 					$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
 
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case ST_PARENTHESES_CLOSE:
 				case ST_BRACKET_CLOSE:
 					--$level_counter;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -4098,37 +4098,37 @@ final class AlignEquals extends AdditionalPass {
 		$bracket_count = 0;
 		$context_counter = 0;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_FUNCTION:
 					++$context_counter;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_PARENTHESES_OPEN:
 					++$paren_count;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_PARENTHESES_CLOSE:
 					--$paren_count;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_BRACKET_OPEN:
 					++$bracket_count;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_BRACKET_CLOSE:
 					--$bracket_count;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_EQUAL:
 					if (!$paren_count && !$bracket_count) {
-						$this->append_code(sprintf(self::ALIGNABLE_EQUAL, $context_counter) . $text);
+						$this->appendCode(sprintf(self::ALIGNABLE_EQUAL, $context_counter) . $text);
 						break;
 					}
 
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -4227,7 +4227,7 @@ class AutoPreincrement extends AdditionalPass {
 		$tkns = $this->aggregate_variables($source);
 		$touched_concat = false;
 		while (list($ptr, $token) = each($tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			switch ($id) {
 				case ST_CONCAT:
 					$touched_concat = true;
@@ -4257,11 +4257,11 @@ class AutoPreincrement extends AdditionalPass {
 		$tkns = token_get_all($source);
 		reset($tkns);
 		while (list($ptr, $token) = each($tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 
 			if (ST_PARENTHESES_OPEN == $id) {
 				$initial_ptr = $ptr;
-				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidate_tokens);
+				$tmp = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidate_tokens);
 				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
 				continue;
 			}
@@ -4269,7 +4269,7 @@ class AutoPreincrement extends AdditionalPass {
 				$stack = $text;
 				$initial_ptr = $ptr;
 				while (list($ptr, $token) = each($tkns)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$stack .= $text;
 					$tkns[$ptr] = null;
 					if (ST_QUOTE == $id) {
@@ -4287,11 +4287,11 @@ class AutoPreincrement extends AdditionalPass {
 				$stack = '';
 				do {
 					list($ptr, $token) = each($tkns);
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$tkns[$ptr] = null;
 					$stack .= $text;
 				} while (ST_CURLY_OPEN != $id);
-				$stack = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
+				$stack = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
 				$tkns[$initial_index] = [self::CHAIN_VARIABLE, '$' . $stack];
 			}
 
@@ -4302,7 +4302,7 @@ class AutoPreincrement extends AdditionalPass {
 				if (T_VARIABLE == $id) {
 					$touched_variable = true;
 				}
-				if (!$this->right_token_subset_is_at_idx(
+				if (!$this->rightTokenSubsetIsAtIdx(
 					$tkns,
 					$ptr,
 					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
@@ -4311,14 +4311,14 @@ class AutoPreincrement extends AdditionalPass {
 				}
 
 				while (list($ptr, $token) = each($tkns)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
 					} elseif (ST_BRACKET_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', $this->candidate_tokens);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', $this->candidate_tokens);
 					} elseif (ST_PARENTHESES_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidate_tokens);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidate_tokens);
 					}
 
 					$stack .= $text;
@@ -4328,7 +4328,7 @@ class AutoPreincrement extends AdditionalPass {
 					}
 
 					if (
-						!$this->right_token_subset_is_at_idx(
+						!$this->rightTokenSubsetIsAtIdx(
 							$tkns,
 							$ptr,
 							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
@@ -4398,29 +4398,29 @@ class CakePHPStyle extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					if (!$this->has_ln_before() && $this->left_token_is(ST_CURLY_OPEN)) {
-						$this->rtrim_and_append_code($this->get_space() . $text);
+					if (!$this->hasLnBefore() && $this->leftTokenIs(ST_CURLY_OPEN)) {
+						$this->rtrimAndAppendCode($this->getSpace() . $text);
 						break;
-					} elseif ($this->right_useful_token_is(T_CONSTANT_ENCAPSED_STRING)) {
-						$this->append_code($text . $this->get_space());
+					} elseif ($this->rightUsefulTokenIs(T_CONSTANT_ENCAPSED_STRING)) {
+						$this->appendCode($text . $this->getSpace());
 						break;
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_CLOSE_TAG:
-					if (!$this->has_ln_before()) {
-						$this->rtrim_and_append_code($this->get_space() . $text);
+					if (!$this->hasLnBefore()) {
+						$this->rtrimAndAppendCode($this->getSpace() . $text);
 						break;
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -4430,16 +4430,16 @@ class CakePHPStyle extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_REFERENCE:
-					if ($this->left_useful_token_is(ST_EQUAL)) {
-						$this->rtrim_and_append_code($text . $this->get_space());
+					if ($this->leftUsefulTokenIs(ST_EQUAL)) {
+						$this->rtrimAndAppendCode($text . $this->getSpace());
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 		return $this->code;
@@ -4448,7 +4448,7 @@ class CakePHPStyle extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ARRAY_CAST:
@@ -4462,7 +4462,7 @@ class CakePHPStyle extends AdditionalPass {
 				case T_VARIABLE:
 				case ST_PARENTHESES_OPEN:
 					if (
-						$this->left_useful_token_is([
+						$this->leftUsefulTokenIs([
 							T_ARRAY_CAST,
 							T_BOOL_CAST,
 							T_DOUBLE_CAST,
@@ -4472,11 +4472,11 @@ class CakePHPStyle extends AdditionalPass {
 							T_UNSET_CAST,
 						])
 					) {
-						$this->rtrim_and_append_code($text);
+						$this->rtrimAndAppendCode($text);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -4487,18 +4487,18 @@ class CakePHPStyle extends AdditionalPass {
 		$this->code = '';
 		$level_touched = null;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_PUBLIC:
 				case T_PRIVATE:
 				case T_PROTECTED:
 					$level_touched = $id;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case T_VARIABLE:
-					if (null !== $level_touched && $this->left_useful_token_is([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC])) {
+					if (null !== $level_touched && $this->leftUsefulTokenIs([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC])) {
 						$text = str_replace('$_', '$', $text);
 						$text = str_replace('$_', '$', $text);
 						if (T_PROTECTED == $level_touched) {
@@ -4507,13 +4507,13 @@ class CakePHPStyle extends AdditionalPass {
 							$text = str_replace('$', '$__', $text);
 						}
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					$level_touched = null;
 					break;
 				case T_STRING:
 					if (
 						null !== $level_touched &&
-						$this->left_useful_token_is(T_FUNCTION) &&
+						$this->leftUsefulTokenIs(T_FUNCTION) &&
 						'_' != $text &&
 						'__' != $text &&
 						'__construct' != $text &&
@@ -4544,11 +4544,11 @@ class CakePHPStyle extends AdditionalPass {
 							$text = '__' . $text;
 						}
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					$level_touched = null;
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -4610,29 +4610,29 @@ class EncapsulateNamespaces extends AdditionalPass {
 		$this->code = '';
 		$in_namespace_context = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					$this->append_code($text);
-					list($found_id, $found_text) = $this->print_and_stop_at([ST_CURLY_OPEN, ST_SEMI_COLON]);
+					$this->appendCode($text);
+					list($found_id, $found_text) = $this->printAndStopAt([ST_CURLY_OPEN, ST_SEMI_COLON]);
 					if (ST_CURLY_OPEN == $found_id) {
-						$this->append_code($found_text);
-						$this->print_curly_block();
+						$this->appendCode($found_text);
+						$this->printCurlyBlock();
 					} elseif (ST_SEMI_COLON == $found_id) {
 						$in_namespace_context = true;
-						$this->append_code(ST_CURLY_OPEN);
-						list($found_id, $found_text) = $this->print_and_stop_at([T_NAMESPACE, T_CLOSE_TAG]);
+						$this->appendCode(ST_CURLY_OPEN);
+						list($found_id, $found_text) = $this->printAndStopAt([T_NAMESPACE, T_CLOSE_TAG]);
 						if (T_CLOSE_TAG == $found_id) {
 							return $source;
 						}
-						$this->append_code($this->get_crlf() . ST_CURLY_CLOSE . $this->get_crlf());
+						$this->appendCode($this->getCrlf() . ST_CURLY_CLOSE . $this->getCrlf());
 						prev($this->tkns);
 						continue;
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 
@@ -4677,7 +4677,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 		$touched_visibility = false;
 		$touched_doc_comment = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_DOC_COMMENT:
@@ -4688,7 +4688,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 				case T_PROTECTED:
 				case T_PRIVATE:
 				case T_STATIC:
-					if (!$this->left_token_is([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
+					if (!$this->leftTokenIs([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
 						$touched_visibility = true;
 						$visibility_idx = $this->ptr;
 					}
@@ -4702,17 +4702,17 @@ final class GeneratePHPDoc extends AdditionalPass {
 					} else {
 						$orig_idx = $visibility_idx;
 					}
-					list($nt_id, $nt_text) = $this->get_token($this->right_token());
+					list($nt_id, $nt_text) = $this->getToken($this->rightToken());
 					if (T_STRING != $nt_id) {
-						$this->append_code($text);
+						$this->appendCode($text);
 						break;
 					}
-					$this->walk_until(ST_PARENTHESES_OPEN);
+					$this->walkUntil(ST_PARENTHESES_OPEN);
 					$param_stack = [];
 					$tmp = ['type' => '', 'name' => ''];
 					$count = 1;
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 
 						if (ST_PARENTHESES_OPEN == $id) {
@@ -4729,7 +4729,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 							continue;
 						}
 						if (T_VARIABLE == $id) {
-							if ($this->right_token_is([ST_EQUAL]) && $this->walk_until(ST_EQUAL) && $this->right_token_is([T_ARRAY])) {
+							if ($this->rightTokenIs([ST_EQUAL]) && $this->walkUntil(ST_EQUAL) && $this->rightTokenIs([T_ARRAY])) {
 								$tmp['type'] = 'array';
 							}
 							$tmp['name'] = $text;
@@ -4740,11 +4740,11 @@ final class GeneratePHPDoc extends AdditionalPass {
 					}
 
 					$return_stack = '';
-					if (!$this->left_useful_token_is(ST_SEMI_COLON)) {
-						$this->walk_until(ST_CURLY_OPEN);
+					if (!$this->leftUsefulTokenIs(ST_SEMI_COLON)) {
+						$this->walkUntil(ST_CURLY_OPEN);
 						$count = 1;
 						while (list($index, $token) = each($this->tkns)) {
-							list($id, $text) = $this->get_token($token);
+							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
 
 							if (ST_CURLY_OPEN == $id) {
@@ -4757,13 +4757,13 @@ final class GeneratePHPDoc extends AdditionalPass {
 								break;
 							}
 							if (T_RETURN == $id) {
-								if ($this->right_token_is([T_DNUMBER])) {
+								if ($this->rightTokenIs([T_DNUMBER])) {
 									$return_stack = 'float';
-								} elseif ($this->right_token_is([T_LNUMBER])) {
+								} elseif ($this->rightTokenIs([T_LNUMBER])) {
 									$return_stack = 'int';
-								} elseif ($this->right_token_is([T_VARIABLE])) {
+								} elseif ($this->rightTokenIs([T_VARIABLE])) {
 									$return_stack = 'mixed';
-								} elseif ($this->right_token_is([ST_SEMI_COLON])) {
+								} elseif ($this->rightTokenIs([ST_SEMI_COLON])) {
 									$return_stack = 'null';
 								}
 							}
@@ -4777,7 +4777,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 		}
 
 		return implode('', array_map(function ($token) {
-			list(, $text) = $this->get_token($token);
+			list(, $text) = $this->getToken($token);
 			return $text;
 		}, $this->tkns));
 	}
@@ -4838,7 +4838,7 @@ class JoinToImplode extends AdditionalPass {
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_STRING:
@@ -4847,19 +4847,19 @@ class JoinToImplode extends AdditionalPass {
 						return true;
 					}
 			}
-			$this->append_code($text);
+			$this->appendCode($text);
 		}
 		return false;
 	}
 	public function format($source) {
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			if (T_STRING == $id && strtolower($text) == 'join' && !($this->left_useful_token_is([T_NEW, T_NS_SEPARATOR, T_STRING, T_DOUBLE_COLON, T_OBJECT_OPERATOR, T_FUNCTION]) || $this->right_useful_token_is([T_NS_SEPARATOR, T_DOUBLE_COLON]))) {
-				$this->append_code('implode');
+			if (T_STRING == $id && strtolower($text) == 'join' && !($this->leftUsefulTokenIs([T_NEW, T_NS_SEPARATOR, T_STRING, T_DOUBLE_COLON, T_OBJECT_OPERATOR, T_FUNCTION]) || $this->rightUsefulTokenIs([T_NS_SEPARATOR, T_DOUBLE_COLON]))) {
+				$this->appendCode('implode');
 				continue;
 			}
-			$this->append_code($text);
+			$this->appendCode($text);
 		}
 
 		return $this->code;
@@ -4910,16 +4910,16 @@ class LaravelStyle extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					if ($this->left_token_is(T_OPEN_TAG)) {
-						$this->rtrim_and_append_code($this->get_space() . $text);
+					if ($this->leftTokenIs(T_OPEN_TAG)) {
+						$this->rtrimAndAppendCode($this->getSpace() . $text);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 
@@ -4931,11 +4931,11 @@ class LaravelStyle extends AdditionalPass {
 		$this->code = '';
 		$max_detected_indent = 0;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_WHITESPACE:
-					if ($this->has_ln($text) && false !== strpos($text, $this->indent_char)) {
+					if ($this->hasLn($text) && false !== strpos($text, $this->indent_char)) {
 						$max_detected_indent = 0;
 						$current_detected_indent = 0;
 						$len = strlen($text);
@@ -4950,38 +4950,38 @@ class LaravelStyle extends AdditionalPass {
 						}
 						$max_detected_indent = max($max_detected_indent, $current_detected_indent);
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_CURLY_OPEN:
-					if ($this->left_useful_token_is([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY])) {
-						list($prev_id, $prev_text) = $this->get_token($this->left_token());
-						if (!$this->has_ln($prev_text)) {
-							$this->append_code($this->get_crlf() . $this->get_indent($max_detected_indent));
+					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY])) {
+						list($prev_id, $prev_text) = $this->getToken($this->leftToken());
+						if (!$this->hasLn($prev_text)) {
+							$this->appendCode($this->getCrlf() . $this->getIndent($max_detected_indent));
 						}
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_ELSE:
 				case T_ELSEIF:
 				case T_FINALLY:
-					list($prev_id, $prev_text) = $this->get_token($this->left_token());
-					if (!$this->has_ln($prev_text)) {
-						$this->append_code($this->get_crlf() . $this->get_indent($max_detected_indent));
+					list($prev_id, $prev_text) = $this->getToken($this->leftToken());
+					if (!$this->hasLn($prev_text)) {
+						$this->appendCode($this->getCrlf() . $this->getIndent($max_detected_indent));
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_CATCH:
 					if (' ' == substr($this->code, -1, 1)) {
 						$this->code = substr($this->code, 0, -1);
 					}
-					list($prev_id, $prev_text) = $this->get_token($this->left_token());
-					if (!$this->has_ln($prev_text)) {
-						$this->append_code($this->get_crlf() . $this->get_indent($max_detected_indent));
+					list($prev_id, $prev_text) = $this->getToken($this->leftToken());
+					if (!$this->hasLn($prev_text)) {
+						$this->appendCode($this->getCrlf() . $this->getIndent($max_detected_indent));
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 
@@ -5036,16 +5036,16 @@ class MergeElseIf extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_IF:
-					if ($this->left_token_is([T_ELSE]) && !$this->left_token_is([T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO])) {
-						$this->rtrim_and_append_code($text);
+					if ($this->leftTokenIs([T_ELSE]) && !$this->leftTokenIs([T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO])) {
+						$this->rtrimAndAppendCode($text);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -5093,23 +5093,23 @@ class MergeNamespaceWithOpenTag extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					if ($this->left_token_is(T_OPEN_TAG)) {
-						$this->rtrim_and_append_code($this->new_line . $text);
+					if ($this->leftTokenIs(T_OPEN_TAG)) {
+						$this->rtrimAndAppendCode($this->new_line . $text);
 						break 2;
 					}
 
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->append_code($text);
+			list($id, $text) = $this->getToken($token);
+			$this->appendCode($text);
 		}
 		return $this->code;
 	}
@@ -5153,17 +5153,17 @@ class NoSpaceAfterPHPDocBlocks extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_WHITESPACE:
-					if ($this->has_ln($text) && $this->left_token_is(T_DOC_COMMENT)) {
+					if ($this->hasLn($text) && $this->leftTokenIs(T_DOC_COMMENT)) {
 						$text = substr(strrchr($text, 10), 0);
-						$this->append_code($text);
+						$this->appendCode($text);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 
@@ -5208,7 +5208,7 @@ final class OrderMethod extends AdditionalPass {
 		$return = '';
 		$function_list = [];
 		while (list($index, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ABSTRACT:
@@ -5221,7 +5221,7 @@ final class OrderMethod extends AdditionalPass {
 					$touched_method = false;
 					$function_name = '';
 					while (list($index, $token) = each($tokens)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 
 						$stack .= $text;
@@ -5276,13 +5276,13 @@ final class OrderMethod extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$return = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CLASS:
 					$return .= $text;
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$return .= $text;
 						if (ST_CURLY_OPEN == $id) {
@@ -5292,7 +5292,7 @@ final class OrderMethod extends AdditionalPass {
 					$class_block = '';
 					$curly_count = 1;
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$class_block .= $text;
 						if (ST_CURLY_OPEN == $id) {
@@ -5310,10 +5310,10 @@ final class OrderMethod extends AdditionalPass {
 						'',
 						$this->orderMethods(self::OPENER_PLACEHOLDER . $class_block)
 					);
-					$this->append_code($return);
+					$this->appendCode($return);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -5364,7 +5364,7 @@ class RemoveUseLeadingSlash extends AdditionalPass {
 		$this->code = '';
 		$last_touched_token = null;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
@@ -5373,11 +5373,11 @@ class RemoveUseLeadingSlash extends AdditionalPass {
 				case T_FUNCTION:
 					$last_touched_token = $id;
 				case T_NS_SEPARATOR:
-					if (T_NAMESPACE == $last_touched_token && $this->left_token_is([T_USE])) {
+					if (T_NAMESPACE == $last_touched_token && $this->leftTokenIs([T_USE])) {
 						continue;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 
@@ -5431,16 +5431,16 @@ class ReturnNull extends AdditionalPass {
 		$this->use_cache = true;
 		$touched_return = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
 
-			if (ST_PARENTHESES_OPEN == $id && $this->left_token_is([T_RETURN])) {
+			if (ST_PARENTHESES_OPEN == $id && $this->leftTokenIs([T_RETURN])) {
 				$paren_count = 1;
 				$touched_another_valid_token = false;
 				$stack = $text;
 				while (list($index, $token) = each($this->tkns)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$this->ptr = $index;
 					$this->cache = [];
 					if (ST_PARENTHESES_OPEN == $id) {
@@ -5464,19 +5464,19 @@ class ReturnNull extends AdditionalPass {
 					}
 				}
 				if ($touched_another_valid_token) {
-					$this->append_code($stack);
+					$this->appendCode($stack);
 				}
 				continue;
 			}
 			if (T_STRING == $id && strtolower($text) == 'null') {
-				list($prev_id, ) = $this->left_useful_token();
-				list($next_id, ) = $this->right_useful_token();
+				list($prev_id, ) = $this->leftUsefulToken();
+				list($next_id, ) = $this->rightUsefulToken();
 				if (T_RETURN == $prev_id && ST_SEMI_COLON == $next_id) {
 					continue;
 				}
 			}
 
-			$this->append_code($text);
+			$this->appendCode($text);
 		}
 
 		return $this->code;
@@ -5527,29 +5527,29 @@ class ShortArray extends AdditionalPass {
 		$this->code = '';
 		$found_paren = [];
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ARRAY:
-					if ($this->right_token_is([ST_PARENTHESES_OPEN])) {
+					if ($this->rightTokenIs([ST_PARENTHESES_OPEN])) {
 						$found_paren[] = self::FOUND_ARRAY;
-						$this->print_and_stop_at(ST_PARENTHESES_OPEN);
-						$this->append_code(ST_BRACKET_OPEN);
+						$this->printAndStopAt(ST_PARENTHESES_OPEN);
+						$this->appendCode(ST_BRACKET_OPEN);
 						break;
 					}
 				case ST_PARENTHESES_OPEN:
 					$found_paren[] = self::FOUND_PARENTHESES;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case ST_PARENTHESES_CLOSE:
 					$pop_token = array_pop($found_paren);
 					if (self::FOUND_ARRAY == $pop_token) {
-						$this->append_code(ST_BRACKET_CLOSE);
+						$this->appendCode(ST_BRACKET_CLOSE);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -5593,25 +5593,25 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 		$this->code = '';
 		$curly_count = 0;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_CURLY_OPEN:
-					$this->append_code($text);
+					$this->appendCode($text);
 					$curly_count = 1;
 					$stack = '';
 					$found_line_break = false;
-					$has_ln_after = $this->has_ln_after();
+					$has_ln_after = $this->hasLnAfter();
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$stack .= $text;
 						if (T_START_HEREDOC == $id) {
-							$stack .= $this->walk_and_accumulate_until($this->tkns, T_END_HEREDOC);
+							$stack .= $this->walkAndAccumulateUntil($this->tkns, T_END_HEREDOC);
 							continue;
 						}
 						if (ST_QUOTE == $id) {
-							$stack .= $this->walk_and_accumulate_until($this->tkns, ST_QUOTE);
+							$stack .= $this->walkAndAccumulateUntil($this->tkns, ST_QUOTE);
 							continue;
 						}
 						if (ST_CURLY_OPEN == $id) {
@@ -5620,7 +5620,7 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 						if (ST_CURLY_CLOSE == $id) {
 							--$curly_count;
 						}
-						if (T_WHITESPACE === $id && $this->has_ln($text)) {
+						if (T_WHITESPACE === $id && $this->hasLn($text)) {
 							$found_line_break = true;
 							break;
 						}
@@ -5629,12 +5629,12 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 						}
 					}
 					if ($found_line_break && !$has_ln_after) {
-						$this->append_code($this->new_line);
+						$this->appendCode($this->new_line);
 					}
-					$this->append_code($stack);
+					$this->appendCode($stack);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -5680,19 +5680,19 @@ class SpaceBetweenMethods extends AdditionalPass {
 		$this->code = '';
 		$last_touched_token = null;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_FUNCTION:
-					$this->append_code($text);
-					$this->print_until(ST_CURLY_OPEN);
-					$this->print_curly_block();
-					if (!$this->right_token_is([ST_CURLY_CLOSE, ST_SEMI_COLON, ST_COMMA, ST_PARENTHESES_CLOSE])) {
-						$this->append_code($this->get_crlf());
+					$this->appendCode($text);
+					$this->printUntil(ST_CURLY_OPEN);
+					$this->printCurlyBlock();
+					if (!$this->rightTokenIs([ST_CURLY_CLOSE, ST_SEMI_COLON, ST_COMMA, ST_PARENTHESES_CLOSE])) {
+						$this->appendCode($this->getCrlf());
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -5752,18 +5752,18 @@ class TightConcat extends AdditionalPass {
 		$this->code = '';
 		$whitespaces = " \t";
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_CONCAT:
-					if (!$this->left_token_is([T_LNUMBER, T_DNUMBER])) {
+					if (!$this->leftTokenIs([T_LNUMBER, T_DNUMBER])) {
 						$this->code = rtrim($this->code, $whitespaces);
 					}
-					if (!$this->right_token_is([T_LNUMBER, T_DNUMBER])) {
+					if (!$this->rightTokenIs([T_LNUMBER, T_DNUMBER])) {
 						each($this->tkns);
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -5806,16 +5806,16 @@ class WrongConstructorName extends AdditionalPass {
 		$this->code = '';
 		$touched_namespace = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
 					$touched_namespace = true;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_CLASS:
-					$this->append_code($text);
-					if ($this->left_useful_token_is([T_DOUBLE_COLON])) {
+					$this->appendCode($text);
+					if ($this->leftUsefulTokenIs([T_DOUBLE_COLON])) {
 						break;
 					}
 					if ($touched_namespace) {
@@ -5823,9 +5823,9 @@ class WrongConstructorName extends AdditionalPass {
 					}
 					$class_local_name = '';
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
-						$this->append_code($text);
+						$this->appendCode($text);
 						if (T_STRING == $id) {
 							$class_local_name = strtolower($text);
 						}
@@ -5835,13 +5835,13 @@ class WrongConstructorName extends AdditionalPass {
 					}
 					$count = 1;
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 
-						if (T_STRING == $id && $this->left_useful_token_is([T_FUNCTION]) && strtolower($text) == $class_local_name) {
+						if (T_STRING == $id && $this->leftUsefulTokenIs([T_FUNCTION]) && strtolower($text) == $class_local_name) {
 							$text = '__construct';
 						}
-						$this->append_code($text);
+						$this->appendCode($text);
 
 						if (ST_CURLY_OPEN == $id) {
 							++$count;
@@ -5855,7 +5855,7 @@ class WrongConstructorName extends AdditionalPass {
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 
@@ -5910,7 +5910,7 @@ final class YodaComparisons extends AdditionalPass {
 			if (is_null($token)) {
 				continue;
 			}
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			switch ($id) {
 				case T_IS_EQUAL:
 				case T_IS_IDENTICAL:
@@ -5925,7 +5925,7 @@ final class YodaComparisons extends AdditionalPass {
 
 					$left_pure_variable = $this->is_pure_variable($left_id);
 					for ($leftmost = $left; $leftmost >= 0; --$leftmost) {
-						list($left_scan_id, $left_scan_text) = $this->get_token($tkns[$leftmost]);
+						list($left_scan_id, $left_scan_text) = $this->getToken($tkns[$leftmost]);
 						if ($this->is_lower_precedence($left_scan_id)) {
 							++$leftmost;
 							break;
@@ -5935,7 +5935,7 @@ final class YodaComparisons extends AdditionalPass {
 
 					$right_pure_variable = $this->is_pure_variable($right_id);
 					for ($rightmost = $right; $rightmost < sizeof($tkns) - 1; ++$rightmost) {
-						list($right_scan_id, $right_scan_text) = $this->get_token($tkns[$rightmost]);
+						list($right_scan_id, $right_scan_text) = $this->getToken($tkns[$rightmost]);
 						if ($this->is_lower_precedence($right_scan_id)) {
 							--$rightmost;
 							break;
@@ -6019,11 +6019,11 @@ final class YodaComparisons extends AdditionalPass {
 	private function aggregate_variables($source) {
 		$tkns = token_get_all($source);
 		while (list($ptr, $token) = each($tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 
 			if (ST_PARENTHESES_OPEN == $id) {
 				$initial_ptr = $ptr;
-				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+				$tmp = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
 				continue;
 			}
@@ -6031,7 +6031,7 @@ final class YodaComparisons extends AdditionalPass {
 				$stack = $text;
 				$initial_ptr = $ptr;
 				while (list($ptr, $token) = each($tkns)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$stack .= $text;
 					$tkns[$ptr] = null;
 					if (ST_QUOTE == $id) {
@@ -6050,7 +6050,7 @@ final class YodaComparisons extends AdditionalPass {
 				if (T_VARIABLE == $id) {
 					$touched_variable = true;
 				}
-				if (!$this->right_token_subset_is_at_idx(
+				if (!$this->rightTokenSubsetIsAtIdx(
 					$tkns,
 					$ptr,
 					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
@@ -6058,14 +6058,14 @@ final class YodaComparisons extends AdditionalPass {
 					continue;
 				}
 				while (list($ptr, $token) = each($tkns)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					} elseif (ST_BRACKET_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					} elseif (ST_PARENTHESES_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					}
 
 					$stack .= $text;
@@ -6075,7 +6075,7 @@ final class YodaComparisons extends AdditionalPass {
 					}
 
 					if (
-						!$this->right_token_subset_is_at_idx(
+						!$this->rightTokenSubsetIsAtIdx(
 							$tkns,
 							$ptr,
 							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]

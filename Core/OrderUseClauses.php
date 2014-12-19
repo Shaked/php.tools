@@ -17,14 +17,14 @@ final class OrderUseClauses extends FormatterPass {
 		while (list(, $pop_token) = each($tokens)) {
 			$next_tokens[] = $pop_token;
 			while (($token = array_shift($next_tokens))) {
-				list($id, $text) = $this->get_token($token);
+				list($id, $text) = $this->getToken($token);
 				if (T_NAMESPACE == $id) {
 					$touched_namespace = true;
 				}
 				if (T_USE === $id) {
 					$use_item = $text;
 					while (list(, $token) = each($tokens)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						if (ST_SEMI_COLON === $id) {
 							$use_item .= $text;
 							break;
@@ -82,7 +82,7 @@ final class OrderUseClauses extends FormatterPass {
 				$return .= $this->new_line;
 				continue;
 			} else {
-				list($id, $text) = $this->get_token($token);
+				list($id, $text) = $this->getToken($token);
 				$lower_text = strtolower($text);
 				if (T_STRING === $id && isset($alias_list[$lower_text])) {
 					++$alias_count[$lower_text];
@@ -98,7 +98,7 @@ final class OrderUseClauses extends FormatterPass {
 		}
 
 		while (list(, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$lower_text = strtolower($text);
 			if (T_STRING === $id && isset($alias_list[$lower_text])) {
 				++$alias_count[$lower_text];
@@ -130,7 +130,7 @@ final class OrderUseClauses extends FormatterPass {
 		$tokens = token_get_all($source);
 		$touched_t_use = false;
 		while (list(, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			if (T_USE === $id) {
 				$touched_t_use = true;
 			}
@@ -145,14 +145,14 @@ final class OrderUseClauses extends FormatterPass {
 		$return = '';
 		reset($tokens);
 		while (list($index, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
 					$return .= $text;
 					$touched_t_use = false;
 					while (list($index, $token) = each($tokens)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$return .= $text;
 						if (ST_CURLY_OPEN == $id || ST_SEMI_COLON == $id) {
@@ -163,7 +163,7 @@ final class OrderUseClauses extends FormatterPass {
 						$namespace_block = '';
 						$curly_count = 1;
 						while (list($index, $token) = each($tokens)) {
-							list($id, $text) = $this->get_token($token);
+							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
 							$namespace_block .= $text;
 
@@ -184,7 +184,7 @@ final class OrderUseClauses extends FormatterPass {
 					} elseif (ST_SEMI_COLON === $id) {
 						$namespace_block = '';
 						while (list($index, $token) = each($tokens)) {
-							list($id, $text) = $this->get_token($token);
+							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
 
 							if (T_USE === $id) {

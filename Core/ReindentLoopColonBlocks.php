@@ -10,7 +10,7 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		$found_endforeach = false;
 		$found_endfor = false;
 		foreach ($tkns as $token) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			if (!$found_endwhile && T_ENDWHILE == $id) {
 				$source = $this->format_while_blocks($source);
 				$found_endwhile = true;
@@ -32,23 +32,23 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case $close_token:
-					$this->set_indent(-1);
-					$this->append_code($text);
+					$this->setIndent(-1);
+					$this->appendCode($text);
 					break;
 				case $open_token:
-					$this->append_code($text);
+					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
-						$this->append_code($text);
+						$this->appendCode($text);
 						if (ST_CURLY_OPEN === $id) {
 							break;
-						} elseif (ST_COLON === $id && !$this->right_token_is([T_CLOSE_TAG])) {
-							$this->set_indent(+1);
+						} elseif (ST_COLON === $id && !$this->rightTokenIs([T_CLOSE_TAG])) {
+							$this->setIndent(+1);
 							break;
 						} elseif (ST_COLON === $id) {
 							break;
@@ -56,14 +56,14 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 					}
 					break;
 				default:
-					if ($this->has_ln($text) && !$this->right_token_is([$close_token])) {
-						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					} elseif ($this->has_ln($text) && $this->right_token_is([$close_token])) {
-						$this->set_indent(-1);
-						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-						$this->set_indent(+1);
+					if ($this->hasLn($text) && !$this->rightTokenIs([$close_token])) {
+						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+					} elseif ($this->hasLn($text) && $this->rightTokenIs([$close_token])) {
+						$this->setIndent(-1);
+						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+						$this->setIndent(+1);
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -80,38 +80,38 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ENDWHILE:
-					$this->set_indent(-1);
-					$this->append_code($text);
+					$this->setIndent(-1);
+					$this->appendCode($text);
 					break;
 				case T_WHILE:
-					$this->append_code($text);
+					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
-						$this->append_code($text);
+						$this->appendCode($text);
 						if (ST_CURLY_OPEN === $id) {
 							break;
 						} elseif (ST_SEMI_COLON === $id) {
 							break;
 						} elseif (ST_COLON === $id) {
-							$this->set_indent(+1);
+							$this->setIndent(+1);
 							break;
 						}
 					}
 					break;
 				default:
-					if ($this->has_ln($text) && !$this->right_token_is([T_ENDWHILE])) {
-						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-					} elseif ($this->has_ln($text) && $this->right_token_is([T_ENDWHILE])) {
-						$this->set_indent(-1);
-						$text = str_replace($this->new_line, $this->new_line . $this->get_indent(), $text);
-						$this->set_indent(+1);
+					if ($this->hasLn($text) && !$this->rightTokenIs([T_ENDWHILE])) {
+						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+					} elseif ($this->hasLn($text) && $this->rightTokenIs([T_ENDWHILE])) {
+						$this->setIndent(-1);
+						$text = str_replace($this->new_line, $this->new_line . $this->getIndent(), $text);
+						$this->setIndent(+1);
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

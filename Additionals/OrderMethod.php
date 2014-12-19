@@ -8,7 +8,7 @@ final class OrderMethod extends AdditionalPass {
 		$return = '';
 		$function_list = [];
 		while (list($index, $token) = each($tokens)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ABSTRACT:
@@ -21,7 +21,7 @@ final class OrderMethod extends AdditionalPass {
 					$touched_method = false;
 					$function_name = '';
 					while (list($index, $token) = each($tokens)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 
 						$stack .= $text;
@@ -76,13 +76,13 @@ final class OrderMethod extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$return = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CLASS:
 					$return .= $text;
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$return .= $text;
 						if (ST_CURLY_OPEN == $id) {
@@ -92,7 +92,7 @@ final class OrderMethod extends AdditionalPass {
 					$class_block = '';
 					$curly_count = 1;
 					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->get_token($token);
+						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$class_block .= $text;
 						if (ST_CURLY_OPEN == $id) {
@@ -110,10 +110,10 @@ final class OrderMethod extends AdditionalPass {
 						'',
 						$this->orderMethods(self::OPENER_PLACEHOLDER . $class_block)
 					);
-					$this->append_code($return);
+					$this->appendCode($return);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

@@ -11,37 +11,37 @@ final class AlignEquals extends AdditionalPass {
 		$bracket_count = 0;
 		$context_counter = 0;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_FUNCTION:
 					++$context_counter;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_PARENTHESES_OPEN:
 					++$paren_count;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_PARENTHESES_CLOSE:
 					--$paren_count;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_BRACKET_OPEN:
 					++$bracket_count;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_BRACKET_CLOSE:
 					--$bracket_count;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_EQUAL:
 					if (!$paren_count && !$bracket_count) {
-						$this->append_code(sprintf(self::ALIGNABLE_EQUAL, $context_counter) . $text);
+						$this->appendCode(sprintf(self::ALIGNABLE_EQUAL, $context_counter) . $text);
 						break;
 					}
 
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

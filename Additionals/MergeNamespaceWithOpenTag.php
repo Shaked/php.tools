@@ -11,23 +11,23 @@ class MergeNamespaceWithOpenTag extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					if ($this->left_token_is(T_OPEN_TAG)) {
-						$this->rtrim_and_append_code($this->new_line . $text);
+					if ($this->leftTokenIs(T_OPEN_TAG)) {
+						$this->rtrimAndAppendCode($this->new_line . $text);
 						break 2;
 					}
 
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
-			$this->append_code($text);
+			list($id, $text) = $this->getToken($token);
+			$this->appendCode($text);
 		}
 		return $this->code;
 	}

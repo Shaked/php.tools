@@ -12,18 +12,18 @@ class TightConcat extends AdditionalPass {
 		$this->code = '';
 		$whitespaces = " \t";
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_CONCAT:
-					if (!$this->left_token_is([T_LNUMBER, T_DNUMBER])) {
+					if (!$this->leftTokenIs([T_LNUMBER, T_DNUMBER])) {
 						$this->code = rtrim($this->code, $whitespaces);
 					}
-					if (!$this->right_token_is([T_LNUMBER, T_DNUMBER])) {
+					if (!$this->rightTokenIs([T_LNUMBER, T_DNUMBER])) {
 						each($this->tkns);
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

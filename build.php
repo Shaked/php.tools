@@ -14,22 +14,22 @@ class Build extends FormatterPass {
 		$this->tkns = SplFixedArray::fromArray(token_get_all($source));
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_REQUIRE:
-					list($id, $text) = $this->walk_until(T_CONSTANT_ENCAPSED_STRING);
+					list($id, $text) = $this->walkUntil(T_CONSTANT_ENCAPSED_STRING);
 					$included = token_get_all(file_get_contents(str_replace(['"', "'"], '', $text)));
 					if (T_OPEN_TAG == $included[0][0]) {
 						unset($included[0]);
 					}
 					while (list(, $token) = each($included)) {
-						list($id, $text) = $this->get_token($token);
-						$this->append_code($text);
+						list($id, $text) = $this->getToken($token);
+						$this->appendCode($text);
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 		return $this->code;

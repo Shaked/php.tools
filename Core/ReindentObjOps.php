@@ -22,7 +22,7 @@ final class ReindentObjOps extends FormatterPass {
 		$max_context_counter = [];
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_WHILE:
@@ -30,37 +30,37 @@ final class ReindentObjOps extends FormatterPass {
 				case T_FOR:
 				case T_FOREACH:
 				case T_SWITCH:
-					$this->append_code($text);
-					$this->print_until(ST_PARENTHESES_OPEN);
-					$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+					$this->appendCode($text);
+					$this->printUntil(ST_PARENTHESES_OPEN);
+					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
 
 				case T_NEW:
-					$this->append_code($text);
-					if ($this->left_useful_token_is(ST_PARENTHESES_OPEN)) {
-						$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_COMMA]);
+					$this->appendCode($text);
+					if ($this->leftUsefulTokenIs(ST_PARENTHESES_OPEN)) {
+						$found_token = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_COMMA]);
 						if (ST_PARENTHESES_OPEN == $found_token) {
 							$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
-							$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-							$this->print_until_any([ST_PARENTHESES_CLOSE, ST_COMMA]);
+							$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+							$this->printUntilAny([ST_PARENTHESES_CLOSE, ST_COMMA]);
 						}
 					}
 					break;
 
 				case T_FUNCTION:
-					$this->append_code($text);
-					if (!$this->right_useful_token_is(T_STRING)) {
+					$this->appendCode($text);
+					if (!$this->rightUsefulTokenIs(T_STRING)) {
 						// $this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
-						$this->print_until(ST_PARENTHESES_OPEN);
-						$this->print_block(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-						$this->print_until(ST_CURLY_OPEN);
-						$this->print_curly_block();
+						$this->printUntil(ST_PARENTHESES_OPEN);
+						$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+						$this->printUntil(ST_CURLY_OPEN);
+						$this->printCurlyBlock();
 					}
 					break;
 
 				case T_VARIABLE:
 				case T_STRING:
-					$this->append_code($text);
+					$this->appendCode($text);
 					if (!isset($level_entrance_counter[$level_counter])) {
 						$level_entrance_counter[$level_counter] = 0;
 					}
@@ -76,22 +76,22 @@ final class ReindentObjOps extends FormatterPass {
 				case ST_PARENTHESES_OPEN:
 				case ST_BRACKET_OPEN:
 					$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case ST_PARENTHESES_CLOSE:
 				case ST_BRACKET_CLOSE:
 					--$level_counter;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case T_OBJECT_OPERATOR:
 					if (0 == $touch_counter[$level_counter][$level_entrance_counter[$level_counter]]) {
 						++$touch_counter[$level_counter][$level_entrance_counter[$level_counter]];
-						if ($this->has_ln_before()) {
+						if ($this->hasLnBefore()) {
 							$align_type[$level_counter][$level_entrance_counter[$level_counter]] = self::ALIGN_WITH_INDENT;
-							$this->append_code($this->get_indent(+1) . $text);
-							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
+							$this->appendCode($this->getIndent(+1) . $text);
+							$found_token = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
 							if (ST_SEMI_COLON == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 							} elseif (ST_PARENTHESES_OPEN == $found_token) {
@@ -110,8 +110,8 @@ final class ReindentObjOps extends FormatterPass {
 								$level_entrance_counter[$level_counter],
 								$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
 							);
-							$this->append_code($placeholder . $text);
-							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
+							$this->appendCode($placeholder . $text);
+							$found_token = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
 							if (ST_SEMI_COLON == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 							} elseif (ST_PARENTHESES_OPEN == $found_token) {
@@ -119,7 +119,7 @@ final class ReindentObjOps extends FormatterPass {
 								$this->inject_placeholder_parentheses_content($placeholder);
 							}
 						}
-					} elseif ($this->has_ln_before() || $this->has_ln_left_token()) {
+					} elseif ($this->hasLnBefore() || $this->hasLnLeftToken()) {
 						++$touch_counter[$level_counter][$level_entrance_counter[$level_counter]];
 						if (self::ALIGN_WITH_SPACES == $align_type[$level_counter][$level_entrance_counter[$level_counter]]) {
 							++$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]];
@@ -129,8 +129,8 @@ final class ReindentObjOps extends FormatterPass {
 								$level_entrance_counter[$level_counter],
 								$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
 							);
-							$this->append_code($placeholder . $text);
-							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
+							$this->appendCode($placeholder . $text);
+							$found_token = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
 							if (ST_SEMI_COLON == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 							} elseif (ST_PARENTHESES_OPEN == $found_token) {
@@ -138,8 +138,8 @@ final class ReindentObjOps extends FormatterPass {
 								$this->inject_placeholder_parentheses_content($placeholder);
 							}
 						} else {
-							$this->append_code($this->get_indent(+1) . $text);
-							$found_token = $this->print_until_any([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
+							$this->appendCode($this->getIndent(+1) . $text);
+							$found_token = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_SEMI_COLON, $this->new_line]);
 							if (ST_SEMI_COLON == $found_token) {
 								$this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 							} elseif (ST_PARENTHESES_OPEN == $found_token) {
@@ -148,7 +148,7 @@ final class ReindentObjOps extends FormatterPass {
 							}
 						}
 					} else {
-						$this->append_code($text);
+						$this->appendCode($text);
 					}
 					break;
 
@@ -158,11 +158,11 @@ final class ReindentObjOps extends FormatterPass {
 						isset($align_type[$level_counter]) &&
 						isset($level_entrance_counter[$level_counter]) &&
 						isset($align_type[$level_counter][$level_entrance_counter[$level_counter]]) &&
-						($this->has_ln_before() || $this->has_ln_left_token())
+						($this->hasLnBefore() || $this->hasLnLeftToken())
 					) {
 						if (self::ALIGN_WITH_SPACES == $align_type[$level_counter][$level_entrance_counter[$level_counter]]) {
 							++$printed_placeholder[$level_counter][$level_entrance_counter[$level_counter]][$context_counter[$level_counter][$level_entrance_counter[$level_counter]]];
-							$this->append_code(
+							$this->appendCode(
 								sprintf(
 									self::ALIGNABLE_OBJOP,
 									$level_counter,
@@ -171,10 +171,10 @@ final class ReindentObjOps extends FormatterPass {
 								)
 							);
 						} elseif (self::ALIGN_WITH_INDENT == $align_type[$level_counter][$level_entrance_counter[$level_counter]]) {
-							$this->append_code($this->get_indent(+1));
+							$this->appendCode($this->getIndent(+1));
 						}
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case ST_COMMA:
@@ -183,11 +183,11 @@ final class ReindentObjOps extends FormatterPass {
 						$level_entrance_counter[$level_counter] = 0;
 					}
 					++$level_entrance_counter[$level_counter];
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -245,9 +245,9 @@ final class ReindentObjOps extends FormatterPass {
 		$sizeof_tokens = sizeof($this->tkns);
 		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
 			$token = &$this->tkns[$i];
-			list($id, $text) = $this->get_token($token);
-			if (T_WHITESPACE == $id && $this->has_ln($text)) {
-				$token[1] = $text . $this->get_indent(+1);
+			list($id, $text) = $this->getToken($token);
+			if (T_WHITESPACE == $id && $this->hasLn($text)) {
+				$token[1] = $text . $this->getIndent(+1);
 				continue;
 			}
 			if (ST_PARENTHESES_OPEN == $id) {
@@ -268,8 +268,8 @@ final class ReindentObjOps extends FormatterPass {
 		$sizeof_tokens = sizeof($this->tkns);
 		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
 			$token = &$this->tkns[$i];
-			list($id, $text) = $this->get_token($token);
-			if (T_WHITESPACE == $id && $this->has_ln($text)) {
+			list($id, $text) = $this->getToken($token);
+			if (T_WHITESPACE == $id && $this->hasLn($text)) {
 				$token[1] = str_replace($this->new_line, $this->new_line . $placeholder, $text);
 				continue;
 			}

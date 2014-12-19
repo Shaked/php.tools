@@ -12,29 +12,29 @@ class EncapsulateNamespaces extends AdditionalPass {
 		$this->code = '';
 		$in_namespace_context = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					$this->append_code($text);
-					list($found_id, $found_text) = $this->print_and_stop_at([ST_CURLY_OPEN, ST_SEMI_COLON]);
+					$this->appendCode($text);
+					list($found_id, $found_text) = $this->printAndStopAt([ST_CURLY_OPEN, ST_SEMI_COLON]);
 					if (ST_CURLY_OPEN == $found_id) {
-						$this->append_code($found_text);
-						$this->print_curly_block();
+						$this->appendCode($found_text);
+						$this->printCurlyBlock();
 					} elseif (ST_SEMI_COLON == $found_id) {
 						$in_namespace_context = true;
-						$this->append_code(ST_CURLY_OPEN);
-						list($found_id, $found_text) = $this->print_and_stop_at([T_NAMESPACE, T_CLOSE_TAG]);
+						$this->appendCode(ST_CURLY_OPEN);
+						list($found_id, $found_text) = $this->printAndStopAt([T_NAMESPACE, T_CLOSE_TAG]);
 						if (T_CLOSE_TAG == $found_id) {
 							return $source;
 						}
-						$this->append_code($this->get_crlf() . ST_CURLY_CLOSE . $this->get_crlf());
+						$this->appendCode($this->getCrlf() . ST_CURLY_CLOSE . $this->getCrlf());
 						prev($this->tkns);
 						continue;
 					}
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 

@@ -12,22 +12,22 @@ final class PSR1ClassConstants extends FormatterPass {
 		$this->code = '';
 		$uc_const = false;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CONST:
 					$uc_const = true;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_STRING:
 					if ($uc_const) {
 						$text = strtoupper($text);
 						$uc_const = false;
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

@@ -14,11 +14,11 @@ final class AlignDoubleArrow extends AdditionalPass {
 		$max_context_counter = [];
 
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_COMMA:
-					if (!$this->has_ln_after() && !$this->has_ln_right_token()) {
+					if (!$this->hasLnAfter() && !$this->hasLnRightToken()) {
 						if (!isset($level_entrance_counter[$level_counter])) {
 							$level_entrance_counter[$level_counter] = 0;
 						}
@@ -31,11 +31,11 @@ final class AlignDoubleArrow extends AdditionalPass {
 					} elseif ($context_counter[$level_counter][$level_entrance_counter[$level_counter]] > 1) {
 						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 1;
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case T_DOUBLE_ARROW:
-					$this->append_code(
+					$this->appendCode(
 						sprintf(
 							self::ALIGNABLE_EQUAL,
 							$level_counter,
@@ -59,17 +59,17 @@ final class AlignDoubleArrow extends AdditionalPass {
 					++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
 					$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
 
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				case ST_PARENTHESES_CLOSE:
 				case ST_BRACKET_CLOSE:
 					--$level_counter;
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

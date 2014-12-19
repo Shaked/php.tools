@@ -17,7 +17,7 @@ final class YodaComparisons extends AdditionalPass {
 			if (is_null($token)) {
 				continue;
 			}
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			switch ($id) {
 				case T_IS_EQUAL:
 				case T_IS_IDENTICAL:
@@ -32,7 +32,7 @@ final class YodaComparisons extends AdditionalPass {
 
 					$left_pure_variable = $this->is_pure_variable($left_id);
 					for ($leftmost = $left; $leftmost >= 0; --$leftmost) {
-						list($left_scan_id, $left_scan_text) = $this->get_token($tkns[$leftmost]);
+						list($left_scan_id, $left_scan_text) = $this->getToken($tkns[$leftmost]);
 						if ($this->is_lower_precedence($left_scan_id)) {
 							++$leftmost;
 							break;
@@ -42,7 +42,7 @@ final class YodaComparisons extends AdditionalPass {
 
 					$right_pure_variable = $this->is_pure_variable($right_id);
 					for ($rightmost = $right; $rightmost < sizeof($tkns) - 1; ++$rightmost) {
-						list($right_scan_id, $right_scan_text) = $this->get_token($tkns[$rightmost]);
+						list($right_scan_id, $right_scan_text) = $this->getToken($tkns[$rightmost]);
 						if ($this->is_lower_precedence($right_scan_id)) {
 							--$rightmost;
 							break;
@@ -126,11 +126,11 @@ final class YodaComparisons extends AdditionalPass {
 	private function aggregate_variables($source) {
 		$tkns = token_get_all($source);
 		while (list($ptr, $token) = each($tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 
 			if (ST_PARENTHESES_OPEN == $id) {
 				$initial_ptr = $ptr;
-				$tmp = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+				$tmp = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
 				continue;
 			}
@@ -138,7 +138,7 @@ final class YodaComparisons extends AdditionalPass {
 				$stack = $text;
 				$initial_ptr = $ptr;
 				while (list($ptr, $token) = each($tkns)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$stack .= $text;
 					$tkns[$ptr] = null;
 					if (ST_QUOTE == $id) {
@@ -157,7 +157,7 @@ final class YodaComparisons extends AdditionalPass {
 				if (T_VARIABLE == $id) {
 					$touched_variable = true;
 				}
-				if (!$this->right_token_subset_is_at_idx(
+				if (!$this->rightTokenSubsetIsAtIdx(
 					$tkns,
 					$ptr,
 					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
@@ -165,14 +165,14 @@ final class YodaComparisons extends AdditionalPass {
 					continue;
 				}
 				while (list($ptr, $token) = each($tkns)) {
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					} elseif (ST_BRACKET_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					} elseif (ST_PARENTHESES_OPEN == $id) {
-						$text = $this->scan_and_replace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					}
 
 					$stack .= $text;
@@ -182,7 +182,7 @@ final class YodaComparisons extends AdditionalPass {
 					}
 
 					if (
-						!$this->right_token_subset_is_at_idx(
+						!$this->rightTokenSubsetIsAtIdx(
 							$tkns,
 							$ptr,
 							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]

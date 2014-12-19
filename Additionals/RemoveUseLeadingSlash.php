@@ -12,7 +12,7 @@ class RemoveUseLeadingSlash extends AdditionalPass {
 		$this->code = '';
 		$last_touched_token = null;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
@@ -21,11 +21,11 @@ class RemoveUseLeadingSlash extends AdditionalPass {
 				case T_FUNCTION:
 					$last_touched_token = $id;
 				case T_NS_SEPARATOR:
-					if (T_NAMESPACE == $last_touched_token && $this->left_token_is([T_USE])) {
+					if (T_NAMESPACE == $last_touched_token && $this->leftTokenIs([T_USE])) {
 						continue;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 

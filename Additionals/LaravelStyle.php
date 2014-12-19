@@ -22,16 +22,16 @@ class LaravelStyle extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					if ($this->left_token_is(T_OPEN_TAG)) {
-						$this->rtrim_and_append_code($this->get_space() . $text);
+					if ($this->leftTokenIs(T_OPEN_TAG)) {
+						$this->rtrimAndAppendCode($this->getSpace() . $text);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 
@@ -43,11 +43,11 @@ class LaravelStyle extends AdditionalPass {
 		$this->code = '';
 		$max_detected_indent = 0;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_WHITESPACE:
-					if ($this->has_ln($text) && false !== strpos($text, $this->indent_char)) {
+					if ($this->hasLn($text) && false !== strpos($text, $this->indent_char)) {
 						$max_detected_indent = 0;
 						$current_detected_indent = 0;
 						$len = strlen($text);
@@ -62,38 +62,38 @@ class LaravelStyle extends AdditionalPass {
 						}
 						$max_detected_indent = max($max_detected_indent, $current_detected_indent);
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case ST_CURLY_OPEN:
-					if ($this->left_useful_token_is([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY])) {
-						list($prev_id, $prev_text) = $this->get_token($this->left_token());
-						if (!$this->has_ln($prev_text)) {
-							$this->append_code($this->get_crlf() . $this->get_indent($max_detected_indent));
+					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY])) {
+						list($prev_id, $prev_text) = $this->getToken($this->leftToken());
+						if (!$this->hasLn($prev_text)) {
+							$this->appendCode($this->getCrlf() . $this->getIndent($max_detected_indent));
 						}
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_ELSE:
 				case T_ELSEIF:
 				case T_FINALLY:
-					list($prev_id, $prev_text) = $this->get_token($this->left_token());
-					if (!$this->has_ln($prev_text)) {
-						$this->append_code($this->get_crlf() . $this->get_indent($max_detected_indent));
+					list($prev_id, $prev_text) = $this->getToken($this->leftToken());
+					if (!$this->hasLn($prev_text)) {
+						$this->appendCode($this->getCrlf() . $this->getIndent($max_detected_indent));
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				case T_CATCH:
 					if (' ' == substr($this->code, -1, 1)) {
 						$this->code = substr($this->code, 0, -1);
 					}
-					list($prev_id, $prev_text) = $this->get_token($this->left_token());
-					if (!$this->has_ln($prev_text)) {
-						$this->append_code($this->get_crlf() . $this->get_indent($max_detected_indent));
+					list($prev_id, $prev_text) = $this->getToken($this->leftToken());
+					if (!$this->hasLn($prev_text)) {
+						$this->appendCode($this->getCrlf() . $this->getIndent($max_detected_indent));
 					}
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 			}
 		}
 

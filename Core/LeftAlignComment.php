@@ -8,7 +8,7 @@ final class LeftAlignComment extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			if (self::NON_INDENTABLE_COMMENT === $text) {
 				continue;
@@ -16,7 +16,7 @@ final class LeftAlignComment extends FormatterPass {
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					list(, $prev_text) = $this->inspect_token(-1);
+					list(, $prev_text) = $this->inspectToken(-1);
 					if (self::NON_INDENTABLE_COMMENT === $prev_text) {
 						// Benchmark me
 						// $new_text = '';
@@ -41,22 +41,22 @@ final class LeftAlignComment extends FormatterPass {
 							}
 							return $v;
 						}, $lines);
-						$this->append_code(implode($this->new_line, $lines));
+						$this->appendCode(implode($this->new_line, $lines));
 						break;
 					}
 				case T_WHITESPACE:
-					list(, $next_text) = $this->inspect_token(1);
+					list(, $next_text) = $this->inspectToken(1);
 					if (self::NON_INDENTABLE_COMMENT === $next_text && substr_count($text, "\n") >= 2) {
 						$text = substr($text, 0, strrpos($text, "\n") + 1);
-						$this->append_code($text);
+						$this->appendCode($text);
 						break;
 					} elseif (self::NON_INDENTABLE_COMMENT === $next_text && substr_count($text, "\n") === 1) {
 						$text = substr($text, 0, strrpos($text, "\n") + 1);
-						$this->append_code($text);
+						$this->appendCode($text);
 						break;
 					}
 				default:
-					$this->append_code($text);
+					$this->appendCode($text);
 					break;
 			}
 		}

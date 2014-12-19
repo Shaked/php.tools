@@ -10,7 +10,7 @@ final class RefactorPass extends FormatterPass {
 		$tkns = token_get_all('<?php ' . $from);
 		array_shift($tkns);
 		$tkns = array_map(function ($v) {
-			return $this->get_token($v);
+			return $this->getToken($v);
 		}, $tkns);
 		$this->from = $tkns;
 		return $this;
@@ -22,7 +22,7 @@ final class RefactorPass extends FormatterPass {
 		$tkns = token_get_all('<?php ' . $to);
 		array_shift($tkns);
 		$tkns = array_map(function ($v) {
-			return $this->get_token($v);
+			return $this->getToken($v);
 		}, $tkns);
 		$this->to = $tkns;
 		return $this;
@@ -47,7 +47,7 @@ final class RefactorPass extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->get_token($token);
+			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 
 			if ($id == $from[0][0]) {
@@ -56,7 +56,7 @@ final class RefactorPass extends FormatterPass {
 				for ($i = 1; $i < $from_size; ++$i) {
 					list($index, $token) = each($this->tkns);
 					$this->ptr = $index;
-					list($id, $text) = $this->get_token($token);
+					list($id, $text) = $this->getToken($token);
 					$buffer .= $text;
 					if ('/*skipUntil' == substr($from[$i][1], 0, 11)) {
 						$skip_call = $from[$i][1];
@@ -64,7 +64,7 @@ final class RefactorPass extends FormatterPass {
 						++$i;
 						while (list($index, $token) = each($this->tkns)) {
 							$this->ptr = $index;
-							list($id, $text) = $this->get_token($token);
+							list($id, $text) = $this->getToken($token);
 							$buffer .= $text;
 							if ($id == $from[$i][0]) {
 								$tmp_i = $i;
@@ -102,9 +102,9 @@ final class RefactorPass extends FormatterPass {
 					}
 				}
 
-				$this->append_code($buffer);
+				$this->appendCode($buffer);
 			} else {
-				$this->append_code($text);
+				$this->appendCode($text);
 			}
 		}
 		return $this->code;
