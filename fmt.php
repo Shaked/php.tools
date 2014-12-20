@@ -938,7 +938,7 @@ final class AutoImportPass extends FormatterPass {
 							break;
 						} elseif (ST_COMMA === $id) {
 							$useItem .= ST_SEMI_COLON . $this->newLine;
-							$nextTokens[] = [T_USE, 'use', ];
+							$nextTokens[] = [T_USE, 'use'];
 							break;
 						} else {
 							$useItem .= $text;
@@ -988,10 +988,10 @@ final class AutoImportPass extends FormatterPass {
 			}
 		}
 
-		while (list(, $token) = each($tokens)) {
+		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 			$lower_text = strtolower($text);
-			if (T_STRING === $id && isset($aliasList[$lower_text])) {
+			if (T_STRING === $id && isset($aliasList[$lower_text]) && ($this->leftTokenSubsetIsAtIdx($tokens, $index, T_NEW) || $this->rightTokenSubsetIsAtIdx($tokens, $index, T_DOUBLE_COLON))) {
 				++$aliasCount[$lower_text];
 			} elseif (T_DOC_COMMENT === $id) {
 				foreach ($aliasList as $alias => $use) {
@@ -1013,7 +1013,7 @@ final class AutoImportPass extends FormatterPass {
 			$baseClassName = '';
 			while (($cnp = array_pop($classNameParts))) {
 				$baseClassName = $cnp . $baseClassName;
-				$classList[strtolower($baseClassName)][] = ltrim(str_replace('\\\\', '\\', '\\' . $className) . ' as ' . $baseClassName, '\\');
+				$classList[strtolower($baseClassName)][ltrim(str_replace('\\\\', '\\', '\\' . $className) . ' as ' . $baseClassName, '\\')] = ltrim(str_replace('\\\\', '\\', '\\' . $className) . ' as ' . $baseClassName, '\\');
 			}
 		}
 
@@ -1051,7 +1051,7 @@ final class AutoImportPass extends FormatterPass {
 			}
 
 			$lower_text = strtolower($text);
-			if (T_STRING === $id) {
+			if (T_STRING === $id && ($this->leftTokenSubsetIsAtIdx($tokens, $index, T_NEW) || $this->rightTokenSubsetIsAtIdx($tokens, $index, T_DOUBLE_COLON))) {
 				if (!isset($aliasCount[$lower_text])) {
 					$aliasCount[$lower_text] = 0;
 				}
