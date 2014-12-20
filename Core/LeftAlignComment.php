@@ -16,8 +16,8 @@ final class LeftAlignComment extends FormatterPass {
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					list(, $prev_text) = $this->inspectToken(-1);
-					if (self::NON_INDENTABLE_COMMENT === $prev_text) {
+					list(, $prevText) = $this->inspectToken(-1);
+					if (self::NON_INDENTABLE_COMMENT === $prevText) {
 						// Benchmark me
 						// $new_text = '';
 						// $tok = strtok($text, $this->new_line);
@@ -45,12 +45,12 @@ final class LeftAlignComment extends FormatterPass {
 						break;
 					}
 				case T_WHITESPACE:
-					list(, $next_text) = $this->inspectToken(1);
-					if (self::NON_INDENTABLE_COMMENT === $next_text && substr_count($text, "\n") >= 2) {
+					list(, $nextText) = $this->inspectToken(1);
+					if (self::NON_INDENTABLE_COMMENT === $nextText && substr_count($text, "\n") >= 2) {
 						$text = substr($text, 0, strrpos($text, "\n") + 1);
 						$this->appendCode($text);
 						break;
-					} elseif (self::NON_INDENTABLE_COMMENT === $next_text && substr_count($text, "\n") === 1) {
+					} elseif (self::NON_INDENTABLE_COMMENT === $nextText && substr_count($text, "\n") === 1) {
 						$text = substr($text, 0, strrpos($text, "\n") + 1);
 						$this->appendCode($text);
 						break;

@@ -15,74 +15,74 @@ final class AutoImportPass extends FormatterPass {
 		return true;
 	}
 
-	private function used_alias_list($source) {
+	private function usedAliasList($source) {
 		$tokens = token_get_all($source);
-		$use_stack = [];
-		$new_tokens = [];
-		$next_tokens = [];
-		$touched_namespace = false;
-		while (list(, $pop_token) = each($tokens)) {
-			$next_tokens[] = $pop_token;
-			while (($token = array_shift($next_tokens))) {
+		$useStack = [];
+		$newTokens = [];
+		$nextTokens = [];
+		$touchedNamespace = false;
+		while (list(, $popToken) = each($tokens)) {
+			$nextTokens[] = $popToken;
+			while (($token = array_shift($nextTokens))) {
 				list($id, $text) = $this->getToken($token);
 				if (T_NAMESPACE == $id) {
-					$touched_namespace = true;
+					$touchedNamespace = true;
 				}
 				if (T_USE === $id) {
-					$use_item = $text;
+					$useItem = $text;
 					while (list(, $token) = each($tokens)) {
 						list($id, $text) = $this->getToken($token);
 						if (ST_SEMI_COLON === $id) {
-							$use_item .= $text;
+							$useItem .= $text;
 							break;
 						} elseif (ST_COMMA === $id) {
-							$use_item .= ST_SEMI_COLON . $this->newLine;
-							$next_tokens[] = [T_USE, 'use', ];
+							$useItem .= ST_SEMI_COLON . $this->newLine;
+							$nextTokens[] = [T_USE, 'use', ];
 							break;
 						} else {
-							$use_item .= $text;
+							$useItem .= $text;
 						}
 					}
-					$use_stack[] = $use_item;
+					$useStack[] = $useItem;
 					$token = new SurrogateToken();
 				}
 				if (T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id || T_TRAIT === $id || T_VARIABLE === $id) {
-					if (sizeof($use_stack) > 0) {
-						$new_tokens[] = $this->newLine;
-						$new_tokens[] = $this->newLine;
+					if (sizeof($useStack) > 0) {
+						$newTokens[] = $this->newLine;
+						$newTokens[] = $this->newLine;
 					}
-					$new_tokens[] = $token;
+					$newTokens[] = $token;
 					break 2;
-				} elseif ($touched_namespace && (T_DOC_COMMENT === $id || T_COMMENT === $id)) {
-					if (sizeof($use_stack) > 0) {
-						$new_tokens[] = $this->newLine;
+				} elseif ($touchedNamespace && (T_DOC_COMMENT === $id || T_COMMENT === $id)) {
+					if (sizeof($useStack) > 0) {
+						$newTokens[] = $this->newLine;
 					}
-					$new_tokens[] = $token;
+					$newTokens[] = $token;
 					break 2;
 				}
-				$new_tokens[] = $token;
+				$newTokens[] = $token;
 			}
 		}
 
-		natcasesort($use_stack);
-		$alias_list = [];
-		$alias_count = [];
-		foreach ($use_stack as $use) {
+		natcasesort($useStack);
+		$aliasList = [];
+		$aliasCount = [];
+		foreach ($useStack as $use) {
 			if (false !== stripos($use, ' as ')) {
 				$alias = substr(strstr($use, ' as '), strlen(' as '), -1);
 			} else {
 				$alias = basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 			}
 			$alias = strtolower($alias);
-			$alias_list[$alias] = strtolower($use);
-			$alias_count[$alias] = 0;
+			$aliasList[$alias] = strtolower($use);
+			$aliasCount[$alias] = 0;
 		}
-		foreach ($new_tokens as $token) {
+		foreach ($newTokens as $token) {
 			if (!($token instanceof SurrogateToken)) {
 				list($id, $text) = $this->getToken($token);
 				$lower_text = strtolower($text);
-				if (T_STRING === $id && isset($alias_list[$lower_text])) {
-					++$alias_count[$lower_text];
+				if (T_STRING === $id && isset($aliasList[$lower_text])) {
+					++$aliasCount[$lower_text];
 				}
 			}
 		}
@@ -90,42 +90,42 @@ final class AutoImportPass extends FormatterPass {
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 			$lower_text = strtolower($text);
-			if (T_STRING === $id && isset($alias_list[$lower_text])) {
-				++$alias_count[$lower_text];
+			if (T_STRING === $id && isset($aliasList[$lower_text])) {
+				++$aliasCount[$lower_text];
 			} elseif (T_DOC_COMMENT === $id) {
-				foreach ($alias_list as $alias => $use) {
+				foreach ($aliasList as $alias => $use) {
 					if (false !== stripos($text, $alias)) {
-						++$alias_count[$alias];
+						++$aliasCount[$alias];
 					}
 				}
 			}
 		}
-		return $alias_count;
+		return $aliasCount;
 	}
 
 	private function singleNamespace($source) {
-		$class_list = [];
+		$classList = [];
 		$results = $this->oracle->query("SELECT class FROM classes ORDER BY class");
 		while (($row = $results->fetchArray())) {
-			$class_name = $row['class'];
-			$class_name_parts = explode('\\', $class_name);
-			$base_class_name = '';
-			while (($cnp = array_pop($class_name_parts))) {
-				$base_class_name = $cnp . $base_class_name;
-				$class_list[strtolower($base_class_name)][] = ltrim(str_replace('\\\\', '\\', '\\' . $class_name) . ' as ' . $base_class_name, '\\');
+			$className = $row['class'];
+			$classNameParts = explode('\\', $className);
+			$baseClassName = '';
+			while (($cnp = array_pop($classNameParts))) {
+				$baseClassName = $cnp . $baseClassName;
+				$classList[strtolower($baseClassName)][] = ltrim(str_replace('\\\\', '\\', '\\' . $className) . ' as ' . $baseClassName, '\\');
 			}
 		}
 
 		$tokens = token_get_all($source);
-		$alias_count = [];
-		$namespace_name = '';
+		$aliasCount = [];
+		$namespaceName = '';
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 			if (T_NAMESPACE == $id) {
 				while (list($index, $token) = each($tokens)) {
 					list($id, $text) = $this->getToken($token);
 					if (T_NS_SEPARATOR == $id || T_STRING == $id) {
-						$namespace_name .= $text;
+						$namespaceName .= $text;
 					}
 					if (ST_SEMI_COLON == $id || ST_CURLY_OPEN == $id) {
 						break;
@@ -151,28 +151,28 @@ final class AutoImportPass extends FormatterPass {
 
 			$lower_text = strtolower($text);
 			if (T_STRING === $id) {
-				if (!isset($alias_count[$lower_text])) {
-					$alias_count[$lower_text] = 0;
+				if (!isset($aliasCount[$lower_text])) {
+					$aliasCount[$lower_text] = 0;
 				}
-				++$alias_count[$lower_text];
+				++$aliasCount[$lower_text];
 			}
 		}
-		$auto_import_candidates = array_intersect_key($class_list, $alias_count);
+		$autoImportCandidates = array_intersect_key($classList, $aliasCount);
 
 		$tokens = token_get_all($source);
-		$touched_namespace = false;
-		$touched_function = false;
+		$touchedNamespace = false;
+		$touchedFunction = false;
 		$return = '';
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 
 			if (T_NAMESPACE == $id) {
-				$touched_namespace = true;
+				$touchedNamespace = true;
 			}
 			if (T_FUNCTION == $id) {
-				$touched_function = true;
+				$touchedFunction = true;
 			}
-			if (!$touched_function && $touched_namespace && (T_FINAL == $id || T_STATIC == $id || T_USE == $id || T_CLASS == $id || T_INTERFACE == $id || T_TRAIT == $id)) {
+			if (!$touchedFunction && $touchedNamespace && (T_FINAL == $id || T_STATIC == $id || T_USE == $id || T_CLASS == $id || T_INTERFACE == $id || T_TRAIT == $id)) {
 				$return .= self::AUTOIMPORT_PLACEHOLDER . $this->newLine;
 				$return .= $text;
 
@@ -185,14 +185,14 @@ final class AutoImportPass extends FormatterPass {
 			$return .= $text;
 		}
 
-		$used_alias = $this->used_alias_list($source);
+		$usedAlias = $this->usedAliasList($source);
 		$replacement = '';
-		foreach ($auto_import_candidates as $alias => $candidates) {
-			if (isset($used_alias[$alias])) {
+		foreach ($autoImportCandidates as $alias => $candidates) {
+			if (isset($usedAlias[$alias])) {
 				continue;
 			}
-			usort($candidates, function ($a, $b) use ($namespace_name) {
-				return similar_text($a, $namespace_name) < similar_text($b, $namespace_name);
+			usort($candidates, function ($a, $b) use ($namespaceName) {
+				return similar_text($a, $namespaceName) < similar_text($b, $namespaceName);
 			});
 			$replacement .= 'use ' . implode(';' . $this->newLine . '//use ', $candidates) . ';' . $this->newLine;
 		}
@@ -201,15 +201,15 @@ final class AutoImportPass extends FormatterPass {
 		return $return;
 	}
 	public function format($source = '') {
-		$namespace_count = 0;
+		$namespaceCount = 0;
 		$tokens = token_get_all($source);
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 			if (T_NAMESPACE == $id) {
-				++$namespace_count;
+				++$namespaceCount;
 			}
 		}
-		if ($namespace_count <= 1) {
+		if ($namespaceCount <= 1) {
 			return $this->singleNamespace($source);
 		}
 
@@ -229,26 +229,26 @@ final class AutoImportPass extends FormatterPass {
 							break;
 						}
 					}
-					$namespace_block = '';
-					$curly_count = 1;
+					$namespaceBlock = '';
+					$curlyCount = 1;
 					while (list($index, $token) = each($tokens)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
-						$namespace_block .= $text;
+						$namespaceBlock .= $text;
 						if (ST_CURLY_OPEN == $id) {
-							++$curly_count;
+							++$curlyCount;
 						} elseif (ST_CURLY_CLOSE == $id) {
-							--$curly_count;
+							--$curlyCount;
 						}
 
-						if (0 == $curly_count) {
+						if (0 == $curlyCount) {
 							break;
 						}
 					}
 					$return .= str_replace(
 						self::OPENER_PLACEHOLDER,
 						'',
-						$this->singleNamespace(self::OPENER_PLACEHOLDER . $namespace_block)
+						$this->singleNamespace(self::OPENER_PLACEHOLDER . $namespaceBlock)
 					);
 					break;
 				default:

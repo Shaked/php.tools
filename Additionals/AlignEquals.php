@@ -7,36 +7,36 @@ final class AlignEquals extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$paren_count = 0;
-		$bracket_count = 0;
-		$context_counter = 0;
+		$parenCount = 0;
+		$bracketCount = 0;
+		$contextCounter = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_FUNCTION:
-					++$context_counter;
+					++$contextCounter;
 					$this->appendCode($text);
 					break;
 				case ST_PARENTHESES_OPEN:
-					++$paren_count;
+					++$parenCount;
 					$this->appendCode($text);
 					break;
 				case ST_PARENTHESES_CLOSE:
-					--$paren_count;
+					--$parenCount;
 					$this->appendCode($text);
 					break;
 				case ST_BRACKET_OPEN:
-					++$bracket_count;
+					++$bracketCount;
 					$this->appendCode($text);
 					break;
 				case ST_BRACKET_CLOSE:
-					--$bracket_count;
+					--$bracketCount;
 					$this->appendCode($text);
 					break;
 				case ST_EQUAL:
-					if (!$paren_count && !$bracket_count) {
-						$this->appendCode(sprintf(self::ALIGNABLE_EQUAL, $context_counter) . $text);
+					if (!$parenCount && !$bracketCount) {
+						$this->appendCode(sprintf(self::ALIGNABLE_EQUAL, $contextCounter) . $text);
 						break;
 					}
 
@@ -46,7 +46,7 @@ final class AlignEquals extends AdditionalPass {
 			}
 		}
 
-		for ($j = 0; $j <= $context_counter; ++$j) {
+		for ($j = 0; $j <= $contextCounter; ++$j) {
 			$placeholder = sprintf(self::ALIGNABLE_EQUAL, $j);
 			if (false === strpos($this->code, $placeholder)) {
 				continue;
@@ -57,20 +57,20 @@ final class AlignEquals extends AdditionalPass {
 			}
 
 			$lines = explode($this->newLine, $this->code);
-			$lines_with_objop = [];
-			$block_count = 0;
+			$linesWithObjop = [];
+			$blockCount = 0;
 
 			foreach ($lines as $idx => $line) {
 				if (false !== strpos($line, $placeholder)) {
-					$lines_with_objop[$block_count][] = $idx;
+					$linesWithObjop[$blockCount][] = $idx;
 				} else {
-					++$block_count;
-					$lines_with_objop[$block_count] = [];
+					++$blockCount;
+					$linesWithObjop[$blockCount] = [];
 				}
 			}
 
 			$i = 0;
-			foreach ($lines_with_objop as $group) {
+			foreach ($linesWithObjop as $group) {
 				++$i;
 				$farthest = 0;
 				foreach ($group as $idx) {

@@ -3,26 +3,26 @@ class CakePHPStyle extends AdditionalPass {
 	private $foundTokens;
 
 	public function candidate($source, $foundTokens) {
-		$this->found_tokens = $foundTokens;
+		$this->foundTokens = $foundTokens;
 		return true;
 	}
 
 	public function format($source) {
 		$fmt = new PSR2ModifierVisibilityStaticOrder();
-		if ($fmt->candidate($source, $this->found_tokens)) {
+		if ($fmt->candidate($source, $this->foundTokens)) {
 			$source = $fmt->format($source);
 		}
 		$fmt = new MergeElseIf();
-		if ($fmt->candidate($source, $this->found_tokens)) {
+		if ($fmt->candidate($source, $this->foundTokens)) {
 			$source = $fmt->format($source);
 		}
-		$source = $this->add_underscores_before_name($source);
-		$source = $this->remove_space_after_casts($source);
-		$source = $this->merge_equals_with_reference($source);
-		$source = $this->resize_spaces($source);
+		$source = $this->addUnderscoresBeforeName($source);
+		$source = $this->removeSpaceAfterCasts($source);
+		$source = $this->mergeEqualsWithReference($source);
+		$source = $this->resizeSpaces($source);
 		return $source;
 	}
-	private function resize_spaces($source) {
+	private function resizeSpaces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
@@ -54,7 +54,7 @@ class CakePHPStyle extends AdditionalPass {
 		}
 		return $this->code;
 	}
-	private function merge_equals_with_reference($source) {
+	private function mergeEqualsWithReference($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
@@ -72,7 +72,7 @@ class CakePHPStyle extends AdditionalPass {
 		}
 		return $this->code;
 	}
-	private function remove_space_after_casts($source) {
+	private function removeSpaceAfterCasts($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
@@ -110,7 +110,7 @@ class CakePHPStyle extends AdditionalPass {
 		}
 		return $this->code;
 	}
-	private function add_underscores_before_name($source) {
+	private function addUnderscoresBeforeName($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$level_touched = null;

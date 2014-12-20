@@ -7,7 +7,7 @@ final class Reindent extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$this->useCache = true;
-		$found_stack = [];
+		$foundStack = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -19,10 +19,10 @@ final class Reindent extends FormatterPass {
 					(T_COMMENT === $id && '//' == substr($text, 0, 2))
 				) && $this->hasLn($text)
 			) {
-				$bottom_found_stack = end($found_stack);
-				if (isset($bottom_found_stack['implicit']) && $bottom_found_stack['implicit']) {
-					$idx = sizeof($found_stack) - 1;
-					$found_stack[$idx]['implicit'] = false;
+				$bottomFoundStack = end($foundStack);
+				if (isset($bottomFoundStack['implicit']) && $bottomFoundStack['implicit']) {
+					$idx = sizeof($foundStack) - 1;
+					$foundStack[$idx]['implicit'] = false;
 					$this->setIndent(+1);
 				}
 			}
@@ -49,22 +49,22 @@ final class Reindent extends FormatterPass {
 				case ST_CURLY_OPEN:
 				case ST_PARENTHESES_OPEN:
 				case ST_BRACKET_OPEN:
-					$indent_token = [
+					$indentToken = [
 						'id' => $id,
 						'implicit' => true,
 					];
 					$this->appendCode($text);
 					if ($this->hasLnAfter()) {
-						$indent_token['implicit'] = false;
+						$indentToken['implicit'] = false;
 						$this->setIndent(+1);
 					}
-					$found_stack[] = $indent_token;
+					$foundStack[] = $indentToken;
 					break;
 				case ST_CURLY_CLOSE:
 				case ST_PARENTHESES_CLOSE:
 				case ST_BRACKET_CLOSE:
-					$popped_id = array_pop($found_stack);
-					if (false === $popped_id['implicit']) {
+					$poppedID = array_pop($foundStack);
+					if (false === $poppedID['implicit']) {
 						$this->setIndent(-1);
 					}
 					$this->appendCode($text);
@@ -75,12 +75,12 @@ final class Reindent extends FormatterPass {
 					$this->appendCode($text);
 					break;
 				default:
-					$has_ln = ($this->hasLn($text));
-					if ($has_ln) {
-						$is_next_curly_paren_bracket_close = $this->rightTokenIs([ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE]);
-						if (!$is_next_curly_paren_bracket_close) {
+					$hasLn = ($this->hasLn($text));
+					if ($hasLn) {
+						$isNextCurlyParenBracketClose = $this->rightTokenIs([ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE]);
+						if (!$isNextCurlyParenBracketClose) {
 							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
-						} elseif ($is_next_curly_paren_bracket_close) {
+						} elseif ($isNextCurlyParenBracketClose) {
 							$this->setIndent(-1);
 							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 							$this->setIndent(+1);

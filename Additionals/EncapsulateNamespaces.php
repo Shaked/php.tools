@@ -17,15 +17,15 @@ class EncapsulateNamespaces extends AdditionalPass {
 			switch ($id) {
 				case T_NAMESPACE:
 					$this->appendCode($text);
-					list($found_id, $found_text) = $this->printAndStopAt([ST_CURLY_OPEN, ST_SEMI_COLON]);
-					if (ST_CURLY_OPEN == $found_id) {
-						$this->appendCode($found_text);
+					list($foundId, $foundText) = $this->printAndStopAt([ST_CURLY_OPEN, ST_SEMI_COLON]);
+					if (ST_CURLY_OPEN == $foundId) {
+						$this->appendCode($foundText);
 						$this->printCurlyBlock();
-					} elseif (ST_SEMI_COLON == $found_id) {
+					} elseif (ST_SEMI_COLON == $foundId) {
 						$in_namespace_context = true;
 						$this->appendCode(ST_CURLY_OPEN);
-						list($found_id, $found_text) = $this->printAndStopAt([T_NAMESPACE, T_CLOSE_TAG]);
-						if (T_CLOSE_TAG == $found_id) {
+						list($foundId, $foundText) = $this->printAndStopAt([T_NAMESPACE, T_CLOSE_TAG]);
+						if (T_CLOSE_TAG == $foundId) {
 							return $source;
 						}
 						$this->appendCode($this->getCrlf() . ST_CURLY_CLOSE . $this->getCrlf());

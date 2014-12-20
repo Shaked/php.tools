@@ -23,9 +23,9 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 					break;
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					list($prev_id, $prev_text) = $this->inspectToken(-1);
+					list($prevId, $prevText) = $this->inspectToken(-1);
 
-					if (T_WHITESPACE === $prev_id && ("\n" === $prev_text || "\n\n" == substr($prev_text, -2, 2))) {
+					if (T_WHITESPACE === $prevId && ("\n" === $prevText || "\n\n" == substr($prevText, -2, 2))) {
 						$this->appendCode(LeftAlignComment::NON_INDENTABLE_COMMENT);
 					}
 
@@ -46,9 +46,9 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 					break;
 				default:
 					if ($this->hasLn($text)) {
-						$trailing_new_line = $this->substrCountTrailing($text, $this->newLine);
-						if ($trailing_new_line > 0) {
-							$text = trim($text) . str_repeat($this->newLine, $trailing_new_line);
+						$trailingNewLine = $this->substrCountTrailing($text, $this->newLine);
+						if ($trailingNewLine > 0) {
+							$text = trim($text) . str_repeat($this->newLine, $trailingNewLine);
 						}
 					}
 					$this->appendCode($text);

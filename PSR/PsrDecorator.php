@@ -6,7 +6,7 @@ class PsrDecorator {
 		$fmt->addPass(new PSR1ClassConstants());
 	}
 
-	public static function PSR1_naming(CodeFormatter $fmt) {
+	public static function PSR1Naming(CodeFormatter $fmt) {
 		$fmt->addPass(new PSR1ClassNames());
 		$fmt->addPass(new PSR1MethodNames());
 	}
@@ -22,7 +22,7 @@ class PsrDecorator {
 
 	public static function decorate(CodeFormatter $fmt) {
 		self::PSR1($fmt);
-		self::PSR1_naming($fmt);
+		self::PSR1Naming($fmt);
 		self::PSR2($fmt);
 	}
 }

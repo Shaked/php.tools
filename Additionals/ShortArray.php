@@ -33,8 +33,8 @@ class ShortArray extends AdditionalPass {
 					break;
 
 				case ST_PARENTHESES_CLOSE:
-					$pop_token = array_pop($found_paren);
-					if (self::FOUND_ARRAY == $pop_token) {
+					$popToken = array_pop($found_paren);
+					if (self::FOUND_ARRAY == $popToken) {
 						$this->appendCode(ST_BRACKET_CLOSE);
 						break;
 					}

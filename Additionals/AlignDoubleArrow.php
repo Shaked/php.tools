@@ -8,10 +8,10 @@ final class AlignDoubleArrow extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
-		$level_counter = 0;
-		$level_entrance_counter = [];
-		$context_counter = [];
-		$max_context_counter = [];
+		$levelCounter = 0;
+		$levelEntranceCounter = [];
+		$contextCounter = [];
+		$maxContextCounter = [];
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -19,17 +19,17 @@ final class AlignDoubleArrow extends AdditionalPass {
 			switch ($id) {
 				case ST_COMMA:
 					if (!$this->hasLnAfter() && !$this->hasLnRightToken()) {
-						if (!isset($level_entrance_counter[$level_counter])) {
-							$level_entrance_counter[$level_counter] = 0;
+						if (!isset($levelEntranceCounter[$levelCounter])) {
+							$levelEntranceCounter[$levelCounter] = 0;
 						}
-						if (!isset($context_counter[$level_counter][$level_entrance_counter[$level_counter]])) {
-							$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
-							$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+						if (!isset($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
+							$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+							$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
 						}
-						++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
-						$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
-					} elseif ($context_counter[$level_counter][$level_entrance_counter[$level_counter]] > 1) {
-						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 1;
+						++$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
+						$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = max($maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]);
+					} elseif ($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] > 1) {
+						$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 1;
 					}
 					$this->appendCode($text);
 					break;
@@ -38,33 +38,33 @@ final class AlignDoubleArrow extends AdditionalPass {
 					$this->appendCode(
 						sprintf(
 							self::ALIGNABLE_EQUAL,
-							$level_counter,
-							$level_entrance_counter[$level_counter],
-							$context_counter[$level_counter][$level_entrance_counter[$level_counter]]
+							$levelCounter,
+							$levelEntranceCounter[$levelCounter],
+							$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
 						) . $text
 					);
 					break;
 
 				case ST_PARENTHESES_OPEN:
 				case ST_BRACKET_OPEN:
-					++$level_counter;
-					if (!isset($level_entrance_counter[$level_counter])) {
-						$level_entrance_counter[$level_counter] = 0;
+					++$levelCounter;
+					if (!isset($levelEntranceCounter[$levelCounter])) {
+						$levelEntranceCounter[$levelCounter] = 0;
 					}
-					++$level_entrance_counter[$level_counter];
-					if (!isset($context_counter[$level_counter][$level_entrance_counter[$level_counter]])) {
-						$context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
-						$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = 0;
+					++$levelEntranceCounter[$levelCounter];
+					if (!isset($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
+						$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+						$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
 					}
-					++$context_counter[$level_counter][$level_entrance_counter[$level_counter]];
-					$max_context_counter[$level_counter][$level_entrance_counter[$level_counter]] = max($max_context_counter[$level_counter][$level_entrance_counter[$level_counter]], $context_counter[$level_counter][$level_entrance_counter[$level_counter]]);
+					++$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
+					$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = max($maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]);
 
 					$this->appendCode($text);
 					break;
 
 				case ST_PARENTHESES_CLOSE:
 				case ST_BRACKET_CLOSE:
-					--$level_counter;
+					--$levelCounter;
 					$this->appendCode($text);
 					break;
 
@@ -74,7 +74,7 @@ final class AlignDoubleArrow extends AdditionalPass {
 			}
 		}
 
-		foreach ($max_context_counter as $level => $entrances) {
+		foreach ($maxContextCounter as $level => $entrances) {
 			foreach ($entrances as $entrance => $context) {
 				for ($j = 0; $j <= $context; ++$j) {
 					$placeholder = sprintf(self::ALIGNABLE_EQUAL, $level, $entrance, $j);
@@ -87,20 +87,20 @@ final class AlignDoubleArrow extends AdditionalPass {
 					}
 
 					$lines = explode($this->newLine, $this->code);
-					$lines_with_objop = [];
-					$block_count = 0;
+					$linesWithObjop = [];
+					$blockCount = 0;
 
 					foreach ($lines as $idx => $line) {
 						if (false !== strpos($line, $placeholder)) {
-							$lines_with_objop[] = $idx;
+							$linesWithObjop[] = $idx;
 						}
 					}
 
 					$farthest = 0;
-					foreach ($lines_with_objop as $idx) {
+					foreach ($linesWithObjop as $idx) {
 						$farthest = max($farthest, strpos($lines[$idx], $placeholder));
 					}
-					foreach ($lines_with_objop as $idx) {
+					foreach ($linesWithObjop as $idx) {
 						$line = $lines[$idx];
 						$current = strpos($line, $placeholder);
 						$delta = abs($farthest - $current);

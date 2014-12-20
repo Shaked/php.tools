@@ -8,17 +8,17 @@ class Cache {
 	private $db;
 
 	public function __construct($filename) {
-		$start_db_creation = false;
+		$startDbCreation = false;
 		if (is_dir($filename)) {
 			$filename = realpath($filename) . DIRECTORY_SEPARATOR . self::DEFAULT_CACHE_FILENAME;
 		}
 		if (!file_exists($filename)) {
-			$start_db_creation = true;
+			$startDbCreation = true;
 		}
 
-		$this->set_db(new SQLite3($filename));
+		$this->setDb(new SQLite3($filename));
 		$this->db->busyTimeout(1000);
-		if ($start_db_creation) {
+		if ($startDbCreation) {
 			$this->create_db();
 		}
 	}
@@ -32,7 +32,7 @@ class Cache {
 	}
 
 	public function upsert($target, $filename, $content) {
-		$hash = $this->calculate_hash($content);
+		$hash = $this->calculateHash($content);
 		$this->db->exec('REPLACE INTO cache VALUES ("' . SQLite3::escapeString($target) . '","' . SQLite3::escapeString($filename) . '", "' . SQLite3::escapeString($hash) . '")');
 	}
 
@@ -42,17 +42,17 @@ class Cache {
 		if (empty($row)) {
 			return $content;
 		}
-		if ($this->calculate_hash($content) != $row['hash']) {
+		if ($this->calculateHash($content) != $row['hash']) {
 			return $content;
 		}
 		return false;
 	}
 
-	private function set_db($db) {
+	private function setDb($db) {
 		$this->db = $db;
 	}
 
-	private function calculate_hash($content) {
+	private function calculateHash($content) {
 		return sprintf('%u', crc32($content));
 	}
 }

@@ -39,14 +39,14 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 				case T_FUNCTION:
 					if (!$this->leftTokenIs([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_PARENTHESES_OPEN, ST_COMMA]) && $this->rightUsefulTokenIs(T_STRING)) {
 						$this->appendCode($text);
-						$touched_ln = false;
+						$touchedLn = false;
 						while (list($index, $token) = each($this->tkns)) {
 							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
 							if (T_WHITESPACE == $id && $this->hasLn($text)) {
-								$touched_ln = true;
+								$touchedLn = true;
 							}
-							if (ST_CURLY_OPEN === $id && !$touched_ln) {
+							if (ST_CURLY_OPEN === $id && !$touchedLn) {
 								$this->appendCode($this->getCrlfIndent());
 								prev($this->tkns);
 								break;

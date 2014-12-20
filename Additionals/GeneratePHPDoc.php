@@ -6,14 +6,14 @@ final class GeneratePHPDoc extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$touched_visibility = false;
-		$touched_doc_comment = false;
+		$touchedVisibility = false;
+		$touchedDocComment = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_DOC_COMMENT:
-					$touched_doc_comment = true;
+					$touchedDocComment = true;
 				case T_FINAL:
 				case T_ABSTRACT:
 				case T_PUBLIC:
@@ -21,26 +21,26 @@ final class GeneratePHPDoc extends AdditionalPass {
 				case T_PRIVATE:
 				case T_STATIC:
 					if (!$this->leftTokenIs([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
-						$touched_visibility = true;
-						$visibility_idx = $this->ptr;
+						$touchedVisibility = true;
+						$visibilityIdx = $this->ptr;
 					}
 				case T_FUNCTION:
-					if ($touched_doc_comment) {
-						$touched_doc_comment = false;
+					if ($touchedDocComment) {
+						$touchedDocComment = false;
 						break;
 					}
-					if (!$touched_visibility) {
-						$orig_idx = $this->ptr;
+					if (!$touchedVisibility) {
+						$origIdx = $this->ptr;
 					} else {
-						$orig_idx = $visibility_idx;
+						$origIdx = $visibilityIdx;
 					}
-					list($nt_id, $nt_text) = $this->getToken($this->rightToken());
-					if (T_STRING != $nt_id) {
+					list($ntId, $ntText) = $this->getToken($this->rightToken());
+					if (T_STRING != $ntId) {
 						$this->appendCode($text);
 						break;
 					}
 					$this->walkUntil(ST_PARENTHESES_OPEN);
-					$param_stack = [];
+					$paramStack = [];
 					$tmp = ['type' => '', 'name' => ''];
 					$count = 1;
 					while (list($index, $token) = each($this->tkns)) {
@@ -65,13 +65,13 @@ final class GeneratePHPDoc extends AdditionalPass {
 								$tmp['type'] = 'array';
 							}
 							$tmp['name'] = $text;
-							$param_stack[] = $tmp;
+							$paramStack[] = $tmp;
 							$tmp = ['type' => '', 'name' => ''];
 							continue;
 						}
 					}
 
-					$return_stack = '';
+					$returnStack = '';
 					if (!$this->leftUsefulTokenIs(ST_SEMI_COLON)) {
 						$this->walkUntil(ST_CURLY_OPEN);
 						$count = 1;
@@ -90,21 +90,21 @@ final class GeneratePHPDoc extends AdditionalPass {
 							}
 							if (T_RETURN == $id) {
 								if ($this->rightTokenIs([T_DNUMBER])) {
-									$return_stack = 'float';
+									$returnStack = 'float';
 								} elseif ($this->rightTokenIs([T_LNUMBER])) {
-									$return_stack = 'int';
+									$returnStack = 'int';
 								} elseif ($this->rightTokenIs([T_VARIABLE])) {
-									$return_stack = 'mixed';
+									$returnStack = 'mixed';
 								} elseif ($this->rightTokenIs([ST_SEMI_COLON])) {
-									$return_stack = 'null';
+									$returnStack = 'null';
 								}
 							}
 						}
 					}
 
-					$func_token = &$this->tkns[$orig_idx];
-					$func_token[1] = $this->render_doc_block($param_stack, $return_stack) . $func_token[1];
-					$touched_visibility = false;
+					$func_token = &$this->tkns[$origIdx];
+					$func_token[1] = $this->renderDocBlock($paramStack, $returnStack) . $func_token[1];
+					$touchedVisibility = false;
 			}
 		}
 
@@ -114,16 +114,16 @@ final class GeneratePHPDoc extends AdditionalPass {
 		}, $this->tkns));
 	}
 
-	private function render_doc_block(array $param_stack, $return_stack) {
-		if (empty($param_stack) && empty($return_stack)) {
+	private function renderDocBlock(array $paramStack, $returnStack) {
+		if (empty($paramStack) && empty($returnStack)) {
 			return '';
 		}
 		$str = '/**' . $this->newLine;
-		foreach ($param_stack as $param) {
+		foreach ($paramStack as $param) {
 			$str .= rtrim(' * @param ' . $param['type']) . ' ' . $param['name'] . $this->newLine;
 		}
-		if (!empty($return_stack)) {
-			$str .= ' * @return ' . $return_stack . $this->newLine;
+		if (!empty($returnStack)) {
+			$str .= ' * @return ' . $returnStack . $this->newLine;
 		}
 		$str .= ' */' . $this->newLine;
 		return $str;

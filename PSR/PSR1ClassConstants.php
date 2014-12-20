@@ -10,19 +10,19 @@ final class PSR1ClassConstants extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$uc_const = false;
+		$ucConst = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CONST:
-					$uc_const = true;
+					$ucConst = true;
 					$this->appendCode($text);
 					break;
 				case T_STRING:
-					if ($uc_const) {
+					if ($ucConst) {
 						$text = strtoupper($text);
-						$uc_const = false;
+						$ucConst = false;
 					}
 					$this->appendCode($text);
 					break;

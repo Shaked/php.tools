@@ -6,28 +6,28 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 
 	public function format($source) {
 		$tkns = token_get_all($source);
-		$found_endwhile = false;
-		$found_endforeach = false;
-		$found_endfor = false;
+		$foundEndwhile = false;
+		$foundEndforeach = false;
+		$foundEndfor = false;
 		foreach ($tkns as $token) {
 			list($id, $text) = $this->getToken($token);
-			if (!$found_endwhile && T_ENDWHILE == $id) {
-				$source = $this->format_while_blocks($source);
-				$found_endwhile = true;
-			} elseif (!$found_endforeach && T_ENDFOREACH == $id) {
-				$source = $this->format_foreach_blocks($source);
-				$found_endforeach = true;
-			} elseif (!$found_endfor && T_ENDFOR == $id) {
-				$source = $this->format_for_blocks($source);
-				$found_endfor = true;
-			} elseif ($found_endwhile && $found_endforeach && $found_endfor) {
+			if (!$foundEndwhile && T_ENDWHILE == $id) {
+				$source = $this->formatWhileBlocks($source);
+				$foundEndwhile = true;
+			} elseif (!$foundEndforeach && T_ENDFOREACH == $id) {
+				$source = $this->formatForeachBlocks($source);
+				$foundEndforeach = true;
+			} elseif (!$foundEndfor && T_ENDFOR == $id) {
+				$source = $this->formatForBlocks($source);
+				$foundEndfor = true;
+			} elseif ($foundEndwhile && $foundEndforeach && $foundEndfor) {
 				break;
 			}
 		}
 		return $source;
 	}
 
-	private function format_blocks($source, $open_token, $close_token) {
+	private function formatBlocks($source, $open_token, $close_token) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
@@ -69,13 +69,13 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		}
 		return $this->code;
 	}
-	private function format_for_blocks($source) {
-		return $this->format_blocks($source, T_FOR, T_ENDFOR);
+	private function formatForBlocks($source) {
+		return $this->formatBlocks($source, T_FOR, T_ENDFOR);
 	}
-	private function format_foreach_blocks($source) {
-		return $this->format_blocks($source, T_FOREACH, T_ENDFOREACH);
+	private function formatForeachBlocks($source) {
+		return $this->formatBlocks($source, T_FOREACH, T_ENDFOREACH);
 	}
-	private function format_while_blocks($source) {
+	private function formatWhileBlocks($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 

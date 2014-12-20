@@ -2,23 +2,23 @@
 class LaravelStyle extends AdditionalPass {
 	private $foundTokens;
 	public function candidate($source, $foundTokens) {
-		$this->found_tokens = $foundTokens;
+		$this->foundTokens = $foundTokens;
 		return true;
 	}
 
 	public function format($source) {
-		$source = $this->namespace_merge_with_open_tag($source);
-		$source = $this->allman_style_braces($source);
+		$source = $this->namespaceMergeWithOpenTag($source);
+		$source = $this->allmanStyleBraces($source);
 		$source = (new RTrim())->format($source);
 
 		$fmt = new TightConcat();
-		if ($fmt->candidate($source, $this->found_tokens)) {
+		if ($fmt->candidate($source, $this->foundTokens)) {
 			$source = $fmt->format($source);
 		}
 		return $source;
 	}
 
-	private function namespace_merge_with_open_tag($source) {
+	private function namespaceMergeWithOpenTag($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
@@ -38,7 +38,7 @@ class LaravelStyle extends AdditionalPass {
 		return $this->code;
 	}
 
-	private function allman_style_braces($source) {
+	private function allmanStyleBraces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$max_detected_indent = 0;
@@ -66,8 +66,8 @@ class LaravelStyle extends AdditionalPass {
 					break;
 				case ST_CURLY_OPEN:
 					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY])) {
-						list($prev_id, $prev_text) = $this->getToken($this->leftToken());
-						if (!$this->hasLn($prev_text)) {
+						list($prevId, $prevText) = $this->getToken($this->leftToken());
+						if (!$this->hasLn($prevText)) {
 							$this->appendCode($this->getCrlf() . $this->getIndent($max_detected_indent));
 						}
 					}
@@ -76,8 +76,8 @@ class LaravelStyle extends AdditionalPass {
 				case T_ELSE:
 				case T_ELSEIF:
 				case T_FINALLY:
-					list($prev_id, $prev_text) = $this->getToken($this->leftToken());
-					if (!$this->hasLn($prev_text)) {
+					list($prevId, $prevText) = $this->getToken($this->leftToken());
+					if (!$this->hasLn($prevText)) {
 						$this->appendCode($this->getCrlf() . $this->getIndent($max_detected_indent));
 					}
 					$this->appendCode($text);
@@ -86,8 +86,8 @@ class LaravelStyle extends AdditionalPass {
 					if (' ' == substr($this->code, -1, 1)) {
 						$this->code = substr($this->code, 0, -1);
 					}
-					list($prev_id, $prev_text) = $this->getToken($this->leftToken());
-					if (!$this->hasLn($prev_text)) {
+					list($prevId, $prevText) = $this->getToken($this->leftToken());
+					if (!$this->hasLn($prevText)) {
 						$this->appendCode($this->getCrlf() . $this->getIndent($max_detected_indent));
 					}
 					$this->appendCode($text);

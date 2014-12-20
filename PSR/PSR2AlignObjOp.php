@@ -11,8 +11,8 @@ final class PSR2AlignObjOp extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$context_counter = 0;
-		$context_meta_count = [];
+		$contextCounter = 0;
+		$contextMetaCount = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -20,17 +20,17 @@ final class PSR2AlignObjOp extends FormatterPass {
 				case ST_SEMI_COLON:
 				case T_ARRAY:
 				case T_DOUBLE_ARROW:
-					++$context_counter;
+					++$contextCounter;
 					$this->appendCode($text);
 					break;
 
 				case T_OBJECT_OPERATOR:
-					if (!isset($context_meta_count[$context_counter])) {
-						$context_meta_count[$context_counter] = 0;
+					if (!isset($contextMetaCount[$contextCounter])) {
+						$contextMetaCount[$contextCounter] = 0;
 					}
-					if ($this->hasLnBefore() || 0 == $context_meta_count[$context_counter]) {
-						$this->appendCode(sprintf(self::ALIGNABLE_TOKEN, $context_counter) . $text);
-						++$context_meta_count[$context_counter];
+					if ($this->hasLnBefore() || 0 == $contextMetaCount[$contextCounter]) {
+						$this->appendCode(sprintf(self::ALIGNABLE_TOKEN, $contextCounter) . $text);
+						++$contextMetaCount[$contextCounter];
 						break;
 					}
 				default:
@@ -39,7 +39,7 @@ final class PSR2AlignObjOp extends FormatterPass {
 			}
 		}
 
-		for ($j = 0; $j <= $context_counter; ++$j) {
+		for ($j = 0; $j <= $contextCounter; ++$j) {
 			$placeholder = sprintf(self::ALIGNABLE_TOKEN, $j);
 			if (false === strpos($this->code, $placeholder)) {
 				continue;
@@ -50,19 +50,19 @@ final class PSR2AlignObjOp extends FormatterPass {
 			}
 
 			$lines = explode($this->newLine, $this->code);
-			$lines_with_objop = [];
-			$block_count = 0;
+			$linesWithObjop = [];
+			$blockCount = 0;
 
 			foreach ($lines as $idx => $line) {
 				if (false !== strpos($line, $placeholder)) {
-					$lines_with_objop[$block_count][] = $idx;
+					$linesWithObjop[$blockCount][] = $idx;
 				} else {
-					++$block_count;
-					$lines_with_objop[$block_count] = [];
+					++$blockCount;
+					$linesWithObjop[$blockCount] = [];
 				}
 			}
 
-			foreach ($lines_with_objop as $group) {
+			foreach ($linesWithObjop as $group) {
 				$first_line = reset($group);
 				$position_at_first_line = strpos($lines[$first_line], $placeholder);
 

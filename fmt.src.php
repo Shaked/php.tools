@@ -272,9 +272,9 @@ if (!isset($testEnv)) {
 	if (isset($opts['list'])) {
 		echo 'Usage: ', $argv[0], ' --help-pass=PASSNAME', PHP_EOL;
 		$classes = get_declared_classes();
-		foreach ($classes as $class_name) {
-			if (is_subclass_of($class_name, 'AdditionalPass')) {
-				echo "\t- ", $class_name, PHP_EOL;
+		foreach ($classes as $className) {
+			if (is_subclass_of($className, 'AdditionalPass')) {
+				echo "\t- ", $className, PHP_EOL;
 			}
 		}
 		die();

@@ -515,12 +515,12 @@ final class RefactorPass extends FormatterPass {
 	}
 	public function format($source) {
 		$from = $this->getFrom();
-		$from_size = sizeof($from);
-		$from_str = implode('', array_map(function ($v) {
+		$fromSize = sizeof($from);
+		$fromStr = implode('', array_map(function ($v) {
 			return $v[1];
 		}, $from));
 		$to = $this->getTo();
-		$to_str = implode('', array_map(function ($v) {
+		$toStr = implode('', array_map(function ($v) {
 			return $v[1];
 		}, $to));
 
@@ -533,14 +533,14 @@ final class RefactorPass extends FormatterPass {
 			if ($id == $from[0][0]) {
 				$match = true;
 				$buffer = $text;
-				for ($i = 1; $i < $from_size; ++$i) {
+				for ($i = 1; $i < $fromSize; ++$i) {
 					list($index, $token) = each($this->tkns);
 					$this->ptr = $index;
 					list($id, $text) = $this->getToken($token);
 					$buffer .= $text;
 					if ('/*skipUntil' == substr($from[$i][1], 0, 11)) {
-						$skip_call = $from[$i][1];
-						$stop_text = strtolower(trim(str_replace('skipUntil:', '', substr($text, 2, -2))));
+						$skipCall = $from[$i][1];
+						$stopText = strtolower(trim(str_replace('skipUntil:', '', substr($text, 2, -2))));
 						++$i;
 						while (list($index, $token) = each($this->tkns)) {
 							$this->ptr = $index;
@@ -550,7 +550,7 @@ final class RefactorPass extends FormatterPass {
 								$tmp_i = $i;
 								$tmp_ptr = $this->ptr;
 								$s_match = true;
-								for ($tmp_i; $tmp_i < $from_size; ++$tmp_i, ++$tmp_ptr) {
+								for ($tmp_i; $tmp_i < $fromSize; ++$tmp_i, ++$tmp_ptr) {
 									if ($from[$tmp_i][0] != $this->tkns[$tmp_ptr][0]) {
 										$s_match = false;
 										break;
@@ -562,7 +562,7 @@ final class RefactorPass extends FormatterPass {
 									continue;
 								}
 							}
-							if (strtolower($text) == $stop_text) {
+							if (strtolower($text) == $stopText) {
 								$match = false;
 								break 2;
 							}
@@ -575,10 +575,10 @@ final class RefactorPass extends FormatterPass {
 					}
 				}
 				if ($match) {
-					if (strpos($to_str, '/*skip*/')) {
-						$buffer = str_replace(explode($skip_call, $from_str), explode('/*skip*/', $to_str), $buffer);
+					if (strpos($toStr, '/*skip*/')) {
+						$buffer = str_replace(explode($skipCall, $fromStr), explode('/*skip*/', $toStr), $buffer);
 					} else {
-						$buffer = str_replace($from_str, $to_str, $buffer);
+						$buffer = str_replace($fromStr, $toStr, $buffer);
 					}
 				}
 

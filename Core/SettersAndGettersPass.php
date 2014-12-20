@@ -30,55 +30,55 @@ final class SettersAndGettersPass extends FormatterPass {
 						'public' => [],
 						'protected' => [],
 					];
-					$function_list = [];
-					$touched_visibility = false;
-					$touched_function = false;
-					$curly_count = null;
+					$functionList = [];
+					$touchedVisibility = false;
+					$touchedFunction = false;
+					$curlyCount = null;
 					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						if (ST_CURLY_OPEN == $id) {
-							++$curly_count;
+							++$curlyCount;
 						}
 						if (ST_CURLY_CLOSE == $id) {
-							--$curly_count;
+							--$curlyCount;
 						}
-						if (0 === $curly_count) {
+						if (0 === $curlyCount) {
 							break;
 						}
 						$this->appendCode($text);
 						if (T_PUBLIC == $id) {
-							$touched_visibility = T_PUBLIC;
+							$touchedVisibility = T_PUBLIC;
 						} elseif (T_PRIVATE == $id) {
-							$touched_visibility = T_PRIVATE;
+							$touchedVisibility = T_PRIVATE;
 						} elseif (T_PROTECTED == $id) {
-							$touched_visibility = T_PROTECTED;
+							$touchedVisibility = T_PROTECTED;
 						}
-						if (T_VARIABLE == $id && T_PUBLIC == $touched_visibility) {
+						if (T_VARIABLE == $id && T_PUBLIC == $touchedVisibility) {
 							$attributes['public'][] = $text;
-							$touched_visibility = null;
-						} elseif (T_VARIABLE == $id && T_PRIVATE == $touched_visibility) {
+							$touchedVisibility = null;
+						} elseif (T_VARIABLE == $id && T_PRIVATE == $touchedVisibility) {
 							$attributes['private'][] = $text;
-							$touched_visibility = null;
-						} elseif (T_VARIABLE == $id && T_PROTECTED == $touched_visibility) {
+							$touchedVisibility = null;
+						} elseif (T_VARIABLE == $id && T_PROTECTED == $touchedVisibility) {
 							$attributes['protected'][] = $text;
-							$touched_visibility = null;
+							$touchedVisibility = null;
 						} elseif (T_FUNCTION == $id) {
-							$touched_function = true;
-						} elseif ($touched_function && T_STRING == $id) {
-							$function_list[] = $text;
-							$touched_visibility = null;
-							$touched_function = false;
+							$touchedFunction = true;
+						} elseif ($touchedFunction && T_STRING == $id) {
+							$functionList[] = $text;
+							$touchedVisibility = null;
+							$touchedFunction = false;
 						}
 					}
-					$function_list = array_combine($function_list, $function_list);
+					$functionList = array_combine($functionList, $functionList);
 					foreach ($attributes as $visibility => $variables) {
 						foreach ($variables as $var) {
 							$str = $this->generate($visibility, $var);
-							foreach ($function_list as $k => $v) {
+							foreach ($functionList as $k => $v) {
 								if (false !== stripos($str, $v)) {
-									unset($function_list[$k]);
+									unset($functionList[$k]);
 									continue 2;
 								}
 							}

@@ -5,15 +5,15 @@ final class ReindentIfColonBlocks extends FormatterPass {
 	}
 	public function format($source) {
 		$this->tkns = token_get_all($source);
-		$found_colon = false;
+		$foundColon = false;
 		foreach ($this->tkns as $token) {
 			list($id, $text) = $this->getToken($token);
 			if (ST_COLON == trim($text)) {
-				$found_colon = true;
+				$foundColon = true;
 				break;
 			}
 		}
-		if (!$found_colon) {
+		if (!$foundColon) {
 			return $source;
 		}
 		reset($this->tkns);
@@ -37,18 +37,18 @@ final class ReindentIfColonBlocks extends FormatterPass {
 						$this->ptr = $index;
 						$this->appendCode($text);
 						if (ST_PARENTHESES_OPEN === $id) {
-							$paren_count = 1;
+							$parenCount = 1;
 							while (list($index, $token) = each($this->tkns)) {
 								list($id, $text) = $this->getToken($token);
 								$this->ptr = $index;
 								$this->appendCode($text);
 								if (ST_PARENTHESES_OPEN === $id) {
-									++$paren_count;
+									++$parenCount;
 								}
 								if (ST_PARENTHESES_CLOSE === $id) {
-									--$paren_count;
+									--$parenCount;
 								}
-								if (0 == $paren_count) {
+								if (0 == $parenCount) {
 									break;
 								}
 							}
@@ -63,10 +63,10 @@ final class ReindentIfColonBlocks extends FormatterPass {
 					}
 					break;
 				default:
-					$has_ln = $this->hasLn($text);
-					if ($has_ln && !$this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF])) {
+					$hasLn = $this->hasLn($text);
+					if ($hasLn && !$this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF])) {
 						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
-					} elseif ($has_ln && $this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF])) {
+					} elseif ($hasLn && $this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF])) {
 						$this->setIndent(-1);
 						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 						$this->setIndent(+1);

@@ -6,7 +6,7 @@ final class OrderMethod extends AdditionalPass {
 	public function orderMethods($source) {
 		$tokens = token_get_all($source);
 		$return = '';
-		$function_list = [];
+		$functionList = [];
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -17,42 +17,42 @@ final class OrderMethod extends AdditionalPass {
 				case T_PROTECTED:
 				case T_PUBLIC:
 					$stack = $text;
-					$curly_count = null;
-					$touched_method = false;
-					$function_name = '';
+					$curlyCount = null;
+					$touchedMethod = false;
+					$functionName = '';
 					while (list($index, $token) = each($tokens)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 
 						$stack .= $text;
 						if (T_FUNCTION == $id) {
-							$touched_method = true;
+							$touchedMethod = true;
 						}
-						if (T_VARIABLE == $id && !$touched_method) {
+						if (T_VARIABLE == $id && !$touchedMethod) {
 							break;
 						}
-						if (T_STRING == $id && $touched_method && empty($function_name)) {
-							$function_name = $text;
+						if (T_STRING == $id && $touchedMethod && empty($functionName)) {
+							$functionName = $text;
 						}
 
-						if (null === $curly_count && ST_SEMI_COLON == $id) {
+						if (null === $curlyCount && ST_SEMI_COLON == $id) {
 							break;
 						}
 
 						if (ST_CURLY_OPEN == $id) {
-							++$curly_count;
+							++$curlyCount;
 						}
 						if (ST_CURLY_CLOSE == $id) {
-							--$curly_count;
+							--$curlyCount;
 						}
-						if (0 === $curly_count) {
+						if (0 === $curlyCount) {
 							break;
 						}
 					}
-					if (!$touched_method) {
+					if (!$touchedMethod) {
 						$return .= $stack;
 					} else {
-						$function_list[$function_name] = $stack;
+						$functionList[$functionName] = $stack;
 						$return .= self::METHOD_REPLACEMENT_PLACEHOLDER;
 					}
 					break;
@@ -61,9 +61,9 @@ final class OrderMethod extends AdditionalPass {
 					break;
 			}
 		}
-		ksort($function_list);
-		foreach ($function_list as $function_body) {
-			$return = preg_replace('/' . self::METHOD_REPLACEMENT_PLACEHOLDER . '/', $function_body, $return, 1);
+		ksort($functionList);
+		foreach ($functionList as $functionBody) {
+			$return = preg_replace('/' . self::METHOD_REPLACEMENT_PLACEHOLDER . '/', $functionBody, $return, 1);
 		}
 		return $return;
 	}
@@ -89,26 +89,26 @@ final class OrderMethod extends AdditionalPass {
 							break;
 						}
 					}
-					$class_block = '';
-					$curly_count = 1;
+					$classBlock = '';
+					$curlyCount = 1;
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
-						$class_block .= $text;
+						$classBlock .= $text;
 						if (ST_CURLY_OPEN == $id) {
-							++$curly_count;
+							++$curlyCount;
 						} elseif (ST_CURLY_CLOSE == $id) {
-							--$curly_count;
+							--$curlyCount;
 						}
 
-						if (0 == $curly_count) {
+						if (0 == $curlyCount) {
 							break;
 						}
 					}
 					$return .= str_replace(
 						self::OPENER_PLACEHOLDER,
 						'',
-						$this->orderMethods(self::OPENER_PLACEHOLDER . $class_block)
+						$this->orderMethods(self::OPENER_PLACEHOLDER . $classBlock)
 					);
 					$this->appendCode($return);
 					break;

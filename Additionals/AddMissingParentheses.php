@@ -16,9 +16,9 @@ class AddMissingParentheses extends AdditionalPass {
 			switch ($id) {
 				case T_NEW:
 					$this->appendCode($text);
-					list($found_id, $found_text) = $this->printAndStopAt([ST_PARENTHESES_OPEN, T_COMMENT, T_DOC_COMMENT, ST_SEMI_COLON]);
-					if (ST_PARENTHESES_OPEN != $found_id) {
-						$this->appendCode('()' . $found_text);
+					list($foundId, $foundText) = $this->printAndStopAt([ST_PARENTHESES_OPEN, T_COMMENT, T_DOC_COMMENT, ST_SEMI_COLON]);
+					if (ST_PARENTHESES_OPEN != $foundId) {
+						$this->appendCode('()' . $foundText);
 					}
 					break;
 				default:

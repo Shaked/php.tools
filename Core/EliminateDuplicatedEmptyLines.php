@@ -9,8 +9,8 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$paren_count = 0;
-		$bracket_count = 0;
+		$parenCount = 0;
+		$bracketCount = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -26,22 +26,22 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 		}
 
 		$lines = explode($this->newLine, $this->code);
-		$empty_lines = [];
-		$block_count = 0;
+		$emptyLines = [];
+		$blockCount = 0;
 
 		foreach ($lines as $idx => $line) {
 			if (trim($line) === self::EMPTY_LINE) {
-				$empty_lines[$block_count][] = $idx;
+				$emptyLines[$blockCount][] = $idx;
 			} else {
-				++$block_count;
-				$empty_lines[$block_count] = [];
+				++$blockCount;
+				$emptyLines[$blockCount] = [];
 			}
 		}
 
-		foreach ($empty_lines as $group) {
+		foreach ($emptyLines as $group) {
 			array_pop($group);
-			foreach ($group as $line_number) {
-				unset($lines[$line_number]);
+			foreach ($group as $lineNumber) {
+				unset($lines[$lineNumber]);
 			}
 		}
 

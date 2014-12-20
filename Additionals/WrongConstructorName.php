@@ -10,13 +10,13 @@ class WrongConstructorName extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$touched_namespace = false;
+		$touchedNamespace = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					$touched_namespace = true;
+					$touchedNamespace = true;
 					$this->appendCode($text);
 					break;
 				case T_CLASS:
@@ -24,16 +24,16 @@ class WrongConstructorName extends AdditionalPass {
 					if ($this->leftUsefulTokenIs([T_DOUBLE_COLON])) {
 						break;
 					}
-					if ($touched_namespace) {
+					if ($touchedNamespace) {
 						break;
 					}
-					$class_local_name = '';
+					$classLocalName = '';
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$this->appendCode($text);
 						if (T_STRING == $id) {
-							$class_local_name = strtolower($text);
+							$classLocalName = strtolower($text);
 						}
 						if (T_EXTENDS == $id || T_IMPLEMENTS == $id || ST_CURLY_OPEN == $id) {
 							break;
@@ -44,7 +44,7 @@ class WrongConstructorName extends AdditionalPass {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 
-						if (T_STRING == $id && $this->leftUsefulTokenIs([T_FUNCTION]) && strtolower($text) == $class_local_name) {
+						if (T_STRING == $id && $this->leftUsefulTokenIs([T_FUNCTION]) && strtolower($text) == $classLocalName) {
 							$text = '__construct';
 						}
 						$this->appendCode($text);

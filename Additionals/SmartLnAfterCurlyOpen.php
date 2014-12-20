@@ -10,17 +10,17 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$curly_count = 0;
+		$curlyCount = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_CURLY_OPEN:
 					$this->appendCode($text);
-					$curly_count = 1;
+					$curlyCount = 1;
 					$stack = '';
-					$found_line_break = false;
-					$has_ln_after = $this->hasLnAfter();
+					$foundLineBreak = false;
+					$hasLnAfter = $this->hasLnAfter();
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
@@ -34,20 +34,20 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 							continue;
 						}
 						if (ST_CURLY_OPEN == $id) {
-							++$curly_count;
+							++$curlyCount;
 						}
 						if (ST_CURLY_CLOSE == $id) {
-							--$curly_count;
+							--$curlyCount;
 						}
 						if (T_WHITESPACE === $id && $this->hasLn($text)) {
-							$found_line_break = true;
+							$foundLineBreak = true;
 							break;
 						}
-						if (0 == $curly_count) {
+						if (0 == $curlyCount) {
 							break;
 						}
 					}
-					if ($found_line_break && !$has_ln_after) {
+					if ($foundLineBreak && !$hasLnAfter) {
 						$this->appendCode($this->newLine);
 					}
 					$this->appendCode($stack);

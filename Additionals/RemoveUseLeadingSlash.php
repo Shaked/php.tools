@@ -10,7 +10,7 @@ class RemoveUseLeadingSlash extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$last_touched_token = null;
+		$lastTouchedToken = null;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -19,9 +19,9 @@ class RemoveUseLeadingSlash extends AdditionalPass {
 				case T_TRAIT:
 				case T_CLASS:
 				case T_FUNCTION:
-					$last_touched_token = $id;
+					$lastTouchedToken = $id;
 				case T_NS_SEPARATOR:
-					if (T_NAMESPACE == $last_touched_token && $this->leftTokenIs([T_USE])) {
+					if (T_NAMESPACE == $lastTouchedToken && $this->leftTokenIs([T_USE])) {
 						continue;
 					}
 				default:

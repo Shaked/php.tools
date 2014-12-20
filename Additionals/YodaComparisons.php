@@ -12,7 +12,7 @@ final class YodaComparisons extends AdditionalPass {
 		return $this->yodise($source);
 	}
 	protected function yodise($source) {
-		$tkns = $this->aggregate_variables($source);
+		$tkns = $this->aggregateVariables($source);
 		while (list($ptr, $token) = each($tkns)) {
 			if (is_null($token)) {
 				continue;
@@ -24,45 +24,45 @@ final class YodaComparisons extends AdditionalPass {
 				case T_IS_NOT_EQUAL:
 				case T_IS_NOT_IDENTICAL:
 					list($left, $right) = $this->siblings($tkns, $ptr);
-					list($left_id, $left_text) = $tkns[$left];
-					list($right_id, $right_text) = $tkns[$right];
-					if ($left_id == $right_id) {
+					list($leftId, $leftText) = $tkns[$left];
+					list($rightId, $rightText) = $tkns[$right];
+					if ($leftId == $rightId) {
 						continue;
 					}
 
-					$left_pure_variable = $this->is_pure_variable($left_id);
+					$leftPureVariable = $this->isPureVariable($leftId);
 					for ($leftmost = $left; $leftmost >= 0; --$leftmost) {
-						list($left_scan_id, $left_scan_text) = $this->getToken($tkns[$leftmost]);
-						if ($this->is_lower_precedence($left_scan_id)) {
+						list($leftScanId, $leftScanText) = $this->getToken($tkns[$leftmost]);
+						if ($this->isLowerPrecedence($leftScanId)) {
 							++$leftmost;
 							break;
 						}
-						$left_pure_variable &= $this->is_pure_variable($left_scan_id);
+						$leftPureVariable &= $this->isPureVariable($leftScanId);
 					}
 
-					$right_pure_variable = $this->is_pure_variable($right_id);
+					$rightPureVariable = $this->isPureVariable($rightId);
 					for ($rightmost = $right; $rightmost < sizeof($tkns) - 1; ++$rightmost) {
-						list($right_scan_id, $right_scan_text) = $this->getToken($tkns[$rightmost]);
-						if ($this->is_lower_precedence($right_scan_id)) {
+						list($rightScanId, $rightScanText) = $this->getToken($tkns[$rightmost]);
+						if ($this->isLowerPrecedence($rightScanId)) {
 							--$rightmost;
 							break;
 						}
-						$right_pure_variable &= $this->is_pure_variable($right_scan_id);
+						$rightPureVariable &= $this->isPureVariable($rightScanId);
 					}
 
-					if ($left_pure_variable && !$right_pure_variable) {
-						$orig_left_tokens = $left_tokens = implode('', array_map(function ($token) {
+					if ($leftPureVariable && !$rightPureVariable) {
+						$origLeftTokens = $leftTokens = implode('', array_map(function ($token) {
 							return isset($token[1]) ? $token[1] : $token;
 						}, array_slice($tkns, $leftmost, $left - $leftmost + 1)));
-						$orig_right_tokens = $right_tokens = implode('', array_map(function ($token) {
+						$origRightTokens = $rightTokens = implode('', array_map(function ($token) {
 							return isset($token[1]) ? $token[1] : $token;
 						}, array_slice($tkns, $right, $rightmost - $right + 1)));
 
-						$left_tokens = (substr($orig_right_tokens, 0, 1) == ' ' ? ' ' : '') . trim($left_tokens) . (substr($orig_right_tokens, -1, 1) == ' ' ? ' ' : '');
-						$right_tokens = (substr($orig_left_tokens, 0, 1) == ' ' ? ' ' : '') . trim($right_tokens) . (substr($orig_left_tokens, -1, 1) == ' ' ? ' ' : '');
+						$leftTokens = (substr($origRightTokens, 0, 1) == ' ' ? ' ' : '') . trim($leftTokens) . (substr($origRightTokens, -1, 1) == ' ' ? ' ' : '');
+						$rightTokens = (substr($origLeftTokens, 0, 1) == ' ' ? ' ' : '') . trim($rightTokens) . (substr($origLeftTokens, -1, 1) == ' ' ? ' ' : '');
 
-						$tkns[$leftmost] = ['REPLACED', $right_tokens];
-						$tkns[$right] = ['REPLACED', $left_tokens];
+						$tkns[$leftmost] = ['REPLACED', $rightTokens];
+						$tkns[$right] = ['REPLACED', $leftTokens];
 
 						if ($leftmost != $left) {
 							for ($i = $leftmost + 1; $i <= $left; ++$i) {
@@ -80,10 +80,10 @@ final class YodaComparisons extends AdditionalPass {
 		return $this->render($tkns);
 	}
 
-	private function is_pure_variable($id) {
+	private function isPureVariable($id) {
 		return self::CHAIN_VARIABLE == $id || T_VARIABLE == $id || T_INC == $id || T_DEC == $id || ST_EXCLAMATION == $id || T_COMMENT == $id || T_DOC_COMMENT == $id || T_WHITESPACE == $id;
 	}
-	private function is_lower_precedence($id) {
+	private function isLowerPrecedence($id) {
 		switch ($id) {
 			case ST_REFERENCE:
 			case ST_BITWISE_XOR:
@@ -123,20 +123,20 @@ final class YodaComparisons extends AdditionalPass {
 		return false;
 	}
 
-	private function aggregate_variables($source) {
+	private function aggregateVariables($source) {
 		$tkns = token_get_all($source);
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
 
 			if (ST_PARENTHESES_OPEN == $id) {
-				$initial_ptr = $ptr;
+				$initialPtr = $ptr;
 				$tmp = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
-				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
+				$tkns[$initialPtr] = [self::PARENTHESES_BLOCK, $tmp];
 				continue;
 			}
 			if (ST_QUOTE == $id) {
 				$stack = $text;
-				$initial_ptr = $ptr;
+				$initialPtr = $ptr;
 				while (list($ptr, $token) = each($tkns)) {
 					list($id, $text) = $this->getToken($token);
 					$stack .= $text;
@@ -146,16 +146,16 @@ final class YodaComparisons extends AdditionalPass {
 					}
 				}
 
-				$tkns[$initial_ptr] = [self::CHAIN_STRING, $stack];
+				$tkns[$initialPtr] = [self::CHAIN_STRING, $stack];
 				continue;
 			}
 
 			if (T_STRING == $id || T_VARIABLE == $id || T_NS_SEPARATOR == $id) {
-				$initial_index = $ptr;
+				$initialIndex = $ptr;
 				$stack = $text;
-				$touched_variable = false;
+				$touchedVariable = false;
 				if (T_VARIABLE == $id) {
-					$touched_variable = true;
+					$touchedVariable = true;
 				}
 				if (!$this->rightTokenSubsetIsAtIdx(
 					$tkns,
@@ -177,8 +177,8 @@ final class YodaComparisons extends AdditionalPass {
 
 					$stack .= $text;
 
-					if (!$touched_variable && T_VARIABLE == $id) {
-						$touched_variable = true;
+					if (!$touchedVariable && T_VARIABLE == $id) {
+						$touchedVariable = true;
 					}
 
 					if (
@@ -192,11 +192,11 @@ final class YodaComparisons extends AdditionalPass {
 					}
 				}
 				if (substr(trim($stack), -1, 1) == ST_PARENTHESES_CLOSE) {
-					$tkns[$initial_index] = [self::CHAIN_FUNC, $stack];
-				} elseif ($touched_variable) {
-					$tkns[$initial_index] = [self::CHAIN_VARIABLE, $stack];
+					$tkns[$initialIndex] = [self::CHAIN_FUNC, $stack];
+				} elseif ($touchedVariable) {
+					$tkns[$initialIndex] = [self::CHAIN_VARIABLE, $stack];
 				} else {
-					$tkns[$initial_index] = [self::CHAIN_LITERAL, $stack];
+					$tkns[$initialIndex] = [self::CHAIN_LITERAL, $stack];
 				}
 			}
 		}

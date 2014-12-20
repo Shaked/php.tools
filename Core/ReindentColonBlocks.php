@@ -8,25 +8,25 @@ final class ReindentColonBlocks extends FormatterPass {
 		$this->useCache = true;
 		$this->code = '';
 
-		$found_colon = false;
+		$foundColon = false;
 		foreach ($this->tkns as $token) {
 			list($id, $text) = $this->getToken($token);
 			if (T_DEFAULT == $id || T_CASE == $id || T_SWITCH == $id) {
-				$found_colon = true;
+				$foundColon = true;
 				break;
 			}
 			$this->appendCode($text);
 		}
-		if (!$found_colon) {
+		if (!$foundColon) {
 			return $source;
 		}
 
 		prev($this->tkns);
-		$switch_level = 0;
-		$switch_curly_count = [];
-		$switch_curly_count[$switch_level] = 0;
-		$is_next_case_or_default = false;
-		$touched_colon = false;
+		$switchLevel = 0;
+		$switchCurlyCount = [];
+		$switchCurlyCount[$switchLevel] = 0;
+		$isNextCaseOrDefault = false;
+		$touchedColon = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -38,9 +38,9 @@ final class ReindentColonBlocks extends FormatterPass {
 					break;
 
 				case T_SWITCH:
-					++$switch_level;
-					$switch_curly_count[$switch_level] = 0;
-					$touched_colon = false;
+					++$switchLevel;
+					$switchCurlyCount[$switchLevel] = 0;
+					$touchedColon = false;
 					$this->appendCode($text);
 					break;
 
@@ -50,41 +50,41 @@ final class ReindentColonBlocks extends FormatterPass {
 						$this->printCurlyBlock();
 						break;
 					}
-					++$switch_curly_count[$switch_level];
+					++$switchCurlyCount[$switchLevel];
 					break;
 
 				case ST_CURLY_CLOSE:
-					--$switch_curly_count[$switch_level];
-					if (0 === $switch_curly_count[$switch_level] && $switch_level > 0) {
-						--$switch_level;
+					--$switchCurlyCount[$switchLevel];
+					if (0 === $switchCurlyCount[$switchLevel] && $switchLevel > 0) {
+						--$switchLevel;
 					}
-					$this->appendCode($this->getIndent($switch_level) . $text);
+					$this->appendCode($this->getIndent($switchLevel) . $text);
 					break;
 
 				case T_DEFAULT:
 				case T_CASE:
-					$touched_colon = false;
+					$touchedColon = false;
 					$this->appendCode($text);
 					break;
 
 				case ST_COLON:
-					$touched_colon = true;
+					$touchedColon = true;
 					$this->appendCode($text);
 					break;
 
 				default:
-					$has_ln = $this->hasLn($text);
-					if ($has_ln) {
-						$is_next_case_or_default = $this->rightUsefulTokenIs([T_CASE, T_DEFAULT]);
-						if ($touched_colon && T_COMMENT == $id && $is_next_case_or_default) {
+					$hasLn = $this->hasLn($text);
+					if ($hasLn) {
+						$isNextCaseOrDefault = $this->rightUsefulTokenIs([T_CASE, T_DEFAULT]);
+						if ($touchedColon && T_COMMENT == $id && $isNextCaseOrDefault) {
 							$this->appendCode($text);
-						} elseif ($touched_colon && T_COMMENT == $id && !$is_next_case_or_default) {
-							$this->appendCode($this->getIndent($switch_level) . $text);
+						} elseif ($touchedColon && T_COMMENT == $id && !$isNextCaseOrDefault) {
+							$this->appendCode($this->getIndent($switchLevel) . $text);
 							if (!$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
-								$this->appendCode($this->getIndent($switch_level));
+								$this->appendCode($this->getIndent($switchLevel));
 							}
-						} elseif (!$is_next_case_or_default && !$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
-							$this->appendCode($text . $this->getIndent($switch_level));
+						} elseif (!$isNextCaseOrDefault && !$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
+							$this->appendCode($text . $this->getIndent($switchLevel));
 						} else {
 							$this->appendCode($text);
 						}

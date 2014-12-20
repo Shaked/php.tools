@@ -22,10 +22,10 @@ final class ResizeSpaces extends FormatterPass {
 		$this->code = '';
 		$this->useCache = true;
 
-		$in_ternary_operator = false;
-		$short_ternary_operator = false;
-		$touched_function = false;
-		$touched_use = false;
+		$inTernaryOperator = false;
+		$shortTernaryOperator = false;
+		$touchedFunction = false;
+		$touchedUse = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -54,21 +54,21 @@ final class ResizeSpaces extends FormatterPass {
 					}
 					break;
 				case '*':
-					list($prev_id, $prev_text) = $this->inspectToken(-1);
-					list($next_id, $next_text) = $this->inspectToken(+1);
+					list($prevId, $prevText) = $this->inspectToken(-1);
+					list($nextId, $nextText) = $this->inspectToken(+1);
 					if (
-						T_WHITESPACE === $prev_id &&
-						T_WHITESPACE !== $next_id
+						T_WHITESPACE === $prevId &&
+						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($text . $this->getSpace());
 					} elseif (
-						T_WHITESPACE !== $prev_id &&
-						T_WHITESPACE === $next_id
+						T_WHITESPACE !== $prevId &&
+						T_WHITESPACE === $nextId
 					) {
 						$this->appendCode($this->getSpace() . $text);
 					} elseif (
-						T_WHITESPACE !== $prev_id &&
-						T_WHITESPACE !== $next_id
+						T_WHITESPACE !== $prevId &&
+						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($this->getSpace() . $text . $this->getSpace());
 					} else {
@@ -83,54 +83,54 @@ final class ResizeSpaces extends FormatterPass {
 				case ST_QUESTION:
 				case ST_CONCAT:
 					if (ST_QUESTION == $id) {
-						$in_ternary_operator = true;
-						$short_ternary_operator = $this->rightTokenIs(ST_COLON);
+						$inTernaryOperator = true;
+						$shortTernaryOperator = $this->rightTokenIs(ST_COLON);
 					}
-					list($prev_id, $prev_text) = $this->inspectToken(-1);
-					list($next_id, $next_text) = $this->inspectToken(+1);
+					list($prevId, $prevText) = $this->inspectToken(-1);
+					list($nextId, $nextText) = $this->inspectToken(+1);
 					if (
-						T_WHITESPACE === $prev_id &&
-						T_WHITESPACE !== $next_id
+						T_WHITESPACE === $prevId &&
+						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_COLON)));
 						break;
 					} elseif (
-						T_WHITESPACE !== $prev_id &&
-						T_WHITESPACE === $next_id
+						T_WHITESPACE !== $prevId &&
+						T_WHITESPACE === $nextId
 					) {
 						$this->appendCode($this->getSpace() . $text);
 						break;
 					} elseif (
-						T_WHITESPACE !== $prev_id &&
-						T_WHITESPACE !== $next_id
+						T_WHITESPACE !== $prevId &&
+						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($this->getSpace() . $text . $this->getSpace(!$this->rightTokenIs(ST_COLON)));
 						break;
 					}
 				case ST_COLON:
-					list($prev_id, $prev_text) = $this->inspectToken(-1);
-					list($next_id, $next_text) = $this->inspectToken(+1);
+					list($prevId, $prevText) = $this->inspectToken(-1);
+					list($nextId, $nextText) = $this->inspectToken(+1);
 					if (
-						$in_ternary_operator &&
-						T_WHITESPACE === $prev_id &&
-						T_WHITESPACE !== $next_id
+						$inTernaryOperator &&
+						T_WHITESPACE === $prevId &&
+						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($text . $this->getSpace());
-						$in_ternary_operator = false;
+						$inTernaryOperator = false;
 					} elseif (
-						$in_ternary_operator &&
-						T_WHITESPACE !== $prev_id &&
-						T_WHITESPACE === $next_id
+						$inTernaryOperator &&
+						T_WHITESPACE !== $prevId &&
+						T_WHITESPACE === $nextId
 					) {
-						$this->appendCode($this->getSpace(!$short_ternary_operator) . $text);
-						$in_ternary_operator = false;
+						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text);
+						$inTernaryOperator = false;
 					} elseif (
-						$in_ternary_operator &&
-						T_WHITESPACE !== $prev_id &&
-						T_WHITESPACE !== $next_id
+						$inTernaryOperator &&
+						T_WHITESPACE !== $prevId &&
+						T_WHITESPACE !== $nextId
 					) {
-						$this->appendCode($this->getSpace(!$short_ternary_operator) . $text . $this->getSpace());
-						$in_ternary_operator = false;
+						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text . $this->getSpace());
+						$inTernaryOperator = false;
 					} else {
 						$this->appendCode($text);
 					}
@@ -156,8 +156,8 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case ST_CURLY_OPEN:
-					$touched_function = false;
-					if (!$touched_use && $this->leftUsefulTokenIs([T_VARIABLE, T_STRING]) && $this->rightUsefulTokenIs([T_VARIABLE, T_STRING])) {
+					$touchedFunction = false;
+					if (!$touchedUse && $this->leftUsefulTokenIs([T_VARIABLE, T_STRING]) && $this->rightUsefulTokenIs([T_VARIABLE, T_STRING])) {
 						$this->appendCode($text);
 						break;
 					} elseif (!$this->hasLnLeftToken() && $this->leftUsefulTokenIs([T_STRING, T_DO, T_FINALLY, ST_PARENTHESES_CLOSE])) {
@@ -175,7 +175,7 @@ final class ResizeSpaces extends FormatterPass {
 					}
 
 				case ST_SEMI_COLON:
-					$touched_use = false;
+					$touchedUse = false;
 					if ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_COMMENT, T_DOC_COMMENT])) {
 						$this->appendCode($text . $this->getSpace());
 						break;
@@ -196,7 +196,7 @@ final class ResizeSpaces extends FormatterPass {
 					} else {
 						$this->appendCode($text . $this->getSpace());
 					}
-					$touched_use = true;
+					$touchedUse = true;
 					break;
 				case T_RETURN:
 				case T_YIELD:
@@ -224,7 +224,7 @@ final class ResizeSpaces extends FormatterPass {
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_SEMI_COLON, T_DOUBLE_COLON, ST_PARENTHESES_OPEN])));
 					break;
 				case T_FUNCTION:
-					$touched_function = true;
+					$touchedFunction = true;
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_SEMI_COLON)));
 					break;
 				case T_PUBLIC:
@@ -322,9 +322,9 @@ final class ResizeSpaces extends FormatterPass {
 					$this->appendCode(str_replace([' ', "\t"], '', $text) . $this->getSpace());
 					break;
 				case ST_REFERENCE:
-					$space_before = !$this->leftUsefulTokenIs([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]) && !$this->leftUsefulTokenIs(T_ARRAY);
-					$space_after = !$touched_function && !$this->leftUsefulTokenIs([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]);
-					$this->appendCode($this->getSpace($space_before) . $text . $this->getSpace($space_after));
+					$spaceBefore = !$this->leftUsefulTokenIs([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]) && !$this->leftUsefulTokenIs(T_ARRAY);
+					$spaceAfter = !$touchedFunction && !$this->leftUsefulTokenIs([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]);
+					$this->appendCode($this->getSpace($spaceBefore) . $text . $this->getSpace($spaceAfter));
 					break;
 				default:
 					$this->appendCode($text);

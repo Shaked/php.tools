@@ -1,7 +1,7 @@
 <?php
 class AutoPreincrement extends AdditionalPass {
-	protected $candidate_tokens = [T_INC, T_DEC];
-	protected $check_against_concat = false;
+	protected $candidateTokens = [T_INC, T_DEC];
+	protected $checkAgainstConcat = false;
 	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
 	const CHAIN_LITERAL = 'CHAIN_LITERAL';
 	const CHAIN_FUNC = 'CHAIN_FUNC';
@@ -18,50 +18,50 @@ class AutoPreincrement extends AdditionalPass {
 		return $this->swap($source);
 	}
 	protected function swap($source) {
-		$tkns = $this->aggregate_variables($source);
-		$touched_concat = false;
+		$tkns = $this->aggregateVariables($source);
+		$touchedConcat = false;
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
 			switch ($id) {
 				case ST_CONCAT:
-					$touched_concat = true;
+					$touchedConcat = true;
 					break;
 				case T_INC:
 				case T_DEC:
-					$prev_token = $tkns[$ptr - 1];
-					list($prev_id, ) = $prev_token;
+					$prevToken = $tkns[$ptr - 1];
+					list($prevId, ) = $prevToken;
 					if (
 						(
-							!$this->check_against_concat
+							!$this->checkAgainstConcat
 							||
-							($this->check_against_concat && !$touched_concat)
+							($this->checkAgainstConcat && !$touchedConcat)
 						) &&
-						(T_VARIABLE == $prev_id || self::CHAIN_VARIABLE == $prev_id)
+						(T_VARIABLE == $prevId || self::CHAIN_VARIABLE == $prevId)
 					) {
 						list($tkns[$ptr], $tkns[$ptr - 1]) = [$tkns[$ptr - 1], $tkns[$ptr]];
 						break;
 					}
-					$touched_concat = false;
+					$touchedConcat = false;
 			}
 		}
 		return $this->render($tkns);
 	}
 
-	private function aggregate_variables($source) {
+	private function aggregateVariables($source) {
 		$tkns = token_get_all($source);
 		reset($tkns);
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
 
 			if (ST_PARENTHESES_OPEN == $id) {
-				$initial_ptr = $ptr;
-				$tmp = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidate_tokens);
-				$tkns[$initial_ptr] = [self::PARENTHESES_BLOCK, $tmp];
+				$initialPtr = $ptr;
+				$tmp = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidateTokens);
+				$tkns[$initialPtr] = [self::PARENTHESES_BLOCK, $tmp];
 				continue;
 			}
 			if (ST_QUOTE == $id) {
 				$stack = $text;
-				$initial_ptr = $ptr;
+				$initialPtr = $ptr;
 				while (list($ptr, $token) = each($tkns)) {
 					list($id, $text) = $this->getToken($token);
 					$stack .= $text;
@@ -71,12 +71,12 @@ class AutoPreincrement extends AdditionalPass {
 					}
 				}
 
-				$tkns[$initial_ptr] = [self::CHAIN_STRING, $stack];
+				$tkns[$initialPtr] = [self::CHAIN_STRING, $stack];
 				continue;
 			}
 
 			if (ST_DOLLAR == $id) {
-				$initial_index = $ptr;
+				$initialIndex = $ptr;
 				$tkns[$ptr] = null;
 				$stack = '';
 				do {
@@ -85,16 +85,16 @@ class AutoPreincrement extends AdditionalPass {
 					$tkns[$ptr] = null;
 					$stack .= $text;
 				} while (ST_CURLY_OPEN != $id);
-				$stack = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
-				$tkns[$initial_index] = [self::CHAIN_VARIABLE, '$' . $stack];
+				$stack = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidateTokens);
+				$tkns[$initialIndex] = [self::CHAIN_VARIABLE, '$' . $stack];
 			}
 
 			if (T_STRING == $id || T_VARIABLE == $id || T_NS_SEPARATOR == $id) {
-				$initial_index = $ptr;
+				$initialIndex = $ptr;
 				$stack = $text;
-				$touched_variable = false;
+				$touchedVariable = false;
 				if (T_VARIABLE == $id) {
-					$touched_variable = true;
+					$touchedVariable = true;
 				}
 				if (!$this->rightTokenSubsetIsAtIdx(
 					$tkns,
@@ -108,17 +108,17 @@ class AutoPreincrement extends AdditionalPass {
 					list($id, $text) = $this->getToken($token);
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidate_tokens);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidateTokens);
 					} elseif (ST_BRACKET_OPEN == $id) {
-						$text = $this->scanAndReplace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', $this->candidate_tokens);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', $this->candidateTokens);
 					} elseif (ST_PARENTHESES_OPEN == $id) {
-						$text = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidate_tokens);
+						$text = $this->scanAndReplace($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, 'swap', $this->candidateTokens);
 					}
 
 					$stack .= $text;
 
-					if (!$touched_variable && T_VARIABLE == $id) {
-						$touched_variable = true;
+					if (!$touchedVariable && T_VARIABLE == $id) {
+						$touchedVariable = true;
 					}
 
 					if (
@@ -132,11 +132,11 @@ class AutoPreincrement extends AdditionalPass {
 					}
 				}
 				if (substr(trim($stack), -1, 1) == ST_PARENTHESES_CLOSE) {
-					$tkns[$initial_index] = [self::CHAIN_FUNC, $stack];
-				} elseif ($touched_variable) {
-					$tkns[$initial_index] = [self::CHAIN_VARIABLE, $stack];
+					$tkns[$initialIndex] = [self::CHAIN_FUNC, $stack];
+				} elseif ($touchedVariable) {
+					$tkns[$initialIndex] = [self::CHAIN_VARIABLE, $stack];
 				} else {
-					$tkns[$initial_index] = [self::CHAIN_LITERAL, $stack];
+					$tkns[$initialIndex] = [self::CHAIN_LITERAL, $stack];
 				}
 			}
 		}
