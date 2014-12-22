@@ -6130,7 +6130,7 @@ EOT;
 	}
 };
 
-function extract_from_argv($argv, $item) {
+function extractFromArgv($argv, $item) {
 	return array_values(
 		array_filter($argv,
 			function ($v) use ($item) {
@@ -6140,7 +6140,7 @@ function extract_from_argv($argv, $item) {
 	);
 }
 
-function extract_from_argv_short($argv, $item) {
+function extractFromArgvShort($argv, $item) {
 	return array_values(
 		array_filter($argv,
 			function ($v) use ($item) {
@@ -6277,7 +6277,7 @@ if (!isset($testEnv)) {
 		exit(0);
 	}
 	if (isset($opts['config'])) {
-		$argv = extract_from_argv($argv, 'config');
+		$argv = extractFromArgv($argv, 'config');
 		if (!file_exists($opts['config']) || !is_file($opts['config'])) {
 			fwrite(STDERR, 'Custom configuration not file found' . PHP_EOL);
 			exit(255);
@@ -6290,7 +6290,7 @@ if (!isset($testEnv)) {
 		fwrite(STDERR, 'Configuration file found' . PHP_EOL);
 		$ini_opts = parse_ini_file('.php.tools.ini', true);
 		if (isset($opts['profile'])) {
-			$argv = extract_from_argv($argv, 'profile');
+			$argv = extractFromArgv($argv, 'profile');
 			$profile = &$ini_opts[$opts['profile']];
 			if (isset($profile)) {
 				$ini_opts = $profile;
@@ -6326,20 +6326,20 @@ if (!isset($testEnv)) {
 	$cache = null;
 	$cache_fn = null;
 	if ($enable_cache && isset($opts['cache'])) {
-		$argv = extract_from_argv($argv, 'cache');
+		$argv = extractFromArgv($argv, 'cache');
 		$cache_fn = $opts['cache'];
 		$cache = new Cache($cache_fn);
 		fwrite(STDERR, 'Using cache ...' . PHP_EOL);
 	}
 	$backup = true;
 	if (isset($opts['no-backup'])) {
-		$argv = extract_from_argv($argv, 'no-backup');
+		$argv = extractFromArgv($argv, 'no-backup');
 		$backup = false;
 	}
 
 	$ignore_list = null;
 	if (isset($opts['ignore'])) {
-		$argv = extract_from_argv($argv, 'ignore');
+		$argv = extractFromArgv($argv, 'ignore');
 		$ignore_list = array_map(function ($v) {
 			return trim($v);
 		}, explode(',', $opts['ignore']));
@@ -6358,21 +6358,21 @@ if (!isset($testEnv)) {
 				$fmt->addPass(new $optPass());
 			}
 		}
-		$argv = extract_from_argv($argv, 'prepasses');
+		$argv = extractFromArgv($argv, 'prepasses');
 	}
 	$fmt->addPass(new TwoCommandsInSameLine());
 	$fmt->addPass(new RemoveIncludeParentheses());
 	$fmt->addPass(new NormalizeIsNotEquals());
 	if (isset($opts['setters_and_getters'])) {
-		$argv = extract_from_argv($argv, 'setters_and_getters');
+		$argv = extractFromArgv($argv, 'setters_and_getters');
 		$fmt->addPass(new SettersAndGettersPass($opts['setters_and_getters']));
 	}
 	if (isset($opts['constructor'])) {
-		$argv = extract_from_argv($argv, 'constructor');
+		$argv = extractFromArgv($argv, 'constructor');
 		$fmt->addPass(new ConstructorPass($opts['constructor']));
 	}
 	if (isset($opts['oracleDB'])) {
-		$argv = extract_from_argv($argv, 'oracleDB');
+		$argv = extractFromArgv($argv, 'oracleDB');
 		$fmt->addPass(new AutoImportPass($opts['oracleDB']));
 	}
 
@@ -6380,7 +6380,7 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new AddMissingCurlyBraces());
 	if (isset($opts['smart_linebreak_after_curly'])) {
 		$fmt->addPass(new SmartLnAfterCurlyOpen());
-		$argv = extract_from_argv($argv, 'smart_linebreak_after_curly');
+		$argv = extractFromArgv($argv, 'smart_linebreak_after_curly');
 	}
 	$fmt->addPass(new ExtraCommaInArray());
 	$fmt->addPass(new NormalizeLnAndLtrimLines());
@@ -6390,7 +6390,7 @@ if (!isset($testEnv)) {
 
 	if (isset($opts['yoda'])) {
 		$fmt->addPass(new YodaComparisons());
-		$argv = extract_from_argv($argv, 'yoda');
+		$argv = extractFromArgv($argv, 'yoda');
 	}
 
 	$fmt->addPass(new ResizeSpaces());
@@ -6401,7 +6401,7 @@ if (!isset($testEnv)) {
 	if (isset($opts['enable_auto_align'])) {
 		$fmt->addPass(new AlignEquals());
 		$fmt->addPass(new AlignDoubleArrow());
-		$argv = extract_from_argv($argv, 'enable_auto_align');
+		$argv = extractFromArgv($argv, 'enable_auto_align');
 	}
 
 	$fmt->addPass(new ReindentObjOps());
@@ -6410,23 +6410,23 @@ if (!isset($testEnv)) {
 
 	if (isset($opts['indent_with_space'])) {
 		$fmt->addPass(new PSR2IndentWithSpace($opts['indent_with_space']));
-		$argv = extract_from_argv($argv, 'indent_with_space');
+		$argv = extractFromArgv($argv, 'indent_with_space');
 	}
 	if (isset($opts['psr'])) {
 		PsrDecorator::decorate($fmt);
-		$argv = extract_from_argv($argv, 'psr');
+		$argv = extractFromArgv($argv, 'psr');
 	}
 	if (isset($opts['psr1'])) {
 		PsrDecorator::PSR1($fmt);
-		$argv = extract_from_argv($argv, 'psr1');
+		$argv = extractFromArgv($argv, 'psr1');
 	}
 	if (isset($opts['psr1-naming'])) {
-		PsrDecorator::PSR1_naming($fmt);
-		$argv = extract_from_argv($argv, 'psr1-naming');
+		PsrDecorator::PSR1Naming($fmt);
+		$argv = extractFromArgv($argv, 'psr1-naming');
 	}
 	if (isset($opts['psr2'])) {
 		PsrDecorator::PSR2($fmt);
-		$argv = extract_from_argv($argv, 'psr2');
+		$argv = extractFromArgv($argv, 'psr2');
 	}
 	if ((isset($opts['psr1']) || isset($opts['psr2']) || isset($opts['psr'])) && isset($opts['enable_auto_align'])) {
 		$fmt->addPass(new PSR2AlignObjOp());
@@ -6434,7 +6434,7 @@ if (!isset($testEnv)) {
 
 	if (isset($opts['visibility_order'])) {
 		$fmt->addPass(new PSR2ModifierVisibilityStaticOrder());
-		$argv = extract_from_argv($argv, 'visibility_order');
+		$argv = extractFromArgv($argv, 'visibility_order');
 	}
 	$fmt->addPass(new LeftAlignComment());
 	$fmt->addPass(new RTrim());
@@ -6451,21 +6451,21 @@ if (!isset($testEnv)) {
 				$fmt->addPass(new $optPass());
 			}
 		}
-		$argv = extract_from_argv($argv, 'passes');
+		$argv = extractFromArgv($argv, 'passes');
 	}
 
 	if (isset($opts['laravel'])) {
 		$fmt->addPass(new LaravelStyle());
-		$argv = extract_from_argv($argv, 'laravel');
+		$argv = extractFromArgv($argv, 'laravel');
 	}
 
 	if (isset($opts['cakephp'])) {
 		$fmt->addPass(new CakePHPStyle());
-		$argv = extract_from_argv($argv, 'cakephp');
+		$argv = extractFromArgv($argv, 'cakephp');
 	}
 
 	if (isset($opts['v'])) {
-		$argv = extract_from_argv_short($argv, 'v');
+		$argv = extractFromArgvShort($argv, 'v');
 		fwrite(STDERR, 'Used passes: ' . implode(', ', $fmt->getPassesNames()) . PHP_EOL);
 	}
 
@@ -6487,7 +6487,7 @@ if (!isset($testEnv)) {
 			echo $fmt->formatCode('<?php ' . substr($str, 0, -1)), PHP_EOL;
 		}
 	} elseif (isset($opts['o'])) {
-		$argv = extract_from_argv_short($argv, 'o');
+		$argv = extractFromArgvShort($argv, 'o');
 		if ('-' == $opts['o'] && '-' == $argv[1]) {
 			echo $fmt->formatCode(file_get_contents('php://stdin'));
 			exit(0);
