@@ -30,8 +30,8 @@ final class OrderUseClauses extends FormatterPass {
 							break;
 						} elseif (ST_COMMA === $id) {
 							$useItem .= ST_SEMI_COLON;
-							$nextTokens[] = [T_WHITESPACE, $this->newLine, ];
-							$nextTokens[] = [T_USE, 'use', ];
+							$nextTokens[] = [T_WHITESPACE, $this->newLine];
+							$nextTokens[] = [T_USE, 'use'];
 							break;
 						} else {
 							$useItem .= $text;

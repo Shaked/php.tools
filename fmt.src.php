@@ -106,6 +106,13 @@ function extractFromArgvShort($argv, $item) {
 		)
 	);
 }
+
+function lint($file) {
+	$output = null;
+	$ret = null;
+	exec('php -l ' . escapeshellarg($file), $output, $ret);
+	return 0 == $ret;
+}
 if (!isset($in_phar)) {
 	$in_phar = false;
 }
@@ -121,6 +128,7 @@ if (!isset($testEnv)) {
 			'--ignore=PATTERN1,PATTERN2' => 'ignore file names whose names contain any PATTERN-N',
 			'--indent_with_space=SIZE' => 'use spaces instead of tabs for indentation. Default 4',
 			'--laravel' => 'Apply Laravel coding style',
+			'--lint-before' => 'lint files before pretty printing (PHP must be declared in %PATH%/$PATH)',
 			'--list' => 'list possible transformations',
 			'--no-backup' => 'no backup file (original.php~)',
 			'--passes=pass1,passN' => 'call specific compiler pass',
@@ -167,6 +175,7 @@ if (!isset($testEnv)) {
 		'ignore:',
 		'indent_with_space::',
 		'laravel',
+		'lint-before',
 		'list',
 		'no-backup',
 		'oracleDB::',
@@ -300,6 +309,12 @@ if (!isset($testEnv)) {
 		$ignore_list = array_map(function ($v) {
 			return trim($v);
 		}, explode(',', $opts['ignore']));
+	}
+
+	$lintBefore = false;
+	if (isset($opts['lint-before'])) {
+		$argv = extractFromArgv($argv, 'lint-before');
+		$lintBefore = true;
 	}
 
 	$fmt = new CodeFormatter();
@@ -490,6 +505,10 @@ if (!isset($testEnv)) {
 			}
 			if (is_file($arg)) {
 				$file = $arg;
+				if ($lintBefore && !lint($file)) {
+					fwrite(STDERR, 'Error lint:' . $file . PHP_EOL);
+					continue;
+				}
 				++$file_count;
 				fwrite(STDERR, '.');
 				file_put_contents($file . '-tmp', $fmt->formatCode(file_get_contents($file)));
@@ -509,7 +528,7 @@ if (!isset($testEnv)) {
 						fwrite(STDERR, 'Starting ' . $workers . ' workers ...' . PHP_EOL);
 					}
 					for ($i = 0; $i < $workers; ++$i) {
-						cofunc(function ($fmt, $backup, $cache_fn, $chn, $chn_done, $id) {
+						cofunc(function ($fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore, $id) {
 							$cache = null;
 							if (null !== $cache_fn) {
 								$cache = new Cache($cache_fn);
@@ -524,6 +543,10 @@ if (!isset($testEnv)) {
 								$target_dir = $msg['target_dir'];
 								$file = $msg['file'];
 								if (empty($file)) {
+									continue;
+								}
+								if ($lintBefore && !lint($file)) {
+									fwrite(STDERR, 'Error lint:' . $file . PHP_EOL);
 									continue;
 								}
 								if (null !== $cache) {
@@ -545,7 +568,7 @@ if (!isset($testEnv)) {
 								rename($file . '-tmp', $file);
 							}
 							$chn_done->in([$cache_hit_count, $cache_miss_count]);
-						}, $fmt, $backup, $cache_fn, $chn, $chn_done, $i);
+						}, $fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore, $i);
 					}
 				}
 				foreach ($files as $file) {
@@ -577,6 +600,10 @@ if (!isset($testEnv)) {
 							}
 						} else {
 							$content = file_get_contents($file);
+						}
+						if ($lintBefore && !lint($file)) {
+							fwrite(STDERR, 'Error lint:' . $file . PHP_EOL);
+							continue;
 						}
 						$fmtCode = $fmt->formatCode($content);
 						fwrite(STDERR, '.');
