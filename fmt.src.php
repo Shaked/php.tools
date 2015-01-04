@@ -83,6 +83,7 @@ require 'Additionals/ReturnNull.php';
 require 'Additionals/ShortArray.php';
 require 'Additionals/SmartLnAfterCurlyOpen.php';
 require 'Additionals/SpaceBetweenMethods.php';
+require 'Additionals/StripExtraCommaInArray.php';
 require 'Additionals/TightConcat.php';
 require 'Additionals/WrongConstructorName.php';
 require 'Additionals/YodaComparisons.php';
