@@ -680,6 +680,9 @@ abstract class AdditionalPass extends FormatterPass {
 	abstract public function getExample();
 }
 ;
+/**
+ * @codeCoverageIgnore
+ */
 final class CodeFormatter {
 	private $passes = [];
 	public function addPass(FormatterPass $pass) {
@@ -802,9 +805,6 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							if (ST_SEMI_COLON != $id && $this->rightTokenIs(T_CLOSE_TAG)) {
 								$this->appendCode(ST_SEMI_COLON);
 								break;
-							}
-							if (T_INLINE_HTML == $id && !$this->rightTokenIs(T_OPEN_TAG)) {
-								$this->appendCode('<?php');
 							}
 							if ($ignoreCount <= 0 && !($this->rightTokenIs([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN, ST_EQUAL]) || ($whileInNextToken && $this->rightTokenIs([T_WHILE]))) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
 								break;

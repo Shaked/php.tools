@@ -1,3 +1,3 @@
 <?php
-//passes:MergeNamespaceWithOpenTag,NoSpaceAfterPHPDocBlocks
+//passes:MergeNamespaceWithOpenTag,NoSpaceAfterPHPDocBlocks,StripNewlineAfterCurlyOpen,StripNewlineAfterClassOpen
 $a . $b;

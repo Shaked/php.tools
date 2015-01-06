@@ -1,4 +1,7 @@
 <?php
+/**
+ * @codeCoverageIgnore
+ */
 final class CodeFormatter {
 	private $passes = [];
 	public function addPass(FormatterPass $pass) {

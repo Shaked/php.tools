@@ -11,3 +11,5 @@ trait B {
 
 	// Comment
 }
+
+A::class;
