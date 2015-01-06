@@ -4,7 +4,18 @@ final class CodeFormatter {
 	public function addPass(FormatterPass $pass) {
 		array_unshift($this->passes, $pass);
 	}
-
+	public function removePass($passName) {
+		$idx = [];
+		foreach ($this->passes as $k => $pass) {
+			if (get_class($pass) == $passName) {
+				$idx[] = $k;
+			}
+		}
+		foreach ($idx as $k) {
+			unset($this->passes[$k]);
+		}
+		$this->passes = array_values($this->passes);
+	}
 	public function getPassesNames() {
 		return array_map(function ($v) {
 			return get_class($v);

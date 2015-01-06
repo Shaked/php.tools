@@ -128,6 +128,7 @@ if (!isset($testEnv)) {
 			'--config=FILENAME' => 'configuration file. Default: .php.tools.ini',
 			'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 			'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
+			'--exclude=pass1,passN' => 'disable specific passes',
 			'--ignore=PATTERN1,PATTERN2' => 'ignore file names whose names contain any PATTERN-N',
 			'--indent_with_space=SIZE' => 'use spaces instead of tabs for indentation. Default 4',
 			'--laravel' => 'Apply Laravel coding style',
@@ -173,6 +174,7 @@ if (!isset($testEnv)) {
 		'config:',
 		'constructor:',
 		'enable_auto_align',
+		'exclude:',
 		'help',
 		'help-pass:',
 		'ignore:',
@@ -437,6 +439,14 @@ if (!isset($testEnv)) {
 	if (isset($opts['cakephp'])) {
 		$fmt->addPass(new CakePHPStyle());
 		$argv = extractFromArgv($argv, 'cakephp');
+	}
+
+	if (isset($opts['exclude'])) {
+		$passesNames = explode(',', $opts['exclude']);
+		foreach ($passesNames as $passName) {
+			$fmt->removePass(trim($passName));
+		}
+		$argv = extractFromArgv($argv, 'exclude');
 	}
 
 	if (isset($opts['v'])) {
