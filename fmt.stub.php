@@ -1704,15 +1704,13 @@ final class OrderUseClauses extends FormatterPass {
 		$useStack = [];
 		$newTokens = [];
 		$nextTokens = [];
-		$touchedNamespace = false;
+		$touchedTUse = false;
 		while (list(, $popToken) = each($tokens)) {
 			$nextTokens[] = $popToken;
 			while (($token = array_shift($nextTokens))) {
 				list($id, $text) = $this->getToken($token);
-				if (T_NAMESPACE == $id) {
-					$touchedNamespace = true;
-				}
 				if (T_USE === $id) {
+					$touchedTUse = true;
 					$useItem = $text;
 					while (list(, $token) = each($tokens)) {
 						list($id, $text) = $this->getToken($token);
@@ -1731,14 +1729,26 @@ final class OrderUseClauses extends FormatterPass {
 					$useStack[] = trim($useItem);
 					$token = new SurrogateToken();
 				}
-				if (T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id || T_TRAIT === $id || T_VARIABLE === $id) {
+				if ($touchedTUse &&
+					T_FINAL === $id ||
+					T_ABSTRACT === $id ||
+					T_INTERFACE === $id ||
+					T_CLASS === $id ||
+					T_FUNCTION === $id ||
+					T_TRAIT === $id ||
+					T_VARIABLE === $id ||
+					T_WHILE === $id ||
+					T_FOR === $id ||
+					T_FOREACH === $id ||
+					T_IF === $id
+				) {
 					if (sizeof($useStack) > 0) {
 						$newTokens[] = $this->newLine;
 						$newTokens[] = $this->newLine;
 					}
 					$newTokens[] = $token;
 					break 2;
-				} elseif ($touchedNamespace && (T_DOC_COMMENT === $id || T_COMMENT === $id)) {
+				} elseif ($touchedTUse && (T_DOC_COMMENT === $id || T_COMMENT === $id)) {
 					if (sizeof($useStack) > 0) {
 						$newTokens[] = $this->newLine;
 					}
