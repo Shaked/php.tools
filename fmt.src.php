@@ -78,6 +78,7 @@ require 'Additionals/MergeNamespaceWithOpenTag.php';
 require 'Additionals/MildAutoPreincrement.php';
 require 'Additionals/NoSpaceAfterPHPDocBlocks.php';
 require 'Additionals/OrderMethod.php';
+require 'Additionals/PrettyPrintDocBlocks.php';
 require 'Additionals/RemoveUseLeadingSlash.php';
 require 'Additionals/ReturnNull.php';
 require 'Additionals/ShortArray.php';

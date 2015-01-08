@@ -1,0 +1,14 @@
+<?php
+//passes:PrettyPrintDocBlocks,Default
+
+/**
+ * message
+ * more message
+ *
+ * @param type2 $a descriptionáccented
+ * @return array
+ * @param LongType $b description2
+ */
+function a(type2 $a, LongType $b) {
+
+}
