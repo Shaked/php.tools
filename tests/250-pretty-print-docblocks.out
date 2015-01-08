@@ -5,6 +5,18 @@
  * message
  * more message
  *
+ * here comes some code:
+ * 	if($a){
+ * 	}
+ *
+ *
+ * @package OfAlivePeople
+ * @subpackage OfThings
+ *
+ * @author Me
+ *
+ * @see something
+ *
  * @param  type2    $a descriptionáccented
  * @param  LongType $b description2
  * @return array

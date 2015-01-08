@@ -26,12 +26,53 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 	private function prettify($docBlock) {
 		$isUTF8 = $this->isUTF8($docBlock);
 
+		if ($isUTF8) {
+			$docBlock = utf8_decode($docBlock);
+		}
+
+		$groups = [
+			'@deprecated' => 1,
+			'@link' => 1,
+			'@see' => 1,
+			'@since' => 1,
+
+			'@author' => 2,
+			'@copyright' => 2,
+			'@license' => 2,
+
+			'@package' => 3,
+			'@subpackage' => 3,
+
+			'@param' => 4,
+			'@throws' => 4,
+			'@return' => 4,
+		];
 		$weights = [
-			'@param' => 1,
-			'@return' => 2,
+			'@package' => 1,
+			'@subpackage' => 2,
+			'@author' => 3,
+			'@copyright' => 4,
+			'@license' => 5,
+			'@deprecated' => 6,
+			'@link' => 7,
+			'@see' => 8,
+			'@since' => 9,
+			'@param' => 10,
+			'@throws' => 11,
+			'@return' => 12,
 		];
 		$weightsLen = [
+			'@package' => strlen('@package'),
+			'@subpackage' => strlen('@subpackage'),
+			'@author' => strlen('@author'),
+			'@copyright' => strlen('@copyright'),
+			'@license' => strlen('@license'),
+			'@deprecated' => strlen('@deprecated'),
+			'@link' => strlen('@link'),
+			'@see' => strlen('@see'),
+			'@since' => strlen('@since'),
 			'@param' => strlen('@param'),
+			'@throws' => strlen('@throws'),
 			'@return' => strlen('@return'),
 		];
 
@@ -41,15 +82,16 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 		$newText = '';
 		foreach ($lines as $idx => $v) {
 			$v = ltrim($v);
+			if ('* ' === substr($v, 0, 2)) {
+				$v = substr($v, 2);
+			}
 			if ('*' === substr($v, 0, 1)) {
-				$v = trim(substr($v, 1));
+				$v = substr($v, 1);
 			}
 			$lines[$idx] = $v . ':' . $idx;
 		}
 
-		/**
-		 * organize lines
-		 */
+		// Sort lines
 		usort($lines, function ($a, $b) use ($weights, $weightsLen) {
 			$weightA = 0;
 			foreach ($weights as $pattern => $weight) {
@@ -87,10 +129,7 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 
 		foreach ($lines as $idx => $line) {
 			foreach ($patterns as $pattern => $len) {
-				if (strtolower(substr($line, 0, $len)) == $pattern) {
-					if ($isUTF8) {
-						$line = utf8_decode($line);
-					}
+				if (strtolower(substr(ltrim($line), 0, $len)) == $pattern) {
 					$words = explode(' ', $line);
 					foreach ($words as $i => $w) {
 						$maxColumn[$i] = isset($maxColumn[$i]) ? max($maxColumn[$i], strlen($w)) : 0;
@@ -101,42 +140,50 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 
 		foreach ($lines as $idx => $line) {
 			foreach ($patterns as $pattern => $len) {
-				if (strtolower(substr($line, 0, $len)) == $pattern) {
-					if ($isUTF8) {
-						$line = utf8_decode($line);
-					}
+				if (strtolower(substr(ltrim($line), 0, $len)) == $pattern) {
 					$parts = str_word_count($line, 2, '@$01234567890_-:' . "\x7f" . "\xff");
 					reset($maxColumn);
 					$currentLine = '';
 					$pad = 0;
 					foreach ($parts as $part) {
-						$currentLine .= $isUTF8 ? utf8_encode($part) : $part;
+						$currentLine .= $part;
 						$pad += current($maxColumn) + 1;
 						$currentLine = str_pad($currentLine, $pad);
 						next($maxColumn);
 					}
-					$lines[$idx] = trim($currentLine);
+					$lines[$idx] = rtrim($currentLine);
 				}
 			}
 		}
 
+		// Space lines
+		$lastGroup = 0;
+		foreach ($lines as $idx => $line) {
+			if ('@' == substr(ltrim($line), 0, 1)) {
+				$tag = strtolower(substr($line, 0, strpos($line, ' ')));
+				if (isset($groups[$tag]) && $groups[$tag] != $lastGroup) {
+					$lines[$idx] = $this->newLine . ' * ' . $line;
+					$lastGroup = $groups[$tag];
+				}
+			}
+		}
+
+		// Output
 		$docBlock = '/**' . $this->newLine;
 		foreach ($lines as $line) {
-			$docBlock .= ' * ' . substr($line, 0, -2) . $this->newLine;
+			$docBlock .= ' * ' . substr(rtrim($line), 0, strrpos($line, ':')) . $this->newLine;
 		}
 		$docBlock .= ' */';
+
+		if ($isUTF8) {
+			$docBlock = utf8_encode($docBlock);
+		}
 
 		return $docBlock;
 	}
 
 	private function isUTF8($usStr) {
 		return (utf8_encode(utf8_decode($usStr)) == $usStr);
-	}
-	private function utf8Decode($usStr) {
-		if ($this->isUTF8($usStr)) {
-			return utf8_decode($usStr);
-		}
-		return $usStr;
 	}
 
 	/**
