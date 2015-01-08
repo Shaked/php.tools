@@ -16,7 +16,7 @@
  *
  * @see something
  *
- * @param  type2    $a descriptionáccented
+ * @param  type2    $a descriptionaccented
  * @param  LongType $b description2
  * @return array
  */

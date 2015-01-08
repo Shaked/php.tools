@@ -131,8 +131,16 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 			foreach ($patterns as $pattern => $len) {
 				if (strtolower(substr(ltrim($line), 0, $len)) == $pattern) {
 					$words = explode(' ', $line);
-					foreach ($words as $i => $w) {
-						$maxColumn[$i] = isset($maxColumn[$i]) ? max($maxColumn[$i], strlen($w)) : 0;
+					$i = 0;
+					foreach ($words as $word) {
+						if (!trim($word)) {
+							continue;
+						}
+						$maxColumn[$i] = isset($maxColumn[$i]) ? max($maxColumn[$i], strlen($word)) : 0;
+						if (2 == $i) {
+							break;
+						}
+						++$i;
 					}
 				}
 			}
@@ -142,14 +150,22 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 			foreach ($patterns as $pattern => $len) {
 				if (strtolower(substr(ltrim($line), 0, $len)) == $pattern) {
 					$words = explode(' ', $line);
-					reset($maxColumn);
 					$currentLine = '';
 					$pad = 0;
-					foreach ($words as $word) {
+					foreach ($maxColumn as $rightMost) {
+						while ((list(, $word) = each($words))) {
+							if (trim($word)) {
+								break;
+							}
+						}
+
 						$currentLine .= $word;
-						$pad += current($maxColumn) + 1;
+						$pad += $rightMost + 1;
 						$currentLine = str_pad($currentLine, $pad);
-						next($maxColumn);
+					}
+
+					while ((list(, $word) = each($words))) {
+						$currentLine .= $word . ' ';
 					}
 					$lines[$idx] = rtrim($currentLine);
 				}

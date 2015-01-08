@@ -9,7 +9,7 @@
  * 	if($a){
  * 	}
  *
- * @param type2 $a descriptionáccented
+ * @param type2 $a descriptionaccented
  * @return array
  * @param LongType $b description2
  * @see something
