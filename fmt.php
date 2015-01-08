@@ -5534,12 +5534,12 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 		foreach ($lines as $idx => $line) {
 			foreach ($patterns as $pattern => $len) {
 				if (strtolower(substr(ltrim($line), 0, $len)) == $pattern) {
-					$parts = str_word_count($line, 2, '@$01234567890_-:' . "\x7f" . "\xff");
+					$words = explode(' ', $line);
 					reset($maxColumn);
 					$currentLine = '';
 					$pad = 0;
-					foreach ($parts as $part) {
-						$currentLine .= $part;
+					foreach ($words as $word) {
+						$currentLine .= $word;
 						$pad += current($maxColumn) + 1;
 						$currentLine = str_pad($currentLine, $pad);
 						next($maxColumn);
@@ -5550,12 +5550,12 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 		}
 
 		// Space lines
-		$lastGroup = 0;
+		$lastGroup = null;
 		foreach ($lines as $idx => $line) {
 			if ('@' == substr(ltrim($line), 0, 1)) {
 				$tag = strtolower(substr($line, 0, strpos($line, ' ')));
 				if (isset($groups[$tag]) && $groups[$tag] != $lastGroup) {
-					$lines[$idx] = $this->newLine . ' * ' . $line;
+					$lines[$idx] = (null !== $lastGroup ? $this->newLine . ' * ' : '') . $line;
 					$lastGroup = $groups[$tag];
 				}
 			}
