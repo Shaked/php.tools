@@ -3034,6 +3034,9 @@ final class SettersAndGettersPass extends FormatterPass {
 	const TYPE_CAMEL_CASE = 'camel';
 	const TYPE_SNAKE_CASE = 'snake';
 	const TYPE_GOLANG = 'golang';
+	const PLACEHOLDER = "/*SETTERSANDGETTERSPLACEHOLDER%s\x3*/";
+	const PLACEHOLDER_REGEX = '/(;\n\/\*SETTERSANDGETTERSPLACEHOLDER).*(\*\/)/';
+
 	public function __construct($type = self::TYPE_CAMEL_CASE) {
 		if (self::TYPE_CAMEL_CASE == $type || self::TYPE_SNAKE_CASE == $type || self::TYPE_GOLANG == $type) {
 			$this->type = $type;
@@ -3089,12 +3092,18 @@ final class SettersAndGettersPass extends FormatterPass {
 						if (T_VARIABLE == $id && T_PUBLIC == $touchedVisibility) {
 							$attributes['public'][] = $text;
 							$touchedVisibility = null;
+							$this->appendCode(';' . $this->newLine . sprintf(self::PLACEHOLDER, $text));
+							each($this->tkns);
 						} elseif (T_VARIABLE == $id && T_PRIVATE == $touchedVisibility) {
 							$attributes['private'][] = $text;
 							$touchedVisibility = null;
+							$this->appendCode(';' . $this->newLine . sprintf(self::PLACEHOLDER, $text));
+							each($this->tkns);
 						} elseif (T_VARIABLE == $id && T_PROTECTED == $touchedVisibility) {
 							$attributes['protected'][] = $text;
 							$touchedVisibility = null;
+							$this->appendCode(';' . $this->newLine . sprintf(self::PLACEHOLDER, $text));
+							each($this->tkns);
 						} elseif (T_FUNCTION == $id) {
 							$touchedFunction = true;
 						} elseif ($touchedFunction && T_STRING == $id) {
@@ -3104,16 +3113,22 @@ final class SettersAndGettersPass extends FormatterPass {
 						}
 					}
 					$functionList = array_combine($functionList, $functionList);
+					$append = false;
 					foreach ($attributes as $visibility => $variables) {
 						foreach ($variables as $var) {
 							$str = $this->generate($visibility, $var);
 							foreach ($functionList as $k => $v) {
 								if (false !== stripos($str, $v)) {
 									unset($functionList[$k]);
+									$append = true;
 									continue 2;
 								}
 							}
-							$this->appendCode($str);
+							if ($append) {
+								$this->appendCode($str);
+							} else {
+								$this->code = str_replace(sprintf(self::PLACEHOLDER, $var), $str, $this->code);
+							}
 						}
 					}
 
@@ -3124,6 +3139,7 @@ final class SettersAndGettersPass extends FormatterPass {
 					break;
 			}
 		}
+		$this->code = preg_replace(self::PLACEHOLDER_REGEX, ';', $this->code);
 		return $this->code;
 	}
 

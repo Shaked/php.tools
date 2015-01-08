@@ -1,28 +1,31 @@
 <?php
-//passes:OrderUseClauses,AddMissingCurlyBraces,SmartLnAfterCurlyOpen,NormalizeLnAndLtrimLines,MergeParenCloseWithCurlyOpen,MergeCurlyCloseAndDoWhile,MergeDoubleArrowAndArray,ExtraCommaInArray,ResizeSpaces,Reindent,ReindentColonBlocks,ReindentLoopColonBlocks,ReindentIfColonBlocks,ReindentObjOps,EliminateDuplicatedEmptyLines,AlignEquals,AlignDoubleArrow,LeftAlignComment,RTrim,SettersAndGettersPass|camel,ConstructorPass|camel,OrderMethod,NormalizeLnAndLtrimLines,Reindent
+//passes:OrderUseClauses,AddMissingCurlyBraces,SmartLnAfterCurlyOpen,NormalizeLnAndLtrimLines,MergeParenCloseWithCurlyOpen,MergeCurlyCloseAndDoWhile,MergeDoubleArrowAndArray,ExtraCommaInArray,ResizeSpaces,Reindent,ReindentColonBlocks,ReindentLoopColonBlocks,ReindentIfColonBlocks,ReindentObjOps,EliminateDuplicatedEmptyLines,AlignEquals,AlignDoubleArrow,LeftAlignComment,RTrim,SettersAndGettersPass|camel,ConstructorPass|camel,NormalizeLnAndLtrimLines,Reindent,Rtrim
 
 class A {
 	private $a;
-	public $b;
-	protected $c;
+	private function setA($a){
+		$this->a = $a;
+	}
 	private function getA(){
 		return $this->a;
+	}
+
+	public $b;
+	public function setB($b){
+		$this->b = $b;
 	}
 	public function getB(){
 		return $this->b;
 	}
-	protected function getC(){
-		return $this->c;
-	}
-	private function setA($a){
-		$this->a = $a;
-	}
-	public function setB($b){
-		$this->b = $b;
-	}
+
+	protected $c;
 	protected function setC($c){
 		$this->c = $c;
 	}
+	protected function getC(){
+		return $this->c;
+	}
+
 	function __construct($a, $b, $c){
 		$this->setA($a);
 		$this->setB($b);
