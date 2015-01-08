@@ -30,16 +30,16 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 					}
 
 					$lines = explode($this->newLine, $text);
-					$new_text = '';
+					$newText = '';
 					foreach ($lines as $v) {
 						$v = ltrim($v);
 						if ('*' === substr($v, 0, 1)) {
 							$v = ' ' . $v;
 						}
-						$new_text .= $this->newLine . $v;
+						$newText .= $this->newLine . $v;
 					}
 
-					$this->appendCode(ltrim($new_text));
+					$this->appendCode(ltrim($newText));
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
 					$this->appendCode($text);
