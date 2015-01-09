@@ -95,7 +95,7 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 		usort($lines, function ($a, $b) use ($weights, $weightsLen) {
 			$weightA = 0;
 			foreach ($weights as $pattern => $weight) {
-				if (strtolower(substr($a, 0, $weightsLen[$pattern])) == $pattern) {
+				if (strtolower(substr(ltrim($a), 0, $weightsLen[$pattern])) == $pattern) {
 					$weightA = $weight;
 					break;
 				}
@@ -103,7 +103,7 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 
 			$weightB = 0;
 			foreach ($weights as $pattern => $weight) {
-				if (strtolower(substr($b, 0, $weightsLen[$pattern])) == $pattern) {
+				if (strtolower(substr(ltrim($b), 0, $weightsLen[$pattern])) == $pattern) {
 					$weightB = $weight;
 					break;
 				}
@@ -136,7 +136,7 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 						if (!trim($word)) {
 							continue;
 						}
-						$maxColumn[$i] = isset($maxColumn[$i]) ? max($maxColumn[$i], strlen($word)) : 0;
+						$maxColumn[$i] = isset($maxColumn[$i]) ? max($maxColumn[$i], strlen($word)) : strlen($word);
 						if (2 == $i) {
 							break;
 						}
