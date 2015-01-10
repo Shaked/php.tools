@@ -9,15 +9,19 @@ class A {
 	public function getB() {
 		return $this->b;
 	}
+
 	protected function getC() {
 		return $this->c;
 	}
+
 	public function setA($a) {
 		$this->a = $a;
 	}
+
 	public function setB($b) {
 		$this->b = $b;
 	}
+
 	protected function setC($c) {
 		$this->c = $c;
 	}
