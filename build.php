@@ -1,7 +1,7 @@
 <?php
 if (ini_get('phar.readonly')) {
-	fwrite(STDERR, 'Please run build with -dphar.readonly=0' . PHP_EOL);
-	exit(255);
+	passthru($_SERVER['_'] . ' -dphar.readonly=0 build.php');
+	exit(0);
 }
 include 'vendor/dericofilho/csp/csp.php';
 include "Core/FormatterPass.php";
