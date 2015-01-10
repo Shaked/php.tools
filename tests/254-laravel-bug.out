@@ -1,0 +1,48 @@
+<?php
+require_once 'init.php';
+
+$id = $_GET['poll'];
+
+if (isset($id))
+{
+	$poll = $db->prepare("
+			SELECT id, question
+			FROM polls
+			WHERE id = $id
+			AND DATE(NOW()) BETWEEN starts AND ends
+		");
+	$poll->execute();
+	$x = $poll->fetchObject();
+}
+else
+{
+	header('Location: index.php');
+}
+
+while (false)
+{
+	if (isset($id))
+	{
+		$poll = $db->prepare("
+			SELECT id, question
+			FROM polls
+			WHERE id = $id
+			AND DATE(NOW()) BETWEEN starts AND ends
+		");
+		$poll->execute();
+		$x = $poll->fetchObject();
+	}
+	else
+	{
+		header('Location: index.php');
+	}
+}
+
+if (true): ?>
+noop();
+<?php else: ?>
+noop();
+<?php endif;
+//passes:Default,LaravelStyle
+//version:5.5.0
+//skipHHVM

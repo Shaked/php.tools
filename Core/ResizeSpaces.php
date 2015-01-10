@@ -110,7 +110,17 @@ final class ResizeSpaces extends FormatterPass {
 				case ST_COLON:
 					list($prevId, $prevText) = $this->inspectToken(-1);
 					list($nextId, $nextText) = $this->inspectToken(+1);
+
 					if (
+						$this->rightUsefulTokenIs(T_CLOSE_TAG) &&
+						(
+							T_WHITESPACE != $nextId
+							||
+							(T_WHITESPACE == $nextId && !$this->hasLn($nextText))
+						)
+					) {
+						$this->appendCode($text . $this->getSpace());
+					} elseif (
 						$inTernaryOperator &&
 						T_WHITESPACE === $prevId &&
 						T_WHITESPACE !== $nextId

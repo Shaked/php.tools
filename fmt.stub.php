@@ -2802,7 +2802,17 @@ final class ResizeSpaces extends FormatterPass {
 				case ST_COLON:
 					list($prevId, $prevText) = $this->inspectToken(-1);
 					list($nextId, $nextText) = $this->inspectToken(+1);
+
 					if (
+						$this->rightUsefulTokenIs(T_CLOSE_TAG) &&
+						(
+							T_WHITESPACE != $nextId
+							||
+							(T_WHITESPACE == $nextId && !$this->hasLn($nextText))
+						)
+					) {
+						$this->appendCode($text . $this->getSpace());
+					} elseif (
 						$inTernaryOperator &&
 						T_WHITESPACE === $prevId &&
 						T_WHITESPACE !== $nextId
@@ -4950,6 +4960,20 @@ class LaravelStyle extends AdditionalPass {
 		if ($fmt->candidate($source, $this->foundTokens)) {
 			$source = $fmt->format($source);
 		}
+		$fmt = new NormalizeLnAndLtrimLines();
+		if ($fmt->candidate($source, $this->foundTokens)) {
+			$source = $fmt->format($source);
+		}
+		$fmt = new Reindent();
+		if ($fmt->candidate($source, $this->foundTokens)) {
+			$source = $fmt->format($source);
+		}
+		$fmt = new LeftAlignComment();
+		if ($fmt->candidate($source, $this->foundTokens)) {
+			$source = $fmt->format($source);
+		}
+
+		$source = (new RTrim())->format($source);
 		return $source;
 	}
 
@@ -4981,39 +5005,22 @@ class LaravelStyle extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_WHITESPACE:
-					if ($this->hasLn($text) && false !== strpos($text, $this->indentChar)) {
-						$max_detected_indent = 0;
-						$current_detected_indent = 0;
-						$len = strlen($text);
-						for ($i = 0; $i < $len; ++$i) {
-							if ($this->newLine == $text[$i]) {
-								$max_detected_indent = max($max_detected_indent, $current_detected_indent);
-								$current_detected_indent = 0;
-							}
-							if ($this->indentChar == $text[$i]) {
-								++$current_detected_indent;
-							}
-						}
-						$max_detected_indent = max($max_detected_indent, $current_detected_indent);
-					}
-					$this->appendCode($text);
-					break;
 				case ST_CURLY_OPEN:
 					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY])) {
 						list($prevId, $prevText) = $this->getToken($this->leftToken());
 						if (!$this->hasLn($prevText)) {
-							$this->appendCode($this->getCrlf() . $this->getIndent($max_detected_indent));
+							$this->appendCode($this->getCrlf());
 						}
 					}
 					$this->appendCode($text);
 					break;
+
 				case T_ELSE:
 				case T_ELSEIF:
 				case T_FINALLY:
 					list($prevId, $prevText) = $this->getToken($this->leftToken());
-					if (!$this->hasLn($prevText)) {
-						$this->appendCode($this->getCrlf() . $this->getIndent($max_detected_indent));
+					if (!$this->hasLn($prevText) && T_OPEN_TAG != $prevId) {
+						$this->appendCode($this->getCrlf());
 					}
 					$this->appendCode($text);
 					break;
@@ -5023,7 +5030,7 @@ class LaravelStyle extends AdditionalPass {
 					}
 					list($prevId, $prevText) = $this->getToken($this->leftToken());
 					if (!$this->hasLn($prevText)) {
-						$this->appendCode($this->getCrlf() . $this->getIndent($max_detected_indent));
+						$this->appendCode($this->getCrlf());
 					}
 					$this->appendCode($text);
 					break;

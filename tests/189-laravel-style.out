@@ -32,7 +32,7 @@ class B {
 		switch ($a)
 		{
 			case 1:
-				break;
+			break;
 		}
 
 		try {
@@ -50,14 +50,14 @@ class B {
 
 	public function c()
 	//comment
-	{
+		{
 
 		try {
 			throw new Exception();
 		}
 		//Comment
-		//Comment2
-		catch (Exception $e)
+				//Comment2
+				catch (Exception $e)
 		{
 			print_r($e);
 		}
