@@ -2884,7 +2884,7 @@ final class ResizeSpaces extends FormatterPass {
 					}
 					break;
 				case ST_PARENTHESES_CLOSE:
-					$this->appendCode($text);
+					$this->appendCode($text . $this->getSpace($this->rightTokenIs([T_COMMENT, T_DOC_COMMENT])));
 					break;
 				case T_USE:
 					if ($this->leftTokenIs(ST_PARENTHESES_CLOSE)) {
