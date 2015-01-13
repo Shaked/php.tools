@@ -36,7 +36,8 @@ final class Reindent extends FormatterPass {
 					$this->printUntil(T_OPEN_TAG);
 					break;
 				case T_START_HEREDOC:
-					$this->appendCode(rtrim($text) . $this->getCrlf());
+					$this->appendCode($text);
+					$this->printUntil(T_END_HEREDOC);
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
 				case T_ENCAPSED_AND_WHITESPACE:

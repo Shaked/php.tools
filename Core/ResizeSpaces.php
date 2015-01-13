@@ -3,6 +3,7 @@ final class ResizeSpaces extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	private function filterWhitespaces($source) {
 		$tkns = token_get_all($source);
 

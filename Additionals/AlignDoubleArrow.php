@@ -2,7 +2,11 @@
 final class AlignDoubleArrow extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d.%d.%d \x3"; // level.levelentracecounter.counter
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[T_DOUBLE_ARROW])) {
+			return true;
+		}
+
+		return false;
 	}
 	public function format($source) {
 		$this->tkns = token_get_all($source);

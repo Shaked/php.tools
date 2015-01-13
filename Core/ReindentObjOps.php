@@ -6,7 +6,11 @@ final class ReindentObjOps extends FormatterPass {
 	const ALIGN_WITH_SPACES = 2;
 
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[T_OBJECT_OPERATOR])) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function format($source) {

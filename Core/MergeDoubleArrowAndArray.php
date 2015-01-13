@@ -10,21 +10,15 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$inDoWhileContext = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			switch ($id) {
-				case T_ARRAY:
-					if ($this->leftTokenIs([T_DOUBLE_ARROW])) {
-						--$inDoWhileContext;
-						$this->rtrimAndAppendCode($text);
-						break;
-					}
-				default:
-					$this->appendCode($text);
-					break;
+
+			if (T_ARRAY === $id && $this->leftUsefulTokenIs([T_DOUBLE_ARROW])) {
+				$this->rtrimAndAppendCode($text);
+				continue;
 			}
+			$this->appendCode($text);
 		}
 		return $this->code;
 	}

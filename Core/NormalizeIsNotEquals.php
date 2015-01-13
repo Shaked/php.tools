@@ -14,14 +14,11 @@ final class NormalizeIsNotEquals extends FormatterPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			switch ($id) {
-				case T_IS_NOT_EQUAL:
-					$this->appendCode(str_replace('<>', '!=', $text) . $this->getSpace());
-					break;
-				default:
-					$this->appendCode($text);
-					break;
+
+			if (T_IS_NOT_EQUAL == $id) {
+				$text = str_replace('<>', '!=', $text) . $this->getSpace();
 			}
+			$this->appendCode($text);
 		}
 
 		return $this->code;

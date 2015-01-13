@@ -1638,21 +1638,15 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$inDoWhileContext = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			switch ($id) {
-				case T_ARRAY:
-					if ($this->leftTokenIs([T_DOUBLE_ARROW])) {
-						--$inDoWhileContext;
-						$this->rtrimAndAppendCode($text);
-						break;
-					}
-				default:
-					$this->appendCode($text);
-					break;
+
+			if (T_ARRAY === $id && $this->leftUsefulTokenIs([T_DOUBLE_ARROW])) {
+				$this->rtrimAndAppendCode($text);
+				continue;
 			}
+			$this->appendCode($text);
 		}
 		return $this->code;
 	}
@@ -1713,14 +1707,11 @@ final class NormalizeIsNotEquals extends FormatterPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			switch ($id) {
-				case T_IS_NOT_EQUAL:
-					$this->appendCode(str_replace('<>', '!=', $text) . $this->getSpace());
-					break;
-				default:
-					$this->appendCode($text);
-					break;
+
+			if (T_IS_NOT_EQUAL == $id) {
+				$text = str_replace('<>', '!=', $text) . $this->getSpace();
 			}
+			$this->appendCode($text);
 		}
 
 		return $this->code;
@@ -2053,7 +2044,8 @@ final class Reindent extends FormatterPass {
 					$this->printUntil(T_OPEN_TAG);
 					break;
 				case T_START_HEREDOC:
-					$this->appendCode(rtrim($text) . $this->getCrlf());
+					$this->appendCode($text);
+					$this->printUntil(T_END_HEREDOC);
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
 				case T_ENCAPSED_AND_WHITESPACE:
@@ -2114,7 +2106,11 @@ final class Reindent extends FormatterPass {
 ;
 final class ReindentColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[T_DEFAULT]) || isset($foundTokens[T_CASE]) || isset($foundTokens[T_SWITCH])) {
+			return true;
+		}
+
+		return false;
 	}
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -2125,13 +2121,9 @@ final class ReindentColonBlocks extends FormatterPass {
 		foreach ($this->tkns as $token) {
 			list($id, $text) = $this->getToken($token);
 			if (T_DEFAULT == $id || T_CASE == $id || T_SWITCH == $id) {
-				$foundColon = true;
 				break;
 			}
 			$this->appendCode($text);
-		}
-		if (!$foundColon) {
-			return $source;
 		}
 
 		prev($this->tkns);
@@ -2212,22 +2204,14 @@ final class ReindentColonBlocks extends FormatterPass {
 };
 final class ReindentIfColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[ST_COLON])) {
+			return true;
+		}
+
+		return false;
 	}
 	public function format($source) {
 		$this->tkns = token_get_all($source);
-		$foundColon = false;
-		foreach ($this->tkns as $token) {
-			list($id, $text) = $this->getToken($token);
-			if (ST_COLON == trim($text)) {
-				$foundColon = true;
-				break;
-			}
-		}
-		if (!$foundColon) {
-			return $source;
-		}
-		reset($this->tkns);
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
@@ -2291,7 +2275,11 @@ final class ReindentIfColonBlocks extends FormatterPass {
 };
 final class ReindentLoopColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[T_ENDWHILE]) || isset($foundTokens[T_ENDFOREACH]) || isset($foundTokens[T_ENDFOR])) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function format($source) {
@@ -2415,7 +2403,11 @@ final class ReindentObjOps extends FormatterPass {
 	const ALIGN_WITH_SPACES = 2;
 
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[T_OBJECT_OPERATOR])) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function format($source) {
@@ -2782,6 +2774,7 @@ final class ResizeSpaces extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	private function filterWhitespaces($source) {
 		$tkns = token_get_all($source);
 
@@ -4085,7 +4078,11 @@ EOT;
 final class AlignDoubleArrow extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d.%d.%d \x3"; // level.levelentracecounter.counter
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[T_DOUBLE_ARROW])) {
+			return true;
+		}
+
+		return false;
 	}
 	public function format($source) {
 		$this->tkns = token_get_all($source);

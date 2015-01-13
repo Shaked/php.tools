@@ -1,22 +1,14 @@
 <?php
 final class ReindentIfColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[ST_COLON])) {
+			return true;
+		}
+
+		return false;
 	}
 	public function format($source) {
 		$this->tkns = token_get_all($source);
-		$foundColon = false;
-		foreach ($this->tkns as $token) {
-			list($id, $text) = $this->getToken($token);
-			if (ST_COLON == trim($text)) {
-				$foundColon = true;
-				break;
-			}
-		}
-		if (!$foundColon) {
-			return $source;
-		}
-		reset($this->tkns);
 		$this->code = '';
 
 		while (list($index, $token) = each($this->tkns)) {
