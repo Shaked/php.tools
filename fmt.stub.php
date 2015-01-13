@@ -833,9 +833,8 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							break;
 						}
 					}
+
 					if (!$this->rightTokenIs([ST_CURLY_OPEN, ST_COLON])) {
-						$whileInNextToken = $this->rightTokenIs([T_WHILE, T_DO]);
-						$ignoreCount = 0;
 						if (!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) {
 							$this->rtrimAndAppendCode($this->newLine . '{');
 						}
@@ -844,21 +843,55 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							$this->ptr = $index;
 							$this->cache = [];
 
+							if (T_WHILE == $id) {
+								$this->appendCode($text);
+								if ($this->skipWhileBlock()) {
+									break;
+								}
+								continue;
+							}
+
+							if (T_DO == $id) {
+								$this->appendCode($text);
+								$this->skipDoBlock();
+								continue;
+							}
+
+							if (T_FUNCTION == $id) {
+								$this->appendCode($text);
+								$this->skipFunctionBlock();
+								continue;
+							}
+
 							if (ST_QUOTE == $id) {
 								$this->appendCode($text);
 								$this->printUntilTheEndOfString();
 								continue;
 							}
-							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
-								++$ignoreCount;
-							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
-								--$ignoreCount;
+							if (ST_PARENTHESES_OPEN == $id) {
+								$this->appendCode($text);
+								$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+								continue;
 							}
+							if (ST_BRACKET_OPEN == $id) {
+								$this->appendCode($text);
+								$this->printBlock(ST_BRACKET_OPEN, ST_BRACKET_CLOSE);
+								continue;
+							}
+							if (ST_CURLY_OPEN == $id || T_CURLY_OPEN == $id || T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+								$this->appendCode($text);
+								$this->printCurlyBlock();
+								if ($this->rightUsefulTokenIs([T_ELSEIF, T_ELSE, ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN])) {
+									continue;
+								}
+								break;
+							}
+
 							$this->appendCode($text);
 							if (T_INLINE_HTML == $id && !$this->rightTokenIs(T_OPEN_TAG)) {
 								$this->appendCode('<?php');
 							}
-							if ($ignoreCount <= 0 && !($this->rightTokenIs([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN]) || ($whileInNextToken && $this->rightTokenIs([T_WHILE]))) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
+							if (ST_SEMI_COLON == $id) {
 								break;
 							}
 						}
@@ -867,6 +900,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						break 2;
 					}
 					break;
+
 				case T_ELSE:
 					$this->appendCode($text);
 					if (!$this->rightTokenIs([ST_CURLY_OPEN, ST_COLON, T_IF])) {
@@ -878,22 +912,56 @@ final class AddMissingCurlyBraces extends FormatterPass {
 							$this->ptr = $index;
 							$this->cache = [];
 
+							if (T_WHILE == $id) {
+								$this->appendCode($text);
+								if ($this->skipWhileBlock()) {
+									break;
+								}
+								continue;
+							}
+
+							if (T_DO == $id) {
+								$this->appendCode($text);
+								$this->skipDoBlock();
+								continue;
+							}
+
+							if (T_FUNCTION == $id) {
+								$this->appendCode($text);
+								$this->skipFunctionBlock();
+								continue;
+							}
+
 							if (ST_QUOTE == $id) {
 								$this->appendCode($text);
 								$this->printUntilTheEndOfString();
 								continue;
 							}
 
-							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
-								++$ignoreCount;
-							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
-								--$ignoreCount;
+							if (ST_PARENTHESES_OPEN == $id) {
+								$this->appendCode($text);
+								$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+								continue;
 							}
+							if (ST_BRACKET_OPEN == $id) {
+								$this->appendCode($text);
+								$this->printBlock(ST_BRACKET_OPEN, ST_BRACKET_CLOSE);
+								continue;
+							}
+							if (ST_CURLY_OPEN == $id || T_CURLY_OPEN == $id || T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+								$this->appendCode($text);
+								$this->printCurlyBlock();
+								if ($this->rightUsefulTokenIs([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN])) {
+									continue;
+								}
+								break;
+							}
+
 							$this->appendCode($text);
 							if (T_INLINE_HTML == $id && !$this->rightTokenIs(T_OPEN_TAG)) {
 								$this->appendCode('<?php');
 							}
-							if ($ignoreCount <= 0 && !($this->rightTokenIs([ST_CURLY_CLOSE, ST_SEMI_COLON, T_OBJECT_OPERATOR, ST_PARENTHESES_OPEN]) || ($whileInNextToken && $this->rightTokenIs([T_WHILE]))) && (ST_CURLY_CLOSE === $id || ST_SEMI_COLON === $id || T_ELSE === $id || T_ELSEIF === $id)) {
+							if (ST_SEMI_COLON == $id) {
 								break;
 							}
 						}
@@ -914,6 +982,31 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		}
 
 		return [$this->code, $changed];
+	}
+
+	private function skipDoBlock() {
+		$this->printUntil(ST_CURLY_OPEN);
+		$this->printCurlyBlock();
+		$this->printUntil(ST_PARENTHESES_OPEN);
+		$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+	}
+
+	private function skipFunctionBlock() {
+		$this->printUntil(ST_PARENTHESES_OPEN);
+		$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+		$this->printUntil(ST_CURLY_OPEN);
+		$this->printCurlyBlock();
+	}
+
+	private function skipWhileBlock() {
+		$this->printUntil(ST_PARENTHESES_OPEN);
+		$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+		if ($this->rightUsefulTokenIs(ST_CURLY_OPEN)) {
+			$this->printUntil(ST_CURLY_OPEN);
+			$this->printCurlyBlock();
+			return true;
+		}
+		return false;
 	}
 }
 ;

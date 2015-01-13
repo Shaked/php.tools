@@ -29,7 +29,7 @@ if ($isCoverage) {
 
 $testNumber = "";
 if (isset($opt['testNumber'])) {
-	$testNumber = (int) $opt['testNumber'];
+	$testNumber = sprintf("%03d", (int) $opt['testNumber']);
 }
 $start = microtime(true);
 $testEnv = true;

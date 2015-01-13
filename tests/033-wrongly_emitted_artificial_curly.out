@@ -5,4 +5,5 @@ function func($n) {
 	} elseif (in_array($n, $fo)) {return self::FO;
 	} else {return self::PH;
 	}
+
 }
