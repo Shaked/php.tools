@@ -5057,6 +5057,7 @@ class LaravelStyle extends AdditionalPass {
 		if ($fmt->candidate($source, $this->foundTokens)) {
 			$source = $fmt->format($source);
 		}
+		$source = $this->ltrimWhitespaces($source);
 		$fmt = new Reindent();
 		if ($fmt->candidate($source, $this->foundTokens)) {
 			$source = $fmt->format($source);
@@ -5127,6 +5128,26 @@ class LaravelStyle extends AdditionalPass {
 					}
 					$this->appendCode($text);
 					break;
+				default:
+					$this->appendCode($text);
+			}
+		}
+
+		return $this->code;
+	}
+
+	private function ltrimWhitespaces($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_WHITESPACE:
+					if ($this->leftTokenIs([T_COMMENT, T_DOC_COMMENT]) && !$this->rightUsefulTokenIs([ST_CURLY_OPEN])) {
+						$this->appendCode(ltrim($text));
+						break;
+					}
 				default:
 					$this->appendCode($text);
 			}

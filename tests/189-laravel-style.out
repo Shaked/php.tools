@@ -37,8 +37,7 @@ class B {
 
 		try {
 			throw new Exception();
-		}/*Comment*/
-		catch (Exception $e)
+		}/*Comment*/catch (Exception $e)
 		{
 			print_r($e);
 		}
@@ -56,8 +55,8 @@ class B {
 			throw new Exception();
 		}
 		//Comment
-				//Comment2
-				catch (Exception $e)
+		//Comment2
+		catch (Exception $e)
 		{
 			print_r($e);
 		}

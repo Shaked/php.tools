@@ -1,0 +1,35 @@
+<?php
+require_once 'init.php';
+
+$id   = $_GET['poll'];
+$user = $_SESSION['user_id'];
+
+if (!isset($id)) {
+	header('Location: index.php');
+} else {
+	// get the poll info
+	$poll = $db->prepare();
+	$poll->execute();
+	$po = $poll->fetchObject();
+
+	// check if the user has voted for that poll already or not
+	$answer = $db->prepare();
+	$answer->execute();
+
+	$completed = $answer->rowCount() ? true : false;
+
+	if ($completed) {
+		$percent = $db->prepare();
+		while ($row = $percent->fetchObject()) {
+			$answers[] = $row;
+		}
+	} else {
+		// get the poll choices
+		$choice = $db->prepare("SELECT * FROM polls_choices WHERE poll_id = $id");
+		$choice->execute();
+		$ch = $choice->fetchAll();
+	}
+}
+//passes:Default,LaravelStyle
+//version:5.5.0
+//skipHHVM
