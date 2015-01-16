@@ -68,6 +68,7 @@ require 'Additionals/AddMissingParentheses.php';
 require 'Additionals/AlignDoubleArrow.php';
 require 'Additionals/AlignDoubleSlashComments.php';
 require 'Additionals/AlignEquals.php';
+require 'Additionals/AlignTypehint.php';
 require 'Additionals/AutoPreincrement.php';
 require 'Additionals/CakePHPStyle.php';
 require 'Additionals/EncapsulateNamespaces.php';
