@@ -5382,7 +5382,7 @@ class LaravelStyle extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_WHITESPACE:
-					if ($this->leftTokenIs([T_COMMENT, T_DOC_COMMENT]) && !$this->rightUsefulTokenIs([ST_CURLY_OPEN])) {
+					if ($this->leftTokenIs([T_COMMENT, T_DOC_COMMENT]) && !$this->rightTokenIs([T_COMMENT, T_DOC_COMMENT, ST_CURLY_OPEN])) {
 						$this->appendCode(substr($text, 2));
 						break;
 					}
