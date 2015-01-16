@@ -5888,6 +5888,13 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 			'@var' => strlen('@var'),
 			'@type' => strlen('@type'),
 		];
+		$patternsColumns = [
+			'@param' => 4,
+			'@throws' => 2,
+			'@return' => 2,
+			'@var' => 4,
+			'@type' => 4,
+		];
 		$alignableIdx = [];
 		$maxColumn = [];
 
@@ -5916,6 +5923,8 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 					$words = explode(' ', $line);
 					$currentLine = '';
 					$pad = 0;
+					$columnCount = 0;
+					$maxColumnCount = $patternsColumns[$pattern];
 					foreach ($maxColumn as $rightMost) {
 						while ((list(, $word) = each($words))) {
 							if (trim($word)) {
@@ -5926,9 +5935,16 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 						$currentLine .= $word;
 						$pad += $rightMost + 1;
 						$currentLine = str_pad($currentLine, $pad);
+						$columnCount++;
+						if ($columnCount == $maxColumnCount) {
+							break;
+						}
 					}
 
 					while ((list(, $word) = each($words))) {
+						if (!trim($word)) {
+							continue;
+						}
 						$currentLine .= $word . ' ';
 					}
 					$lines[$idx] = rtrim($currentLine);
