@@ -5389,7 +5389,7 @@ class LaravelStyle extends AdditionalPass {
 			switch ($id) {
 				case T_WHITESPACE:
 					if ($this->leftTokenIs([T_COMMENT, T_DOC_COMMENT]) && !$this->rightUsefulTokenIs([ST_CURLY_OPEN])) {
-						$this->appendCode(ltrim($text));
+						$this->appendCode(substr($text, 2));
 						break;
 					}
 				default:
