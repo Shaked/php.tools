@@ -543,34 +543,12 @@ if (isset($argv[1]) && "lint" == $argv[1]) {
 			exec('git status -s | grep -i "\.php$" | awk -F \' \' \'{ print $2 }\'', $files);
 			echo "Differential linting...";
 			if ($concurrent) {
-				$chn = make_channel();
-				$chnDone = make_channel();
-				echo "Starting " . FMTWORKERS . "...", PHP_EOL;
-				for ($i = 0; $i < FMTWORKERS; $i++) {
-					cofunc(function ($chn, $chnDone, $i) {
-						while (true) {
-							$file = $chn->out();
-							if (null === $file) {
-								break;
-							}
-							passthru('php -l ' . $file . ' | while read line; do echo "' . ($i + 1) . ' $line"; done');
-						}
-						$chnDone->in('OK');
-					}, $chn, $chnDone, $i);
-				}
+				list($chn, $chnDone) = concurrentExec('php -l %s');
 				echo "Running lint...", PHP_EOL;
 				foreach ($files as $file) {
 					$chn->in($file);
 				}
-				for ($i = 0; $i < FMTWORKERS; $i++) {
-					$chn->in(null);
-				}
-
-				for ($i = 0; $i < FMTWORKERS; $i++) {
-					$chnDone->out();
-				}
-				$chn->close();
-				$chnDone->close();
+				stopExec($chn, $chnDone);
 			} else {
 				foreach ($files as $file) {
 					passthru('php -l ' . $file);
@@ -587,35 +565,13 @@ if (isset($argv[1]) && "lint" == $argv[1]) {
 
 			echo "Full linting...", PHP_EOL;
 			if ($concurrent) {
-				$chn = make_channel();
-				$chnDone = make_channel();
-				echo "Starting " . FMTWORKERS . "...", PHP_EOL;
-				for ($i = 0; $i < FMTWORKERS; $i++) {
-					cofunc(function ($chn, $chnDone, $i) {
-						while (true) {
-							$file = $chn->out();
-							if (null === $file) {
-								break;
-							}
-							passthru('php -l ' . $file . ' | while read line; do echo "' . ($i + 1) . ' $line"; done');
-						}
-						$chnDone->in('OK');
-					}, $chn, $chnDone, $i);
-				}
+				list($chn, $chnDone) = concurrentExec('php -l %s');
 				echo "Running lint...", PHP_EOL;
 				foreach ($regex as $file) {
 					$file = $file[0];
 					$chn->in($file);
 				}
-				for ($i = 0; $i < FMTWORKERS; $i++) {
-					$chn->in(null);
-				}
-
-				for ($i = 0; $i < FMTWORKERS; $i++) {
-					$chnDone->out();
-				}
-				$chn->close();
-				$chnDone->close();
+				stopExec($chn, $chnDone);
 			} else {
 				foreach ($regex as $file) {
 					$file = $file[0];
@@ -627,63 +583,35 @@ if (isset($argv[1]) && "lint" == $argv[1]) {
 }
 
 if ($fmtBin && isset($argv[1]) && "fmt" == $argv[1]) {
-	if ("" == $argv[2]) {
+	if (!isset($argv[2])) {
 		$execute = function () {
-			echo "Starting " . FMTWORKERS . " workers...";
-			// J=""
-			// files=$( git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 } ' )
-			// for line in $files
-			// do
-			// 	(php -l $line &> /dev/null) && (cp $line $line~; php fmt.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line" &
-			// 	J="$J $!"
-			// 	JCNT=`echo $J | wc -w`
-			// 	if( $JCNT -ge $FMTWORKERS ){
-			// 		for jj in $J;
-			// 		do
-			// 			wait $jj;
-			// 		done;
-			// 		J=""
-			// 	fi
-			// done;
-			// for jj in $J;
-			// do
-			// 	wait $jj;
-			// done;
+			list($chn, $chnDone) = concurrentExec('php fmt.php --lint-before %s');
+			$files = [];
+			exec("git status -s | grep -i \"\.php$\" | awk -F ' ' '{ print $2 } '", $files);
+			foreach ($files as $file) {
+				$chn->in($file);
+			}
+			stopExec($chn, $chnDone);
 		};
 	} elseif ("clean" == $argv[2]) {
 		$execute = function () {
-			// eval $FMT_CLEAN
+			$directory = new RecursiveDirectoryIterator('.');
+			$iterator = new RecursiveIteratorIterator($directory);
+			$regex = new RegexIterator($iterator, '/^.+~$/i', RecursiveRegexIterator::GET_MATCH);
+			foreach ($regex as $file) {
+				$file = $file[0];
+				echo $file, PHP_EOL;
+				unlink($file);
+			}
 		};
 	} elseif ("all" == $argv[2]) {
 		$execute = function () {
-			// echo "Starting $FMTWORKERS workers..."
-			// J=""
-			// for i in $DIRS;
-			// do
-			// 	files=`find $i -ipath "*.php"`
-			// 	for line in $files
-			// 	do
-			// 		( (php -l $line &> /dev/null) && (cp $line $line~; php fmt.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line" ) &
-			// 		J="$J $!"
-			// 		JCNT=`echo $J | wc -w`
-			// 		if( $JCNT -ge $FMTWORKERS ){
-			// 			for jj in $J;
-			// 			do
-			// 				wait $jj;
-			// 			done;
-			// 			J=""
-			// 		fi
-			// 	done;
-			// done;
-			// for jj in $J;
-			// do
-			// 	wait $jj;
-			// done;
+			passthru('php fmt.php --lint-before .');
 		};
 	} else {
 		$line = $argv[2];
-		$execute = function () {
-			// (php -l $line &> /dev/null) && (cp $line $line~; php fmt.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line"
+		$execute = function () use ($line) {
+			passthru('php fmt.php --lint-before ' . $line);
 		};
 	}
 }
@@ -729,4 +657,39 @@ function which($cmd) {
 	$retcode = 0;
 	$which = exec('which ' . escapeshellarg($cmd), $output, $retcode);
 	return [$which, 0 == $retcode];
+}
+
+function concurrentExec($cmd) {
+	$chn = make_channel();
+	$chnDone = make_channel();
+	echo "Starting " . FMTWORKERS . "...", PHP_EOL;
+	for ($i = 0; $i < FMTWORKERS; ++$i) {
+		cofunc(function ($chn, $chnDone, $cmd, $i) {
+			while (true) {
+				$str = $chn->out();
+				if (null === $str) {
+					break;
+				}
+				passthru(sprintf($cmd, $str) . ' | while read line; do echo "' . ($i + 1) . ' $line"; done');
+			}
+			$chnDone->in('OK');
+		}, $chn, $chnDone, $cmd, $i);
+	}
+
+	cofunc(function ($chn, $chnDone) {
+
+	}, $chn, $chnDone);
+
+	return [$chn, $chnDone];
+}
+
+function stopExec($chn, $chnDone) {
+	for ($i = 0; $i < FMTWORKERS; ++$i) {
+		$chn->in(null);
+	}
+	for ($i = 0; $i < FMTWORKERS; ++$i) {
+		$chnDone->out();
+	}
+	$chn->close();
+	$chnDone->close();
 }
