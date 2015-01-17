@@ -43,7 +43,7 @@ if ($concurrent) {
 // SOFTWARE.
 
 define('PHP_INT_LENGTH', strlen(sprintf("%u", PHP_INT_MAX)));
-function cofunc(callable$fn) {
+function cofunc(callable $fn) {
 	$pid = pcntl_fork();
 	if (-1 == $pid) {
 		trigger_error('could not fork', E_ERROR);
@@ -60,6 +60,7 @@ function cofunc(callable$fn) {
 }
 
 class CSP_Channel {
+	const CLOSED = '-1';
 	private $ipc;
 	private $ipc_fn;
 	private $key;
@@ -74,6 +75,9 @@ class CSP_Channel {
 		]);
 
 	}
+	public function msg_count() {
+		return $this->msg_count;
+	}
 	public function close() {
 		$this->closed = true;
 		do {
@@ -87,10 +91,35 @@ class CSP_Channel {
 		if ($this->closed || !msg_queue_exists($this->key)) {
 			return;
 		}
-		++$this->msg_count;
 		$shm = new Message();
 		$shm->store($msg);
-		@msg_send($this->ipc, 1, $shm->key(), false);
+		$error = 0;
+		@msg_send($this->ipc, 1, $shm->key(), false, true, $error);
+		++$this->msg_count;
+	}
+	public function non_blocking_in($msg) {
+		if ($this->closed || !msg_queue_exists($this->key)) {
+			return self::CLOSED;
+		}
+		$shm = new Message();
+		$shm->store($msg);
+		$error = 0;
+		@msg_send($this->ipc, 1, $shm->key(), false, false, $error);
+		if (MSG_EAGAIN === $error) {
+			$shmAbortedMessage = new Message($shm->key());
+			$shmAbortedMessage->destroy();
+			return false;
+		}
+		++$this->msg_count;
+		$first_loop = true;
+		do {
+			$data = msg_stat_queue($this->ipc);
+			if (!$first_loop && 0 == $data['msg_qnum']) {
+				break;
+			}
+			$first_loop = false;
+		} while (true);
+		return true;
 	}
 	public function out() {
 		if ($this->closed || !msg_queue_exists($this->key)) {
@@ -99,11 +128,27 @@ class CSP_Channel {
 		$msgtype = null;
 		$ipcmsg = null;
 		$error = null;
-		msg_receive($this->ipc, 1, $msgtype, (1 * PHP_INT_LENGTH) + 1, $ipcmsg, false, $error);
+		msg_receive($this->ipc, 1, $msgtype, (1 * PHP_INT_LENGTH) + 1, $ipcmsg, false, 0, $error);
 		--$this->msg_count;
 		$shm = new Message($ipcmsg);
 		$ret = $shm->fetch();
 		return $ret;
+	}
+	public function non_blocking_out() {
+		if ($this->closed || !msg_queue_exists($this->key)) {
+			return [self::CLOSED, null];
+		}
+		$msgtype = null;
+		$ipcmsg = null;
+		$error = null;
+		msg_receive($this->ipc, 1, $msgtype, (1 * PHP_INT_LENGTH) + 1, $ipcmsg, false, MSG_IPC_NOWAIT, $error);
+		if (MSG_ENOMSG === $error) {
+			return [false, null];
+		}
+		--$this->msg_count;
+		$shm = new Message($ipcmsg);
+		$ret = $shm->fetch();
+		return [true, $ret];
 	}
 }
 class Message {
@@ -142,6 +187,58 @@ class Message {
 
 function make_channel() {
 	return new CSP_Channel();
+}
+
+/*
+$chn = &$chn;
+$var = &$var;
+$var2 = &$var2;
+
+select_channel([
+[$chn, $var, function () {
+echo "Message Sent";
+}],
+[$var, $chn, function ($msg) {
+echo "Message Received";
+}],
+['default', function () {
+echo "Default";
+}, $var2],
+]);
+ */
+function select_channel(array $actions) {
+	while (true) {
+		foreach ($actions as $action) {
+			if ('default' == $action[0]) {
+				call_user_func_array($action[1]);
+				break 2;
+			} elseif (is_callable($action[1])) {
+				$chn = &$action[0];
+				$callback = &$action[1];
+
+				list($ok, $result) = $chn->non_blocking_out();
+				if (true === $ok) {
+					call_user_func_array($callback, [$result]);
+					break 2;
+				}
+			} elseif ($action[0] instanceof CSP_Channel) {
+				$chn = &$action[0];
+				$msg = &$action[1];
+				$callback = &$action[2];
+				$params = array_slice($action, 3);
+
+				$ok = $chn->non_blocking_in($msg);
+				if (CSP_Channel::CLOSED === $ok) {
+					throw new Exception('Cannot send to closed channel');
+				} elseif (true === $ok) {
+					call_user_func($callback);
+					break 2;
+				}
+			} else {
+				throw new Exception('Invalid action for CSP select_channel');
+			}
+		}
+	}
 }
 ;
 }
@@ -257,7 +354,10 @@ if (!defined("T_YIELD")) {
 if (!defined("T_FINALLY")) {
 	define("T_FINALLY", "finally");
 }
-;
+
+define('ST_PARENTHESES_BLOCK', 'ST_PARENTHESES_BLOCK');
+define('ST_BRACKET_BLOCK', 'ST_BRACKET_BLOCK');
+define('ST_CURLY_BLOCK', 'ST_CURLY_BLOCK');;
 abstract class FormatterPass {
 	protected $indentChar = "\t";
 	protected $newLine = "\n";

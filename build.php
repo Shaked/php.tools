@@ -52,14 +52,16 @@ for ($i = 0; $i < $workers; ++$i) {
 			echo $target, PHP_EOL;
 			file_put_contents($target . '.php', $pass->format(file_get_contents($target . '.src.php')));
 			chmod($target . '.php', 0755);
-			file_put_contents($target . '.stub.php', $pass->format(file_get_contents($target . '.stub.src.php')));
-			chmod($target . '.stub.php', 0755);
+			if (file_exists($target . '.stub.src.php')) {
+				file_put_contents($target . '.stub.php', $pass->format(file_get_contents($target . '.stub.src.php')));
+				chmod($target . '.stub.php', 0755);
+			}
 		}
 		$chn_done->in('done');
 	}, $pass, $chn, $chn_done);
 }
 
-$targets = ['fmt', 'refactor'];
+$targets = ['fmt', 'refactor', 'php.tools'];
 foreach ($targets as $target) {
 	$chn->in($target);
 }
@@ -83,3 +85,5 @@ foreach ($phars as $target) {
 	file_put_contents($target . ".phar.sha1", sha1_file($target . '.phar'));
 }
 echo 'done', PHP_EOL;
+
+rename('php.tools.php', 'php.tools');

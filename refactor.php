@@ -61,7 +61,10 @@ if (!defined("T_YIELD")) {
 if (!defined("T_FINALLY")) {
 	define("T_FINALLY", "finally");
 }
-;
+
+define('ST_PARENTHESES_BLOCK', 'ST_PARENTHESES_BLOCK');
+define('ST_BRACKET_BLOCK', 'ST_BRACKET_BLOCK');
+define('ST_CURLY_BLOCK', 'ST_CURLY_BLOCK');;
 abstract class FormatterPass {
 	protected $indentChar = "\t";
 	protected $newLine = "\n";
