@@ -1,3 +1,5 @@
+#!/usr/bin/env php
+<?php
 #!/bin/bash
 # Copyright (c) 2014, Carlos C
 # All rights reserved.
@@ -12,393 +14,67 @@
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-which git &> /dev/null
-if [ 0 != $? ];
-then
-	echo "This tool needs Git to work."
-	echo "Please, install git using:"
-	echo "  sudo yum install git"
-	echo "or"
-	echo "  sudo apt-get install git"
-	exit 255;
-fi
-
-
-ARCH=${BASH_VERSINFO[5]}
-CURPWD=$(php -r "echo realpath('.');")
-if [[ $ARCH == *apple* ]]; then
-DIRS="`find . -depth 1 -type d | egrep -iv "cover|vendor|web|fixtures|docs|^\.$" | php -r "echo implode(' ', array_map(function(\\\$v){return str_replace('$CURPWD', '.',realpath(\\\$v)); }, array_filter(explode(PHP_EOL, file_get_contents('php://stdin')))));"`"
-FMT_CLEAN="find . -ipath '*~' -delete"
-INCREMENTAL_TEST="find . -ipath '*~' -mmin -10 | grep -iv '_test.php'"
-else
-DIRS="`find -maxdepth 1 -type d | egrep -iv "cover|vendor|web|fixtures|docs|^\.$" | xargs -l1 readlink -f | tr "\\n" " " | sed "s|$CURPWD/|./|g"`"
-FMT_CLEAN="find -iwholename '*~' -delete"
-INCREMENTAL_TEST="find $DIRS -iwholename '*.php' -mmin -10 | grep -iv '_test.php'"
-fi
-FMTWORKERS=2
-
-CLOC=false
-which cloc &> /dev/null
-if [ 0 == $? ];
-then
-	CLOC=true
-	CLOCBIN=`which cloc`
-fi
-which ./cloc &> /dev/null
-if [ 0 == $? ];
-then
-	CLOC=true
-	CLOCBIN=`which ./cloc`
-fi
-
-CTAGS=false
-which ctags &> /dev/null
-if [ 0 == $? ];
-then
-	CTAGS_VERSION=$(ctags --version)
-	if [[ $CTAGS_VERSION == *Exuberant* ]];
-	then
-		CTAGS=true
-	fi
-fi
-
-PHPUNIT=false
-which vendor/bin/phpunit &> /dev/null
-if [ 0 == $? ];
-then
-	PHPUNIT=true
-fi
-
-FMT=false
-if [ -e fmt.php ];
-then
-	FMT=true
-fi
-if [ -e vendor/bin/fmt.php ];
-then
-	FMT=true
-fi
-
-PHPDOC=false
-if [ -e vendor/bin/phpdoc.php ];
-then
-	PHPDOC=true
-fi
-
-function execute(){
-	echo "$0 [command]"
-	echo "	lint - run lint on changed files"
-	echo "	lint all - run lint on all files"
-	$CTAGS && echo "	ctags - generate ctags"
-	$PHPUNIT && echo "	test - execute PHPUnit"
-	$PHPUNIT && echo "	cover - execute PHPUnit with cover output"
-	$PHPDOC && echo "	doc - execute phpDocumentor"
-	$CLOC && echo "	cloc - execute script to count lines of code"
-	$CTAGS && echo "	watch ctags - execute PHPUnit, but keeps watching for file changes to trigger ctags generator"
-	$PHPUNIT && echo "	watch test - execute PHPUnit, but keeps watching for file changes to trigger the test automatically"
-	$PHPUNIT && echo "	watch cover - execute PHPUnit with cover output, but keeps watching for file changes to trigger the test automatically"
-	$PHPDOC && echo "	watch doc - execute phpDocumentor, but keeps watching for file changes to trigger the generation automatically"
-	$CLOC && echo "	watch doc - execute script to count lines of code, but keeps watching for file changes to trigger the count automatically"
-	$FMT && echo "	fmt [filename] - format filename according to project formatting rules"
-	$FMT && echo "	fmt all - format all files according to project formatting rules"
-	$FMT && echo "	fmt clean - remove all backup files - *~"
-	$FMT && echo "	watch fmt [all|filename] - watch for changes and format according to project formatting rules"
-
-	if [ !$CLOC ];
-	then
-		echo ""
-		echo "	download cloc from http://cloc.sourceforge.net/"
-	fi
-	if [ !$PHPUNIT ];
-	then
-		echo ""
-		echo "	add phpunit to composer.json:"
-		echo '	phpunit/phpunit": "4.0.*"'
-	fi
-	if [ !$PHPDOC ];
-	then
-		echo ""
-		echo "	add phpdoc to composer.json:"
-		echo '	"phpdocumentor/phpdocumentor": "2.4.*"'
-	fi
-	if [ !$CTAGS ];
-	then
-		echo ""
-		echo "	install exuberant ctags:"
-		echo "	http://ctags.sourceforge.net/"
-	fi
-
-	exit 0
+if (version_compare(phpversion(), '5.5.0', '<')) {
+	fwrite(STDERR, "PHP needs to be a minimum version of PHP 5.5.0\n");
+	exit(255);
 }
 
-function update_phpunit_xml(){
-	#processIsolation=\"true\"\
-	phpunit_xml_template="\
-	<phpunit\
-	         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\
-	         xsi:noNamespaceSchemaLocation=\"http://schema.phpunit.de/3.7/phpunit.xsd\"\
-	         colors=\"true\"\
-	         verbose=\"false\">\
-	         <testsuite>\
-	"
-	for i in $DIRS;
-	do
-		phpunit_xml_template="$phpunit_xml_template<directory suffix=\"_test.php\">$i</directory>"
-	done;
-	phpunit_xml_template="$phpunit_xml_template</testsuite>"
-
-	phpunit_xml_template="$phpunit_xml_template<filter>"
-	phpunit_xml_template="$phpunit_xml_template<whitelist processUncoveredFilesFromWhitelist=\"true\" >"
-	for i in $DIRS;
-	do
-		phpunit_xml_template="$phpunit_xml_template<directory suffix=\".php\">$i</directory>"
-	done;
-	phpunit_xml_template="$phpunit_xml_template<exclude>"
-	for i in $DIRS;
-	do
-		phpunit_xml_template="$phpunit_xml_template<directory suffix=\"_test.php\">$i</directory>"
-	done;
-	phpunit_xml_template="$phpunit_xml_template</exclude>"
-	phpunit_xml_template="$phpunit_xml_template</whitelist>"
-	phpunit_xml_template="$phpunit_xml_template</filter></phpunit>"
-
-	echo $phpunit_xml_template > phpunit.xml
+list(, $ok) = which('git');
+if (!$ok) {
+	fwrite(STDERR, "This tool needs Git to work." . PHP_EOL);
+	fwrite(STDERR, "Please, install git using:" . PHP_EOL);
+	fwrite(STDERR, "  sudo yum install git" . PHP_EOL);
+	fwrite(STDERR, "or" . PHP_EOL);
+	fwrite(STDERR, "  sudo apt-get install git" . PHP_EOL);
+	exit(255);
 }
 
-WATCH=""
-if [ "watch" == "$1" ];
-then
-	WATCH="watch"
-	shift
-fi
+define('FMTWORKERS', 2);
 
-$CLOC && if [ "cloc" == "$1" ] ;
-then
-	function execute(){
-		echo $DIRS;
-		nice -n 20 $CLOCBIN $DIRS;
+$clocBin = false;
+list($bin, $ok) = which('cloc');
+if ($ok) {
+	$clocBin = $bin;
+} else {
+	list($bin, $ok) = which('./cloc');
+	if ($ok) {
+		$clocBin = $bin;
 	}
-fi;
-
-$CTAGS && if [ "ctags" == "$1" ] ;
-then
-	function execute(){
-		echo $DIRS;
-		nice -n 20 ctags --PHP-kinds=+cf \
-		--regex-PHP='/define\("([^ ]*)"/\1/d/' \
-		--regex-PHP="/define\('([^ ]*)'/\1/d/" \
-		--regex-PHP="/const ([^ ]*)/\1/d/" \
-		--regex-PHP='/trait ([^ ]*)/\1/c/' \
-		--regex-PHP='/final class ([^ ]*)/\1/c/' \
-		--regex-PHP='/final abstract class ([^ ]*)/\1/c/' \
-		--regex-PHP='/abstract class ([^ ]*)/\1/c/' \
-		--regex-PHP='/interface ([^ ]*)/\1/c/' \
-		--regex-PHP='/(public |static |abstract |protected |private |final public )+function ([^ (]*)/\2/f/' -R -f .tags-new $DIRS;
-		(cat .tags-new | sort -k1) &> .tags_sorted_by_file
-		mv .tags-new .tags;
-	}
-fi;
-
-$PHPUNIT && if [ "test" == "$1" ] ;
-then
-	update_phpunit_xml
-	shift
-	function execute(){
-		TEST=""
-		if [[ "incremental" == "$1" ]]; then
-			shift
-			FILES=`eval $INCREMENTAL_TEST`
-			for i in $FILES;
-			do
-				echo -e "\n---\n\n\e[32m\e[7mTesting " ${i/.php/} "\e[27m\e[0m"
-				execute ${i/.php/} "$@"
-			done;
-			return 1
-		elif [[ $1 == */* ]]; then
-			TEST="$1Test $1_test.php"
-			shift
-		elif [[ $1 == *\\* ]]; then
-			FN=${1//\\/\/}
-			TEST="$1Test ${FN}_test.php"
-			shift
-		fi
-		vendor/bin/phpunit $TEST "$@"
-	}
-fi;
-
-$PHPUNIT && if [ "cover" == "$1" ] ;
-then
-	update_phpunit_xml
-	shift
-	function execute(){
-		TEST=""
-		if [[ "incremental" == "$1" ]]; then
-			shift
-			FILES=`eval $INCREMENTAL_TEST`
-			for i in $FILES;
-			do
-				echo -e "\n---\n\n\e[32m\e[7mTesting " ${i/.php/} "\e[27m\e[0m"
-				execute ${i/.php/} "$@"
-			done;
-			return 1
-		elif [[ $1 == */* ]]; then
-			TEST="$1Test $1_test.php"
-			shift
-		elif [[ $1 == *\\* ]]; then
-			FN=${1//\\/\/}
-			TEST="$1Test ${FN}_test.php"
-			shift
-		fi
-		vendor/bin/phpunit --coverage-text --coverage-html=cover/ --coverage-clover=clover.xml --log-junit=junit.xml $TEST "$@"
-	}
-fi;
-
-
-$PHPDOC && if [ "doc" == "$1" ] ;
-then
-	function execute(){
-		NEW_DIRS=""
-		for i in $DIRS;
-		do
-			NEW_DIRS="-d $i $NEW_DIRS"
-		done;
-		php vendor/bin/phpdoc.php $NEW_DIRS -t docs/
-	}
-fi;
-
-if [ "lint" == "$1" ];
-then
-	if [ "" == "$2" ];
-	then
-		function execute(){
-			echo "Differential linting..."
-			which parallel &> /dev/null
-			if [ 0 == $? ];
-			then
-				git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 }' | parallel --no-notice php -l
-			else
-				files=$( git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 } ' )
-				for line in $files
-				do
-					(php -l $line &> /dev/null) || (php -l $line) && echo "$line"
-				done;
-			fi;
-		}
-	fi;
-	if [ "all" == "$2" ];
-	then
-		function execute(){
-			echo "Full linting..."
-			which parallel &> /dev/null
-			if [ 0 == $? ];
-			then
-				find . -ipath "*.php" | parallel --no-notice php -l
-			else
-				echo 'Needs GNU Parallel'
-			fi;
-		}
-	fi;
-fi;
-
-$FMT && if [ "fmt" == "$1" ];
-then
-	if [ "" == "$2" ];
-	then
-		function execute(){
-			echo "Starting $FMTWORKERS workers..."
-			J=""
-			files=$( git status -s | grep -i "\.php$" | awk -F ' ' '{ print $2 } ' )
-			for line in $files
-			do
-				(php -l $line &> /dev/null) && (cp $line $line~; php fmt.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line" &
-				J="$J $!"
-				JCNT=`echo $J | wc -w`
-				if [ $JCNT -ge $FMTWORKERS ];
-				then
-					for jj in $J;
-					do
-						wait $jj;
-					done;
-					J=""
-				fi
-			done;
-			for jj in $J;
-			do
-				wait $jj;
-			done;
-		}
-	elif [ "clean" == "$2" ];
-	then
-		function execute(){
-			eval $FMT_CLEAN
-		}
-	elif [ "all" == "$2" ];
-	then
-		function execute(){
-			echo "Starting $FMTWORKERS workers..."
-			J=""
-			for i in $DIRS;
-			do
-				files=`find $i -ipath "*.php"`
-				for line in $files
-				do
-					( (php -l $line &> /dev/null) && (cp $line $line~; php fmt.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line" ) &
-					J="$J $!"
-					JCNT=`echo $J | wc -w`
-					if [ $JCNT -ge $FMTWORKERS ];
-					then
-						for jj in $J;
-						do
-							wait $jj;
-						done;
-						J=""
-					fi
-				done;
-			done;
-			for jj in $J;
-			do
-				wait $jj;
-			done;
-		}
-	else
-		line=$2
-		function execute(){
-			(php -l $line &> /dev/null) && (cp $line $line~; php fmt.php $line > $line-formatted; (php -l $line-formatted &> /dev/null) && mv -f $line-formatted $line) && echo "Formatted $line"
-		}
-	fi
-
-fi
-
-sha=0
-previous_sha=0
-update_sha () {
-	command="ls -lR $DIRS | sha1sum"
-	sha=`bash -c "$command"`
-}
-changed () {
-	echo "Running... $1 $2";
-	time execute "$@"
-	previous_sha=$sha
-}
-compare () {
-	update_sha
-	if [[ $sha != $previous_sha ]] ;
-	then
-		changed "$@";
-	fi
-}
-watch () {
-	while true; do
-		compare "$@"
-		read -s -t 1 && (
-			execute "$@"
-		)
-	done
 }
 
-if [ "watch" == "$WATCH" ];
-then
-	watch "$@"
-else
-	time execute "$@"
-fi
+$ctagsBin = false;
+list($bin, $ok) = which('ctags');
+if ($ok) {
+	$ctagsVersion = [];
+	exec($bin . ' --version', $ctagsVersion);
+	if (false !== strpos(implode('', $ctagsVersion), 'Exuberant')) {
+		$ctagsBin = $bin;
+	}
+}
+
+$phpunitBin = false;
+list($bin, $ok) = which('vendor/bin/phpunit');
+if ($ok) {
+	$phpunitBin = $bin;
+}
+
+$fmtBin = false;
+if (file_exists('fmt.php')) {
+	$fmtBin = 'fmt.php';
+} elseif (file_exists('vendor/bin/fmt.php')) {
+	$fmtBin = 'vendor/bin/fmt.php';
+}
+
+$phpdocBin = false;
+if (file_exists('vendor/bin/phpdoc.php')) {
+	$phpdocBin = 'vendor/bin/phpdoc.php';
+}
+
+echo $clocBin, $phpunitBin, $fmtBin, $phpdocBin;
+
+function which($cmd) {
+	$output = [];
+	$retcode = 0;
+	$which = exec('which ' . escapeshellarg($cmd), $output, $retcode);
+	return [$which, 0 == $retcode];
+}
