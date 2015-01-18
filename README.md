@@ -14,6 +14,7 @@ php.tools
 
 * [Sublime Text 2/3](https://github.com/dericofilho/sublime-phpfmt)
 * [Vim](https://github.com/dericofilho/vim-phpfmt)
+* [PHPStorm](https://github.com/dericofilho/php.tools/blob/master/PHPStorm.md)
 
 ## Usage
 
