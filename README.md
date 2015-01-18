@@ -10,6 +10,11 @@ php.tools
 - PHP >= 5.5.0 to run the formatter. Note that the formatter can parse even a PHP file version 4 in case needed.
 - Optionally, if Exuberant Ctags, vendored PHPUnit and phpDocumentos are available, the functions for unit testing, code coverage and document generation are enabled.
 
+## Plugins
+
+* [Sublime Text 2/3](https://github.com/dericofilho/sublime-phpfmt)
+* [Vim](https://github.com/dericofilho/vim-phpfmt)
+
 ## Usage
 
 ```
