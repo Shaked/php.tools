@@ -4342,6 +4342,9 @@ EOT;
 ;
 final class AlignDoubleSlashComments extends AdditionalPass {
 	const ALIGNABLE_COMMENT = "\x2 COMMENT%d \x3";
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_COMMENT])) {
 			return true;
