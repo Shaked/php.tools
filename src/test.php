@@ -37,7 +37,7 @@ ob_start();
 if (!isset($opt['deployed'])) {
 	include realpath(__DIR__ . "/fmt.src.php");
 } else {
-	include realpath(__DIR__ . "/fmt.php");
+	include realpath(__DIR__ . "/../fmt.php");
 }
 ob_end_clean();
 echo 'Running tests...', PHP_EOL;
