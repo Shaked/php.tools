@@ -16,7 +16,11 @@ class B {
 			noop();
 		}
 
-		do {
+		/* post->scopeSearch */
+		// default / no ajax
+
+		do
+		{
 
 		} while ($true);
 
@@ -32,12 +36,13 @@ class B {
 		switch ($a)
 		{
 			case 1:
-			break;
+				break;
 		}
 
 		try {
 			throw new Exception();
-		}/*Comment*/catch (Exception $e)
+		}/*Comment*/
+		catch (Exception $e)
 		{
 			print_r($e);
 		}
@@ -49,13 +54,13 @@ class B {
 
 	public function c()
 	//comment
-		{
+	{
 
 		try {
 			throw new Exception();
 		}
 		//Comment
-				//Comment2
+		//Comment2
 		catch (Exception $e)
 		{
 			print_r($e);

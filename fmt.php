@@ -5388,21 +5388,6 @@ class LaravelStyle extends AdditionalPass {
 		if ($fmt->candidate($source, $this->foundTokens)) {
 			$source = $fmt->format($source);
 		}
-		$fmt = new NormalizeLnAndLtrimLines();
-		if ($fmt->candidate($source, $this->foundTokens)) {
-			$source = $fmt->format($source);
-		}
-		$source = $this->ltrimWhitespaces($source);
-		$fmt = new Reindent();
-		if ($fmt->candidate($source, $this->foundTokens)) {
-			$source = $fmt->format($source);
-		}
-		$fmt = new LeftAlignComment();
-		if ($fmt->candidate($source, $this->foundTokens)) {
-			$source = $fmt->format($source);
-		}
-
-		$source = (new RTrim())->format($source);
 		return $source;
 	}
 
@@ -5435,12 +5420,18 @@ class LaravelStyle extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_CURLY_OPEN:
-					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY])) {
+					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO])) {
 						list($prevId, $prevText) = $this->getToken($this->leftToken());
 						if (!$this->hasLn($prevText)) {
-							$this->appendCode($this->getCrlf());
+							$this->appendCode($this->getCrlfIndent());
 						}
 					}
+					$this->setIndent(+1);
+					$this->appendCode($text);
+					break;
+
+				case ST_CURLY_CLOSE:
+					$this->setIndent(-1);
 					$this->appendCode($text);
 					break;
 
@@ -5449,7 +5440,7 @@ class LaravelStyle extends AdditionalPass {
 				case T_FINALLY:
 					list($prevId, $prevText) = $this->getToken($this->leftToken());
 					if (!$this->hasLn($prevText) && T_OPEN_TAG != $prevId) {
-						$this->appendCode($this->getCrlf());
+						$this->appendCode($this->getCrlfIndent());
 					}
 					$this->appendCode($text);
 					break;
@@ -5459,30 +5450,10 @@ class LaravelStyle extends AdditionalPass {
 					}
 					list($prevId, $prevText) = $this->getToken($this->leftToken());
 					if (!$this->hasLn($prevText)) {
-						$this->appendCode($this->getCrlf());
+						$this->appendCode($this->getCrlfIndent());
 					}
 					$this->appendCode($text);
 					break;
-				default:
-					$this->appendCode($text);
-			}
-		}
-
-		return $this->code;
-	}
-
-	private function ltrimWhitespaces($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_WHITESPACE:
-					if ($this->leftTokenIs([T_COMMENT, T_DOC_COMMENT]) && !$this->rightTokenIs([T_COMMENT, T_DOC_COMMENT, ST_CURLY_OPEN])) {
-						$this->appendCode(substr($text, 2));
-						break;
-					}
 				default:
 					$this->appendCode($text);
 			}
