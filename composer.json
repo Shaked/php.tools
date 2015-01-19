@@ -19,9 +19,6 @@
     "require":{
         "php": ">=5.4.0"
     },
-    "require-dev": {
-        "satooshi/php-coveralls": "dev-master"
-    },
     "suggest": {
         "phpunit/phpunit": "Execute tests using 'php.tools test'",
         "phpdocumentor/phpdocumentor": "Document generation using 'php.tools doc'",
