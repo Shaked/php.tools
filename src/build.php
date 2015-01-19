@@ -86,4 +86,14 @@ foreach ($phars as $target) {
 }
 echo 'done', PHP_EOL;
 
-rename('php.tools.php', 'php.tools');
+$variants = ['.php', '.stub.php', '.phar', '.phar.sha1'];
+foreach ($targets as $target) {
+	foreach ($variants as $variant) {
+		if (file_exists($target . $variant)) {
+			echo 'moving ', $target . $variant, ' to ..' . DIRECTORY_SEPARATOR . $target . $variant, PHP_EOL;
+			rename($target . $variant, '..' . DIRECTORY_SEPARATOR . $target . $variant);
+		}
+	}
+}
+rename('..' . DIRECTORY_SEPARATOR . 'php.tools.php', '..' . DIRECTORY_SEPARATOR . 'php.tools');
+echo 'moving ', '..' . DIRECTORY_SEPARATOR . 'php.tools.php', ' to ..' . DIRECTORY_SEPARATOR . 'php.tools', PHP_EOL;
