@@ -12,6 +12,9 @@ class B {
 			noop();
 		}
 
+		/* post->scopeSearch */
+		// default / no ajax
+
 		do{
 
 		}while($true);
