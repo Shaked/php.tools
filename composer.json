@@ -26,7 +26,6 @@
         "satooshi/php-coveralls": "dev-master"
     },
     "suggest": {
-        "GNU Parallel": "Parallel execution in 'php.tools'",
         "phpunit/phpunit": "Execute tests using 'php.tools test'",
         "phpdocumentor/phpdocumentor": "Document generation using 'php.tools doc'",
         "exuberant/ctags": "For PHP target ctags generation"

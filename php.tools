@@ -261,9 +261,6 @@ foreach (new DirectoryIterator('.') as $fileInfo) {
 	$DIRS[] = $fileInfo->getFilename();
 }
 
-//FMT_CLEAN="find -iwholename '*~' -delete"
-//INCREMENTAL_TEST="find $DIRS -iwholename '*.php' -mmin -10 | grep -iv '_test.php'"
-
 define('FMTWORKERS', 4);
 
 $clocBin = false;
@@ -315,7 +312,7 @@ if (file_exists('vendor/bin/phpdoc.php')) {
 $execute = function () {
 	GLOBAL $clocBin, $ctagsBin, $phpunitBin, $fmtBin, $phpdocBin, $argv;
 
-	echo $argv[0] . ' [command]' . PHP_EOL;
+	echo 'php.tools [command]' . PHP_EOL;
 	echo '	lint - run lint on changed files' . PHP_EOL;
 	echo '	lint all - run lint on all files' . PHP_EOL;
 
@@ -403,12 +400,12 @@ $execute = function () {
 
 function updatePhpunitXml($DIRS) {
 	$phpunit_xml_template = "
-	<phpunit\
-	         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\
-	         xsi:noNamespaceSchemaLocation=\"http://schema.phpunit.de/3.7/phpunit.xsd\"\
-	         colors=\"true\"\
-	         verbose=\"false\">\
-	         <testsuite>\
+	<phpunit
+	         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+	         xsi:noNamespaceSchemaLocation=\"http://schema.phpunit.de/3.7/phpunit.xsd\"
+	         colors=\"true\"
+	         verbose=\"false\">
+	         <testsuite>
 	";
 	foreach ($DIRS as $i) {
 		$phpunit_xml_template .= "<directory suffix=\"_test.php\">" . $i . "</directory>";
@@ -474,63 +471,73 @@ if ($ctagsBin && isset($argv[1]) && "ctags" == $argv[1]) {
 
 if ($phpunitBin && isset($argv[1]) && "test" == $argv[1]) {
 	updatePhpunitXml($DIRS);
-	array_shift($argv);
 	$execute = function () {
+		$argv = $GLOBALS['argv'];
 		$TEST = "";
-		if ("incremental" == $argv[1]) {
-			array_shift($argv);
-			$FILES = `eval $INCREMENTAL_TEST`;
-			foreach ($FILES as $i) {
-				// echo -e "\n---\n\n\e[32m\e[7mTesting " ${i/.php/} "\e[27m\e[0m"
-				// execute ${i/.php/} "$@"
+		// if ("incremental" == $argv[1]) {
+		// 	array_shift($argv);
+		// 	$FILES = `eval $INCREMENTAL_TEST`;
+		// 	foreach ($FILES as $i) {
+		// 		// echo -e "\n---\n\n\e[32m\e[7mTesting " ${i/.php/} "\e[27m\e[0m"
+		// 		// execute ${i/.php/} "$@"
+		// 	}
+		// 	return 1;
+		// } else
+		if (isset($argv[1])) {
+			$argv[1] = trim($argv[1]);
+			$argv[1] = str_replace('.php', '', trim($argv[1]));
+			if (strpos($argv[1], '/') !== false) {
+				$TEST = $argv[1] . "Test " . $argv[1] . "_test.php";
+			} elseif (strpos($argv[1], "\\") !== false) {
+				$FN = str_replace("\\", '/', $argv[1]);
+				$TEST = $argv[1] . "Test " . $FN . "_test.php";
 			}
-			return 1;
+			array_shift($argv);
+			array_shift($argv);
 		}
-		// elseif ($1 == * ){
-		// 	TEST="$1Test $1_test.php"
-		// 	shift
-		// }elseif( $1 == *\\* ){
-		// 	FN=${1//\\/\/}
-		// 	TEST="$1Test ${FN}_test.php"
-		// 	shift
-		// }
-		// vendor/bin/phpunit $TEST "$@"
+		passthru('vendor/bin/phpunit ' . $TEST . ' ' . implode(' ', $argv));
 	};
 }
 
 if ($phpunitBin && isset($argv[1]) && "cover" == $argv[1]) {
 	updatePhpunitXml($DIRS);
-	array_shift($argv);
 	$execute = function () {
+		$argv = $GLOBALS['argv'];
 		$TEST = "";
-		if ("incremental" == $argv[1]) {
-			array_shift($argv);
-			$FILES = `eval $INCREMENTAL_TEST`;
-			foreach ($FILES as $i) {
-				// echo -e "\n---\n\n\e[32m\e[7mTesting " ${i/.php/} "\e[27m\e[0m"
-				// execute ${i/.php/} "$@"
+		// if ("incremental" == $argv[1]) {
+		// 	array_shift($argv);
+		// 	$FILES = `eval $INCREMENTAL_TEST`;
+		// 	foreach ($FILES as $i) {
+		// 		// echo -e "\n---\n\n\e[32m\e[7mTesting " ${i/.php/} "\e[27m\e[0m"
+		// 		// execute ${i/.php/} "$@"
+		// 	}
+		// 	return 1;
+		// } else
+		if (isset($argv[1])) {
+			$argv[1] = trim($argv[1]);
+			$argv[1] = str_replace('.php', '', trim($argv[1]));
+			if (strpos($argv[1], '/') !== false) {
+				$TEST = $argv[1] . "Test " . $argv[1] . "_test.php";
+			} elseif (strpos($argv[1], "\\") !== false) {
+				$FN = str_replace("\\", '/', $argv[1]);
+				$TEST = $argv[1] . "Test " . $FN . "_test.php";
 			}
-			return 1;
+			array_shift($argv);
+			array_shift($argv);
 		}
-		// elseif ($1 == * ){
-		// 	TEST="$1Test $1_test.php"
-		// 	shift
-		// }elseif( $1 == *\\* ){
-		// 	FN=${1//\\/\/}
-		// 	TEST="$1Test ${FN}_test.php"
-		// 	shift
-		// }
-		// vendor/bin/phpunit --coverage-text --coverage-html=cover/ --coverage-clover=clover.xml --log-junit=junit.xml $TEST "$@"
+		passthru('vendor/bin/phpunit --coverage-text --coverage-html=cover/ --coverage-clover=clover.xml --log-junit=junit.xml ' . $TEST . ' ' . implode(' ', $argv));
 	};
 }
 
 if ($phpdocBin && isset($argv[1]) && "doc" == $argv[1]) {
-	$execute = function () use ($DIRS) {
+	$execute = function () {
+		GLOBAL $DIRS;
 		$NEW_DIRS = "";
 		foreach ($DIRS as $i) {
-			$NEW_DIRS = "-d $i $NEW_DIRS";
+			$NEW_DIRS = "-d " . escapeshellarg($i) . " " . $NEW_DIRS;
 		}
-		// php vendor/bin/phpdoc.php $NEW_DIRS -t docs/
+		echo "php vendor/bin/phpdoc.php " . $NEW_DIRS . " -t docs/", PHP_EOL;
+		passthru("php vendor/bin/phpdoc.php " . $NEW_DIRS . " -t docs/");
 	};
 }
 
@@ -616,41 +623,24 @@ if ($fmtBin && isset($argv[1]) && "fmt" == $argv[1]) {
 	}
 }
 
-$sha = 0;
-$previousSha = 0;
-function updateSha($DIRS) {
-	$command = "ls -lR $DIRS | sha1sum";
-	$sha = `bash -c "$command"`;
-}
-function changed(&$sha, &$previousSha) {
-	echo "Running... $1 $2";
-	//time execute "$@";
-	$previousSha = $sha;
-}
-function compare(&$sha, &$previousSha, $DIRS) {
-	updateSha($DIRS);
-	if ($sha != $previousSha) {
-		changed($sha, $previousSha, "$@");
-	}
-}
-
-function watch() {
+array_shift($argv);
+if (!empty($WATCH)) {
+	$directory = new RecursiveDirectoryIterator('.');
+	$iterator = new RecursiveIteratorIterator($directory);
+	$currentTime = time();
 	while (true) {
-		//compare "$@"
-		// read -s -t 1 && (
-		// execute "$@"
-		// )
+		foreach ($iterator as $file) {
+			if ($file->getMTime() > $currentTime) {
+				$currentTime = $file->getMTime();
+				echo 'Running ...', PHP_EOL;
+				call_user_func($execute);
+				break;
+			}
+		}
 	}
+} else {
+	call_user_func($execute);
 }
-
-call_user_func($execute);
-/*
-if ("watch" == "$WATCH" ){
-watch "$@"
-}else{
-time execute "$@"
-}
- */
 
 function which($cmd) {
 	$output = [];
