@@ -388,27 +388,27 @@ if (!isset($testEnv)) {
 	$fmt->addPass(new Reindent());
 	$fmt->addPass(new EliminateDuplicatedEmptyLines());
 
-	if (isset($opts['indent_with_space'])) {
+	if (isset($opts['indent_with_space']) && !isset($opts['laravel'])) {
 		$fmt->addPass(new PSR2IndentWithSpace($opts['indent_with_space']));
 		$argv = extractFromArgv($argv, 'indent_with_space');
 	}
-	if (isset($opts['psr'])) {
+	if (isset($opts['psr']) && !isset($opts['laravel'])) {
 		PsrDecorator::decorate($fmt);
 		$argv = extractFromArgv($argv, 'psr');
 	}
-	if (isset($opts['psr1'])) {
+	if (isset($opts['psr1']) && !isset($opts['laravel'])) {
 		PsrDecorator::PSR1($fmt);
 		$argv = extractFromArgv($argv, 'psr1');
 	}
-	if (isset($opts['psr1-naming'])) {
+	if (isset($opts['psr1-naming']) && !isset($opts['laravel'])) {
 		PsrDecorator::PSR1Naming($fmt);
 		$argv = extractFromArgv($argv, 'psr1-naming');
 	}
-	if (isset($opts['psr2'])) {
+	if (isset($opts['psr2']) && !isset($opts['laravel'])) {
 		PsrDecorator::PSR2($fmt);
 		$argv = extractFromArgv($argv, 'psr2');
 	}
-	if ((isset($opts['psr1']) || isset($opts['psr2']) || isset($opts['psr'])) && isset($opts['enable_auto_align'])) {
+	if ((isset($opts['psr1']) || isset($opts['psr2']) || isset($opts['psr'])) && isset($opts['enable_auto_align']) && !isset($opts['laravel'])) {
 		$fmt->addPass(new PSR2AlignObjOp());
 	}
 
