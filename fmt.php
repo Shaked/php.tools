@@ -5425,6 +5425,8 @@ class LaravelStyle extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_DOLLAR_OPEN_CURLY_BRACES:
+				case T_CURLY_OPEN:
 				case ST_CURLY_OPEN:
 					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO])) {
 						list($prevId, $prevText) = $this->getToken($this->leftToken());
