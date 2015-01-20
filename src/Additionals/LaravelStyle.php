@@ -1,5 +1,16 @@
 <?php
 class LaravelStyle extends AdditionalPass {
+
+	// trying to match http://laravel.com/docs/4.2/contributions#coding-style
+	// PSR-0 and PSR-1 will use sublime-text settings.
+	// # The class namespace declaration must be on the same line as <?php. [ok]
+	// # A class' opening { must be on the same line as the class name. [ok]
+	// # Functions and control structures must use Allman style braces. [ok with bug]
+	// # Indent with tabs, align with spaces.
+	// ## tabs:not yet consider indent-with_space = true in phpfmt.sublime-settings
+	// ## align:waiting for bugs feedback]
+	// # addition: match formatting of laravel4.2/app/config/*.php & framework/**/*.php
+
 	private $foundTokens;
 	public function candidate($source, $foundTokens) {
 		$this->foundTokens = $foundTokens;
@@ -15,6 +26,13 @@ class LaravelStyle extends AdditionalPass {
 		if ($fmt->candidate($source, $this->foundTokens)) {
 			$source = $fmt->format($source);
 		}
+
+		$source = $this->noneDocBlockMinorCleanUp($source);
+		$fmt = new AlignEquals();
+		if ($fmt->candidate($source, $this->foundTokens)) {
+			$source = $fmt->format($source);
+		}
+
 		return $source;
 	}
 
@@ -82,6 +100,30 @@ class LaravelStyle extends AdditionalPass {
 						$this->appendCode($this->getCrlfIndent());
 					}
 					$this->appendCode($text);
+					break;
+				default:
+					$this->appendCode($text);
+			}
+		}
+
+		return $this->code;
+	}
+
+	private function noneDocBlockMinorCleanUp($source) {
+		// # addition: match formatting of laravel4.2/app/config/app.php
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_COMMENT:
+					if (substr($text, 0, 3) != '/**') {
+						list(, $prevText) = $this->inspectToken(-1);
+						$counts = substr_count($prevText, "\t");
+						$replacement = "\n" . str_repeat("\t", $counts);
+						$this->appendCode(preg_replace('/\n(\s+)/', $replacement, $text));
+					}
 					break;
 				default:
 					$this->appendCode($text);
