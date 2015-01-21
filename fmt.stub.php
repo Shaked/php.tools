@@ -5169,7 +5169,11 @@ EOT;
 ;
 final class GeneratePHPDoc extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[T_FUNCTION])) {
+			return true;
+		}
+
+		return false;
 	}
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -5917,7 +5921,11 @@ final class OrderMethod extends AdditionalPass {
 	}
 
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[T_CLASS], $foundTokens[T_FUNCTION])) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function format($source) {
