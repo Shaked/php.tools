@@ -1,5 +1,5 @@
 <?php
-class LaravelStyle extends AdditionalPass {
+class LaravelStyle extends FormatterPass {
 
 	// trying to match http://laravel.com/docs/4.2/contributions#coding-style
 	// PSR-0 and PSR-1 will use sublime-text settings.
@@ -166,14 +166,14 @@ class LaravelStyle extends AdditionalPass {
 					// echo "diff with previous ";
 					if (count($temp) > 1) {
 						array_push($seenBuckets, $temp); //push to bucket
-						// echo "pushed ";
+						                                 // echo "pushed ";
 					}
 					$temp = []; // clear temp
 				}
 			}
 			array_push($temp, $index);
 			if ((count($seenArray) - 1) == $j and (count($temp) > 1)) {
-				// echo "reached end ";
+				                                 // echo "reached end ";
 				array_push($seenBuckets, $temp); //push to bucket
 			}
 			// echo PHP_EOL;
@@ -221,7 +221,7 @@ class LaravelStyle extends AdditionalPass {
 			}
 			// break;
 		}
-		// print_r($this->getConsecutiveFromArray($seenDoubleArrows));
+		                              // print_r($this->getConsecutiveFromArray($seenDoubleArrows));
 		return implode("\n", $lines); //$source;
 	}
 
@@ -246,37 +246,5 @@ class LaravelStyle extends AdditionalPass {
 		$source = $this->generateConsecutiveFromArray($seenDoubleArrows, $source);
 
 		return $source;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Applies Laravel Coding Style';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php namespace A;
-
-class A {
-	function b()
-	{
-		if($a)
-		{
-			noop();
-		}
-		else
-		{
-			noop();
-		}
-	}
-
-}
-?>
-EOT;
 	}
 }

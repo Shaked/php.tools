@@ -74,7 +74,6 @@ require 'Additionals/CakePHPStyle.php';
 require 'Additionals/EncapsulateNamespaces.php';
 require 'Additionals/GeneratePHPDoc.php';
 require 'Additionals/JoinToImplode.php';
-require 'Additionals/LaravelStyle.php';
 require 'Additionals/LongArray.php';
 require 'Additionals/MergeElseIf.php';
 require 'Additionals/MergeNamespaceWithOpenTag.php';
@@ -93,6 +92,9 @@ require 'Additionals/StripNewlineAfterCurlyOpen.php';
 require 'Additionals/TightConcat.php';
 require 'Additionals/WrongConstructorName.php';
 require 'Additionals/YodaComparisons.php';
+
+require 'Laravel/LaravelStyle.php';
+require 'Laravel/LaravelDecorator.php';
 
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -436,7 +438,7 @@ if (!isset($testEnv)) {
 	}
 
 	if (isset($opts['laravel'])) {
-		$fmt->addPass(new LaravelStyle());
+		LaravelDecorator::decorate($fmt);
 		$argv = extractFromArgv($argv, 'laravel');
 	}
 

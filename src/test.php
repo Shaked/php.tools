@@ -228,6 +228,80 @@ if (!$bailOut) {
 	}
 }
 
+$cases = glob(__DIR__ . "/tests-laravel/" . $testNumber . "*.in");
+if (!$bailOut) {
+	foreach ($cases as $caseIn) {
+		++$count;
+		$isCoverage && $coverage->start($caseIn);
+		$fmt = new CodeFormatter();
+		$caseOut = str_replace('.in', '.out', $caseIn);
+		$content = file_get_contents($caseIn);
+		$tokens = token_get_all($content);
+		$specialPasses = false;
+		foreach ($tokens as $token) {
+			list($id, $text) = getToken($token);
+			if (T_COMMENT == $id && '//version:' == substr($text, 0, 10)) {
+				$version = str_replace('//version:', '', $text);
+				if (version_compare(PHP_VERSION, $version, '<')) {
+					echo 'S';
+					continue 2;
+				}
+			} elseif (!$shortTagEnabled && (T_INLINE_HTML == $id) && false !== strpos($text, '//skipShortTag')) {
+				echo 'S';
+				continue 2;
+			} elseif (T_COMMENT == $id && '//passes:' == substr($text, 0, 9)) {
+				$passes = explode(',', str_replace('//passes:', '', $text));
+				$specialPasses = true;
+				foreach ($passes as $pass) {
+					$pass = trim($pass);
+					$fmt->addPass(new $pass());
+				}
+			}
+		}
+		if (!$specialPasses) {
+			$fmt->addPass(new TwoCommandsInSameLine());
+			$fmt->addPass(new RemoveIncludeParentheses());
+			$fmt->addPass(new NormalizeIsNotEquals());
+			$fmt->addPass(new OrderUseClauses());
+			$fmt->addPass(new AddMissingCurlyBraces());
+			$fmt->addPass(new ExtraCommaInArray());
+			$fmt->addPass(new NormalizeLnAndLtrimLines());
+			$fmt->addPass(new MergeParenCloseWithCurlyOpen());
+			$fmt->addPass(new MergeCurlyCloseAndDoWhile());
+			$fmt->addPass(new MergeDoubleArrowAndArray());
+			$fmt->addPass(new ResizeSpaces());
+			$fmt->addPass(new ReindentColonBlocks());
+			$fmt->addPass(new ReindentLoopColonBlocks());
+			$fmt->addPass(new ReindentIfColonBlocks());
+			$fmt->addPass(new AlignEquals());
+			$fmt->addPass(new AlignDoubleArrow());
+			$fmt->addPass(new ReindentObjOps());
+			$fmt->addPass(new Reindent());
+			$fmt->addPass(new EliminateDuplicatedEmptyLines());
+			$fmt->addPass(new PSR2AlignObjOp());
+			$fmt->addPass(new LeftAlignComment());
+			$fmt->addPass(new RTrim());
+			LaravelDecorator::decorate($fmt);
+		}
+
+		$got = $fmt->formatCode($content);
+		$expected = '';
+		if (file_exists($caseOut)) {
+			$expected = file_get_contents($caseOut);
+		}
+		if ($got != $expected) {
+			$brokenTests[$caseOut] = $got;
+			if (isset($opt['stop'])) {
+				$bailOut = true;
+				break;
+			}
+			echo '!';
+		} else {
+			echo '.';
+		}
+		$isCoverage && $coverage->stop();
+	}
+}
 echo PHP_EOL;
 echo 'Tests:', $count . PHP_EOL;
 echo 'Broken:', sizeof($brokenTests) . PHP_EOL;
