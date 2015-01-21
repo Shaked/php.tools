@@ -75,6 +75,7 @@ require 'Additionals/EncapsulateNamespaces.php';
 require 'Additionals/GeneratePHPDoc.php';
 require 'Additionals/JoinToImplode.php';
 require 'Additionals/LaravelStyle.php';
+require 'Additionals/LongArray.php';
 require 'Additionals/MergeElseIf.php';
 require 'Additionals/MergeNamespaceWithOpenTag.php';
 require 'Additionals/MildAutoPreincrement.php';
