@@ -1832,6 +1832,9 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_INLINE_HTML:
+					$this->appendCode($text);
+					break;
 				case ST_QUOTE:
 					$this->appendCode($text);
 					$this->printUntilTheEndOfString();
