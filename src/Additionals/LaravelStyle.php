@@ -166,14 +166,14 @@ class LaravelStyle extends AdditionalPass {
 					// echo "diff with previous ";
 					if (count($temp) > 1) {
 						array_push($seenBuckets, $temp); //push to bucket
-						                                 // echo "pushed ";
+						// echo "pushed ";
 					}
 					$temp = []; // clear temp
 				}
 			}
 			array_push($temp, $index);
 			if ((count($seenArray) - 1) == $j and (count($temp) > 1)) {
-				                                 // echo "reached end ";
+				// echo "reached end ";
 				array_push($seenBuckets, $temp); //push to bucket
 			}
 			// echo PHP_EOL;
@@ -202,7 +202,7 @@ class LaravelStyle extends AdditionalPass {
 			// just run the top 5 to seek the laternative
 			rsort($toBeSorted);
 			// print_r($toBeSorted);
-			for ($i = 1; $i <= 5; $i++) {
+			for ($i = 1; $i <= 5; ++$i) {
 				if (isset($toBeSorted[$i])) {
 					if ($toBeSorted[($i - 1)] / $toBeSorted[$i] > 1.5) {
 						$maxPosition = $toBeSorted[$i];
@@ -221,7 +221,7 @@ class LaravelStyle extends AdditionalPass {
 			}
 			// break;
 		}
-		                              // print_r($this->getConsecutiveFromArray($seenDoubleArrows));
+		// print_r($this->getConsecutiveFromArray($seenDoubleArrows));
 		return implode("\n", $lines); //$source;
 	}
 

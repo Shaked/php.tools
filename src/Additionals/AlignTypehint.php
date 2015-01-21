@@ -33,7 +33,7 @@ final class AlignTypehint extends AdditionalPass {
 						}
 						$this->appendCode(sprintf(self::ALIGNABLE_TYPEHINT, $contextCounter) . $text);
 					} while (true);
-					$contextCounter++;
+					++$contextCounter;
 					break;
 
 				default:

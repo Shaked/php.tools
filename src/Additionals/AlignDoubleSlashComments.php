@@ -29,7 +29,7 @@ final class AlignDoubleSlashComments extends AdditionalPass {
 
 				case T_WHITESPACE:
 					if ($this->hasLn($text)) {
-						$contextCounter++;
+						++$contextCounter;
 					}
 				default:
 					$this->appendCode($text);

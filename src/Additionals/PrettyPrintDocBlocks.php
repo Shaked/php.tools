@@ -171,7 +171,7 @@ class PrettyPrintDocBlocks extends AdditionalPass {
 						$currentLine .= $word;
 						$pad += $rightMost + 1;
 						$currentLine = str_pad($currentLine, $pad);
-						$columnCount++;
+						++$columnCount;
 						if ($columnCount == $maxColumnCount) {
 							break;
 						}
