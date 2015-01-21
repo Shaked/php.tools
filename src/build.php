@@ -1,6 +1,6 @@
 <?php
 if (ini_get('phar.readonly')) {
-	passthru($_SERVER['_'] . ' -dphar.readonly=0 build.php');
+	passthru($_SERVER['_'] . ' -dphar.readonly=0 build.php 2>&1');
 	exit(0);
 }
 include 'vendor/dericofilho/csp/csp.php';
