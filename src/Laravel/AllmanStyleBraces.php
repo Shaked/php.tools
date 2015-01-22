@@ -13,9 +13,32 @@ class AllmanStyleBraces extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case ST_CURLY_OPEN:
+					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO])) {
+						list($prevId, $prevText) = $this->getToken($this->leftToken());
+						if (!$this->hasLn($prevText)) {
+							$this->appendCode($this->getCrlfIndent());
+						}
+					}
+					$indentToken = [
+						'id' => $id,
+						'implicit' => true,
+					];
+					$this->appendCode($text);
+					if ($this->hasLnAfter()) {
+						$indentToken['implicit'] = false;
+						$this->setIndent(+1);
+					}
+					if (!$this->hasLnAfter() && !$this->leftUsefulTokenIs([T_OBJECT_OPERATOR, T_DOUBLE_COLON])) {
+						$this->setIndent(+1);
+						$this->appendCode($this->getCrlfIndent());
+						$this->setIndent(-1);
+					}
+					$foundStack[] = $indentToken;
+					break;
+
 				case T_DOLLAR_OPEN_CURLY_BRACES:
 				case T_CURLY_OPEN:
-				case ST_CURLY_OPEN:
 					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO])) {
 						list($prevId, $prevText) = $this->getToken($this->leftToken());
 						if (!$this->hasLn($prevText)) {

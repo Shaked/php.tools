@@ -7,9 +7,6 @@ final class CodeFormatter {
 	public function addPass(FormatterPass $pass) {
 		array_unshift($this->passes, $pass);
 	}
-	public function getPasses() {
-		return array_reverse($this->passes);
-	}
 	public function removePass($passName) {
 		$idx = [];
 		foreach ($this->passes as $k => $pass) {

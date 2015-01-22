@@ -782,9 +782,6 @@ final class CodeFormatter {
 	public function addPass(FormatterPass $pass) {
 		array_unshift($this->passes, $pass);
 	}
-	public function getPasses() {
-		return array_reverse($this->passes);
-	}
 	public function removePass($passName) {
 		$idx = [];
 		foreach ($this->passes as $k => $pass) {
@@ -7186,9 +7183,32 @@ class AllmanStyleBraces extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case ST_CURLY_OPEN:
+					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO])) {
+						list($prevId, $prevText) = $this->getToken($this->leftToken());
+						if (!$this->hasLn($prevText)) {
+							$this->appendCode($this->getCrlfIndent());
+						}
+					}
+					$indentToken = [
+						'id' => $id,
+						'implicit' => true,
+					];
+					$this->appendCode($text);
+					if ($this->hasLnAfter()) {
+						$indentToken['implicit'] = false;
+						$this->setIndent(+1);
+					}
+					if (!$this->hasLnAfter() && !$this->leftUsefulTokenIs([T_OBJECT_OPERATOR, T_DOUBLE_COLON])) {
+						$this->setIndent(+1);
+						$this->appendCode($this->getCrlfIndent());
+						$this->setIndent(-1);
+					}
+					$foundStack[] = $indentToken;
+					break;
+
 				case T_DOLLAR_OPEN_CURLY_BRACES:
 				case T_CURLY_OPEN:
-				case ST_CURLY_OPEN:
 					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO])) {
 						list($prevId, $prevText) = $this->getToken($this->leftToken());
 						if (!$this->hasLn($prevText)) {
@@ -7261,21 +7281,8 @@ class AllmanStyleBraces extends FormatterPass {
 ;
 class LaravelDecorator {
 	public static function decorate(CodeFormatter &$fmt) {
-		$passes = $fmt->getPasses();
-
-		$fmt = new CodeFormatter();
-
-		foreach ($passes as $pass) {
-			$passName = get_class($pass);
-			if ('AlignEquals' == $passName || 'AlignDoubleArrow' == $passName) {
-				continue;
-			}
-			$fmt->addPass($pass);
-			if ('AddMissingCurlyBraces' == $passName) {
-				$fmt->addPass(new SmartLnAfterCurlyOpen());
-			}
-		}
-
+		$fmt->removePass('AlignEquals');
+		$fmt->removePass('AlignDoubleArrow');
 		$fmt->addPass(new NamespaceMergeWithOpenTag());
 		$fmt->addPass(new AllmanStyleBraces());
 		$fmt->addPass(new RTrim());
