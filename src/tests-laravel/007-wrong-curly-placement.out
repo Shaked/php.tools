@@ -1,5 +1,5 @@
 <?php
-Event::listen('send_activation', function ($user)
+Event::listen('send_activation', function($user)
 {
 	Mail::send(
 		'emails.confirm',
@@ -7,7 +7,7 @@ Event::listen('send_activation', function ($user)
 			'username' => $user->username,
 			'link'     => $user->code,
 		],
-		function ($send) use ($user)
+		function($send) use ($user)
 		{
 			$send->to($user->email, $user->username)->subject('activation email');
 		}

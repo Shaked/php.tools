@@ -93,8 +93,13 @@ require 'Additionals/TightConcat.php';
 require 'Additionals/WrongConstructorName.php';
 require 'Additionals/YodaComparisons.php';
 
-require 'Laravel/LaravelStyle.php';
+require 'Laravel/AlignEqualsByConsecutiveBlocks.php';
 require 'Laravel/LaravelDecorator.php';
+require 'Laravel/LaravelStyle.php';
+require 'Laravel/NoneDocBlockMinorCleanUp.php';
+require 'Laravel/NoSpaceBetweenFunctionAndBracket.php';
+require 'Laravel/SortUseNamespace.php';
+require 'Laravel/SpaceAroundExclaimationMark.php';
 
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -126,7 +131,7 @@ if (!isset($in_phar)) {
 	$in_phar = false;
 }
 if (!isset($testEnv)) {
-	function show_help($argv, $enable_cache, $in_phar) {
+	function showHelp($argv, $enable_cache, $in_phar) {
 		echo 'Usage: ' . $argv[0] . ' [-hv] [-o=FILENAME] [--config=FILENAME] ' . ($enable_cache ? '[--cache[=FILENAME]] ' : '') . '[--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space=SIZE] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--cache[=FILENAME]' => 'cache file. Default: ',
@@ -276,7 +281,7 @@ if (!isset($testEnv)) {
 		$opts = array_merge($ini_opts, $opts);
 	}
 	if (isset($opts['h']) || isset($opts['help'])) {
-		show_help($argv, $enable_cache, $in_phar);
+		showHelp($argv, $enable_cache, $in_phar);
 	}
 
 	if (isset($opts['help-pass'])) {
@@ -673,7 +678,7 @@ if (!isset($testEnv)) {
 			exit(255);
 		}
 	} else {
-		show_help($argv, $enable_cache, $in_phar);
+		showHelp($argv, $enable_cache, $in_phar);
 	}
 	exit(0);
 }

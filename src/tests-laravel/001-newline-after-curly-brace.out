@@ -1,5 +1,5 @@
 <?php
-Route::filter('guest', function ()
+Route::filter('guest', function()
 {
 	if (Auth::check())
 	{

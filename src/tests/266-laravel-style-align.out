@@ -1,6 +1,6 @@
 <?php
 
-$one    = 1;
+$one = 1;
 $twelve = 100;
 $moneyisgood = 'text';
 

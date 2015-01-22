@@ -4,7 +4,7 @@ require_once 'init.php';
 $id   = $_GET['poll'];
 $user = $_SESSION['user_id'];
 
-if (!isset($id))
+if ( ! isset($id))
 {
 	header('Location: index.php');
 }

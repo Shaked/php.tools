@@ -1,5 +1,5 @@
 <?php
-class LaravelStyle extends FormatterPass {
+class LaravelStyle extends AdditionalPass {
 
 	// trying to match http://laravel.com/docs/4.2/contributions#coding-style
 	// PSR-0 and PSR-1 will use sublime-text settings.
@@ -7,9 +7,7 @@ class LaravelStyle extends FormatterPass {
 	// # A class' opening { must be on the same line as the class name. [ok]
 	// # Functions and control structures must use Allman style braces. [ok with bug]
 	// # Indent with tabs, align with spaces.
-	// ## tabs:not yet consider indent-with_space = true in phpfmt.sublime-settings
-	// ## align:waiting for bugs feedback]
-	// # addition: match formatting of laravel4.2/app/config/*.php & framework/**/*.php
+	// # reference with laravel/laravel/**/*.php & laravel/framework/**/*.php
 
 	private $foundTokens;
 	public function candidate($source, $foundTokens) {
@@ -27,8 +25,30 @@ class LaravelStyle extends FormatterPass {
 			$source = $fmt->format($source);
 		}
 
-		$source = $this->noneDocBlockMinorCleanUp($source);
-		$source = $this->alignConsecutiveEqualSign($source);
+		$fmt = new NoSpaceBetweenFunctionAndBracket();
+		if ($fmt->candidate($source, $this->foundTokens)) {
+			$source = $fmt->format($source);
+		}
+
+		$fmt = new SpaceAroundExclaimationMark();
+		if ($fmt->candidate($source, $this->foundTokens)) {
+			$source = $fmt->format($source);
+		}
+
+		$fmt = new NoneDocBlockMinorCleanUp();
+		if ($fmt->candidate($source, $this->foundTokens)) {
+			$source = $fmt->format($source);
+		}
+
+		$fmt = new SortUseNameSpace();
+		if ($fmt->candidate($source, $this->foundTokens)) {
+			$source = $fmt->format($source);
+		}
+
+		$fmt = new AlignEqualsByConsecutiveBlocks();
+		if ($fmt->candidate($source, $this->foundTokens)) {
+			$source = $fmt->format($source);
+		}
 
 		return $source;
 	}
@@ -36,6 +56,7 @@ class LaravelStyle extends FormatterPass {
 	private function namespaceMergeWithOpenTag($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -57,6 +78,7 @@ class LaravelStyle extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$foundStack = [];
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -133,145 +155,35 @@ class LaravelStyle extends FormatterPass {
 		return $this->code;
 	}
 
-	private function noneDocBlockMinorCleanUp($source) {
-		// # addition: match formatting of laravel4.2/app/config/app.php
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_COMMENT:
-					if (substr($text, 0, 3) != '/**') {
-						list(, $prevText) = $this->inspectToken(-1);
-						$counts = substr_count($prevText, "\t");
-						$replacement = "\n" . str_repeat("\t", $counts);
-						$this->appendCode(preg_replace('/\n(\s+)/', $replacement, $text));
-					}
-					break;
-				default:
-					$this->appendCode($text);
-			}
-		}
-
-		return $this->code;
-	}
-	private function tokensInLine($source) {
-		$tokens = token_get_all($source);
-		$processed = [];
-		$seen = 1; // token_get_all always starts with 1
-		$tokensLine = '';
-		foreach ($tokens as $index => $token) {
-			if (isset($token[2])) {
-				$currLine = $token[2];
-				if ($seen != $currLine) {
-					$processed[($seen - 1)] = $tokensLine;
-					// $tokensLine = token_name($token[0]) . "($index) ";
-					$tokensLine = token_name($token[0]) . " ";
-					$seen = $currLine;
-				} else {
-					// $tokensLine .= token_name($token[0]) . "($index) ";
-					$tokensLine .= token_name($token[0]) . " ";
-					// echo ($tokensLine);die;
-				}
-			} else {
-				// $tokensLine .= $token . "($index) ";
-				$tokensLine .= $token . " ";
-			}
-		}
-		$processed[($seen - 1)] = $tokensLine; // consider the last line
-		return $processed;
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Applies Laravel Coding Style';
 	}
 
-	private function getConsecutiveFromArray($seenArray) {
-		$temp = [];
-		$seenBuckets = [];
-		foreach ($seenArray as $j => $index) {
-			// echo "$j => $index ";
-			if (0 !== $j) {
-				if (($index - 1) !== $seenArray[($j - 1)]) {
-					// echo "diff with previous ";
-					if (count($temp) > 1) {
-						array_push($seenBuckets, $temp); //push to bucket
-						                                 // echo "pushed ";
-					}
-					$temp = []; // clear temp
-				}
-			}
-			array_push($temp, $index);
-			if ((count($seenArray) - 1) == $j and (count($temp) > 1)) {
-				                                 // echo "reached end ";
-				array_push($seenBuckets, $temp); //push to bucket
-			}
-			// echo PHP_EOL;
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php namespace A;
+
+class A {
+	function b()
+	{
+		if($a)
+		{
+			noop();
 		}
-		return $seenBuckets;
+		else
+		{
+			noop();
+		}
 	}
 
-	private function generateConsecutiveFromArray($seenArray, $source) {
-		$lines = explode("\n", $source);
-		// print_r($this->getConsecutiveFromArray($seenArray));
-		foreach ($this->getConsecutiveFromArray($seenArray) as $bucket) {
-			//get max position of =
-			$maxPosition = 0;
-			$eq = ' =';
-			$toBeSorted = [];
-			foreach ($bucket as $indexInBucket) {
-				// echo "$indexInBucket(", strpos($lines[$indexInBucket], $eq), ') ';
-				$position = strpos($lines[$indexInBucket], $eq);
-				$maxPosition = max($maxPosition, $position);
-				array_push($toBeSorted, $position);
-			}
-			// echo ' ', $maxPosition, PHP_EOL;
-
-			// find alternative max if there's a further = position
-			// ratio of highest : second highest > 1.5, else use the second highest
-			// just run the top 5 to seek the laternative
-			rsort($toBeSorted);
-			// print_r($toBeSorted);
-			for ($i = 1; $i <= 5; ++$i) {
-				if (isset($toBeSorted[$i])) {
-					if ($toBeSorted[($i - 1)] / $toBeSorted[$i] > 1.5) {
-						$maxPosition = $toBeSorted[$i];
-						break;
-					}
-				}
-			}
-			// insert space directly
-			foreach ($bucket as $indexInBucket) {
-				$delta = $maxPosition - strpos($lines[$indexInBucket], $eq);
-				if ($delta > 0) {
-					$replace = str_repeat(' ', $delta) . $eq;
-					$lines[$indexInBucket] = preg_replace("/$eq/", $replace, $lines[$indexInBucket]);
-				}
-				// echo $lines[$indexInBucket], PHP_EOL;
-			}
-			// break;
-		}
-		                              // print_r($this->getConsecutiveFromArray($seenDoubleArrows));
-		return implode("\n", $lines); //$source;
-	}
-
-	private function alignConsecutiveEqualSign($source) {
-		// should align '= and '=>'
-		$digFromHere = $this->tokensInLine($source);
-
-		$seenEquals = [];
-		$seenDoubleArrows = [];
-		foreach ($digFromHere as $index => $line) {
-			if (preg_match('/^T_VARIABLE T_WHITESPACE =.+;/', $line, $match)) {
-				array_push($seenEquals, $index);
-			}
-			if (preg_match('/^T_CONSTANT_ENCAPSED_STRING T_WHITESPACE T_DOUBLE_ARROW /', $line, $match) and
-				!strstr($line, 'T_ARRAY ( ')) {
-				array_push($seenDoubleArrows, $index);
-			}
-		}
-		// print_r($seenEquals);
-		// print_r($seenDoubleArrows);
-		$source = $this->generateConsecutiveFromArray($seenEquals, $source);
-		$source = $this->generateConsecutiveFromArray($seenDoubleArrows, $source);
-
-		return $source;
+}
+?>
+EOT;
 	}
 }
