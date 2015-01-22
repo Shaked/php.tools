@@ -7193,11 +7193,22 @@ class AllmanStyleBraces extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$foundStack = [];
+		$currentIndentation = 0;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_FUNCTION:
+					$currentIndentation = 0;
+					$poppedID = array_pop($foundStack);
+					if (true === $poppedID['implicit']) {
+						list($prevId, $prevText) = $this->inspectToken(-1);
+						$currentIndentation = substr_count($prevText, $this->indentChar);
+					}
+					$foundStack[] = $poppedID;
+					$this->appendCode($text);
+					break;
 				case ST_CURLY_OPEN:
 					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO])) {
 						list($prevId, $prevText) = $this->getToken($this->leftToken());
@@ -7209,7 +7220,8 @@ class AllmanStyleBraces extends FormatterPass {
 						'id' => $id,
 						'implicit' => true,
 					];
-					$this->appendCode($text);
+					$this->appendCode(str_repeat($this->indentChar, $currentIndentation) . $text);
+					$currentIndentation = 0;
 					if ($this->hasLnAfter()) {
 						$indentToken['implicit'] = false;
 						$this->setIndent(+1);
@@ -7275,6 +7287,7 @@ class AllmanStyleBraces extends FormatterPass {
 					}
 					$this->appendCode($text);
 					break;
+
 				case T_CATCH:
 					if (' ' == substr($this->code, -1, 1)) {
 						$this->code = substr($this->code, 0, -1);
@@ -7285,6 +7298,7 @@ class AllmanStyleBraces extends FormatterPass {
 					}
 					$this->appendCode($text);
 					break;
+
 				default:
 					$this->appendCode($text);
 			}

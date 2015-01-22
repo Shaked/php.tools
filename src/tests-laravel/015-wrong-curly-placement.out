@@ -1,0 +1,21 @@
+<?php
+Event::listen('remove', function()
+{
+	(new ABC)->remove();
+}
+);
+
+Event::listen('remove',
+	function()
+	{
+		(new ABC)->remove();
+	}
+);
+
+Event::listen(
+	'remove',
+	function()
+	{
+		(new ABC)->remove();
+	}
+);
