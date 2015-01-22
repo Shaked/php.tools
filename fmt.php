@@ -7283,17 +7283,7 @@ class LaravelDecorator {
 		$fmt->addPass(new NoSpaceBetweenFunctionAndBracket());
 		$fmt->addPass(new SpaceAroundExclamationMark());
 		$fmt->addPass(new NoneDocBlockMinorCleanUp());
-
-		// // Vetoed because it used Regex to modify PHP code,
-		// // with no consideration about context book-keeping.
-		// // Therefore, this is not safe as it does not
-		// // distinguish between PHP code and inline strings.
 		$fmt->addPass(new SortUseNameSpace());
-
-		// // Vetoed because it used Regex to modify PHP code,
-		// // with no consideration about context book-keeping.
-		// // Therefore, this is not safe as it does not
-		// // distinguish between PHP code and inline strings.
 		$fmt->addPass(new AlignEqualsByConsecutiveBlocks());
 	}
 };
@@ -7408,35 +7398,53 @@ class SortUseNameSpace extends FormatterPass {
 	}
 
 	public function format($source) {
-		// assumption: core parser stack the T_USE line consecutively,
-		// will not process T_USE line(s) besides the header/top file section.
-		$lines = explode("\n", $source);
-		$t_use = [];
-		$seen = false;
-		$min = 1000;
-		$max = -1000;
-		$prev = -1;
-		foreach ($lines as $index => $line) {
-			// some fail-safe to prevent core parser misbehave,
-			if ($seen and (preg_match('/^use\s/i', $line)) and (($prev + 1) == $index)) {
-				$max = max($index, $max);
-				$prev = $index;
-			}
-			if (preg_match('/^use\s/i', $line)) {
-				if (false == $seen) {
-					$seen = true;
-					$min = min($index, $min);
-					$prev = $index;
-				}
+		$digFromHere = $this->tokensInLine($source);
+		$seenUseToken = [];
+		foreach ($digFromHere as $index => $line) {
+			$line = null;
+			$match = null;
+			if (preg_match('/^(?:T_WHITESPACE )?(T_USE) T_WHITESPACE /', $line, $match)) {
+				array_push($seenUseToken, $index);
 			}
 		}
-		$t_use = array_splice($lines, $min, ($max - $min + 1));
-		$t_use = $this->sortByLength($t_use);
+		$source = $this->sortTokenBlocks($seenUseToken, $source);
+		return $source;
+	}
 
-		$head = array_splice($lines, 0, $min);
-		$lines = array_merge($head, $t_use, $lines);
+	private function sortTokenBlocks($seenArray, $source) {
+		$lines = explode("\n", $source);
+		$buckets = $this->getTokensBuckets($seenArray);
+		foreach ($buckets as $bucket) {
+			$start = $bucket[0];
+			$stop = $bucket[(count($bucket) - 1)];
 
-		return implode("\n", $lines);
+			$t_use = array_splice($lines, $start, ($stop - $start + 1));
+			$t_use = $this->sortByLength($t_use);
+
+			$head = array_splice($lines, 0, $start);
+			$lines = array_merge($head, $t_use, $lines);
+		}
+		return implode("\n", $lines); //$source;
+	}
+
+	private function getTokensBuckets($seenArray) {
+		$temp = [];
+		$seenBuckets = [];
+		foreach ($seenArray as $j => $index) {
+			if (0 !== $j) {
+				if (($index - 1) !== $seenArray[($j - 1)]) {
+					if (count($temp) > 1) {
+						array_push($seenBuckets, $temp); //push to bucket
+					}
+					$temp = []; // clear temp
+				}
+			}
+			array_push($temp, $index);
+			if ((count($seenArray) - 1) == $j and (count($temp) > 1)) {
+				array_push($seenBuckets, $temp); //push to bucket
+			}
+		}
+		return $seenBuckets;
 	}
 
 	private function sortByLength($inArray) {
@@ -7453,6 +7461,29 @@ class SortUseNameSpace extends FormatterPass {
 			array_push($cleaned, $unprepend);
 		}
 		return $cleaned;
+	}
+
+	private function tokensInLine($source) {
+		$tokens = token_get_all($source);
+		$processed = [];
+		$seen = 1; // token_get_all always starts with 1
+		$tokensLine = '';
+		foreach ($tokens as $index => $token) {
+			if (isset($token[2])) {
+				$currLine = $token[2];
+				if ($seen != $currLine) {
+					$processed[($seen - 1)] = $tokensLine;
+					$tokensLine = token_name($token[0]) . " ";
+					$seen = $currLine;
+				} else {
+					$tokensLine .= token_name($token[0]) . " ";
+				}
+			} else {
+				$tokensLine .= $token . " ";
+			}
+		}
+		$processed[($seen - 1)] = $tokensLine; // consider the last line
+		return $processed;
 	}
 }
 ;
