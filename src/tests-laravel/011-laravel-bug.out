@@ -1,7 +1,7 @@
 <?php
 require_once 'init.php';
 
-$id   = $_GET['poll'];
+$id = $_GET['poll'];
 $user = $_SESSION['user_id'];
 
 if ( ! isset($id))
@@ -37,6 +37,5 @@ else
 		$ch = $choice->fetchAll();
 	}
 }
-//passes:Default,LaravelStyle
 //version:5.5.0
 //skipHHVM

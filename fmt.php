@@ -7056,7 +7056,7 @@ EOT;
 	}
 };
 
-class AlignEqualsByConsecutiveBlocks extends AdditionalPass {
+class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_EQUAL])) {
 			return true;
@@ -7170,164 +7170,14 @@ class AlignEqualsByConsecutiveBlocks extends AdditionalPass {
 		}
 		return $seenBuckets;
 	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'A different alignment algorithm for Laravel';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-$a = 1; // basic
-$bb = 22;
-$ccc = 333;
-
-$a = 1; // with ratio of 1.5
-$bb = 22;
-$eeeee = 55555;
-
-$hanging = 'hanging no align'; // not counted as a block
-
-$something = array(
-    $bb => 22, // intro whitespace
-    $ccc => 333,
-
-    'bb' => 22,
-    'ccc' => 333,
-    'dddd' => 4444,
-);
-?>
-to
-<?php
-$a   = 1; // basic
-$bb  = 22;
-$ccc = 333;
-
-$a  = 1; // with ratio of 1.5
-$bb = 22;
-$eeeee = 55555;
-
-$hanging = 'hanging no align'; // not counted as a block
-
-$something = array(
-    $bb  => 22, // intro whitespace
-    $ccc => 333,
-
-    'bb'   => 22,
-    'ccc'  => 333,
-    'dddd' => 4444,
-);
-?>
-EOT;
-	}
 }
 ;
-class LaravelDecorator {
-	public static function decorate(CodeFormatter &$fmt) {
-		$passes = $fmt->getPasses();
-
-		$fmt = new CodeFormatter();
-
-		foreach ($passes as $pass) {
-			$fmt->addPass($pass);
-			if (get_class($pass) == 'AddMissingCurlyBraces') {
-				$fmt->addPass(new SmartLnAfterCurlyOpen());
-			}
-		}
-
-		$fmt->addPass(new LaravelStyle());
-	}
-};
-class LaravelStyle extends AdditionalPass {
-
-	// trying to match http://laravel.com/docs/4.2/contributions#coding-style
-	// PSR-0 and PSR-1 will use sublime-text settings.
-	// # The class namespace declaration must be on the same line as <?php. [ok]
-	// # A class' opening { must be on the same line as the class name. [ok]
-	// # Functions and control structures must use Allman style braces. [ok with bug]
-	// # Indent with tabs, align with spaces.
-	// # reference with laravel/laravel/**/*.php & laravel/framework/**/*.php
-
-	private $foundTokens;
+class AllmanStyleBraces extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		$this->foundTokens = $foundTokens;
 		return true;
 	}
 
 	public function format($source) {
-		$source = $this->namespaceMergeWithOpenTag($source);
-		$source = $this->allmanStyleBraces($source);
-		$source = (new RTrim())->format($source);
-
-		$fmt = new TightConcat();
-		if ($fmt->candidate($source, $this->foundTokens)) {
-			$source = $fmt->format($source);
-		}
-
-		$fmt = new NoSpaceBetweenFunctionAndBracket();
-		if ($fmt->candidate($source, $this->foundTokens)) {
-			$source = $fmt->format($source);
-		}
-
-		$fmt = new SpaceAroundExclaimationMark();
-		if ($fmt->candidate($source, $this->foundTokens)) {
-			$source = $fmt->format($source);
-		}
-
-		$fmt = new NoneDocBlockMinorCleanUp();
-		if ($fmt->candidate($source, $this->foundTokens)) {
-			$source = $fmt->format($source);
-		}
-
-		// Vetoed because it used Regex to modify PHP code,
-		// with no consideration about context book-keeping.
-		// Therefore, this is not safe as it does not
-		// distinguish between PHP code and inline strings.
-		// $fmt = new SortUseNameSpace();
-		// if ($fmt->candidate($source, $this->foundTokens)) {
-		// 	$source = $fmt->format($source);
-		// }
-
-		// Vetoed because it used Regex to modify PHP code,
-		// with no consideration about context book-keeping.
-		// Therefore, this is not safe as it does not
-		// distinguish between PHP code and inline strings.
-		// $fmt = new AlignEqualsByConsecutiveBlocks();
-		// if ($fmt->candidate($source, $this->foundTokens)) {
-		// 	$source = $fmt->format($source);
-		// }
-
-		return $source;
-	}
-
-	private function namespaceMergeWithOpenTag($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_NAMESPACE:
-					if ($this->leftTokenIs(T_OPEN_TAG)) {
-						$this->rtrimAndAppendCode($this->getSpace() . $text);
-						break;
-					}
-				default:
-					$this->appendCode($text);
-			}
-		}
-
-		return $this->code;
-	}
-
-	private function allmanStyleBraces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$foundStack = [];
@@ -7407,41 +7257,78 @@ class LaravelStyle extends AdditionalPass {
 
 		return $this->code;
 	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Applies Laravel Coding Style';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php namespace A;
-
-class A {
-	function b()
-	{
-		if($a)
-		{
-			noop();
-		}
-		else
-		{
-			noop();
-		}
-	}
-
 }
-?>
-EOT;
+;
+class LaravelDecorator {
+	public static function decorate(CodeFormatter &$fmt) {
+		$passes = $fmt->getPasses();
+
+		$fmt = new CodeFormatter();
+
+		foreach ($passes as $pass) {
+			$passName = get_class($pass);
+			if ('AlignEquals' == $passName || 'AlignDoubleArrow' == $passName) {
+				continue;
+			}
+			$fmt->addPass($pass);
+			if ('AddMissingCurlyBraces' == $passName) {
+				$fmt->addPass(new SmartLnAfterCurlyOpen());
+			}
+		}
+
+		$fmt->addPass(new NamespaceMergeWithOpenTag());
+		$fmt->addPass(new AllmanStyleBraces());
+		$fmt->addPass(new RTrim());
+		$fmt->addPass(new TightConcat());
+		$fmt->addPass(new NoSpaceBetweenFunctionAndBracket());
+		$fmt->addPass(new SpaceAroundExclamationMark());
+		$fmt->addPass(new NoneDocBlockMinorCleanUp());
+
+		// // Vetoed because it used Regex to modify PHP code,
+		// // with no consideration about context book-keeping.
+		// // Therefore, this is not safe as it does not
+		// // distinguish between PHP code and inline strings.
+		$fmt->addPass(new SortUseNameSpace());
+
+		// // Vetoed because it used Regex to modify PHP code,
+		// // with no consideration about context book-keeping.
+		// // Therefore, this is not safe as it does not
+		// // distinguish between PHP code and inline strings.
+		$fmt->addPass(new AlignEqualsByConsecutiveBlocks());
+	}
+};
+class NamespaceMergeWithOpenTag extends FormatterPass {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_NAMESPACE])) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_NAMESPACE:
+					if ($this->leftTokenIs(T_OPEN_TAG)) {
+						$this->rtrimAndAppendCode($this->getSpace() . $text);
+						break;
+					}
+				default:
+					$this->appendCode($text);
+			}
+		}
+
+		return $this->code;
 	}
 }
 ;
-class NoneDocBlockMinorCleanUp extends AdditionalPass {
+class NoneDocBlockMinorCleanUp extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_COMMENT])) {
 			return true;
@@ -7473,49 +7360,9 @@ class NoneDocBlockMinorCleanUp extends AdditionalPass {
 		}
 		return $this->code;
 	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Realign /* block, not /** nor //';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-	/*
-	| some text
-	 */
-
-	/*
-| fixing if this exist in core
-	 */
-
-	// this line is ignored
-
-	/** this is also ignored
-	 */
-?>
-to
-<?php
-	/*
-	| some text
-	*/
-
-	// this line is ignored
-
-	/** this is also ignored
-	 */
-?>
-EOT;
-	}
 }
 ;
-class NoSpaceBetweenFunctionAndBracket extends AdditionalPass {
+class NoSpaceBetweenFunctionAndBracket extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_FUNCTION])) {
 			return true;
@@ -7549,43 +7396,9 @@ class NoSpaceBetweenFunctionAndBracket extends AdditionalPass {
 
 		return $this->code;
 	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Remove space(s) between function and (';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-Route::filter('auth.basic', function () {
-	return Auth::basic();
-});
-App::before(function ($request) {
-	//
-});
-?>
-to
-<?php
-Route::filter('auth.basic', function()
-{
-	return Auth::basic();
-});
-App::before(function($request)
-{
-	//
-});
-?>
-EOT;
-	}
 }
 ;
-class SortUseNameSpace extends AdditionalPass {
+class SortUseNameSpace extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_USE])) {
 			return true;
@@ -7641,73 +7454,9 @@ class SortUseNameSpace extends AdditionalPass {
 		}
 		return $cleaned;
 	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Simple sorting of T_USE to follow Laravel Framework';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-
-namespace Illuminate\Foundation;
-
-use Closure;
-use Illuminate\Config\FileEnvironmentVariablesLoader;
-use Illuminate\Config\FileLoader;
-use Illuminate\Container\Container;
-use Illuminate\Events\EventServiceProvider;
-use Illuminate\Exception\ExceptionServiceProvider;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Routing\RoutingServiceProvider;
-use Illuminate\Support\Contracts\ResponsePreparerInterface;
-use Illuminate\Support\Facades\Facade;
-use Stack\Builder;
-use Symfony\Component\Debug\Exception\FatalErrorException;
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\TerminableInterface;
-?>
-to
-<?php namespace Illuminate\Foundation;
-
-use Closure;
-use Stack\Builder;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Config\FileLoader;
-use Illuminate\Container\Container;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Facade;
-use Illuminate\Events\EventServiceProvider;
-use Illuminate\Routing\RoutingServiceProvider;
-use Illuminate\Exception\ExceptionServiceProvider;
-use Illuminate\Config\FileEnvironmentVariablesLoader;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\TerminableInterface;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Debug\Exception\FatalErrorException;
-use Illuminate\Support\Contracts\ResponsePreparerInterface;
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-?>
-EOT;
-	}
 }
 ;
-class SpaceAroundExclaimationMark extends AdditionalPass {
+class SpaceAroundExclamationMark extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_EXCLAMATION])) {
 			return true;
@@ -7733,28 +7482,6 @@ class SpaceAroundExclaimationMark extends AdditionalPass {
 		}
 
 		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Add spaces around !';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-if (!is_null($this->layout))
-?>
-to
-<?php
-if ( ! is_null($this->layout))
-?>
-EOT;
 	}
 }
 ;

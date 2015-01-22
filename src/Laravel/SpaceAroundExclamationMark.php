@@ -1,5 +1,5 @@
 <?php
-class SpaceAroundExclaimationMark extends AdditionalPass {
+class SpaceAroundExclamationMark extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_EXCLAMATION])) {
 			return true;
@@ -25,27 +25,5 @@ class SpaceAroundExclaimationMark extends AdditionalPass {
 		}
 
 		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Add spaces around !';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-if (!is_null($this->layout))
-?>
-to
-<?php
-if ( ! is_null($this->layout))
-?>
-EOT;
 	}
 }

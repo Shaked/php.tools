@@ -30,6 +30,5 @@ if (!isset($id)) {
 		$ch = $choice->fetchAll();
 	}
 }
-//passes:Default,LaravelStyle
 //version:5.5.0
 //skipHHVM

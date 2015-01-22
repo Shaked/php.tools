@@ -5,7 +5,7 @@ Event::listen('send_activation', function($user)
 		'emails.confirm',
 		[
 			'username' => $user->username,
-			'link'     => $user->code,
+			'link' => $user->code,
 		],
 		function($send) use ($user)
 		{

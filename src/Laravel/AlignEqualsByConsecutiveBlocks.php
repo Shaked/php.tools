@@ -1,5 +1,5 @@
 <?php
-class AlignEqualsByConsecutiveBlocks extends AdditionalPass {
+class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_EQUAL])) {
 			return true;
@@ -112,61 +112,5 @@ class AlignEqualsByConsecutiveBlocks extends AdditionalPass {
 			}
 		}
 		return $seenBuckets;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'A different alignment algorithm for Laravel';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-$a = 1; // basic
-$bb = 22;
-$ccc = 333;
-
-$a = 1; // with ratio of 1.5
-$bb = 22;
-$eeeee = 55555;
-
-$hanging = 'hanging no align'; // not counted as a block
-
-$something = array(
-    $bb => 22, // intro whitespace
-    $ccc => 333,
-
-    'bb' => 22,
-    'ccc' => 333,
-    'dddd' => 4444,
-);
-?>
-to
-<?php
-$a   = 1; // basic
-$bb  = 22;
-$ccc = 333;
-
-$a  = 1; // with ratio of 1.5
-$bb = 22;
-$eeeee = 55555;
-
-$hanging = 'hanging no align'; // not counted as a block
-
-$something = array(
-    $bb  => 22, // intro whitespace
-    $ccc => 333,
-
-    'bb'   => 22,
-    'ccc'  => 333,
-    'dddd' => 4444,
-);
-?>
-EOT;
 	}
 }

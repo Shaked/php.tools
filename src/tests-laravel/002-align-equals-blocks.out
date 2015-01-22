@@ -17,5 +17,3 @@ $something = array(
 	'ccc' => 333,
 	'dddd' => 4444,
 );
-
-//passes:LaravelStyle

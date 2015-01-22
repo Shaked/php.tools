@@ -6,4 +6,3 @@ App::before(function ($request) {
 	//
 });
 
-//passes:LaravelStyle

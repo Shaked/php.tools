@@ -1,5 +1,5 @@
 <?php
-class NoneDocBlockMinorCleanUp extends AdditionalPass {
+class NoneDocBlockMinorCleanUp extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_COMMENT])) {
 			return true;
@@ -30,45 +30,5 @@ class NoneDocBlockMinorCleanUp extends AdditionalPass {
 			}
 		}
 		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Realign /* block, not /** nor //';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-	/*
-	| some text
-	 */
-
-	/*
-| fixing if this exist in core
-	 */
-
-	// this line is ignored
-
-	/** this is also ignored
-	 */
-?>
-to
-<?php
-	/*
-	| some text
-	*/
-
-	// this line is ignored
-
-	/** this is also ignored
-	 */
-?>
-EOT;
 	}
 }

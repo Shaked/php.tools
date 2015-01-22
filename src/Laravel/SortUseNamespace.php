@@ -1,5 +1,5 @@
 <?php
-class SortUseNameSpace extends AdditionalPass {
+class SortUseNameSpace extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_USE])) {
 			return true;
@@ -54,69 +54,5 @@ class SortUseNameSpace extends AdditionalPass {
 			array_push($cleaned, $unprepend);
 		}
 		return $cleaned;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Simple sorting of T_USE to follow Laravel Framework';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-
-namespace Illuminate\Foundation;
-
-use Closure;
-use Illuminate\Config\FileEnvironmentVariablesLoader;
-use Illuminate\Config\FileLoader;
-use Illuminate\Container\Container;
-use Illuminate\Events\EventServiceProvider;
-use Illuminate\Exception\ExceptionServiceProvider;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Routing\RoutingServiceProvider;
-use Illuminate\Support\Contracts\ResponsePreparerInterface;
-use Illuminate\Support\Facades\Facade;
-use Stack\Builder;
-use Symfony\Component\Debug\Exception\FatalErrorException;
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\TerminableInterface;
-?>
-to
-<?php namespace Illuminate\Foundation;
-
-use Closure;
-use Stack\Builder;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Config\FileLoader;
-use Illuminate\Container\Container;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Facade;
-use Illuminate\Events\EventServiceProvider;
-use Illuminate\Routing\RoutingServiceProvider;
-use Illuminate\Exception\ExceptionServiceProvider;
-use Illuminate\Config\FileEnvironmentVariablesLoader;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\TerminableInterface;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Debug\Exception\FatalErrorException;
-use Illuminate\Support\Contracts\ResponsePreparerInterface;
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-?>
-EOT;
 	}
 }

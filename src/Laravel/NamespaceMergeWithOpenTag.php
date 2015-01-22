@@ -1,7 +1,7 @@
 <?php
-class NoSpaceBetweenFunctionAndBracket extends FormatterPass {
+class NamespaceMergeWithOpenTag extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_FUNCTION])) {
+		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
 		}
 
@@ -16,18 +16,13 @@ class NoSpaceBetweenFunctionAndBracket extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_FUNCTION:
-					if ($this->rightTokenIs([T_WHITESPACE, '('])) {
-						$grab = $text;
-						$grab .= $this->walkAndAccumulateUntil($this->tkns, '(');
-						$this->appendCode(str_replace(' ', '', $grab));
-					} else {
-						$this->appendCode($text);
+				case T_NAMESPACE:
+					if ($this->leftTokenIs(T_OPEN_TAG)) {
+						$this->rtrimAndAppendCode($this->getSpace() . $text);
+						break;
 					}
-					break;
 				default:
 					$this->appendCode($text);
-					break;
 			}
 		}
 

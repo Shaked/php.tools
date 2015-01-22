@@ -1,5 +1,6 @@
-<?php namespace B;
-class A {
+<?php
+namespace B;
+class A{
 	protected function method()
 	{
 		$this->{"Some{$var}Op"}();
@@ -10,6 +11,5 @@ class A {
 		noop();
 	}
 }
-//passes:Default,LaravelStyle
 //version:5.5.0
 //skipHHVM

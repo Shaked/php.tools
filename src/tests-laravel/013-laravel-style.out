@@ -1,7 +1,7 @@
-<?php
-namespace checknonedocblock\cleanup;
+<?php namespace checknonedocblock\cleanup;
 
-function test() {
+function test()
+{
 	$one = 1;
 	$twelve = 100;
 	$moneyisevil = 'text';
@@ -22,7 +22,7 @@ function test() {
 		| Application URL as per laravel's app/config/app.php
 		|--------------------------------------------------------------------------
 		| left bottom corner, that little space that should be removed
-		 */
+		*/
 		'aliases' => array(
 			'App' => 'Illuminate\Support\Facades\App',
 			'Artisan' => 'Illuminate\Support\Facades\Artisan',
@@ -65,6 +65,5 @@ function test() {
 		),
 	);
 }
-//passes:Default,LaravelStyle
 //version:5.5.0
 //skipHHVM
