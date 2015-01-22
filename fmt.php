@@ -7113,7 +7113,7 @@ class LaravelStyle extends FormatterPass {
 	private function allmanStyleBraces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$max_detected_indent = 0;
+		$foundStack = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -7127,12 +7127,39 @@ class LaravelStyle extends FormatterPass {
 							$this->appendCode($this->getCrlfIndent());
 						}
 					}
-					$this->setIndent(+1);
+					$indentToken = [
+						'id' => $id,
+						'implicit' => true,
+					];
 					$this->appendCode($text);
+					if ($this->hasLnAfter()) {
+						$indentToken['implicit'] = false;
+						$this->setIndent(+1);
+					}
+					$foundStack[] = $indentToken;
 					break;
 
+				case ST_BRACKET_OPEN:
+				case ST_PARENTHESES_OPEN:
+					$indentToken = [
+						'id' => $id,
+						'implicit' => true,
+					];
+					$this->appendCode($text);
+					if ($this->hasLnAfter()) {
+						$indentToken['implicit'] = false;
+						$this->setIndent(+1);
+					}
+					$foundStack[] = $indentToken;
+					break;
+
+				case ST_BRACKET_CLOSE:
+				case ST_PARENTHESES_CLOSE:
 				case ST_CURLY_CLOSE:
-					$this->setIndent(-1);
+					$poppedID = array_pop($foundStack);
+					if (false === $poppedID['implicit']) {
+						$this->setIndent(-1);
+					}
 					$this->appendCode($text);
 					break;
 
