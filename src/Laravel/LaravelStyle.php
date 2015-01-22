@@ -40,15 +40,23 @@ class LaravelStyle extends AdditionalPass {
 			$source = $fmt->format($source);
 		}
 
-		$fmt = new SortUseNameSpace();
-		if ($fmt->candidate($source, $this->foundTokens)) {
-			$source = $fmt->format($source);
-		}
+		// Vetoed because it used Regex to modify PHP code,
+		// with no consideration about context book-keeping.
+		// Therefore, this is not safe as it does not
+		// distinguish between PHP code and inline strings.
+		// $fmt = new SortUseNameSpace();
+		// if ($fmt->candidate($source, $this->foundTokens)) {
+		// 	$source = $fmt->format($source);
+		// }
 
-		$fmt = new AlignEqualsByConsecutiveBlocks();
-		if ($fmt->candidate($source, $this->foundTokens)) {
-			$source = $fmt->format($source);
-		}
+		// Vetoed because it used Regex to modify PHP code,
+		// with no consideration about context book-keeping.
+		// Therefore, this is not safe as it does not
+		// distinguish between PHP code and inline strings.
+		// $fmt = new AlignEqualsByConsecutiveBlocks();
+		// if ($fmt->candidate($source, $this->foundTokens)) {
+		// 	$source = $fmt->format($source);
+		// }
 
 		return $source;
 	}
