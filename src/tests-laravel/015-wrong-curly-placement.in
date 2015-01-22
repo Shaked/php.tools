@@ -16,3 +16,20 @@ Event::listen(
         (new ABC)->remove();
     }
 );
+
+
+if($a){
+Event::listen('add_subscribe',
+			function($user)
+    {
+        (new MailChimp)->add_subscribe($user);
+    }
+);
+}
+
+Event::listen('update_subscribe',
+    function($old_email, $new_email, $user)
+    {
+        (new MailChimp)->update_subscribe($old_email, $new_email, $user);
+    }
+);

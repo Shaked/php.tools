@@ -35,7 +35,8 @@ class AllmanStyleBraces extends FormatterPass {
 						'id' => $id,
 						'implicit' => true,
 					];
-					$this->appendCode(str_repeat($this->indentChar, $currentIndentation) . $text);
+					$adjustedIndendation = max($currentIndentation - $this->indent, 0);
+					$this->appendCode(str_repeat($this->indentChar, $adjustedIndendation) . $text);
 					$currentIndentation = 0;
 					if ($this->hasLnAfter()) {
 						$indentToken['implicit'] = false;
