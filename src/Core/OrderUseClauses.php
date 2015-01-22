@@ -1,6 +1,18 @@
 <?php
 final class OrderUseClauses extends FormatterPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERBY \x3*/";
+	private $sortFunction = null;
+
+	public function __construct(callable $sortFunction = null) {
+		$this->sortFunction = $sortFunction;
+		if (null == $sortFunction) {
+			$this->sortFunction = function ($useStack) {
+				natcasesort($useStack);
+				return $useStack;
+			};
+		}
+	}
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_USE])) {
 			return true;
@@ -70,7 +82,7 @@ final class OrderUseClauses extends FormatterPass {
 		if (empty($useStack)) {
 			return $source;
 		}
-		natcasesort($useStack);
+		$useStack = call_user_func($this->sortFunction, $useStack);
 		$aliasList = [];
 		$aliasCount = [];
 		foreach ($useStack as $use) {
