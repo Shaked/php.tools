@@ -1,0 +1,6 @@
+Dear user:
+use this;
+use another thing;
+use important thing;
+<?php
+use SomeClass;
