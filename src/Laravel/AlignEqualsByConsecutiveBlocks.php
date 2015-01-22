@@ -15,12 +15,10 @@ class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 		$seenEquals = [];
 		$seenDoubleArrows = [];
 		foreach ($digFromHere as $index => $line) {
-			$line = null;
 			$match = null;
 			if (preg_match('/^T_VARIABLE T_WHITESPACE =.+;/', $line, $match)) {
 				array_push($seenEquals, $index);
 			}
-			$line = null;
 			$match = null;
 			if (preg_match('/^(?:T_WHITESPACE )?(T_CONSTANT_ENCAPSED_STRING|T_VARIABLE) T_WHITESPACE T_DOUBLE_ARROW /', $line, $match) &&
 				!strstr($line, 'T_ARRAY ( ')) {

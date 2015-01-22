@@ -12,7 +12,6 @@ class SortUseNameSpace extends FormatterPass {
 		$digFromHere = $this->tokensInLine($source);
 		$seenUseToken = [];
 		foreach ($digFromHere as $index => $line) {
-			$line = null;
 			$match = null;
 			if (preg_match('/^(?:T_WHITESPACE )?(T_USE) T_WHITESPACE /', $line, $match)) {
 				array_push($seenUseToken, $index);

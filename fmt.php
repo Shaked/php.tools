@@ -2107,7 +2107,6 @@ final class OrderUseClauses extends FormatterPass {
 
 		return $return;
 	}
-
 }
 ;
 final class Reindent extends FormatterPass {
@@ -7069,12 +7068,10 @@ class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 		$seenEquals = [];
 		$seenDoubleArrows = [];
 		foreach ($digFromHere as $index => $line) {
-			$line = null;
 			$match = null;
 			if (preg_match('/^T_VARIABLE T_WHITESPACE =.+;/', $line, $match)) {
 				array_push($seenEquals, $index);
 			}
-			$line = null;
 			$match = null;
 			if (preg_match('/^(?:T_WHITESPACE )?(T_CONSTANT_ENCAPSED_STRING|T_VARIABLE) T_WHITESPACE T_DOUBLE_ARROW /', $line, $match) &&
 				!strstr($line, 'T_ARRAY ( ')) {
@@ -7408,7 +7405,6 @@ class SortUseNameSpace extends FormatterPass {
 		$digFromHere = $this->tokensInLine($source);
 		$seenUseToken = [];
 		foreach ($digFromHere as $index => $line) {
-			$line = null;
 			$match = null;
 			if (preg_match('/^(?:T_WHITESPACE )?(T_USE) T_WHITESPACE /', $line, $match)) {
 				array_push($seenUseToken, $index);

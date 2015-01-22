@@ -23,4 +23,23 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\TerminableInterface;
 
-//version:5.7.0
+new Closure();
+new FileEnvironmentVariablesLoader();
+new FileLoader();
+new Container();
+new EventServiceProvider();
+new ExceptionServiceProvider();
+new Filesystem();
+new Request();
+new Response();
+new RoutingServiceProvider();
+new ResponsePreparerInterface();
+new Facade();
+new Builder();
+new FatalErrorException();
+new SymfonyRequest();
+new SymfonyResponse();
+new HttpException();
+new NotFoundHttpException();
+new HttpKernelInterface();
+new TerminableInterface();
