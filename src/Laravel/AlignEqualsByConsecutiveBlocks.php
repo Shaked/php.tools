@@ -1,7 +1,7 @@
 <?php
 class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[ST_EQUAL])) {
+		if (isset($foundTokens[ST_EQUAL]) || isset($foundTokens[T_DOUBLE_ARROW])) {
 			return true;
 		}
 
