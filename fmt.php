@@ -2066,20 +2066,6 @@ final class OrderUseClauses extends FormatterPass {
 				$return .= $text;
 			}
 		}
-		while (list(, $token) = each($tokens)) {
-			list($id, $text) = $this->getToken($token);
-			$lower_text = strtolower($text);
-			if (T_STRING === $id && isset($aliasList[$lower_text])) {
-				++$aliasCount[$lower_text];
-			} elseif (T_DOC_COMMENT === $id) {
-				foreach ($aliasList as $alias => $use) {
-					if (false !== stripos($text, $alias)) {
-						++$aliasCount[$alias];
-					}
-				}
-			}
-			$return .= $text;
-		}
 
 		$unusedImport = [];
 		if ($removeUnused) {

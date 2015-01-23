@@ -4,3 +4,9 @@
 $a = array(1, 2);
 
 a(array(1, 2))['deference'];
+
+$a = array(1, 2);
+
+$b = array();
+
+$c = (array(1, 2));
