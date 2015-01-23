@@ -1,0 +1,29 @@
+<?php
+
+use Acme\Mailers\AMailChimpa,Acme\Mailers\MailChimp2,Acme\Mailers\MailChimp33;
+
+use Acme\Mailers\MailChimp444;
+
+Event::listen('add_subscribe',
+
+    function ($user) {
+        (new MailChimp)->add_subscribe($user);
+    }
+);
+
+Event::listen('update_subscribe',
+    function ($old_email, $new_email, $user) {
+        (new MailChimp)->update_subscribe($old_email, $new_email, $user);
+    }
+);
+
+Event::listen('remove_subscribe',
+    function () {
+        (new MailChimp)->remove_subscribe();
+    }
+);
+
+new AMailChimpa();
+new MailChimp2();
+new MailChimp33();
+new MailChimp444();

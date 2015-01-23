@@ -478,6 +478,21 @@ abstract class FormatterPass {
 		return $ret;
 	}
 
+	protected function walkAndAccumulateStopAtAny(&$tkns, $tknids) {
+		$tknids = array_flip($tknids);
+		$ret = '';
+		while (list($index, $token) = each($tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			if (isset($tknids[$id])) {
+				prev($tkns);
+				break;
+			}
+			$ret .= $text;
+		}
+		return [$ret, $id];
+	}
+
 	private function walkLeft($tkns, $idx, $ignoreList) {
 		$i = $idx;
 		while (--$i >= 0 && isset($tkns[$i][1]) && isset($ignoreList[$tkns[$i][0]]));

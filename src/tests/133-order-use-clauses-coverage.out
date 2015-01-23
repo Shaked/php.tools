@@ -3,6 +3,7 @@ namespace NS {
 	use A;
 	use B;
 	use C;
+
 	{
 
 		new A();
@@ -15,6 +16,7 @@ namespace NS2 {
 	use D;
 	use E;
 	use F;
+
 	{
 
 		new E();
