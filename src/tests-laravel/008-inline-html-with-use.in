@@ -1,6 +1,30 @@
-Dear user:
+<?php echo "something";?>
+
+Dear userTwo:
 use this;
 use another thing;
 use important thing;
 <?php
-use SomeClass;
+
+use Closure\One;
+use Illuminate\Config\FileLoader;
+use Closure\Three;
+
+Class CamelOne {
+	use Illuminate\Http\Response;
+	use Illuminate\Support\Contracts\ResponsePreparerInterface;
+	use Illuminate\Routing\RoutingServiceProvider;
+
+	use Symfony\Component\HttpFoundation\Request;
+	use Illuminate\Support\Facades\Facade;
+
+	use Closure\Two;
+}
+
+new FileLoader();
+new One();
+new Three();
+?>
+
+use that;
+use power;

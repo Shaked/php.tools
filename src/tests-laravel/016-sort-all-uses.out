@@ -1,0 +1,38 @@
+<?php namespace test\test;
+
+use Closure;
+use Illuminate\Config\FileLoader;
+use Illuminate\Config\FileEnvironmentVariablesLoader;
+
+class oneOne {
+	use Closure;
+	use Illuminate\Http\Response;
+	use Illuminate\Support\Facades\Facade;
+	use Symfony\Component\HttpFoundation\Request;
+	use Illuminate\Routing\RoutingServiceProvider;
+	use Illuminate\Support\Contracts\ResponsePreparerInterface;
+
+	public function __construct()
+	{
+		new Closure();
+		new Facade();
+		new FileEnvironmentVariablesLoader();
+		new FileLoader();
+		new Request();
+		new Response();
+		new ResponsePreparerInterface();
+		new RoutingServiceProvider();
+	}
+}
+?>
+use that;
+use power;
+<?php
+class twoTwo {
+	function test()
+	{
+		//use lmno;
+		//use abc;
+		//use edfghijk;
+	}
+}

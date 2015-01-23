@@ -1,6 +1,11 @@
 <?php
 final class OrderUseClauses extends FormatterPass {
+	const SPLIT_COMMA = true;
+	const REMOVE_UNUSED = true;
+	const STRIP_BLANK_LINES = true;
+	const TRAIT_BLOCK_OPEN = 'TRAIT_BLOCK_OPEN';
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERBY \x3*/";
+
 	private $sortFunction = null;
 
 	public function __construct(callable $sortFunction = null) {
@@ -20,7 +25,7 @@ final class OrderUseClauses extends FormatterPass {
 
 		return false;
 	}
-	private function singleNamespace($source) {
+	private function sortUseClauses($source, $splitComma, $removeUnused, $stripBlankLines) {
 		$tokens = token_get_all($source);
 		$useStack = [];
 		$newTokens = [];
@@ -35,10 +40,10 @@ final class OrderUseClauses extends FormatterPass {
 					$useItem = $text;
 					while (list(, $token) = each($tokens)) {
 						list($id, $text) = $this->getToken($token);
-						if (ST_SEMI_COLON === $id) {
+						if (ST_CURLY_OPEN === $id || ST_SEMI_COLON === $id) {
 							$useItem .= $text;
 							break;
-						} elseif (ST_COMMA === $id) {
+						} elseif ($splitComma && ST_COMMA === $id) {
 							$useItem .= ST_SEMI_COLON;
 							$nextTokens[] = [T_WHITESPACE, $this->newLine];
 							$nextTokens[] = [T_USE, 'use'];
@@ -47,10 +52,18 @@ final class OrderUseClauses extends FormatterPass {
 							$useItem .= $text;
 						}
 					}
-					$useStack[] = trim($useItem);
-					$token = new SurrogateToken();
+					if (ST_CURLY_OPEN === $id) {
+						$token = [self::TRAIT_BLOCK_OPEN, $useItem];
+					} else {
+						$useStack[] = trim($useItem);
+						$token = new SurrogateToken();
+					}
 				}
 				if ($touchedTUse &&
+					T_PUBLIC === $id ||
+					T_PRIVATE === $id ||
+					T_PROTECTED === $id ||
+					T_STATIC === $id ||
 					T_FINAL === $id ||
 					T_ABSTRACT === $id ||
 					T_INTERFACE === $id ||
@@ -63,7 +76,7 @@ final class OrderUseClauses extends FormatterPass {
 					T_FOREACH === $id ||
 					T_IF === $id
 				) {
-					if (sizeof($useStack) > 0) {
+					if ($stripBlankLines && sizeof($useStack) > 0) {
 						$newTokens[] = $this->newLine;
 						$newTokens[] = $this->newLine;
 					}
@@ -79,6 +92,7 @@ final class OrderUseClauses extends FormatterPass {
 				$newTokens[] = $token;
 			}
 		}
+
 		if (empty($useStack)) {
 			return $source;
 		}
@@ -101,7 +115,11 @@ final class OrderUseClauses extends FormatterPass {
 			if ($token instanceof SurrogateToken) {
 				$return .= array_shift($useStack);
 			} elseif (T_WHITESPACE == $token[0] && isset($newTokens[$idx - 1], $newTokens[$idx + 1]) && $newTokens[$idx - 1] instanceof SurrogateToken && $newTokens[$idx + 1] instanceof SurrogateToken) {
-				$return .= $this->newLine;
+				if ($stripBlankLines) {
+					$return .= $this->newLine;
+				} else {
+					$return .= $token[1];
+				}
 				continue;
 			} else {
 				list($id, $text) = $this->getToken($token);
@@ -134,13 +152,17 @@ final class OrderUseClauses extends FormatterPass {
 			$return .= $text;
 		}
 
-		$unusedImport = array_keys(
-			array_filter(
-				$aliasCount, function ($v) {
-					return 0 === $v;
-				}
-			)
-		);
+		$unusedImport = [];
+		if ($removeUnused) {
+			$unusedImport = array_keys(
+				array_filter(
+					$aliasCount, function ($v) {
+						return 0 === $v;
+					}
+				)
+			);
+		}
+
 		foreach ($unusedImport as $v) {
 			$return = str_ireplace($aliasList[$v] . $this->newLine, null, $return);
 		}
@@ -148,6 +170,66 @@ final class OrderUseClauses extends FormatterPass {
 		return $return;
 	}
 	public function format($source = '') {
+		$source = $this->sortWithinNamespaces($source);
+		$source = $this->sortWithinClasses($source);
+		return $source;
+	}
+
+	private function sortWithinClasses($source) {
+		$tokens = token_get_all($source);
+		$return = '';
+		while (list($index, $token) = each($tokens)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_CLASS:
+					$return .= $text;
+					$touchedTUse = false;
+					$return .= $this->walkAndAccumulateStopAt($tokens, ST_CURLY_OPEN);
+
+					$classBlock = '';
+					$curlyCount = 0;
+					while (list($index, $token) = each($tokens)) {
+						list($id, $text) = $this->getToken($token);
+						$this->ptr = $index;
+						$classBlock .= $text;
+
+						if (T_USE === $id) {
+							$touchedTUse = true;
+						}
+
+						if (ST_CURLY_OPEN == $id || T_CURLY_OPEN == $id || T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+							++$curlyCount;
+						} elseif (ST_CURLY_CLOSE == $id) {
+							--$curlyCount;
+						}
+
+						if (0 == $curlyCount) {
+							break;
+						}
+					}
+
+					if (!$touchedTUse) {
+						$return .= $classBlock;
+						break;
+					}
+
+					$return .= str_replace(
+						self::OPENER_PLACEHOLDER,
+						'',
+						$this->sortUseClauses(self::OPENER_PLACEHOLDER . $classBlock, !self::SPLIT_COMMA, !self::REMOVE_UNUSED, !self::STRIP_BLANK_LINES)
+					);
+
+					break;
+				default:
+					$return .= $text;
+			}
+		}
+
+		return $return;
+	}
+
+	private function sortWithinNamespaces($source) {
 		$namespaceCount = 0;
 		$tokens = token_get_all($source);
 		$touchedTUse = false;
@@ -161,7 +243,7 @@ final class OrderUseClauses extends FormatterPass {
 			}
 		}
 		if ($namespaceCount <= 1 && $touchedTUse) {
-			return $this->singleNamespace($source);
+			return $this->sortUseClauses($source, self::SPLIT_COMMA, self::REMOVE_UNUSED, self::STRIP_BLANK_LINES);
 		}
 
 		$return = '';
@@ -225,7 +307,7 @@ final class OrderUseClauses extends FormatterPass {
 					$return .= str_replace(
 						self::OPENER_PLACEHOLDER,
 						'',
-						$this->singleNamespace(self::OPENER_PLACEHOLDER . $namespaceBlock)
+						$this->sortUseClauses(self::OPENER_PLACEHOLDER . $namespaceBlock, self::SPLIT_COMMA, self::REMOVE_UNUSED, self::STRIP_BLANK_LINES)
 					);
 
 					break;

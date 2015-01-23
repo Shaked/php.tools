@@ -12,5 +12,6 @@ class LaravelDecorator {
 		$fmt->addPass(new NoneDocBlockMinorCleanUp());
 		$fmt->addPass(new SortUseNameSpace());
 		$fmt->addPass(new AlignEqualsByConsecutiveBlocks());
+		$fmt->addPass(new EliminateDuplicatedEmptyLines());
 	}
 }
