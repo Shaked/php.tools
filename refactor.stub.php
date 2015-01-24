@@ -1,4 +1,4 @@
-<?php $in_phar = true;
+<?php $inPhar = true;
 
 if (version_compare(phpversion(), '5.5.0', '<')) {
 	fwrite(STDERR, "PHP needs to be a minimum version of PHP 5.5.0\n");

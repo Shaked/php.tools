@@ -1,4 +1,4 @@
-<?php $in_phar = true;
+<?php $inPhar = true;
 
 if (version_compare(phpversion(), '5.5.0', '<')) {
 	fwrite(STDERR, "PHP needs to be a minimum version of PHP 5.5.0\n");
@@ -242,9 +242,9 @@ function select_channel(array $actions) {
 }
 ;
 }
-$enable_cache = false;
+$enableCache = false;
 if (class_exists('SQLite3')) {
-	$enable_cache = true;
+	$enableCache = true;
 	/**
  * @codeCoverageIgnore
  */
@@ -7598,12 +7598,12 @@ function lint($file) {
 	exec('php -l ' . escapeshellarg($file), $output, $ret);
 	return 0 == $ret;
 }
-if (!isset($in_phar)) {
-	$in_phar = false;
+if (!isset($inPhar)) {
+	$inPhar = false;
 }
 if (!isset($testEnv)) {
-	function showHelp($argv, $enable_cache, $in_phar) {
-		echo 'Usage: ' . $argv[0] . ' [-hv] [-o=FILENAME] [--config=FILENAME] ' . ($enable_cache ? '[--cache[=FILENAME]] ' : '') . '[--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space=SIZE] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
+	function showHelp($argv, $enableCache, $inPhar) {
+		echo 'Usage: ' . $argv[0] . ' [-hv] [-o=FILENAME] [--config=FILENAME] ' . ($enableCache ? '[--cache[=FILENAME]] ' : '') . '[--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space=SIZE] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
 		$options = [
 			'--cache[=FILENAME]' => 'cache file. Default: ',
 			'--cakephp' => 'Apply CakePHP coding style',
@@ -7632,10 +7632,10 @@ if (!isset($testEnv)) {
 			'-o=file' => 'output the formatted code to "file"',
 			'-v' => 'verbose',
 		];
-		if ($in_phar) {
+		if ($inPhar) {
 			$options['--selfupdate'] = 'self-update fmt.phar from Github';
 		}
-		if (!$enable_cache) {
+		if (!$enableCache) {
 			unset($options['--cache[=FILENAME]']);
 		} else {
 			$options['--cache[=FILENAME]'] .= (Cache::DEFAULT_CACHE_FILENAME);
@@ -7650,7 +7650,7 @@ if (!isset($testEnv)) {
 		echo PHP_EOL, 'If - is blank, it reads from stdin', PHP_EOL;
 		die();
 	}
-	$getopt_long_options = [
+	$getoptLongOptions = [
 		'cache::',
 		'cakephp',
 		'config:',
@@ -7678,15 +7678,15 @@ if (!isset($testEnv)) {
 		'visibility_order',
 		'yoda',
 	];
-	if ($in_phar) {
-		$getopt_long_options[] = 'selfupdate';
+	if ($inPhar) {
+		$getoptLongOptions[] = 'selfupdate';
 	}
-	if (!$enable_cache) {
-		unset($getopt_long_options['cache::']);
+	if (!$enableCache) {
+		unset($getoptLongOptions['cache::']);
 	}
 	$opts = getopt(
 		'ihvo:',
-		$getopt_long_options
+		$getoptLongOptions
 	);
 	if (isset($opts['selfupdate'])) {
 		$opts = [
@@ -7714,7 +7714,7 @@ if (!isset($testEnv)) {
 			fwrite(STDERR, 'Could not autoupdate - not release found' . PHP_EOL);
 			exit(255);
 		}
-		if ($in_phar) {
+		if ($inPhar) {
 			if (!file_exists($argv[0])) {
 				$argv[0] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[0];
 			}
@@ -7735,24 +7735,24 @@ if (!isset($testEnv)) {
 			fwrite(STDERR, 'Custom configuration not file found' . PHP_EOL);
 			exit(255);
 		}
-		$ini_opts = parse_ini_file($opts['config'], true);
-		if (!empty($ini_opts)) {
-			$opts = $ini_opts;
+		$iniOpts = parse_ini_file($opts['config'], true);
+		if (!empty($iniOpts)) {
+			$opts = $iniOpts;
 		}
 	} elseif (file_exists('.php.tools.ini') && is_file('.php.tools.ini')) {
 		fwrite(STDERR, 'Configuration file found' . PHP_EOL);
-		$ini_opts = parse_ini_file('.php.tools.ini', true);
+		$iniOpts = parse_ini_file('.php.tools.ini', true);
 		if (isset($opts['profile'])) {
 			$argv = extractFromArgv($argv, 'profile');
-			$profile = &$ini_opts[$opts['profile']];
+			$profile = &$iniOpts[$opts['profile']];
 			if (isset($profile)) {
-				$ini_opts = $profile;
+				$iniOpts = $profile;
 			}
 		}
-		$opts = array_merge($ini_opts, $opts);
+		$opts = array_merge($iniOpts, $opts);
 	}
 	if (isset($opts['h']) || isset($opts['help'])) {
-		showHelp($argv, $enable_cache, $in_phar);
+		showHelp($argv, $enableCache, $inPhar);
 	}
 
 	if (isset($opts['help-pass'])) {
@@ -7778,7 +7778,7 @@ if (!isset($testEnv)) {
 
 	$cache = null;
 	$cache_fn = null;
-	if ($enable_cache && isset($opts['cache'])) {
+	if ($enableCache && isset($opts['cache'])) {
 		$argv = extractFromArgv($argv, 'cache');
 		$cache_fn = $opts['cache'];
 		$cache = new Cache($cache_fn);
@@ -7959,7 +7959,7 @@ if (!isset($testEnv)) {
 			echo $fmt->formatCode(file_get_contents('php://stdin'));
 			exit(0);
 		}
-		if ($in_phar) {
+		if ($inPhar) {
 			if (!file_exists($argv[1])) {
 				$argv[1] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[1];
 			}
@@ -7979,13 +7979,13 @@ if (!isset($testEnv)) {
 			echo $fmt->formatCode(file_get_contents('php://stdin'));
 			exit(0);
 		}
-		$file_not_found = false;
+		$fileNotFound = false;
 		$start = microtime(true);
 		fwrite(STDERR, 'Formatting ...' . PHP_EOL);
-		$missing_files = [];
-		$file_count = 0;
+		$missingFiles = [];
+		$fileCount = 0;
 
-		$cache_hit_count = 0;
+		$cacheHitCount = 0;
 		$workers = 4;
 
 		for ($j = 1; $j < $argc; ++$j) {
@@ -7993,7 +7993,7 @@ if (!isset($testEnv)) {
 			if (!isset($arg)) {
 				continue;
 			}
-			if ($in_phar) {
+			if ($inPhar) {
 				if (!file_exists($arg)) {
 					$arg = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $arg;
 				}
@@ -8004,7 +8004,7 @@ if (!isset($testEnv)) {
 					fwrite(STDERR, 'Error lint:' . $file . PHP_EOL);
 					continue;
 				}
-				++$file_count;
+				++$fileCount;
 				fwrite(STDERR, '.');
 				file_put_contents($file . '-tmp', $fmt->formatCode(file_get_contents($file)));
 				rename($file . '-tmp', $file);
@@ -8028,7 +8028,7 @@ if (!isset($testEnv)) {
 							if (null !== $cache_fn) {
 								$cache = new Cache($cache_fn);
 							}
-							$cache_hit_count = 0;
+							$cacheHitCount = 0;
 							$cache_miss_count = 0;
 							while (true) {
 								$msg = $chn->out();
@@ -8047,7 +8047,7 @@ if (!isset($testEnv)) {
 								if (null !== $cache) {
 									$content = $cache->is_changed($target_dir, $file);
 									if (!$content) {
-										++$cache_hit_count;
+										++$cacheHitCount;
 										continue;
 									}
 								} else {
@@ -8062,7 +8062,7 @@ if (!isset($testEnv)) {
 								$backup && rename($file, $file . '~');
 								rename($file . '-tmp', $file);
 							}
-							$chn_done->in([$cache_hit_count, $cache_miss_count]);
+							$chn_done->in([$cacheHitCount, $cache_miss_count]);
 						}, $fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore, $i);
 					}
 				}
@@ -8076,21 +8076,21 @@ if (!isset($testEnv)) {
 						}
 					}
 
-					++$file_count;
+					++$fileCount;
 					if ($concurrent) {
 						$chn->in([
 							'target_dir' => $target_dir,
 							'file' => $file,
 						]);
 					} else {
-						if (0 == ($file_count % 20)) {
-							fwrite(STDERR, ' ' . $file_count . PHP_EOL);
+						if (0 == ($fileCount % 20)) {
+							fwrite(STDERR, ' ' . $fileCount . PHP_EOL);
 						}
 						if (null !== $cache) {
 							$content = $cache->is_changed($target_dir, $file);
 							if (!$content) {
-								++$file_count;
-								++$cache_hit_count;
+								++$fileCount;
+								++$cacheHitCount;
 								continue;
 							}
 						} else {
@@ -8117,39 +8117,39 @@ if (!isset($testEnv)) {
 					}
 					for ($i = 0; $i < $workers; ++$i) {
 						list($cache_hit, $cache_miss) = $chn_done->out();
-						$cache_hit_count += $cache_hit;
+						$cacheHitCount += $cache_hit;
 					}
 					$chn_done->close();
 					$chn->close();
 				}
 				continue;
 			} elseif (!is_file($arg)) {
-				$file_not_found = true;
-				$missing_files[] = $arg;
+				$fileNotFound = true;
+				$missingFiles[] = $arg;
 				fwrite(STDERR, '!');
 			}
-			if (0 == ($file_count % 20)) {
-				fwrite(STDERR, ' ' . $file_count . PHP_EOL);
+			if (0 == ($fileCount % 20)) {
+				fwrite(STDERR, ' ' . $fileCount . PHP_EOL);
 			}
 		}
 		fwrite(STDERR, PHP_EOL);
 		if (null !== $cache) {
-			fwrite(STDERR, ' ' . $cache_hit_count . ' files untouched (cache hit)' . PHP_EOL);
+			fwrite(STDERR, ' ' . $cacheHitCount . ' files untouched (cache hit)' . PHP_EOL);
 		}
-		fwrite(STDERR, ' ' . $file_count . ' files total' . PHP_EOL);
+		fwrite(STDERR, ' ' . $fileCount . ' files total' . PHP_EOL);
 		fwrite(STDERR, 'Took ' . round(microtime(true) - $start, 2) . 's' . PHP_EOL);
-		if (sizeof($missing_files)) {
+		if (sizeof($missingFiles)) {
 			fwrite(STDERR, "Files not found: " . PHP_EOL);
-			foreach ($missing_files as $file) {
+			foreach ($missingFiles as $file) {
 				fwrite(STDERR, "\t - " . $file . PHP_EOL);
 			}
 		}
 
-		if ($file_not_found) {
+		if ($fileNotFound) {
 			exit(255);
 		}
 	} else {
-		showHelp($argv, $enable_cache, $in_phar);
+		showHelp($argv, $enableCache, $inPhar);
 	}
 	exit(0);
 }
