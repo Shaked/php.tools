@@ -7503,7 +7503,11 @@ class SortUseNameSpace extends FormatterPass {
 	public function __construct() {
 		$sortFunction = function ($useStack) {
 			usort($useStack, function ($a, $b) {
-				return strlen($a) - strlen($b);
+				$len = strlen($a) - strlen($b);
+				if (0 === $len) {
+					return strcmp($a, $b);
+				}
+				return $len;
 			});
 			return $useStack;
 		};
