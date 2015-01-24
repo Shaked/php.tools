@@ -6,4 +6,7 @@ php:
         - 5.5
         - 5.4
 
-script: cd src && (php -dshort_open_tag=On test.php -v --coveralls) && (php -dshort_open_tag=On test.php -v --deployed) && php vendor/bin/coveralls -v
+script:
+        - if [ "$TRAVIS_PHP_VERSION" == "5.6" ]; then cd src && (php -dshort_open_tag=On test.php -v --coveralls) && (php -dshort_open_tag=On test.php -v --deployed) && php vendor/bin/coveralls -v; fi;
+        - if [ "$TRAVIS_PHP_VERSION" != "5.6" ]; then cd src && (php -dshort_open_tag=On test.php -v) && (php -dshort_open_tag=On test.php -v --deployed); fi;
+        - cd src && ./benchmark 3 5
