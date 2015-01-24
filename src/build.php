@@ -51,10 +51,8 @@ for ($i = 0; $i < $workers; ++$i) {
 			}
 			echo $target, PHP_EOL;
 			file_put_contents($target . '.php', $pass->format(file_get_contents($target . '.src.php')));
-			chmod($target . '.php', 0755);
 			if (file_exists($target . '.stub.src.php')) {
 				file_put_contents($target . '.stub.php', $pass->format(file_get_contents($target . '.stub.src.php')));
-				chmod($target . '.stub.php', 0755);
 			}
 		}
 		$chn_done->in('done');
@@ -83,17 +81,19 @@ foreach ($phars as $target) {
 	$phar[$target . ".stub.php"] = file_get_contents($target . '.stub.php');
 	$phar->setStub('#!/usr/bin/env php' . "\n" . $phar->createDefaultStub($target . '.stub.php'));
 	file_put_contents($target . ".phar.sha1", sha1_file($target . '.phar'));
+	unlink($target . '.stub.php');
 }
 echo 'done', PHP_EOL;
 
-$variants = ['.php', '.stub.php', '.phar', '.phar.sha1'];
+$variants = ['.php' => 0755, '.phar' => 0755, '.phar.sha1' => 0444];
 foreach ($targets as $target) {
-	foreach ($variants as $variant) {
+	foreach ($variants as $variant => $permission) {
 		if (file_exists($target . $variant)) {
 			echo 'moving ', $target . $variant, ' to ..' . DIRECTORY_SEPARATOR . $target . $variant, PHP_EOL;
 			rename($target . $variant, '..' . DIRECTORY_SEPARATOR . $target . $variant);
+			chmod('..' . DIRECTORY_SEPARATOR . $target . $variant, $permission);
 		}
 	}
 }
-rename('..' . DIRECTORY_SEPARATOR . 'php.tools.php', '..' . DIRECTORY_SEPARATOR . 'php.tools');
 echo 'moving ', '..' . DIRECTORY_SEPARATOR . 'php.tools.php', ' to ..' . DIRECTORY_SEPARATOR . 'php.tools', PHP_EOL;
+rename('..' . DIRECTORY_SEPARATOR . 'php.tools.php', '..' . DIRECTORY_SEPARATOR . 'php.tools');
