@@ -34,3 +34,4 @@ do
 done;
 git checkout master &> /dev/null
 git branch -D benchmark-regression &> /dev/null
+exit 0;
