@@ -16,10 +16,10 @@ class TightConcat extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_CONCAT:
-					if (!$this->leftTokenIs([T_LNUMBER, T_DNUMBER])) {
+					if (!$this->leftUsefulTokenIs([T_LNUMBER, T_DNUMBER])) {
 						$this->code = rtrim($this->code, $whitespaces);
 					}
-					if (!$this->rightTokenIs([T_LNUMBER, T_DNUMBER])) {
+					if (!$this->rightUsefulTokenIs([T_LNUMBER, T_DNUMBER, T_STRING])) {
 						each($this->tkns);
 					}
 				default:
