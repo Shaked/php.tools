@@ -1,8 +1,6 @@
 package src
 
 import (
-	"fmt"
-	"log"
 	"os/exec"
 	"strconv"
 	"testing"
@@ -39,9 +37,9 @@ func benchmarkFmt(commits int, b *testing.B) {
 	exec.Command("git", "reset", "--hard", "HEAD~"+strconv.Itoa(commits)).Output()
 	out, err := exec.Command("git", "log", "--pretty=oneline", "-n1").Output()
 	if err != nil {
-		log.Fatal(err)
+		b.Fatal(err)
 	}
-	fmt.Printf("%s", out)
+	b.Logf("%s", out)
 
 	b.StartTimer()
 	for n := 0; n < b.N; n++ {
