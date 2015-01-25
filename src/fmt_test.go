@@ -41,7 +41,7 @@ func benchmarkFmt(commits int, b *testing.B) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(out)
+	fmt.Printf("%s", out)
 
 	b.StartTimer()
 	for n := 0; n < b.N; n++ {
