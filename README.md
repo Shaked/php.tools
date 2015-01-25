@@ -19,7 +19,7 @@ php.tools
 ## Usage
 
 ```
-    /bin/sh ./php.tools [watch [command]]
+    php ./php.tools [watch [command]]
 	ctags - generate ctags
 	test - execute PHPUnit
 	cover - execute PHPUnit with cover output
