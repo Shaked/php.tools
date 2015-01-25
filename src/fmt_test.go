@@ -37,7 +37,7 @@ func benchmarkFmt(commits int, b *testing.B) {
 	exec.Command("git", "branch", "-D", "performance").Output()
 	exec.Command("git", "checkout", "-b", "performance").Output()
 	exec.Command("git", "reset", "--hard", "HEAD~"+strconv.Itoa(commits)).Output()
-	out, err := exec.Command("git", "show", "--pretty=oneline").Output()
+	out, err := exec.Command("git", "log", "--pretty=oneline", "-n1").Output()
 	if err != nil {
 		log.Fatal(err)
 	}
