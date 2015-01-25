@@ -3723,7 +3723,7 @@ final class PSR1OpenTags extends FormatterPass {
 			switch ($id) {
 				case T_OPEN_TAG:
 					if ('<?php' !== $text) {
-						$this->appendCode('<?php' . $this->newLine);
+						$this->appendCode('<?php' . ($this->hasLnAfter() || $this->hasLn($text) || $this->rightUsefulTokenIs(T_NAMESPACE) ? $this->newLine : $this->getSpace()));
 						break;
 					}
 				default:
@@ -4198,7 +4198,7 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 		list($id, $text) = $this->getToken(end($this->tkns));
 		$this->ptr = key($this->tkns);
 
-		if (T_CLOSE_TAG == $id) {
+		if (T_CLOSE_TAG == $id && $this->leftUsefulTokenIs([ST_CURLY_CLOSE, ST_SEMI_COLON])) {
 			unset($this->tkns[$this->ptr]);
 		} elseif (T_INLINE_HTML == $id && '' == trim($text) && $this->leftTokenIs(T_CLOSE_TAG)) {
 			unset($this->tkns[$this->ptr]);

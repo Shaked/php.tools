@@ -17,7 +17,7 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 		list($id, $text) = $this->getToken(end($this->tkns));
 		$this->ptr = key($this->tkns);
 
-		if (T_CLOSE_TAG == $id) {
+		if (T_CLOSE_TAG == $id && $this->leftUsefulTokenIs([ST_CURLY_CLOSE, ST_SEMI_COLON])) {
 			unset($this->tkns[$this->ptr]);
 		} elseif (T_INLINE_HTML == $id && '' == trim($text) && $this->leftTokenIs(T_CLOSE_TAG)) {
 			unset($this->tkns[$this->ptr]);
