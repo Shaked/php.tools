@@ -1,6 +1,8 @@
 package src
 
 import (
+	"fmt"
+	"log"
 	"os/exec"
 	"strconv"
 	"testing"
@@ -35,6 +37,12 @@ func benchmarkFmt(commits int, b *testing.B) {
 	exec.Command("git", "branch", "-D", "performance").Output()
 	exec.Command("git", "checkout", "-b", "performance").Output()
 	exec.Command("git", "reset", "--hard", "HEAD~"+strconv.Itoa(commits)).Output()
+	out, err := exec.Command("git", "show", "--pretty=oneline").Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(out)
+
 	b.StartTimer()
 	for n := 0; n < b.N; n++ {
 		exec.Command("php", "test.php", "-v").Output()
