@@ -200,6 +200,32 @@ abstract class FormatterPass {
 		}
 	}
 
+	protected function printAndStopAtEndOfParamBlock() {
+		$count = 1;
+		$paramCount = 1;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			$this->cache = [];
+
+			if (ST_COMMA == $id) {
+				$paramCount++;
+			}
+			if (ST_PARENTHESES_OPEN == $id) {
+				++$count;
+			}
+			if (ST_PARENTHESES_CLOSE == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				prev($this->tkns);
+				break;
+			}
+			$this->appendCode($text);
+		}
+		return $paramCount;
+	}
+
 	protected function printBlock($start, $end) {
 		$count = 1;
 		while (list($index, $token) = each($this->tkns)) {
