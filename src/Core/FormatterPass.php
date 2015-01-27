@@ -142,8 +142,18 @@ abstract class FormatterPass {
 			$this->ptr = $index;
 			$this->cache = [];
 
-			if (ST_COMMA == $id) {
+			if (ST_COMMA == $id && 1 == $count) {
 				$paramCount++;
+			}
+			if (ST_BRACKET_OPEN == $id) {
+				$this->appendCode($text);
+				$this->printBlock(ST_BRACKET_OPEN, ST_BRACKET_CLOSE);
+				continue;
+			}
+			if (ST_CURLY_OPEN == $id || T_CURLY_OPEN == $id || T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+				$this->appendCode($text);
+				$this->printCurlyBlock();
+				continue;
 			}
 			if (ST_PARENTHESES_OPEN == $id) {
 				++$count;

@@ -35,6 +35,16 @@ final class StrictBehavior extends AdditionalPass {
 				continue;
 			}
 
+			if ($this->leftUsefulTokenIs([T_DOUBLE_COLON, T_OBJECT_OPERATOR])) {
+				$this->appendCode($text);
+				continue;
+			}
+
+			if (!$this->rightUsefulTokenIs(ST_PARENTHESES_OPEN)) {
+				$this->appendCode($text);
+				continue;
+			}
+
 			$maxParams = $foundKeyword;
 
 			$this->appendCode($text);

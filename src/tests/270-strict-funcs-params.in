@@ -35,4 +35,19 @@ mb_detect_encoding($arr);
 array_keys($arr, [1]);
 mb_detect_encoding($arr, 'UTF8');
 
+//-----
 
+array_keys($arr, func($a, $b));
+array_keys($arr, [$a, $b]);
+array_keys($arr, $a->{$v});
+array_keys($arr, "{$v}");
+array_keys($arr, "${$v}");
+array_keys($arr, ${$v});
+
+//-----
+
+SomeStaticClass::array_keys($arr, func($a, $b));
+$someObject->array_keys($arr, func($a, $b));
+
+SomeStaticClass::array_keys;
+$someObject->array_keys;
