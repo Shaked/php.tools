@@ -86,6 +86,7 @@ require 'Additionals/ReturnNull.php';
 require 'Additionals/ShortArray.php';
 require 'Additionals/SmartLnAfterCurlyOpen.php';
 require 'Additionals/SpaceBetweenMethods.php';
+require 'Additionals/StrictComparison.php';
 require 'Additionals/StripExtraCommaInArray.php';
 require 'Additionals/StripNewlineAfterClassOpen.php';
 require 'Additionals/StripNewlineAfterCurlyOpen.php';
