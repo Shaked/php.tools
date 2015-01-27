@@ -29,7 +29,11 @@ if ($isCoverage) {
 
 $testNumber = "";
 if (isset($opt['testNumber'])) {
-	$testNumber = sprintf("%03d", (int) $opt['testNumber']);
+	if (is_numeric($opt['testNumber'])) {
+		$testNumber = sprintf("%03d", (int) $opt['testNumber']);
+	} else {
+		$testNumber = sprintf("%s", $opt['testNumber']);
+	}
 }
 $start = microtime(true);
 $testEnv = true;
@@ -78,61 +82,59 @@ foreach ($cases as $caseIn) {
 				$pass = trim($pass);
 				if (false !== strpos($pass, '|')) {
 					$pass = explode('|', $pass);
-					$reflectionClass = new ReflectionClass($pass[0]);
-					$params = [];
-					$fmt->addPass($reflectionClass->newInstanceArgs(explode(',', $pass[1])));
+					$fmt->enablePass($pass[0], $pass[1]);
 				} else {
 					if ('default' == strtolower($pass)) {
-						$fmt->addPass(new TwoCommandsInSameLine());
-						$fmt->addPass(new RemoveIncludeParentheses());
-						$fmt->addPass(new NormalizeIsNotEquals());
-						$fmt->addPass(new OrderUseClauses());
-						$fmt->addPass(new AddMissingCurlyBraces());
-						$fmt->addPass(new ExtraCommaInArray());
-						$fmt->addPass(new NormalizeLnAndLtrimLines());
-						$fmt->addPass(new MergeParenCloseWithCurlyOpen());
-						$fmt->addPass(new MergeCurlyCloseAndDoWhile());
-						$fmt->addPass(new MergeDoubleArrowAndArray());
-						$fmt->addPass(new ResizeSpaces());
-						$fmt->addPass(new ReindentColonBlocks());
-						$fmt->addPass(new ReindentLoopColonBlocks());
-						$fmt->addPass(new ReindentIfColonBlocks());
-						$fmt->addPass(new AlignEquals());
-						$fmt->addPass(new AlignDoubleArrow());
-						$fmt->addPass(new ReindentObjOps());
-						$fmt->addPass(new Reindent());
-						$fmt->addPass(new EliminateDuplicatedEmptyLines());
-						$fmt->addPass(new LeftAlignComment());
-						$fmt->addPass(new RTrim());
+						$fmt->enablePass('TwoCommandsInSameLine');
+						$fmt->enablePass('RemoveIncludeParentheses');
+						$fmt->enablePass('NormalizeIsNotEquals');
+						$fmt->enablePass('OrderUseClauses');
+						$fmt->enablePass('AddMissingCurlyBraces');
+						$fmt->enablePass('ExtraCommaInArray');
+						$fmt->enablePass('NormalizeLnAndLtrimLines');
+						$fmt->enablePass('MergeParenCloseWithCurlyOpen');
+						$fmt->enablePass('MergeCurlyCloseAndDoWhile');
+						$fmt->enablePass('MergeDoubleArrowAndArray');
+						$fmt->enablePass('ResizeSpaces');
+						$fmt->enablePass('ReindentColonBlocks');
+						$fmt->enablePass('ReindentLoopColonBlocks');
+						$fmt->enablePass('ReindentIfColonBlocks');
+						$fmt->enablePass('AlignEquals');
+						$fmt->enablePass('AlignDoubleArrow');
+						$fmt->enablePass('ReindentObjOps');
+						$fmt->enablePass('Reindent');
+						$fmt->enablePass('EliminateDuplicatedEmptyLines');
+						$fmt->enablePass('LeftAlignComment');
+						$fmt->enablePass('RTrim');
 					} else {
-						$fmt->addPass(new $pass());
+						$fmt->enablePass($pass);
 					}
 				}
 			}
 		}
 	}
 	if (!$specialPasses) {
-		$fmt->addPass(new TwoCommandsInSameLine());
-		$fmt->addPass(new RemoveIncludeParentheses());
-		$fmt->addPass(new NormalizeIsNotEquals());
-		$fmt->addPass(new OrderUseClauses());
-		$fmt->addPass(new AddMissingCurlyBraces());
-		$fmt->addPass(new ExtraCommaInArray());
-		$fmt->addPass(new NormalizeLnAndLtrimLines());
-		$fmt->addPass(new MergeParenCloseWithCurlyOpen());
-		$fmt->addPass(new MergeCurlyCloseAndDoWhile());
-		$fmt->addPass(new MergeDoubleArrowAndArray());
-		$fmt->addPass(new ResizeSpaces());
-		$fmt->addPass(new ReindentColonBlocks());
-		$fmt->addPass(new ReindentLoopColonBlocks());
-		$fmt->addPass(new ReindentIfColonBlocks());
-		$fmt->addPass(new AlignEquals());
-		$fmt->addPass(new AlignDoubleArrow());
-		$fmt->addPass(new ReindentObjOps());
-		$fmt->addPass(new Reindent());
-		$fmt->addPass(new EliminateDuplicatedEmptyLines());
-		$fmt->addPass(new LeftAlignComment());
-		$fmt->addPass(new RTrim());
+		$fmt->enablePass('TwoCommandsInSameLine');
+		$fmt->enablePass('RemoveIncludeParentheses');
+		$fmt->enablePass('NormalizeIsNotEquals');
+		$fmt->enablePass('OrderUseClauses');
+		$fmt->enablePass('AddMissingCurlyBraces');
+		$fmt->enablePass('ExtraCommaInArray');
+		$fmt->enablePass('NormalizeLnAndLtrimLines');
+		$fmt->enablePass('MergeParenCloseWithCurlyOpen');
+		$fmt->enablePass('MergeCurlyCloseAndDoWhile');
+		$fmt->enablePass('MergeDoubleArrowAndArray');
+		$fmt->enablePass('ResizeSpaces');
+		$fmt->enablePass('ReindentColonBlocks');
+		$fmt->enablePass('ReindentLoopColonBlocks');
+		$fmt->enablePass('ReindentIfColonBlocks');
+		$fmt->enablePass('AlignEquals');
+		$fmt->enablePass('AlignDoubleArrow');
+		$fmt->enablePass('ReindentObjOps');
+		$fmt->enablePass('Reindent');
+		$fmt->enablePass('EliminateDuplicatedEmptyLines');
+		$fmt->enablePass('LeftAlignComment');
+		$fmt->enablePass('RTrim');
 	}
 
 	$got = $fmt->formatCode($content);
@@ -179,34 +181,34 @@ if (!$bailOut) {
 				$specialPasses = true;
 				foreach ($passes as $pass) {
 					$pass = trim($pass);
-					$fmt->addPass(new $pass());
+					$fmt->enablePass($pass);
 				}
 			}
 		}
 		if (!$specialPasses) {
-			$fmt->addPass(new TwoCommandsInSameLine());
-			$fmt->addPass(new RemoveIncludeParentheses());
-			$fmt->addPass(new NormalizeIsNotEquals());
-			$fmt->addPass(new OrderUseClauses());
-			$fmt->addPass(new AddMissingCurlyBraces());
-			$fmt->addPass(new ExtraCommaInArray());
-			$fmt->addPass(new NormalizeLnAndLtrimLines());
-			$fmt->addPass(new MergeParenCloseWithCurlyOpen());
-			$fmt->addPass(new MergeCurlyCloseAndDoWhile());
-			$fmt->addPass(new MergeDoubleArrowAndArray());
-			$fmt->addPass(new ResizeSpaces());
-			$fmt->addPass(new ReindentColonBlocks());
-			$fmt->addPass(new ReindentLoopColonBlocks());
-			$fmt->addPass(new ReindentIfColonBlocks());
-			$fmt->addPass(new AlignEquals());
-			$fmt->addPass(new AlignDoubleArrow());
-			$fmt->addPass(new ReindentObjOps());
-			$fmt->addPass(new Reindent());
-			$fmt->addPass(new EliminateDuplicatedEmptyLines());
+			$fmt->enablePass('TwoCommandsInSameLine');
+			$fmt->enablePass('RemoveIncludeParentheses');
+			$fmt->enablePass('NormalizeIsNotEquals');
+			$fmt->enablePass('OrderUseClauses');
+			$fmt->enablePass('AddMissingCurlyBraces');
+			$fmt->enablePass('ExtraCommaInArray');
+			$fmt->enablePass('NormalizeLnAndLtrimLines');
+			$fmt->enablePass('MergeParenCloseWithCurlyOpen');
+			$fmt->enablePass('MergeCurlyCloseAndDoWhile');
+			$fmt->enablePass('MergeDoubleArrowAndArray');
+			$fmt->enablePass('ResizeSpaces');
+			$fmt->enablePass('ReindentColonBlocks');
+			$fmt->enablePass('ReindentLoopColonBlocks');
+			$fmt->enablePass('ReindentIfColonBlocks');
+			$fmt->enablePass('AlignEquals');
+			$fmt->enablePass('AlignDoubleArrow');
+			$fmt->enablePass('ReindentObjOps');
+			$fmt->enablePass('Reindent');
+			$fmt->enablePass('EliminateDuplicatedEmptyLines');
+			$fmt->enablePass('PSR2AlignObjOp');
+			$fmt->enablePass('LeftAlignComment');
+			$fmt->enablePass('RTrim');
 			PsrDecorator::decorate($fmt);
-			$fmt->addPass(new PSR2AlignObjOp());
-			$fmt->addPass(new LeftAlignComment());
-			$fmt->addPass(new RTrim());
 		}
 
 		$got = $fmt->formatCode($content);
@@ -254,33 +256,33 @@ if (!$bailOut) {
 				$specialPasses = true;
 				foreach ($passes as $pass) {
 					$pass = trim($pass);
-					$fmt->addPass(new $pass());
+					$fmt->enablePass($pass);
 				}
 			}
 		}
 		if (!$specialPasses) {
-			$fmt->addPass(new TwoCommandsInSameLine());
-			$fmt->addPass(new RemoveIncludeParentheses());
-			$fmt->addPass(new NormalizeIsNotEquals());
-			$fmt->addPass(new OrderUseClauses());
-			$fmt->addPass(new AddMissingCurlyBraces());
-			$fmt->addPass(new ExtraCommaInArray());
-			$fmt->addPass(new NormalizeLnAndLtrimLines());
-			$fmt->addPass(new MergeParenCloseWithCurlyOpen());
-			$fmt->addPass(new MergeCurlyCloseAndDoWhile());
-			$fmt->addPass(new MergeDoubleArrowAndArray());
-			$fmt->addPass(new ResizeSpaces());
-			$fmt->addPass(new ReindentColonBlocks());
-			$fmt->addPass(new ReindentLoopColonBlocks());
-			$fmt->addPass(new ReindentIfColonBlocks());
-			$fmt->addPass(new AlignEquals());
-			$fmt->addPass(new AlignDoubleArrow());
-			$fmt->addPass(new ReindentObjOps());
-			$fmt->addPass(new Reindent());
-			$fmt->addPass(new EliminateDuplicatedEmptyLines());
-			$fmt->addPass(new PSR2AlignObjOp());
-			$fmt->addPass(new LeftAlignComment());
-			$fmt->addPass(new RTrim());
+			$fmt->enablePass('TwoCommandsInSameLine');
+			$fmt->enablePass('RemoveIncludeParentheses');
+			$fmt->enablePass('NormalizeIsNotEquals');
+			$fmt->enablePass('OrderUseClauses');
+			$fmt->enablePass('AddMissingCurlyBraces');
+			$fmt->enablePass('ExtraCommaInArray');
+			$fmt->enablePass('NormalizeLnAndLtrimLines');
+			$fmt->enablePass('MergeParenCloseWithCurlyOpen');
+			$fmt->enablePass('MergeCurlyCloseAndDoWhile');
+			$fmt->enablePass('MergeDoubleArrowAndArray');
+			$fmt->enablePass('ResizeSpaces');
+			$fmt->enablePass('ReindentColonBlocks');
+			$fmt->enablePass('ReindentLoopColonBlocks');
+			$fmt->enablePass('ReindentIfColonBlocks');
+			$fmt->enablePass('AlignEquals');
+			$fmt->enablePass('AlignDoubleArrow');
+			$fmt->enablePass('ReindentObjOps');
+			$fmt->enablePass('Reindent');
+			$fmt->enablePass('EliminateDuplicatedEmptyLines');
+			$fmt->enablePass('PSR2AlignObjOp');
+			$fmt->enablePass('LeftAlignComment');
+			$fmt->enablePass('RTrim');
 			LaravelDecorator::decorate($fmt);
 		}
 

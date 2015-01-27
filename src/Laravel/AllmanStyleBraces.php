@@ -19,7 +19,7 @@ class AllmanStyleBraces extends FormatterPass {
 					$poppedID = array_pop($foundStack);
 					if (true === $poppedID['implicit']) {
 						list($prevId, $prevText) = $this->inspectToken(-1);
-						$currentIndentation = substr_count($prevText, $this->indentChar);
+						$currentIndentation = substr_count($prevText, $this->indentChar, strrpos($prevText, "\n"));
 					}
 					$foundStack[] = $poppedID;
 					$this->appendCode($text);

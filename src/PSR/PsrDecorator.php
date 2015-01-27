@@ -1,23 +1,23 @@
 <?php
 class PsrDecorator {
 	public static function PSR1(CodeFormatter $fmt) {
-		$fmt->addPass(new PSR1OpenTags());
-		$fmt->addPass(new PSR1BOMMark());
-		$fmt->addPass(new PSR1ClassConstants());
+		$fmt->enablePass('PSR1OpenTags');
+		$fmt->enablePass('PSR1BOMMark');
+		$fmt->enablePass('PSR1ClassConstants');
 	}
 
 	public static function PSR1Naming(CodeFormatter $fmt) {
-		$fmt->addPass(new PSR1ClassNames());
-		$fmt->addPass(new PSR1MethodNames());
+		$fmt->enablePass('PSR1ClassNames');
+		$fmt->enablePass('PSR1MethodNames');
 	}
 
 	public static function PSR2(CodeFormatter $fmt) {
-		$fmt->addPass(new PSR2KeywordsLowerCase());
-		$fmt->addPass(new PSR2IndentWithSpace());
-		$fmt->addPass(new PSR2LnAfterNamespace());
-		$fmt->addPass(new PSR2CurlyOpenNextLine());
-		$fmt->addPass(new PSR2ModifierVisibilityStaticOrder());
-		$fmt->addPass(new PSR2SingleEmptyLineAndStripClosingTag());
+		$fmt->enablePass('PSR2KeywordsLowerCase');
+		$fmt->enablePass('PSR2IndentWithSpace');
+		$fmt->enablePass('PSR2LnAfterNamespace');
+		$fmt->enablePass('PSR2CurlyOpenNextLine');
+		$fmt->enablePass('PSR2ModifierVisibilityStaticOrder');
+		$fmt->enablePass('PSR2SingleEmptyLineAndStripClosingTag');
 	}
 
 	public static function decorate(CodeFormatter $fmt) {

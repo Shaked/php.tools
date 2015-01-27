@@ -4,35 +4,35 @@
 class A {
 	private $a;
 
-	private function setA($a){
+	private function setA($a) {
 		$this->a = $a;
 	}
 
-	private function getA(){
+	private function getA() {
 		return $this->a;
 	}
 
 	public $b;
 
-	public function setB($b){
+	public function setB($b) {
 		$this->b = $b;
 	}
 
-	public function getB(){
+	public function getB() {
 		return $this->b;
 	}
 
 	protected $c;
 
-	protected function setC($c){
+	protected function setC($c) {
 		$this->c = $c;
 	}
 
-	protected function getC(){
+	protected function getC() {
 		return $this->c;
 	}
 
-	function __construct($a, $b, $c){
+	function __construct($a, $b, $c) {
 		$this->setA($a);
 		$this->setB($b);
 		$this->setC($c);

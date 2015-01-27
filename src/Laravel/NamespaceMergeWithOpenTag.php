@@ -19,13 +19,16 @@ class NamespaceMergeWithOpenTag extends FormatterPass {
 				case T_NAMESPACE:
 					if ($this->leftTokenIs(T_OPEN_TAG)) {
 						$this->rtrimAndAppendCode($this->getSpace() . $text);
-						break;
+						break 2;
 					}
 				default:
 					$this->appendCode($text);
 			}
 		}
-
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->appendCode($text);
+		}
 		return $this->code;
 	}
 }

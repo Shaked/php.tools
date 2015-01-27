@@ -343,64 +343,42 @@ if (!isset($testEnv)) {
 		}, explode(',', $opts['prepasses']));
 		foreach ($optPasses as $optPass) {
 			if (class_exists($optPass)) {
-				$fmt->addPass(new $optPass());
-			} elseif (is_file('Additionals/' . $optPass . '.php')) {
-				include 'Additionals/' . $optPass . '.php';
-				$fmt->addPass(new $optPass());
+				$fmt->enablePass($optPass);
 			}
 		}
 		$argv = extractFromArgv($argv, 'prepasses');
 	}
-	$fmt->addPass(new TwoCommandsInSameLine());
-	$fmt->addPass(new RemoveIncludeParentheses());
-	$fmt->addPass(new NormalizeIsNotEquals());
 	if (isset($opts['setters_and_getters'])) {
 		$argv = extractFromArgv($argv, 'setters_and_getters');
-		$fmt->addPass(new SettersAndGettersPass($opts['setters_and_getters']));
+		$fmt->enablePass('SettersAndGettersPass', $opts['setters_and_getters']);
 	}
 	if (isset($opts['constructor'])) {
 		$argv = extractFromArgv($argv, 'constructor');
-		$fmt->addPass(new ConstructorPass($opts['constructor']));
+		$fmt->enablePass('ConstructorPass', $opts['constructor']);
 	}
 	if (isset($opts['oracleDB'])) {
 		$argv = extractFromArgv($argv, 'oracleDB');
-		$fmt->addPass(new AutoImportPass($opts['oracleDB']));
+		$fmt->enablePass('AutoImportPass', $opts['oracleDB']);
 	}
 
-	$fmt->addPass(new OrderUseClauses());
-	$fmt->addPass(new AddMissingCurlyBraces());
 	if (isset($opts['smart_linebreak_after_curly'])) {
-		$fmt->addPass(new SmartLnAfterCurlyOpen());
+		$fmt->enablePass('SmartLnAfterCurlyOpen');
 		$argv = extractFromArgv($argv, 'smart_linebreak_after_curly');
 	}
-	$fmt->addPass(new ExtraCommaInArray());
-	$fmt->addPass(new NormalizeLnAndLtrimLines());
-	$fmt->addPass(new MergeParenCloseWithCurlyOpen());
-	$fmt->addPass(new MergeCurlyCloseAndDoWhile());
-	$fmt->addPass(new MergeDoubleArrowAndArray());
 
 	if (isset($opts['yoda'])) {
-		$fmt->addPass(new YodaComparisons());
+		$fmt->enablePass('YodaComparisons');
 		$argv = extractFromArgv($argv, 'yoda');
 	}
 
-	$fmt->addPass(new ResizeSpaces());
-	$fmt->addPass(new ReindentColonBlocks());
-	$fmt->addPass(new ReindentLoopColonBlocks());
-	$fmt->addPass(new ReindentIfColonBlocks());
-
 	if (isset($opts['enable_auto_align'])) {
-		$fmt->addPass(new AlignEquals());
-		$fmt->addPass(new AlignDoubleArrow());
+		$fmt->enablePass('AlignEquals');
+		$fmt->enablePass('AlignDoubleArrow');
 		$argv = extractFromArgv($argv, 'enable_auto_align');
 	}
 
-	$fmt->addPass(new ReindentObjOps());
-	$fmt->addPass(new Reindent());
-	$fmt->addPass(new EliminateDuplicatedEmptyLines());
-
 	if (isset($opts['indent_with_space']) && !isset($opts['laravel'])) {
-		$fmt->addPass(new PSR2IndentWithSpace($opts['indent_with_space']));
+		$fmt->addPass('PSR2IndentWithSpace', $opts['indent_with_space']);
 		$argv = extractFromArgv($argv, 'indent_with_space');
 	}
 	if (isset($opts['psr']) && !isset($opts['laravel'])) {
@@ -420,15 +398,13 @@ if (!isset($testEnv)) {
 		$argv = extractFromArgv($argv, 'psr2');
 	}
 	if ((isset($opts['psr1']) || isset($opts['psr2']) || isset($opts['psr'])) && isset($opts['enable_auto_align']) && !isset($opts['laravel'])) {
-		$fmt->addPass(new PSR2AlignObjOp());
+		$fmt->enablePass('PSR2AlignObjOp');
 	}
 
 	if (isset($opts['visibility_order'])) {
-		$fmt->addPass(new PSR2ModifierVisibilityStaticOrder());
+		$fmt->enablePass('PSR2ModifierVisibilityStaticOrder');
 		$argv = extractFromArgv($argv, 'visibility_order');
 	}
-	$fmt->addPass(new LeftAlignComment());
-	$fmt->addPass(new RTrim());
 
 	if (isset($opts['passes'])) {
 		$optPasses = array_map(function ($v) {
@@ -436,10 +412,7 @@ if (!isset($testEnv)) {
 		}, explode(',', $opts['passes']));
 		foreach ($optPasses as $optPass) {
 			if (class_exists($optPass)) {
-				$fmt->addPass(new $optPass());
-			} elseif (is_file('Additionals/' . $optPass . '.php')) {
-				include 'Additionals/' . $optPass . '.php';
-				$fmt->addPass(new $optPass());
+				$fmt->enablePass($optPass);
 			}
 		}
 		$argv = extractFromArgv($argv, 'passes');
@@ -451,14 +424,14 @@ if (!isset($testEnv)) {
 	}
 
 	if (isset($opts['cakephp'])) {
-		$fmt->addPass(new CakePHPStyle());
+		$fmt->enablePass('CakePHPStyle');
 		$argv = extractFromArgv($argv, 'cakephp');
 	}
 
 	if (isset($opts['exclude'])) {
 		$passesNames = explode(',', $opts['exclude']);
 		foreach ($passesNames as $passName) {
-			$fmt->removePass(trim($passName));
+			$fmt->disablePass(trim($passName));
 		}
 		$argv = extractFromArgv($argv, 'exclude');
 	}

@@ -1,17 +1,17 @@
 <?php
 class LaravelDecorator {
 	public static function decorate(CodeFormatter &$fmt) {
-		$fmt->removePass('AlignEquals');
-		$fmt->removePass('AlignDoubleArrow');
-		$fmt->addPass(new NamespaceMergeWithOpenTag());
-		$fmt->addPass(new AllmanStyleBraces());
-		$fmt->addPass(new RTrim());
-		$fmt->addPass(new TightConcat());
-		$fmt->addPass(new NoSpaceBetweenFunctionAndBracket());
-		$fmt->addPass(new SpaceAroundExclamationMark());
-		$fmt->addPass(new NoneDocBlockMinorCleanUp());
-		$fmt->addPass(new SortUseNameSpace());
-		$fmt->addPass(new AlignEqualsByConsecutiveBlocks());
-		$fmt->addPass(new EliminateDuplicatedEmptyLines());
+		$fmt->disablePass('AlignEquals');
+		$fmt->disablePass('AlignDoubleArrow');
+		$fmt->enablePass('NamespaceMergeWithOpenTag');
+		$fmt->enablePass('AllmanStyleBraces');
+		$fmt->enablePass('RTrim');
+		$fmt->enablePass('TightConcat');
+		$fmt->enablePass('NoSpaceBetweenFunctionAndBracket');
+		$fmt->enablePass('SpaceAroundExclamationMark');
+		$fmt->enablePass('NoneDocBlockMinorCleanUp');
+		$fmt->enablePass('SortUseNameSpace');
+		$fmt->enablePass('AlignEqualsByConsecutiveBlocks');
+		$fmt->enablePass('EliminateDuplicatedEmptyLines');
 	}
 }

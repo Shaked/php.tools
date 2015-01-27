@@ -843,33 +843,142 @@ abstract class AdditionalPass extends FormatterPass {
  * @codeCoverageIgnore
  */
 final class CodeFormatter {
-	private $passes = [];
-	public function addPass(FormatterPass $pass) {
-		array_unshift($this->passes, $pass);
+	private $passes = [
+		'RTrim' => false,
+
+		'LongArray' => false,
+		'StripExtraCommaInArray' => false,
+		'NoSpaceAfterPHPDocBlocks' => false,
+		'RemoveUseLeadingSlash' => false,
+		'OrderMethod' => false,
+		'ShortArray' => false,
+		'MergeElseIf' => false,
+		'AutoPreincrement' => false,
+		'MildAutoPreincrement' => false,
+
+		'CakePHPStyle' => false,
+
+		'StripNewlineAfterClassOpen' => false,
+		'StripNewlineAfterCurlyOpen' => false,
+		'EliminateDuplicatedEmptyLines' => false,
+		'AlignEqualsByConsecutiveBlocks' => false,
+		'SortUseNameSpace' => false,
+		'NoneDocBlockMinorCleanUp' => false,
+		'SpaceAroundExclamationMark' => false,
+		'NoSpaceBetweenFunctionAndBracket' => false,
+		'TightConcat' => false,
+		'AllmanStyleBraces' => false,
+		'NamespaceMergeWithOpenTag' => false,
+		'MergeNamespaceWithOpenTag' => false,
+
+		'LeftAlignComment' => false,
+
+		'PSR2AlignObjOp' => false,
+		'PSR2SingleEmptyLineAndStripClosingTag' => false,
+		'PSR2ModifierVisibilityStaticOrder' => false,
+		'PSR2CurlyOpenNextLine' => false,
+		'PSR2LnAfterNamespace' => false,
+		'PSR2IndentWithSpace' => false,
+		'PSR2KeywordsLowerCase' => false,
+
+		'PSR1MethodNames' => false,
+		'PSR1ClassNames' => false,
+
+		'PSR1ClassConstants' => false,
+		'PSR1BOMMark' => false,
+		'PSR1OpenTags' => false,
+
+		'EliminateDuplicatedEmptyLines' => false,
+		'Reindent' => false,
+		'ReindentObjOps' => false,
+
+		'AlignTypehint' => false,
+		'AlignDoubleSlashComments' => false,
+		'AlignDoubleArrow' => false,
+		'AlignEquals' => false,
+
+		'ReindentIfColonBlocks' => false,
+		'ReindentLoopColonBlocks' => false,
+		'ReindentColonBlocks' => false,
+		'ResizeSpaces' => false,
+		'YodaComparisons' => false,
+
+		'MergeDoubleArrowAndArray' => false,
+		'MergeCurlyCloseAndDoWhile' => false,
+		'MergeParenCloseWithCurlyOpen' => false,
+		'NormalizeLnAndLtrimLines' => false,
+		'ExtraCommaInArray' => false,
+		'SmartLnAfterCurlyOpen' => false,
+		'AddMissingCurlyBraces' => false,
+		'OrderUseClauses' => false,
+		'AutoImportPass' => false,
+		'ConstructorPass' => false,
+		'SettersAndGettersPass' => false,
+		'NormalizeIsNotEquals' => false,
+		'RemoveIncludeParentheses' => false,
+		'TwoCommandsInSameLine' => false,
+
+		'SpaceBetweenMethods' => false,
+		'GeneratePHPDoc' => false,
+		'ReturnNull' => false,
+		'AddMissingParentheses' => false,
+		'WrongConstructorName' => false,
+		'JoinToImplode' => false,
+		'EncapsulateNamespaces' => false,
+		'PrettyPrintDocBlocks' => false,
+		'StrictBehavior' => false,
+		'StrictComparison' => false,
+	];
+
+	public function __construct() {
+		$this->passes['TwoCommandsInSameLine'] = new TwoCommandsInSameLine();
+		$this->passes['RemoveIncludeParentheses'] = new RemoveIncludeParentheses();
+		$this->passes['NormalizeIsNotEquals'] = new NormalizeIsNotEquals();
+		$this->passes['OrderUseClauses'] = new OrderUseClauses();
+		$this->passes['AddMissingCurlyBraces'] = new AddMissingCurlyBraces();
+		$this->passes['ExtraCommaInArray'] = new ExtraCommaInArray();
+		$this->passes['NormalizeLnAndLtrimLines'] = new NormalizeLnAndLtrimLines();
+		$this->passes['MergeParenCloseWithCurlyOpen'] = new MergeParenCloseWithCurlyOpen();
+		$this->passes['MergeCurlyCloseAndDoWhile'] = new MergeCurlyCloseAndDoWhile();
+		$this->passes['MergeDoubleArrowAndArray'] = new MergeDoubleArrowAndArray();
+		$this->passes['ResizeSpaces'] = new ResizeSpaces();
+		$this->passes['ReindentColonBlocks'] = new ReindentColonBlocks();
+		$this->passes['ReindentLoopColonBlocks'] = new ReindentLoopColonBlocks();
+		$this->passes['ReindentIfColonBlocks'] = new ReindentIfColonBlocks();
+		$this->passes['ReindentObjOps'] = new ReindentObjOps();
+		$this->passes['Reindent'] = new Reindent();
+		$this->passes['EliminateDuplicatedEmptyLines'] = new EliminateDuplicatedEmptyLines();
+		$this->passes['LeftAlignComment'] = new LeftAlignComment();
+		$this->passes['RTrim'] = new RTrim();
 	}
-	public function removePass($passName) {
-		$idx = [];
-		foreach ($this->passes as $k => $pass) {
-			if (get_class($pass) == $passName) {
-				$idx[] = $k;
-			}
+
+	public function enablePass($pass) {
+		if (!isset($this->passes[$pass])) {
+			debug_print_backtrace();
+			die($pass . ' does not exists');
 		}
-		foreach ($idx as $k) {
-			unset($this->passes[$k]);
+		$args = func_get_args();
+		if (!isset($args[1])) {
+			$this->passes[$pass] = new $pass();
+		} else {
+			$this->passes[$pass] = new $pass($args[1]);
 		}
-		$this->passes = array_values($this->passes);
 	}
+
+	public function disablePass($pass) {
+		$this->passes[$pass] = null;
+	}
+
 	public function getPassesNames() {
-		return array_map(function ($v) {
-			return get_class($v);
-		}, $this->passes);
+		return array_keys(array_filter($this->passes));
 	}
+
 	public function formatCode($source = '') {
 		$passes = array_map(
 			function ($pass) {
 				return clone $pass;
 			},
-			$this->passes
+			array_filter($this->passes)
 		);
 		$foundTokens = [];
 		$tkns = token_get_all($source);
@@ -4248,23 +4357,23 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 ;
 class PsrDecorator {
 	public static function PSR1(CodeFormatter $fmt) {
-		$fmt->addPass(new PSR1OpenTags());
-		$fmt->addPass(new PSR1BOMMark());
-		$fmt->addPass(new PSR1ClassConstants());
+		$fmt->enablePass('PSR1OpenTags');
+		$fmt->enablePass('PSR1BOMMark');
+		$fmt->enablePass('PSR1ClassConstants');
 	}
 
 	public static function PSR1Naming(CodeFormatter $fmt) {
-		$fmt->addPass(new PSR1ClassNames());
-		$fmt->addPass(new PSR1MethodNames());
+		$fmt->enablePass('PSR1ClassNames');
+		$fmt->enablePass('PSR1MethodNames');
 	}
 
 	public static function PSR2(CodeFormatter $fmt) {
-		$fmt->addPass(new PSR2KeywordsLowerCase());
-		$fmt->addPass(new PSR2IndentWithSpace());
-		$fmt->addPass(new PSR2LnAfterNamespace());
-		$fmt->addPass(new PSR2CurlyOpenNextLine());
-		$fmt->addPass(new PSR2ModifierVisibilityStaticOrder());
-		$fmt->addPass(new PSR2SingleEmptyLineAndStripClosingTag());
+		$fmt->enablePass('PSR2KeywordsLowerCase');
+		$fmt->enablePass('PSR2IndentWithSpace');
+		$fmt->enablePass('PSR2LnAfterNamespace');
+		$fmt->enablePass('PSR2CurlyOpenNextLine');
+		$fmt->enablePass('PSR2ModifierVisibilityStaticOrder');
+		$fmt->enablePass('PSR2SingleEmptyLineAndStripClosingTag');
 	}
 
 	public static function decorate(CodeFormatter $fmt) {
@@ -7484,7 +7593,7 @@ class AllmanStyleBraces extends FormatterPass {
 					$poppedID = array_pop($foundStack);
 					if (true === $poppedID['implicit']) {
 						list($prevId, $prevText) = $this->inspectToken(-1);
-						$currentIndentation = substr_count($prevText, $this->indentChar);
+						$currentIndentation = substr_count($prevText, $this->indentChar, strrpos($prevText, "\n"));
 					}
 					$foundStack[] = $poppedID;
 					$this->appendCode($text);
@@ -7591,18 +7700,18 @@ class AllmanStyleBraces extends FormatterPass {
 ;
 class LaravelDecorator {
 	public static function decorate(CodeFormatter &$fmt) {
-		$fmt->removePass('AlignEquals');
-		$fmt->removePass('AlignDoubleArrow');
-		$fmt->addPass(new NamespaceMergeWithOpenTag());
-		$fmt->addPass(new AllmanStyleBraces());
-		$fmt->addPass(new RTrim());
-		$fmt->addPass(new TightConcat());
-		$fmt->addPass(new NoSpaceBetweenFunctionAndBracket());
-		$fmt->addPass(new SpaceAroundExclamationMark());
-		$fmt->addPass(new NoneDocBlockMinorCleanUp());
-		$fmt->addPass(new SortUseNameSpace());
-		$fmt->addPass(new AlignEqualsByConsecutiveBlocks());
-		$fmt->addPass(new EliminateDuplicatedEmptyLines());
+		$fmt->disablePass('AlignEquals');
+		$fmt->disablePass('AlignDoubleArrow');
+		$fmt->enablePass('NamespaceMergeWithOpenTag');
+		$fmt->enablePass('AllmanStyleBraces');
+		$fmt->enablePass('RTrim');
+		$fmt->enablePass('TightConcat');
+		$fmt->enablePass('NoSpaceBetweenFunctionAndBracket');
+		$fmt->enablePass('SpaceAroundExclamationMark');
+		$fmt->enablePass('NoneDocBlockMinorCleanUp');
+		$fmt->enablePass('SortUseNameSpace');
+		$fmt->enablePass('AlignEqualsByConsecutiveBlocks');
+		$fmt->enablePass('EliminateDuplicatedEmptyLines');
 	}
 };
 class NamespaceMergeWithOpenTag extends FormatterPass {
@@ -7625,13 +7734,16 @@ class NamespaceMergeWithOpenTag extends FormatterPass {
 				case T_NAMESPACE:
 					if ($this->leftTokenIs(T_OPEN_TAG)) {
 						$this->rtrimAndAppendCode($this->getSpace() . $text);
-						break;
+						break 2;
 					}
 				default:
 					$this->appendCode($text);
 			}
 		}
-
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->appendCode($text);
+		}
 		return $this->code;
 	}
 }
@@ -7652,15 +7764,24 @@ class NoneDocBlockMinorCleanUp extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_COMMENT:
-					if ((substr($text, 0, 3) != '/**') &&
-						(substr($text, 0, 2) != '//')) {
-						list(, $prevText) = $this->inspectToken(-1);
-						$counts = substr_count($prevText, "\t");
-						$replacement = "\n" . str_repeat("\t", $counts);
-						$this->appendCode(preg_replace('/\n\s*/', $replacement, $text));
-					} else {
+					if (substr($text, 0, 3) != '/**' ||
+						substr($text, 0, 2) != '//') {
+						if (substr($text, -3) == ' */' && $this->hasLn($text)) {
+							$text = substr($text, 0, -3) . '*/';
+						}
 						$this->appendCode($text);
+						break;
 					}
+
+					list(, $prevText) = $this->inspectToken(-1);
+					$counts = substr_count($prevText, "\t");
+					$replacement = "\n" . str_repeat("\t", $counts);
+					$text = preg_replace('/\n\s*/', $replacement, $text);
+					if (substr($text, -3) == ' */' && $this->hasLn($text)) {
+						$text = substr($text, 0, -3) . '*/';
+					}
+					$this->appendCode($text);
+
 					break;
 				default:
 					$this->appendCode($text);
@@ -7998,64 +8119,42 @@ if (!isset($testEnv)) {
 		}, explode(',', $opts['prepasses']));
 		foreach ($optPasses as $optPass) {
 			if (class_exists($optPass)) {
-				$fmt->addPass(new $optPass());
-			} elseif (is_file('Additionals/' . $optPass . '.php')) {
-				include 'Additionals/' . $optPass . '.php';
-				$fmt->addPass(new $optPass());
+				$fmt->enablePass($optPass);
 			}
 		}
 		$argv = extractFromArgv($argv, 'prepasses');
 	}
-	$fmt->addPass(new TwoCommandsInSameLine());
-	$fmt->addPass(new RemoveIncludeParentheses());
-	$fmt->addPass(new NormalizeIsNotEquals());
 	if (isset($opts['setters_and_getters'])) {
 		$argv = extractFromArgv($argv, 'setters_and_getters');
-		$fmt->addPass(new SettersAndGettersPass($opts['setters_and_getters']));
+		$fmt->enablePass('SettersAndGettersPass', $opts['setters_and_getters']);
 	}
 	if (isset($opts['constructor'])) {
 		$argv = extractFromArgv($argv, 'constructor');
-		$fmt->addPass(new ConstructorPass($opts['constructor']));
+		$fmt->enablePass('ConstructorPass', $opts['constructor']);
 	}
 	if (isset($opts['oracleDB'])) {
 		$argv = extractFromArgv($argv, 'oracleDB');
-		$fmt->addPass(new AutoImportPass($opts['oracleDB']));
+		$fmt->enablePass('AutoImportPass', $opts['oracleDB']);
 	}
 
-	$fmt->addPass(new OrderUseClauses());
-	$fmt->addPass(new AddMissingCurlyBraces());
 	if (isset($opts['smart_linebreak_after_curly'])) {
-		$fmt->addPass(new SmartLnAfterCurlyOpen());
+		$fmt->enablePass('SmartLnAfterCurlyOpen');
 		$argv = extractFromArgv($argv, 'smart_linebreak_after_curly');
 	}
-	$fmt->addPass(new ExtraCommaInArray());
-	$fmt->addPass(new NormalizeLnAndLtrimLines());
-	$fmt->addPass(new MergeParenCloseWithCurlyOpen());
-	$fmt->addPass(new MergeCurlyCloseAndDoWhile());
-	$fmt->addPass(new MergeDoubleArrowAndArray());
 
 	if (isset($opts['yoda'])) {
-		$fmt->addPass(new YodaComparisons());
+		$fmt->enablePass('YodaComparisons');
 		$argv = extractFromArgv($argv, 'yoda');
 	}
 
-	$fmt->addPass(new ResizeSpaces());
-	$fmt->addPass(new ReindentColonBlocks());
-	$fmt->addPass(new ReindentLoopColonBlocks());
-	$fmt->addPass(new ReindentIfColonBlocks());
-
 	if (isset($opts['enable_auto_align'])) {
-		$fmt->addPass(new AlignEquals());
-		$fmt->addPass(new AlignDoubleArrow());
+		$fmt->enablePass('AlignEquals');
+		$fmt->enablePass('AlignDoubleArrow');
 		$argv = extractFromArgv($argv, 'enable_auto_align');
 	}
 
-	$fmt->addPass(new ReindentObjOps());
-	$fmt->addPass(new Reindent());
-	$fmt->addPass(new EliminateDuplicatedEmptyLines());
-
 	if (isset($opts['indent_with_space']) && !isset($opts['laravel'])) {
-		$fmt->addPass(new PSR2IndentWithSpace($opts['indent_with_space']));
+		$fmt->addPass('PSR2IndentWithSpace', $opts['indent_with_space']);
 		$argv = extractFromArgv($argv, 'indent_with_space');
 	}
 	if (isset($opts['psr']) && !isset($opts['laravel'])) {
@@ -8075,15 +8174,13 @@ if (!isset($testEnv)) {
 		$argv = extractFromArgv($argv, 'psr2');
 	}
 	if ((isset($opts['psr1']) || isset($opts['psr2']) || isset($opts['psr'])) && isset($opts['enable_auto_align']) && !isset($opts['laravel'])) {
-		$fmt->addPass(new PSR2AlignObjOp());
+		$fmt->enablePass('PSR2AlignObjOp');
 	}
 
 	if (isset($opts['visibility_order'])) {
-		$fmt->addPass(new PSR2ModifierVisibilityStaticOrder());
+		$fmt->enablePass('PSR2ModifierVisibilityStaticOrder');
 		$argv = extractFromArgv($argv, 'visibility_order');
 	}
-	$fmt->addPass(new LeftAlignComment());
-	$fmt->addPass(new RTrim());
 
 	if (isset($opts['passes'])) {
 		$optPasses = array_map(function ($v) {
@@ -8091,10 +8188,7 @@ if (!isset($testEnv)) {
 		}, explode(',', $opts['passes']));
 		foreach ($optPasses as $optPass) {
 			if (class_exists($optPass)) {
-				$fmt->addPass(new $optPass());
-			} elseif (is_file('Additionals/' . $optPass . '.php')) {
-				include 'Additionals/' . $optPass . '.php';
-				$fmt->addPass(new $optPass());
+				$fmt->enablePass($optPass);
 			}
 		}
 		$argv = extractFromArgv($argv, 'passes');
@@ -8106,14 +8200,14 @@ if (!isset($testEnv)) {
 	}
 
 	if (isset($opts['cakephp'])) {
-		$fmt->addPass(new CakePHPStyle());
+		$fmt->enablePass('CakePHPStyle');
 		$argv = extractFromArgv($argv, 'cakephp');
 	}
 
 	if (isset($opts['exclude'])) {
 		$passesNames = explode(',', $opts['exclude']);
 		foreach ($passesNames as $passName) {
-			$fmt->removePass(trim($passName));
+			$fmt->disablePass(trim($passName));
 		}
 		$argv = extractFromArgv($argv, 'exclude');
 	}
