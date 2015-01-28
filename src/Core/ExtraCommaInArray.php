@@ -1,7 +1,6 @@
 <?php
 final class ExtraCommaInArray extends FormatterPass {
 	const ST_SHORT_ARRAY_OPEN = 'SHORT_ARRAY_OPEN';
-	const EMPTY_ARRAY = 'ST_EMPTY_ARRAY';
 
 	public function candidate($source, $foundTokens) {
 		return true;
@@ -38,21 +37,12 @@ final class ExtraCommaInArray extends FormatterPass {
 						array_pop($contextStack);
 					}
 					break;
-				case T_STRING:
-					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
-						$contextStack[] = T_STRING;
-					}
-					break;
-				case T_ARRAY:
-					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
-						$contextStack[] = T_ARRAY;
-					}
-					break;
 				case ST_PARENTHESES_OPEN:
-					if (isset($contextStack[0]) && T_ARRAY == end($contextStack) && $this->rightTokenIs(ST_PARENTHESES_CLOSE)) {
-						array_pop($contextStack);
-						$contextStack[] = self::EMPTY_ARRAY;
-					} elseif (!$this->leftTokenIs([T_ARRAY, T_STRING])) {
+					if ($this->leftUsefulTokenIs(T_STRING)) {
+						$contextStack[] = T_STRING;
+					} elseif ($this->leftUsefulTokenIs(T_ARRAY)) {
+						$contextStack[] = T_ARRAY;
+					} else {
 						$contextStack[] = ST_PARENTHESES_OPEN;
 					}
 					break;
