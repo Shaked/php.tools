@@ -19,7 +19,8 @@ class TightConcat extends AdditionalPass {
 					if (!$this->leftUsefulTokenIs([T_LNUMBER, T_DNUMBER])) {
 						$this->code = rtrim($this->code, $whitespaces);
 					}
-					if (!$this->rightUsefulTokenIs([T_LNUMBER, T_DNUMBER, T_STRING])) {
+					list($nextId, ) = $this->inspectToken(+1);
+					if (T_WHITESPACE == $nextId && !$this->rightUsefulTokenIs([T_LNUMBER, T_DNUMBER])) {
 						each($this->tkns);
 					}
 				default:
