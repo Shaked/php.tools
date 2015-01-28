@@ -953,10 +953,6 @@ final class CodeFormatter {
 	}
 
 	public function enablePass($pass) {
-		if (!isset($this->passes[$pass])) {
-			debug_print_backtrace();
-			die($pass . ' does not exists');
-		}
 		$args = func_get_args();
 		if (!isset($args[1])) {
 			$this->passes[$pass] = new $pass();
