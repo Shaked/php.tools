@@ -2,7 +2,7 @@
 /**
  * From PHP-CS-Fixer
  */
-class ShortArray extends AdditionalPass {
+final class ShortArray extends AdditionalPass {
 	const FOUND_ARRAY = 'array';
 	const FOUND_PARENTHESES = 'paren';
 	public function candidate($source, $foundTokens) {

@@ -1,5 +1,5 @@
 <?php
-class SortUseNameSpace extends FormatterPass {
+final class SortUseNameSpace extends FormatterPass {
 	private $pass = null;
 	public function __construct() {
 		$sortFunction = function ($useStack) {

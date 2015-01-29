@@ -242,7 +242,7 @@ if (class_exists('SQLite3')) {
 	/**
  * @codeCoverageIgnore
  */
-class Cache {
+final class Cache {
 	const DEFAULT_CACHE_FILENAME = '.php.tools.cache';
 
 	private $db;
@@ -4352,7 +4352,7 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 	}
 }
 ;
-class PsrDecorator {
+final class PsrDecorator {
 	public static function PSR1(CodeFormatter $fmt) {
 		$fmt->enablePass('PSR1OpenTags');
 		$fmt->enablePass('PSR1BOMMark');
@@ -4380,7 +4380,7 @@ class PsrDecorator {
 	}
 };
 
-class AddMissingParentheses extends AdditionalPass {
+final class AddMissingParentheses extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NEW])) {
 			return true;
@@ -5111,7 +5111,7 @@ $b--;
 EOT;
 	}
 };
-class CakePHPStyle extends AdditionalPass {
+final class CakePHPStyle extends AdditionalPass {
 	private $foundTokens;
 
 	public function candidate($source, $foundTokens) {
@@ -5337,7 +5337,7 @@ EOT;
 	}
 }
 ;
-class EncapsulateNamespaces extends AdditionalPass {
+final class EncapsulateNamespaces extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
@@ -5576,7 +5576,7 @@ EOT;
 	}
 }
 ;
-class JoinToImplode extends AdditionalPass {
+final class JoinToImplode extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -5720,7 +5720,7 @@ EOT;
 /**
  * From PHP-CS-Fixer
  */
-class MergeElseIf extends AdditionalPass {
+final class MergeElseIf extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_ELSE])) {
 			return true;
@@ -5777,7 +5777,7 @@ EOT;
 	}
 }
 ;
-class MergeNamespaceWithOpenTag extends AdditionalPass {
+final class MergeNamespaceWithOpenTag extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
@@ -5833,11 +5833,11 @@ EOT;
 	}
 }
 ;
-class MildAutoPreincrement extends AutoPreincrement {
+final class MildAutoPreincrement extends AutoPreincrement {
 	protected $candidateTokens = [];
 	protected $checkAgainstConcat = true;
 };
-class NoSpaceAfterPHPDocBlocks extends FormatterPass {
+final class NoSpaceAfterPHPDocBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DOC_COMMENT])) {
 			return true;
@@ -6051,7 +6051,7 @@ EOT;
 	}
 }
 ;
-class PrettyPrintDocBlocks extends AdditionalPass {
+final class PrettyPrintDocBlocks extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DOC_COMMENT])) {
 			return true;
@@ -6305,7 +6305,7 @@ function A(array $b, LongTypeName $c) {
 EOT;
 	}
 };
-class RemoveUseLeadingSlash extends AdditionalPass {
+final class RemoveUseLeadingSlash extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE]) || isset($foundTokens[T_TRAIT]) || isset($foundTokens[T_CLASS]) || isset($foundTokens[T_FUNCTION]) || isset($foundTokens[T_NS_SEPARATOR])) {
 			return true;
@@ -6371,7 +6371,7 @@ EOT;
 	}
 }
 ;
-class ReturnNull extends AdditionalPass {
+final class ReturnNull extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_RETURN])) {
 			return true;
@@ -6466,7 +6466,7 @@ EOT;
 /**
  * From PHP-CS-Fixer
  */
-class ShortArray extends AdditionalPass {
+final class ShortArray extends AdditionalPass {
 	const FOUND_ARRAY = 'array';
 	const FOUND_PARENTHESES = 'paren';
 	public function candidate($source, $foundTokens) {
@@ -6620,7 +6620,7 @@ EOT;
 	}
 }
 ;
-class SpaceBetweenMethods extends AdditionalPass {
+final class SpaceBetweenMethods extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_FUNCTION])) {
 			return true;
@@ -6942,7 +6942,7 @@ EOT;
 /**
  * From PHP-CS-Fixer
  */
-class StripNewlineAfterClassOpen extends AdditionalPass {
+final class StripNewlineAfterClassOpen extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_CLASS]) || isset($foundTokens[T_TRAIT])) {
 			return true;
@@ -7007,7 +7007,7 @@ class A {
 EOT;
 	}
 };
-class StripNewlineAfterCurlyOpen extends AdditionalPass {
+final class StripNewlineAfterCurlyOpen extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_CURLY_OPEN])) {
 			return true;
@@ -7071,7 +7071,7 @@ for ($a = 0; $a < 10; $a++){
 EOT;
 	}
 };
-class TightConcat extends AdditionalPass {
+final class TightConcat extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_CONCAT])) {
 			return true;
@@ -7126,7 +7126,7 @@ $a = 'a'. 1 .'b';
 EOT;
 	}
 };
-class WrongConstructorName extends AdditionalPass {
+final class WrongConstructorName extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE]) || isset($foundTokens[T_CLASS])) {
 			return true;
@@ -7457,7 +7457,7 @@ EOT;
 	}
 };
 
-class AlignEqualsByConsecutiveBlocks extends FormatterPass {
+final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_EQUAL]) || isset($foundTokens[T_DOUBLE_ARROW])) {
 			return true;
@@ -7571,7 +7571,7 @@ class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 	}
 }
 ;
-class AllmanStyleBraces extends FormatterPass {
+final class AllmanStyleBraces extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -7696,7 +7696,7 @@ class AllmanStyleBraces extends FormatterPass {
 	}
 }
 ;
-class LaravelDecorator {
+final class LaravelDecorator {
 	public static function decorate(CodeFormatter &$fmt) {
 		$fmt->disablePass('AlignEquals');
 		$fmt->disablePass('AlignDoubleArrow');
@@ -7712,7 +7712,7 @@ class LaravelDecorator {
 		$fmt->enablePass('EliminateDuplicatedEmptyLines');
 	}
 };
-class NamespaceMergeWithOpenTag extends FormatterPass {
+final class NamespaceMergeWithOpenTag extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
@@ -7746,7 +7746,7 @@ class NamespaceMergeWithOpenTag extends FormatterPass {
 	}
 }
 ;
-class NoneDocBlockMinorCleanUp extends FormatterPass {
+final class NoneDocBlockMinorCleanUp extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_COMMENT])) {
 			return true;
@@ -7789,7 +7789,7 @@ class NoneDocBlockMinorCleanUp extends FormatterPass {
 	}
 }
 ;
-class NoSpaceBetweenFunctionAndBracket extends FormatterPass {
+final class NoSpaceBetweenFunctionAndBracket extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_FUNCTION])) {
 			return true;
@@ -7822,7 +7822,7 @@ class NoSpaceBetweenFunctionAndBracket extends FormatterPass {
 	}
 }
 ;
-class SortUseNameSpace extends FormatterPass {
+final class SortUseNameSpace extends FormatterPass {
 	private $pass = null;
 	public function __construct() {
 		$sortFunction = function ($useStack) {
@@ -7845,7 +7845,7 @@ class SortUseNameSpace extends FormatterPass {
 	}
 }
 ;
-class SpaceAroundExclamationMark extends FormatterPass {
+final class SpaceAroundExclamationMark extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_EXCLAMATION])) {
 			return true;

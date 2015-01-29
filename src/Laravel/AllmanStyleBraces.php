@@ -1,5 +1,5 @@
 <?php
-class AllmanStyleBraces extends FormatterPass {
+final class AllmanStyleBraces extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}

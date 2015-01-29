@@ -1,5 +1,5 @@
 <?php
-class TightConcat extends AdditionalPass {
+final class TightConcat extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_CONCAT])) {
 			return true;

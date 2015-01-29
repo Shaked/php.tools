@@ -2,7 +2,7 @@
 /**
  * @codeCoverageIgnore
  */
-class Cache {
+final class Cache {
 	const DEFAULT_CACHE_FILENAME = '.php.tools.cache';
 
 	private $db;

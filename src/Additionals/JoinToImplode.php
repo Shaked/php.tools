@@ -1,5 +1,5 @@
 <?php
-class JoinToImplode extends AdditionalPass {
+final class JoinToImplode extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';

@@ -1,5 +1,5 @@
 <?php
-class AddMissingParentheses extends AdditionalPass {
+final class AddMissingParentheses extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NEW])) {
 			return true;

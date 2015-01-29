@@ -1,5 +1,5 @@
 <?php
-class CakePHPStyle extends AdditionalPass {
+final class CakePHPStyle extends AdditionalPass {
 	private $foundTokens;
 
 	public function candidate($source, $foundTokens) {

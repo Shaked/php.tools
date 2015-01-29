@@ -1,5 +1,5 @@
 <?php
-class MildAutoPreincrement extends AutoPreincrement {
+final class MildAutoPreincrement extends AutoPreincrement {
 	protected $candidateTokens = [];
 	protected $checkAgainstConcat = true;
 }
