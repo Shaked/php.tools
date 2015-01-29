@@ -6,6 +6,7 @@ final class CodeFormatter {
 	private $passes = [
 		'RTrim' => false,
 
+		'WordWrap' => false,
 		'LongArray' => false,
 		'StripExtraCommaInArray' => false,
 		'NoSpaceAfterPHPDocBlocks' => false,
@@ -60,6 +61,7 @@ final class CodeFormatter {
 		'ReindentIfColonBlocks' => false,
 		'ReindentLoopColonBlocks' => false,
 		'ReindentColonBlocks' => false,
+
 		'ResizeSpaces' => false,
 		'YodaComparisons' => false,
 

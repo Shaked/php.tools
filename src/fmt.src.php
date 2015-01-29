@@ -92,6 +92,7 @@ require 'Additionals/StripExtraCommaInArray.php';
 require 'Additionals/StripNewlineAfterClassOpen.php';
 require 'Additionals/StripNewlineAfterCurlyOpen.php';
 require 'Additionals/TightConcat.php';
+require 'Additionals/WordWrap.php';
 require 'Additionals/WrongConstructorName.php';
 require 'Additionals/YodaComparisons.php';
 
