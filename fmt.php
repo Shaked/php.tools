@@ -7997,7 +7997,7 @@ if (!isset($testEnv)) {
 			'--list' => 'list possible transformations',
 			'--no-backup' => 'no backup file (original.php~)',
 			'--passes=pass1,passN' => 'call specific compiler pass',
-			'--prepasses=pass1,passN' => 'call specific compiler pass, before the rest of stack',
+			'--prepasses=pass1,passN' => 'call specific compiler pass, before the rest of stack (deprecated)',
 			'--profile=NAME' => 'use one of profiles present in configuration file',
 			'--psr' => 'activate PSR1 and PSR2 styles',
 			'--psr1' => 'activate PSR1 style',
