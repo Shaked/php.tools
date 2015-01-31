@@ -8225,7 +8225,7 @@ if (!isset($testEnv)) {
 	}
 
 	if (isset($opts['indent_with_space']) && !isset($opts['laravel'])) {
-		$fmt->addPass('PSR2IndentWithSpace', $opts['indent_with_space']);
+		$fmt->enablePass('PSR2IndentWithSpace', $opts['indent_with_space']);
 		$argv = extractFromArgv($argv, 'indent_with_space');
 	}
 	if (isset($opts['psr']) && !isset($opts['laravel'])) {
