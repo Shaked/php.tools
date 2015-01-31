@@ -13,12 +13,16 @@ final class WordWrap extends AdditionalPass {
 		$this->code = '';
 
 		$currentLineLength = 0;
+		$detectedTab = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 
 			$originalText = $text;
 			if (T_WHITESPACE == $id) {
+				if (!$detectedTab && false !== strpos($text, "\t")) {
+					$detectedTab = true;
+				}
 				$text = str_replace(
 					$this->indentChar,
 					str_repeat(' ', self::$tabSizeInSpace),
@@ -51,7 +55,9 @@ final class WordWrap extends AdditionalPass {
 			if (false !== strpos($line, self::ALIGNABLE_WORDWRAP)) {
 				$line = str_replace(self::ALIGNABLE_WORDWRAP, '', $line);
 				$line = str_pad($line, self::$length, ' ', STR_PAD_LEFT);
-				$line = preg_replace('/\G {' . self::$tabSizeInSpace . '}/', "\t", $line);
+				if ($detectedTab) {
+					$line = preg_replace('/\G {' . self::$tabSizeInSpace . '}/', "\t", $line);
+				}
 				$lines[$idx] = $line;
 			}
 		}
