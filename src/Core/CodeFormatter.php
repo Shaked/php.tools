@@ -53,8 +53,8 @@ final class CodeFormatter {
 		'Reindent' => false,
 		'ReindentObjOps' => false,
 
-		'AlignTypehint' => false,
 		'AlignDoubleSlashComments' => false,
+		'AlignTypehint' => false,
 		'AlignDoubleArrow' => false,
 		'AlignEquals' => false,
 
