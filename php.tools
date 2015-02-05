@@ -471,10 +471,10 @@ if ($ctagsBin && isset($argv[1]) && "ctags" == $argv[1]) {
 
 if ($phpunitBin && isset($argv[1]) && "test" == $argv[1]) {
 	updatePhpunitXml($DIRS);
-	array_shift($GLOBALS['argv']);
 	$execute = function () use ($phpunitBin) {
 		$argv = $GLOBALS['argv'];
 		$TEST = "";
+		unset($argv[0]);
 		if (isset($argv[1])) {
 			$argv[1] = trim($argv[1]);
 			$argv[1] = str_replace('.php', '', trim($argv[1]));
@@ -487,16 +487,16 @@ if ($phpunitBin && isset($argv[1]) && "test" == $argv[1]) {
 			array_shift($argv);
 			array_shift($argv);
 		}
-		passthru($phpunitBin . $TEST . ' ' . implode(' ', $argv));
+		passthru($phpunitBin . ' ' . $TEST . ' ' . implode(' ', $argv));
 	};
 }
 
 if ($phpunitBin && isset($argv[1]) && "cover" == $argv[1]) {
 	updatePhpunitXml($DIRS);
-	array_shift($GLOBALS['argv']);
 	$execute = function () use ($phpunitBin) {
 		$argv = $GLOBALS['argv'];
 		$TEST = "";
+		unset($argv[0]);
 		if (isset($argv[1])) {
 			$argv[1] = trim($argv[1]);
 			$argv[1] = str_replace('.php', '', trim($argv[1]));
@@ -608,17 +608,17 @@ if ($fmtBin && isset($argv[1]) && "fmt" == $argv[1]) {
 
 array_shift($argv);
 if (!empty($WATCH)) {
-	$currentTime = time();
+	$currentTime = 0;
 	while (true) {
 		foreach ($DIRS as $dir) {
 			$directoryIterator = new RecursiveDirectoryIterator($dir);
 			$iterator = new RecursiveIteratorIterator($directoryIterator);
 			foreach ($iterator as $file) {
 				if ($file->getMTime() > $currentTime) {
-					$currentTime = $file->getMTime();
 					echo 'Running ...', PHP_EOL;
 					call_user_func($execute);
-					break;
+					$currentTime = time();
+					break 2;
 				}
 			}
 		}
