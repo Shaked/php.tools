@@ -343,6 +343,9 @@ final class ResizeSpaces extends FormatterPass {
 						list($leftId, $leftText) = $this->inspectToken(-1);
 						$this->appendCode($this->getSpace(T_VARIABLE == $leftId) . $text);
 						break;
+					} elseif (!$this->hasLn($text) && !$this->hasLnBefore() && !$this->hasLnAfter() && $this->leftUsefulTokenIs(ST_COMMA) && $this->rightUsefulTokenIs(T_VARIABLE)) {
+						$this->appendCode($text . $this->getSpace());
+						break;
 					}
 				default:
 					$this->appendCode($text);
