@@ -71,6 +71,7 @@ require 'Additionals/AlignEquals.php';
 require 'Additionals/AlignTypehint.php';
 require 'Additionals/AutoPreincrement.php';
 require 'Additionals/CakePHPStyle.php';
+require 'Additionals/DocBlockToComment.php';
 require 'Additionals/EncapsulateNamespaces.php';
 require 'Additionals/GeneratePHPDoc.php';
 require 'Additionals/JoinToImplode.php';

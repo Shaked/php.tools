@@ -5,8 +5,9 @@
 final class CodeFormatter {
 	private $passes = [
 		'RTrim' => false,
-
 		'WordWrap' => false,
+
+		'DocBlockToComment' => false,
 		'LongArray' => false,
 		'StripExtraCommaInArray' => false,
 		'NoSpaceAfterPHPDocBlocks' => false,

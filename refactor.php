@@ -402,9 +402,9 @@ abstract class FormatterPass {
 		return $this->rightToken($this->ignoreFutileTokens);
 	}
 
-	// protected function rightUsefulTokenIdx($idx = false) {
-	// 	return $this->rightTokenIdx($this->ignoreFutileTokens);
-	// }
+	protected function rightUsefulTokenIdx() {
+		return $this->rightTokenIdx($this->ignoreFutileTokens);
+	}
 
 	protected function rightUsefulTokenIs($token) {
 		return $this->rightTokenIs($token, $this->ignoreFutileTokens);
