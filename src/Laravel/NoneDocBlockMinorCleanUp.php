@@ -1,5 +1,5 @@
 <?php
-final class NoneDocBlockMinorCleanUp extends FormatterPass {
+final class NonDocBlockMinorCleanUp extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_COMMENT])) {
 			return true;
@@ -24,16 +24,6 @@ final class NoneDocBlockMinorCleanUp extends FormatterPass {
 						break;
 					}
 
-					list(, $prevText) = $this->inspectToken(-1);
-					$counts = substr_count($prevText, "\t");
-					$replacement = "\n" . str_repeat("\t", $counts);
-					$text = preg_replace('/\n\s*/', $replacement, $text);
-					if (substr($text, -3) == ' */' && $this->hasLn($text)) {
-						$text = substr($text, 0, -3) . '*/';
-					}
-					$this->appendCode($text);
-
-					break;
 				default:
 					$this->appendCode($text);
 			}

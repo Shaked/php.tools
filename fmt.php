@@ -865,7 +865,7 @@ final class CodeFormatter {
 		'EliminateDuplicatedEmptyLines' => false,
 		'AlignEqualsByConsecutiveBlocks' => false,
 		'SortUseNameSpace' => false,
-		'NoneDocBlockMinorCleanUp' => false,
+		'NonDocBlockMinorCleanUp' => false,
 		'SpaceAroundExclamationMark' => false,
 		'NoSpaceBetweenFunctionAndBracket' => false,
 		'TightConcat' => false,
@@ -2128,7 +2128,6 @@ final class OrderUseClauses extends FormatterPass {
 					next($tokens);
 
 					$foundComma = false;
-					continue;
 
 				} elseif ($splitComma && ST_COMMA == $foundToken) {
 					$touchedTUse = true;
@@ -2137,14 +2136,14 @@ final class OrderUseClauses extends FormatterPass {
 					$newTokens[] = [T_WHITESPACE, $this->newLine . $this->newLine];
 
 					$foundComma = true;
-					continue;
 
 				} elseif (ST_CURLY_OPEN == $foundToken) {
 					$newTokens[] = $foundToken;
 
 					$foundComma = false;
-					continue;
+
 				}
+				continue;
 			}
 
 			$newTokens[] = $token;
@@ -7859,21 +7858,11 @@ final class AllmanStyleBraces extends FormatterPass {
 
 				case T_DOLLAR_OPEN_CURLY_BRACES:
 				case T_CURLY_OPEN:
-					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO])) {
-						list($prevId, $prevText) = $this->getToken($this->leftToken());
-						if (!$this->hasLn($prevText)) {
-							$this->appendCode($this->getCrlfIndent());
-						}
-					}
 					$indentToken = [
 						'id' => $id,
 						'implicit' => true,
 					];
 					$this->appendCode($text);
-					if ($this->hasLnAfter()) {
-						$indentToken['implicit'] = false;
-						$this->setIndent(+1);
-					}
 					$foundStack[] = $indentToken;
 					break;
 
@@ -7941,7 +7930,7 @@ final class LaravelDecorator {
 		$fmt->enablePass('TightConcat');
 		$fmt->enablePass('NoSpaceBetweenFunctionAndBracket');
 		$fmt->enablePass('SpaceAroundExclamationMark');
-		$fmt->enablePass('NoneDocBlockMinorCleanUp');
+		$fmt->enablePass('NonDocBlockMinorCleanUp');
 		$fmt->enablePass('SortUseNameSpace');
 		$fmt->enablePass('AlignEqualsByConsecutiveBlocks');
 		$fmt->enablePass('EliminateDuplicatedEmptyLines');
@@ -7981,7 +7970,7 @@ final class NamespaceMergeWithOpenTag extends FormatterPass {
 	}
 }
 ;
-final class NoneDocBlockMinorCleanUp extends FormatterPass {
+final class NonDocBlockMinorCleanUp extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_COMMENT])) {
 			return true;
@@ -8006,16 +7995,6 @@ final class NoneDocBlockMinorCleanUp extends FormatterPass {
 						break;
 					}
 
-					list(, $prevText) = $this->inspectToken(-1);
-					$counts = substr_count($prevText, "\t");
-					$replacement = "\n" . str_repeat("\t", $counts);
-					$text = preg_replace('/\n\s*/', $replacement, $text);
-					if (substr($text, -3) == ' */' && $this->hasLn($text)) {
-						$text = substr($text, 0, -3) . '*/';
-					}
-					$this->appendCode($text);
-
-					break;
 				default:
 					$this->appendCode($text);
 			}

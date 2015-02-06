@@ -82,7 +82,6 @@ final class OrderUseClauses extends FormatterPass {
 					next($tokens);
 
 					$foundComma = false;
-					continue;
 
 				} elseif ($splitComma && ST_COMMA == $foundToken) {
 					$touchedTUse = true;
@@ -91,14 +90,14 @@ final class OrderUseClauses extends FormatterPass {
 					$newTokens[] = [T_WHITESPACE, $this->newLine . $this->newLine];
 
 					$foundComma = true;
-					continue;
 
 				} elseif (ST_CURLY_OPEN == $foundToken) {
 					$newTokens[] = $foundToken;
 
 					$foundComma = false;
-					continue;
+
 				}
+				continue;
 			}
 
 			$newTokens[] = $token;

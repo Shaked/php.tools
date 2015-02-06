@@ -9,7 +9,7 @@ final class LaravelDecorator {
 		$fmt->enablePass('TightConcat');
 		$fmt->enablePass('NoSpaceBetweenFunctionAndBracket');
 		$fmt->enablePass('SpaceAroundExclamationMark');
-		$fmt->enablePass('NoneDocBlockMinorCleanUp');
+		$fmt->enablePass('NonDocBlockMinorCleanUp');
 		$fmt->enablePass('SortUseNameSpace');
 		$fmt->enablePass('AlignEqualsByConsecutiveBlocks');
 		$fmt->enablePass('EliminateDuplicatedEmptyLines');

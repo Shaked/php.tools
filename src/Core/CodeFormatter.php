@@ -25,7 +25,7 @@ final class CodeFormatter {
 		'EliminateDuplicatedEmptyLines' => false,
 		'AlignEqualsByConsecutiveBlocks' => false,
 		'SortUseNameSpace' => false,
-		'NoneDocBlockMinorCleanUp' => false,
+		'NonDocBlockMinorCleanUp' => false,
 		'SpaceAroundExclamationMark' => false,
 		'NoSpaceBetweenFunctionAndBracket' => false,
 		'TightConcat' => false,

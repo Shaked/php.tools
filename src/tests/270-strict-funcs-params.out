@@ -51,3 +51,7 @@ $someObject->array_keys($arr, func($a, $b));
 
 SomeStaticClass::array_keys;
 $someObject->array_keys;
+
+//------
+
+array_keys;
