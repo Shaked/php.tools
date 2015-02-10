@@ -118,6 +118,28 @@ abstract class FormatterPass {
 		return $this->leftTokenIs($token, $this->ignoreFutileTokens);
 	}
 
+	protected function peekAndCountUntilAny($tkns, $ptr, $tknids) {
+		$tknids = array_flip($tknids);
+		$tknsSize = sizeof($tkns);
+		$countTokens = [];
+		for ($i = $ptr; $i < $tknsSize; $i++) {
+			$token = $tkns[$i];
+			list($id, $text) = $this->getToken($token);
+			if (T_WHITESPACE == $id || T_COMMENT == $id || T_DOC_COMMENT == $id) {
+				continue;
+			}
+			if (!isset($countTokens[$id])) {
+				$countTokens[$id] = 0;
+			}
+			++$countTokens[$id];
+			if (isset($tknids[$id])) {
+				break;
+			}
+		}
+
+		return [$id, $countTokens];
+	}
+
 	protected function printAndStopAt($tknids) {
 		if (is_scalar($tknids)) {
 			$tknids = [$tknids];
