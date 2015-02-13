@@ -41,6 +41,14 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 				continue;
 			}
 
+			if (
+				T_STRING == $id
+				&& $this->leftUsefulTokenIs([T_DOUBLE_COLON, T_OBJECT_OPERATOR])
+			) {
+				$this->appendCode($text);
+				continue;
+			}
+
 			if (T_START_HEREDOC == $id) {
 				$this->appendCode($text);
 				$this->printUntil(ST_SEMI_COLON);
