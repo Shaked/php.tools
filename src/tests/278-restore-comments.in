@@ -1,0 +1,21 @@
+<?php
+//passes:Default,RestoreComments,PrettyPrintDocBlocks
+
+/**
+ * Something
+ * @param Type $a
+ * @param LongType $a
+ */
+function a($a, $b){
+	if(true){
+		if(true){
+			/*
+				// Don't touch this.
+				if($a){
+					// Do something here
+					doSomething("here");
+				}
+			*/
+		}
+	}
+}

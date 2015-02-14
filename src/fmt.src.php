@@ -45,6 +45,7 @@ require 'Core/ReindentLoopColonBlocks.php';
 require 'Core/ReindentObjOps.php';
 require 'Core/RemoveIncludeParentheses.php';
 require 'Core/ResizeSpaces.php';
+require 'Core/RestoreComments.php';
 require 'Core/RTrim.php';
 require 'Core/SettersAndGettersPass.php';
 require 'Core/SurrogateToken.php';
