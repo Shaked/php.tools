@@ -100,7 +100,7 @@ final class ReindentObjOps extends FormatterPass {
 								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 							} elseif (ST_PARENTHESES_OPEN == $foundToken) {
 								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
-								$this->indent_parentheses_content();
+								$this->indentParenthesesContent();
 							}
 						} else {
 							$alignType[$levelCounter][$levelEntranceCounter[$levelCounter]] = self::ALIGN_WITH_SPACES;
@@ -148,7 +148,7 @@ final class ReindentObjOps extends FormatterPass {
 								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 							} elseif (ST_PARENTHESES_OPEN == $foundToken) {
 								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
-								$this->indent_parentheses_content();
+								$this->indentParenthesesContent();
 							}
 						}
 					} else {
@@ -243,7 +243,7 @@ final class ReindentObjOps extends FormatterPass {
 		return $this->code;
 	}
 
-	private function indent_parentheses_content() {
+	private function indentParenthesesContent() {
 		$count = 0;
 		$i = $this->ptr;
 		$sizeof_tokens = sizeof($this->tkns);
