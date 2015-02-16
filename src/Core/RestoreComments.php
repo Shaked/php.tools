@@ -2,6 +2,10 @@
 final class RestoreComments extends FormatterPass {
 	// Injected by CodeFormatter.php
 	public $commentStack = [];
+
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_COMMENT])) {
 			return true;
