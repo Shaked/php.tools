@@ -95,10 +95,16 @@ final class UpgradeToPreg extends AdditionalPass {
 		return $this->render($this->tkns);
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function getDescription() {
 		return 'Upgrade ereg_* calls to preg_*';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function getExample() {
 		return '<?php
 // From:
