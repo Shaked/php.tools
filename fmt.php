@@ -3511,6 +3511,11 @@ final class ResizeSpaces extends FormatterPass {
 					$this->appendCode($this->getSpace($spaceBefore) . $text . $this->getSpace($spaceAfter));
 					break;
 
+				case ST_BITWISE_OR:
+				case ST_BITWISE_XOR:
+					$this->appendCode($this->getSpace() . $text . $this->getSpace());
+					break;
+
 				case T_COMMENT:
 					if (substr($text, 0, 2) == '//') {
 						list($leftId, $leftText) = $this->inspectToken(-1);
@@ -3527,12 +3532,17 @@ final class ResizeSpaces extends FormatterPass {
 		}
 
 		return $this->code;
+
 	}
 }
 ;
 final class RestoreComments extends FormatterPass {
 	// Injected by CodeFormatter.php
 	public $commentStack = [];
+
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_COMMENT])) {
 			return true;
@@ -7450,10 +7460,16 @@ final class UpgradeToPreg extends AdditionalPass {
 		return $this->render($this->tkns);
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function getDescription() {
 		return 'Upgrade ereg_* calls to preg_*';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function getExample() {
 		return '<?php
 // From:
