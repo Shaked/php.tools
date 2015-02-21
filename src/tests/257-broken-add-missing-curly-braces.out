@@ -46,6 +46,7 @@ if (isset($var)) {
 	} else {
 		$b;
 	}
+
 }
 
 if ($a) {do {$a;} while (true);

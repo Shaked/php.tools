@@ -1039,16 +1039,16 @@ final class AddMissingCurlyBraces extends FormatterPass {
 	}
 
 	public function format($source) {
-		list($tmp, $changed, $foundIfIf) = $this->addBraces($source, true);
+		list($tmp, $changed, $foundNestedIfBlocks) = $this->addBraces($source, true);
 		while ($changed) {
-			list($source, $changed, $foundIfIf) = $this->addBraces($tmp, true);
+			list($source, $changed, $foundNestedIfBlocks) = $this->addBraces($tmp, true);
 			if ($source === $tmp) {
 				break;
 			}
 			$tmp = $source;
 		}
 
-		if ($foundIfIf) {
+		if ($foundNestedIfBlocks) {
 			list($tmp, $changed) = $this->addBraces($source, false);
 			while ($changed) {
 				list($source, $changed) = $this->addBraces($tmp, false);
@@ -1061,12 +1061,12 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		return $source;
 	}
 
-	private function addBraces($source, $skipIfBlocks) {
+	private function addBraces($source, $skipNestedIfBlocks) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$this->useCache = true;
 		$changed = false;
-		$foundIfIf = false;
+		$foundNestedIfBlocks = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -1147,11 +1147,11 @@ final class AddMissingCurlyBraces extends FormatterPass {
 					}
 
 					$skip = [ST_CURLY_OPEN, ST_COLON];
-					if ($skipIfBlocks) {
+					if ($skipNestedIfBlocks) {
 						$skip[] = T_IF;
 					}
-					if (!$foundIfIf && $this->rightTokenIs([T_IF])) {
-						$foundIfIf = true;
+					if (!$foundNestedIfBlocks && $this->rightTokenIs([T_IF])) {
+						$foundNestedIfBlocks = true;
 					}
 					if (!$this->rightTokenIs($skip)) {
 						if (!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) {
@@ -1222,7 +1222,16 @@ final class AddMissingCurlyBraces extends FormatterPass {
 
 				case T_ELSE:
 					$this->appendCode($text);
-					if (!$this->rightTokenIs([ST_CURLY_OPEN, ST_COLON, T_IF])) {
+					if ($skipNestedIfBlocks && $this->leftUsefulTokenIs([ST_CURLY_CLOSE])) {
+						$foundNestedIfBlocks = true;
+					}
+					if (
+						(
+							!$skipNestedIfBlocks ||
+							!$this->leftUsefulTokenIs([ST_CURLY_CLOSE])
+						) &&
+						!$this->rightTokenIs([ST_CURLY_OPEN, ST_COLON, T_IF])
+					) {
 						$whileInNextToken = $this->rightTokenIs([T_WHILE, T_DO]);
 						$ignoreCount = 0;
 						$this->rtrimAndAppendCode('{');
@@ -1300,7 +1309,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 			$this->appendCode($text);
 		}
 
-		return [$this->code, $changed, $foundIfIf];
+		return [$this->code, $changed, $foundNestedIfBlocks];
 	}
 
 	private function skipDoBlock() {
