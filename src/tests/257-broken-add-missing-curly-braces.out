@@ -21,7 +21,6 @@ if (isset($var)) {
 		$a;
 	} elseif ($a) {$b;
 	}
-
 }
 
 if (isset($var)) {
@@ -30,7 +29,6 @@ if (isset($var)) {
 	} elseif ($a) {
 		while ($a) {$c;
 		}
-
 	}
 }
 
@@ -48,7 +46,6 @@ if (isset($var)) {
 	} else {
 		$b;
 	}
-
 }
 
 if ($a) {do {$a;} while (true);

@@ -3,22 +3,36 @@ final class AddMissingCurlyBraces extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
-		list($tmp, $changed) = $this->addBraces($source);
+		list($tmp, $changed, $foundIfIf) = $this->addBraces($source, true);
 		while ($changed) {
-			list($source, $changed) = $this->addBraces($tmp);
+			list($source, $changed, $foundIfIf) = $this->addBraces($tmp, true);
 			if ($source === $tmp) {
 				break;
 			}
 			$tmp = $source;
 		}
+
+		if ($foundIfIf) {
+			list($tmp, $changed) = $this->addBraces($source, false);
+			while ($changed) {
+				list($source, $changed) = $this->addBraces($tmp, false);
+				if ($source === $tmp) {
+					break;
+				}
+				$tmp = $source;
+			}
+		}
 		return $source;
 	}
-	private function addBraces($source) {
+
+	private function addBraces($source, $skipIfBlocks) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$this->useCache = true;
 		$changed = false;
+		$foundIfIf = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -98,7 +112,14 @@ final class AddMissingCurlyBraces extends FormatterPass {
 						}
 					}
 
-					if (!$this->rightTokenIs([ST_CURLY_OPEN, ST_COLON])) {
+					$skip = [ST_CURLY_OPEN, ST_COLON];
+					if ($skipIfBlocks) {
+						$skip[] = T_IF;
+					}
+					if (!$foundIfIf && $this->rightTokenIs([T_IF])) {
+						$foundIfIf = true;
+					}
+					if (!$this->rightTokenIs($skip)) {
 						if (!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) {
 							$this->rtrimAndAppendCode($this->newLine . '{');
 						}
@@ -245,7 +266,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 			$this->appendCode($text);
 		}
 
-		return [$this->code, $changed];
+		return [$this->code, $changed, $foundIfIf];
 	}
 
 	private function skipDoBlock() {
