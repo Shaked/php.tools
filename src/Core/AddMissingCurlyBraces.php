@@ -74,6 +74,12 @@ final class AddMissingCurlyBraces extends FormatterPass {
 								continue;
 							}
 
+							if (T_TRY == $id) {
+								$this->appendCode($text);
+								$this->skipTryCatchFinallyBlock();
+								break;
+							}
+
 							if (ST_PARENTHESES_OPEN === $id || ST_CURLY_OPEN === $id || ST_BRACKET_OPEN === $id) {
 								++$ignoreCount;
 							} elseif (ST_PARENTHESES_CLOSE === $id || ST_CURLY_CLOSE === $id || ST_BRACKET_CLOSE === $id) {
@@ -134,6 +140,12 @@ final class AddMissingCurlyBraces extends FormatterPass {
 									break;
 								}
 								continue;
+							}
+
+							if (T_TRY == $id) {
+								$this->appendCode($text);
+								$this->skipTryCatchFinallyBlock();
+								break;
 							}
 
 							if (T_DO == $id) {
@@ -214,6 +226,12 @@ final class AddMissingCurlyBraces extends FormatterPass {
 								continue;
 							}
 
+							if (T_TRY == $id) {
+								$this->appendCode($text);
+								$this->skipTryCatchFinallyBlock();
+								break;
+							}
+
 							if (T_DO == $id) {
 								$this->appendCode($text);
 								$this->skipDoBlock();
@@ -283,6 +301,20 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		$this->printCurlyBlock();
 		$this->printUntil(ST_PARENTHESES_OPEN);
 		$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+	}
+
+	private function skipTryCatchFinallyBlock() {
+		$this->printUntil(ST_CURLY_OPEN);
+		$this->printCurlyBlock();
+		while ($this->rightUsefulTokenIs(T_CATCH)) {
+			$this->printUntil(ST_PARENTHESES_OPEN);
+			$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+			$this->printUntil(ST_CURLY_OPEN);
+			$this->printCurlyBlock();
+		}
+		if ($this->rightUsefulTokenIs(T_FINALLY)) {
+			$this->printCurlyBlock();
+		}
 	}
 
 	private function skipFunctionBlock() {
