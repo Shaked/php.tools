@@ -1,14 +1,10 @@
 language: php
+sudo: false
 
 php:
         - 5.6
         - 5.5
 
-before_install:
-        - sudo apt-get update
-        - sudo apt-get install golang
-
 script:
         - if [ "$TRAVIS_PHP_VERSION" == "5.6" ]; then cd src && (php -dshort_open_tag=On test.php -v --coveralls) && (phpenv config-rm xdebug.ini) && (php -dshort_open_tag=On test.php -v --deployed) && php vendor/bin/coveralls -v; fi;
         - if [ "$TRAVIS_PHP_VERSION" != "5.6" ]; then cd src && (phpenv config-rm xdebug.ini) && (php -dshort_open_tag=On test.php -v) && (php -dshort_open_tag=On test.php -v --deployed); fi;
-        - go test -bench=. -benchtime=5s
