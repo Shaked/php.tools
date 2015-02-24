@@ -14,20 +14,25 @@ if ($a) {
 	$c;
 }
 
-if ($a) {do {$a;} while (true);
+if ($a) {
+	do {$a;} while (true);
 }
 
-if ($a) {for ($i;false; $i++) {$a;}
+if ($a) {
+	for ($i;false; $i++) {$a;}
 }
 
-if ($a) {foreach ($a as $b) {$b;}
+if ($a) {
+	foreach ($a as $b) {$b;}
 }
 
-if ($a) {while (false) {$b;}
+if ($a) {
+	while (false) {$b;}
 }
 
-if ($a) {function ($a, $b) {$a;
-	$b;};
+if ($a) {
+	function ($a, $b) {$a;
+		$b;};
 }
 
 if ($a) {

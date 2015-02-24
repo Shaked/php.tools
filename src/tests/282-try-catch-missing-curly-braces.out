@@ -72,7 +72,8 @@ foreach ($arr as $v) {
 
 		} catch (Exception $e) {
 			echo 3;
+		} finally {
+			echo 4;
 		}
 	}
-
 }

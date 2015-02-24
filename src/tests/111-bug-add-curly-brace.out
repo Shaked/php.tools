@@ -1,19 +1,22 @@
 <?php
-if ($a == 1) {$x = $i;
+if ($a == 1) {
+	$x = $i;
 }
 
 while ($ten != 0) {
 	$ten = intval($ten / 26);
 }
 
-if ($a == 1) {$x = $i;
+if ($a == 1) {
+	$x = $i;
 } elseif ($b == 1) {
 	while ($ten != 0) {
 		$ten = intval($ten / 26);
 	}
 }
 
-if ($a == 1) {$x = $i;
+if ($a == 1) {
+	$x = $i;
 } elseif ($b == 1) {
 	while ($ten != 0) {
 		$ten = intval($ten / 26);
@@ -24,21 +27,24 @@ if ($a == 1) {$x = $i;
 	}
 }
 
-for ($i; $i < 10; $i++) {$x = $i;
+for ($i; $i < 10; $i++) {
+	$x = $i;
 }
 
 while ($ten != 0) {
 	$ten = intval($ten / 26);
 }
 
-foreach ($arr as $i) {$x = $i;
+foreach ($arr as $i) {
+	$x = $i;
 }
 
 while ($ten != 0) {
 	$ten = intval($ten / 26);
 }
 
-while (false) {$x = $i;
+while (false) {
+	$x = $i;
 }
 
 while ($ten != 0) {

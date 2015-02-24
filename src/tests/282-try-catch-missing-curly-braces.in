@@ -68,5 +68,7 @@ foreach($arr as $v)
         echo 2;
     }catch(Exception $e){
         echo 3;
+    }finally{
+        echo 4;
     }
 

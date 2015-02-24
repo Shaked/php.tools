@@ -1,11 +1,15 @@
 <?php
 
-if ($a == 1) {$x = $i;
-} else {;
+if ($a == 1) {
+	$x = $i;
+} else {
+	;
 }
 
-if ($a == 1) /* hw */ {$x = $i;
-} else {;
+if ($a == 1) /* hw */ {
+	$x = $i;
+} else {
+	;
 }
 
 if (isset($var)) {
@@ -19,7 +23,8 @@ if (isset($var)) {
 if (isset($var)) {
 	if (0 == $var) {
 		$a;
-	} elseif ($a) {$b;
+	} elseif ($a) {
+		$b;
 	}
 }
 
@@ -27,7 +32,8 @@ if (isset($var)) {
 	if (0 == $var) {
 		$a;
 	} elseif ($a) {
-		while ($a) {$c;
+		while ($a) {
+			$c;
 		}
 	}
 }
@@ -46,17 +52,19 @@ if (isset($var)) {
 	} else {
 		$b;
 	}
-
 }
 
-if ($a) {do {$a;} while (true);
+if ($a) {
+	do {$a;} while (true);
 }
 
-if ($a) {$a = function ($a, $b) {
-	if ($a) {$b;
-	}
+if ($a) {
+	$a = function ($a, $b) {
+		if ($a) {
+			$b;
+		}
 
-};
+	};
 }
 
 //----
@@ -71,7 +79,8 @@ if ($a) {$a = function ($a, $b) {
 // while ($ten != 0) {
 //     $ten = intval($ten / 26);
 // }
-if ($a == 1) {$x = $i;
+if ($a == 1) {
+	$x = $i;
 } elseif ($b == 1) {
 	while ($ten != 0) {
 		$ten = intval($ten / 26);
@@ -88,12 +97,15 @@ if ($a == 1) {$x = $i;
 // while ($ten != 0) $ten = intval($ten / 26);
 // else
 // while ($ten != 0) $ten = intval($ten / 26);
-if ($a == 1) {$x = $i;
+if ($a == 1) {
+	$x = $i;
 } elseif ($b == 1) {
-	while ($ten != 0) {$ten = intval($ten / 26);
+	while ($ten != 0) {
+		$ten = intval($ten / 26);
 	}
 } else {
-	while ($ten != 0) {$ten = intval($ten / 26);
+	while ($ten != 0) {
+		$ten = intval($ten / 26);
 	}
 }
 
@@ -103,11 +115,13 @@ if ($a == 1) {$x = $i;
 // while ($ten != 0) { $ten = intval($ten / 26); }
 // else
 // while ($ten != 0) $ten = intval($ten / 26);
-if ($a == 1) {$x = $i;
+if ($a == 1) {
+	$x = $i;
 } elseif ($b == 1) {
 	while ($ten != 0) {$ten = intval($ten / 26);}
 } else {
-	while ($ten != 0) {$ten = intval($ten / 26);
+	while ($ten != 0) {
+		$ten = intval($ten / 26);
 	}
 }
 
@@ -117,9 +131,11 @@ if ($a == 1) {$x = $i;
 // while ($ten != 0) $ten = intval($ten / 26);
 // else
 // while ($ten != 0) { $ten = intval($ten / 26); }
-if ($a == 1) {$x = $i;
+if ($a == 1) {
+	$x = $i;
 } elseif ($b == 1) {
-	while ($ten != 0) {$ten = intval($ten / 26);
+	while ($ten != 0) {
+		$ten = intval($ten / 26);
 	}
 } else {
 	while ($ten != 0) {$ten = intval($ten / 26);}

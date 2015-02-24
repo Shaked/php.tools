@@ -19,7 +19,8 @@ do {
 	$cmd = cmd();
 } while (true);
 
-if ($a) {return false;
+if ($a) {
+	return false;
 }
 
 do {

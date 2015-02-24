@@ -7,7 +7,6 @@ if (true) {
 	} else {
 		echo 3;
 	}
-
 }
 
 if (true) {
@@ -16,7 +15,6 @@ if (true) {
 	} else {
 		echo 2;
 	}
-
 } else {
 	echo 3;
 }
@@ -36,9 +34,7 @@ if (true) {
 		} else {
 			echo 3;
 		}
-
+	} else {
+		echo 3;
 	}
-
-} else {
-	echo 3;
 }

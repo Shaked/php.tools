@@ -501,4 +501,194 @@ abstract class FormatterPass {
 			}
 		}
 	}
+
+	protected function refWalkUsefulUntil($tkns, &$ptr, $expectedId) {
+		do {
+			$ptr = $this->walkRight($tkns, $ptr, $this->ignoreFutileTokens);
+		} while ($expectedId != $tkns[$ptr][0]);
+	}
+
+	protected function refWalkBlock($tkns, &$ptr, $start, $end) {
+		$count = 0;
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; $ptr++) {
+			$id = $tkns[$ptr][0];
+			if ($start == $id) {
+				++$count;
+			}
+			if ($end == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
+
+	protected function refWalkCurlyBlock($tkns, &$ptr) {
+		$count = 0;
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; $ptr++) {
+			$id = $tkns[$ptr][0];
+			if (ST_CURLY_OPEN == $id) {
+				++$count;
+			}
+			if (T_CURLY_OPEN == $id) {
+				++$count;
+			}
+			if (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+				++$count;
+			}
+			if (ST_CURLY_CLOSE == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
+
+	protected function refSkipIfTokenIsAny($tkns, &$ptr, $skipIds) {
+		$skipIds = array_flip($skipIds);
+		$ptr++;
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; $ptr++) {
+			$id = $tkns[$ptr][0];
+			if (!isset($skipIds[$id])) {
+				break;
+			}
+		}
+	}
+
+	protected function refSkipBlocks($tkns, &$ptr) {
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; $ptr++) {
+			$id = $tkns[$ptr][0];
+
+			if (T_CLOSE_TAG == $id) {
+				return;
+			}
+
+			if (T_DO == $id) {
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+				$this->refWalkCurlyBlock($tkns, $ptr);
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
+				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				continue;
+			}
+
+			if (T_WHILE == $id) {
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
+				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				if ($this->rightTokenSubsetIsAtIdx(
+					$tkns,
+					$ptr,
+					ST_CURLY_OPEN,
+					$this->ignoreFutileTokens
+				)) {
+					$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+					$this->refWalkCurlyBlock($tkns, $ptr);
+					return;
+				}
+			}
+
+			if (T_FOR == $id || T_FOREACH == $id || T_SWITCH == $id) {
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
+				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+				$this->refWalkCurlyBlock($tkns, $ptr);
+				return;
+			}
+
+			if (T_TRY == $id) {
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+				$this->refWalkCurlyBlock($tkns, $ptr);
+				while (
+					$this->rightTokenSubsetIsAtIdx(
+						$tkns,
+						$ptr,
+						T_CATCH,
+						$this->ignoreFutileTokens
+					)
+				) {
+					$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
+					$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+					$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+					$this->refWalkCurlyBlock($tkns, $ptr);
+				}
+				if ($this->rightTokenSubsetIsAtIdx(
+					$tkns,
+					$ptr,
+					T_FINALLY,
+					$this->ignoreFutileTokens
+				)) {
+					$this->refWalkUsefulUntil($tkns, $ptr, T_FINALLY);
+					$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+					$this->refWalkCurlyBlock($tkns, $ptr);
+				}
+				return;
+			}
+
+			if (T_IF == $id) {
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
+				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+				$this->refWalkCurlyBlock($tkns, $ptr);
+				while (true) {
+					if (
+						$this->rightTokenSubsetIsAtIdx(
+							$tkns,
+							$ptr,
+							T_ELSEIF,
+							$this->ignoreFutileTokens
+						)
+					) {
+						$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
+						$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+						$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+						$this->refWalkCurlyBlock($tkns, $ptr);
+					} elseif (
+						$this->rightTokenSubsetIsAtIdx(
+							$tkns,
+							$ptr,
+							T_ELSE,
+							$this->ignoreFutileTokens
+						)
+					) {
+						$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+						$this->refWalkCurlyBlock($tkns, $ptr);
+						break;
+					} else {
+						break;
+					}
+				}
+				return;
+			}
+
+			if (
+				ST_CURLY_OPEN == $id ||
+				T_CURLY_OPEN == $id ||
+				T_DOLLAR_OPEN_CURLY_BRACES == $id
+			) {
+				$this->refWalkCurlyBlock($tkns, $ptr);
+				continue;
+			}
+
+			if (ST_PARENTHESES_OPEN == $id) {
+				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				continue;
+			}
+
+			if (ST_BRACKET_OPEN == $id) {
+				$this->refWalkBlock($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE);
+				continue;
+			}
+
+			if (ST_SEMI_COLON == $id) {
+				return;
+			}
+		}
+		$ptr--;
+	}
+
+	protected function refInsert(&$tkns, &$ptr, $item) {
+		array_splice($tkns, $ptr, 0, [$item]);
+		$ptr++;
+	}
 }
