@@ -7,6 +7,7 @@ final class AddMissingParentheses extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -19,6 +20,8 @@ final class AddMissingParentheses extends AdditionalPass {
 					list($foundId, $foundText) = $this->printAndStopAt([ST_PARENTHESES_OPEN, T_COMMENT, T_DOC_COMMENT, ST_SEMI_COLON]);
 					if (ST_PARENTHESES_OPEN != $foundId) {
 						$this->appendCode('()' . $foundText);
+					} elseif (ST_PARENTHESES_OPEN == $foundId) {
+						$this->appendCode($foundText);
 					}
 					break;
 				default:
