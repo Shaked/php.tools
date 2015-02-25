@@ -38,6 +38,7 @@ final class CodeFormatter {
 		'LeftAlignComment' => false,
 
 		'PSR2AlignObjOp' => false,
+		'PSR2EmptyFunction' => false,
 		'PSR2SingleEmptyLineAndStripClosingTag' => false,
 		'PSR2ModifierVisibilityStaticOrder' => false,
 		'PSR2CurlyOpenNextLine' => false,

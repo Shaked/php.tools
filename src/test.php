@@ -181,7 +181,33 @@ if (!$bailOut) {
 				$specialPasses = true;
 				foreach ($passes as $pass) {
 					$pass = trim($pass);
-					$fmt->enablePass($pass);
+					if ('default' == strtolower($pass)) {
+						$fmt->enablePass('TwoCommandsInSameLine');
+						$fmt->enablePass('RemoveIncludeParentheses');
+						$fmt->enablePass('NormalizeIsNotEquals');
+						$fmt->enablePass('OrderUseClauses');
+						$fmt->enablePass('AddMissingCurlyBraces');
+						$fmt->enablePass('ExtraCommaInArray');
+						$fmt->enablePass('NormalizeLnAndLtrimLines');
+						$fmt->enablePass('MergeParenCloseWithCurlyOpen');
+						$fmt->enablePass('MergeCurlyCloseAndDoWhile');
+						$fmt->enablePass('MergeDoubleArrowAndArray');
+						$fmt->enablePass('ResizeSpaces');
+						$fmt->enablePass('ReindentColonBlocks');
+						$fmt->enablePass('ReindentLoopColonBlocks');
+						$fmt->enablePass('ReindentIfColonBlocks');
+						$fmt->enablePass('AlignEquals');
+						$fmt->enablePass('AlignDoubleArrow');
+						$fmt->enablePass('ReindentObjOps');
+						$fmt->enablePass('Reindent');
+						$fmt->enablePass('EliminateDuplicatedEmptyLines');
+						$fmt->enablePass('PSR2AlignObjOp');
+						$fmt->enablePass('LeftAlignComment');
+						$fmt->enablePass('RTrim');
+						PsrDecorator::decorate($fmt);
+					} else {
+						$fmt->enablePass($pass);
+					}
 				}
 			}
 		}
