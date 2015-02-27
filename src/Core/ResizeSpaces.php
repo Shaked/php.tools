@@ -113,12 +113,12 @@ final class ResizeSpaces extends FormatterPass {
 					list($nextId, $nextText) = $this->inspectToken(+1);
 
 					if (
-						$this->rightUsefulTokenIs(T_CLOSE_TAG) &&
 						(
 							T_WHITESPACE != $nextId
 							||
 							(T_WHITESPACE == $nextId && !$this->hasLn($nextText))
 						)
+						&& $this->rightUsefulTokenIs(T_CLOSE_TAG)
 					) {
 						$this->appendCode($text . $this->getSpace());
 					} elseif (
