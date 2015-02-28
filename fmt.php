@@ -2505,7 +2505,7 @@ final class ReindentColonBlocks extends FormatterPass {
 		$this->code = '';
 
 		$foundColon = false;
-		foreach ($this->tkns as $token) {
+		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			if (T_DEFAULT == $id || T_CASE == $id || T_SWITCH == $id) {
 				break;
