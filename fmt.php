@@ -6710,8 +6710,8 @@ final class ReturnNull extends AdditionalPass {
 				continue;
 			}
 			if (T_STRING == $id && strtolower($text) == 'null') {
-				list($prevId, ) = $this->leftUsefulToken();
-				list($nextId, ) = $this->rightUsefulToken();
+				list($prevId, ) = $this->getToken($this->leftUsefulToken());
+				list($nextId, ) = $this->getToken($this->rightUsefulToken());
 				if (T_RETURN == $prevId && ST_SEMI_COLON == $nextId) {
 					continue;
 				}
