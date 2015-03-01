@@ -48,6 +48,7 @@ require 'Core/ResizeSpaces.php';
 require 'Core/RestoreComments.php';
 require 'Core/RTrim.php';
 require 'Core/SettersAndGettersPass.php';
+require 'Core/StripExtraCommaInList.php';
 require 'Core/SurrogateToken.php';
 require 'Core/TwoCommandsInSameLine.php';
 

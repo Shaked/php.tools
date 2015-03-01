@@ -1063,6 +1063,7 @@ final class CodeFormatter {
 		'UpgradeToPreg' => false,
 		'DocBlockToComment' => false,
 		'LongArray' => false,
+
 		'StripExtraCommaInArray' => false,
 		'NoSpaceAfterPHPDocBlocks' => false,
 		'RemoveUseLeadingSlash' => false,
@@ -1119,6 +1120,7 @@ final class CodeFormatter {
 		'ReindentColonBlocks' => false,
 
 		'ResizeSpaces' => false,
+		'StripExtraCommaInList' => false,
 		'YodaComparisons' => false,
 
 		'MergeDoubleArrowAndArray' => false,
@@ -1149,25 +1151,26 @@ final class CodeFormatter {
 	];
 
 	public function __construct() {
-		$this->passes['TwoCommandsInSameLine'] = new TwoCommandsInSameLine();
-		$this->passes['RemoveIncludeParentheses'] = new RemoveIncludeParentheses();
-		$this->passes['NormalizeIsNotEquals'] = new NormalizeIsNotEquals();
-		$this->passes['OrderUseClauses'] = new OrderUseClauses();
 		$this->passes['AddMissingCurlyBraces'] = new AddMissingCurlyBraces();
+		$this->passes['EliminateDuplicatedEmptyLines'] = new EliminateDuplicatedEmptyLines();
 		$this->passes['ExtraCommaInArray'] = new ExtraCommaInArray();
-		$this->passes['NormalizeLnAndLtrimLines'] = new NormalizeLnAndLtrimLines();
-		$this->passes['MergeParenCloseWithCurlyOpen'] = new MergeParenCloseWithCurlyOpen();
+		$this->passes['LeftAlignComment'] = new LeftAlignComment();
 		$this->passes['MergeCurlyCloseAndDoWhile'] = new MergeCurlyCloseAndDoWhile();
 		$this->passes['MergeDoubleArrowAndArray'] = new MergeDoubleArrowAndArray();
-		$this->passes['ResizeSpaces'] = new ResizeSpaces();
-		$this->passes['ReindentColonBlocks'] = new ReindentColonBlocks();
-		$this->passes['ReindentLoopColonBlocks'] = new ReindentLoopColonBlocks();
-		$this->passes['ReindentIfColonBlocks'] = new ReindentIfColonBlocks();
-		$this->passes['ReindentObjOps'] = new ReindentObjOps();
+		$this->passes['MergeParenCloseWithCurlyOpen'] = new MergeParenCloseWithCurlyOpen();
+		$this->passes['NormalizeIsNotEquals'] = new NormalizeIsNotEquals();
+		$this->passes['NormalizeLnAndLtrimLines'] = new NormalizeLnAndLtrimLines();
+		$this->passes['OrderUseClauses'] = new OrderUseClauses();
 		$this->passes['Reindent'] = new Reindent();
-		$this->passes['EliminateDuplicatedEmptyLines'] = new EliminateDuplicatedEmptyLines();
-		$this->passes['LeftAlignComment'] = new LeftAlignComment();
+		$this->passes['ReindentColonBlocks'] = new ReindentColonBlocks();
+		$this->passes['ReindentIfColonBlocks'] = new ReindentIfColonBlocks();
+		$this->passes['ReindentLoopColonBlocks'] = new ReindentLoopColonBlocks();
+		$this->passes['ReindentObjOps'] = new ReindentObjOps();
+		$this->passes['RemoveIncludeParentheses'] = new RemoveIncludeParentheses();
+		$this->passes['ResizeSpaces'] = new ResizeSpaces();
 		$this->passes['RTrim'] = new RTrim();
+		$this->passes['StripExtraCommaInList'] = new StripExtraCommaInList();
+		$this->passes['TwoCommandsInSameLine'] = new TwoCommandsInSameLine();
 	}
 
 	public function enablePass($pass) {
@@ -3701,6 +3704,63 @@ final class SettersAndGettersPass extends FormatterPass {
 		$str = $this->newLine . $visibility . ' function Set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . '){' . $this->newLine . '$this->' . str_replace('$', '', $var) . ' = ' . $var . ';' . $this->newLine . '}' . $this->newLine . $this->newLine;
 		$str .= $visibility . ' function ' . ucfirst(str_replace('$', '', $var)) . '(){' . $this->newLine . 'return $this->' . str_replace('$', '', $var) . ';' . $this->newLine . '}' . $this->newLine;
 		return $str;
+	}
+};
+final class StripExtraCommaInList extends FormatterPass {
+	const EMPTY_LIST = 'ST_EMPTY_LIST';
+
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_LIST])) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+
+		$contextStack = [];
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_STRING:
+					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
+						$contextStack[] = T_STRING;
+					}
+					break;
+				case T_ARRAY:
+					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
+						$contextStack[] = T_ARRAY;
+					}
+					break;
+				case T_LIST:
+					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
+						$contextStack[] = T_LIST;
+					}
+					break;
+				case ST_PARENTHESES_OPEN:
+					if (isset($contextStack[0]) && T_LIST == end($contextStack) && $this->rightTokenIs(ST_PARENTHESES_CLOSE)) {
+						array_pop($contextStack);
+						$contextStack[] = self::EMPTY_LIST;
+					} elseif (!$this->leftTokenIs([T_LIST, T_ARRAY, T_STRING])) {
+						$contextStack[] = ST_PARENTHESES_OPEN;
+					}
+					break;
+				case ST_PARENTHESES_CLOSE:
+					if (isset($contextStack[0])) {
+						if (T_LIST == end($contextStack) && $this->leftUsefulTokenIs(ST_COMMA)) {
+							$prevTokenIdx = $this->leftUsefulTokenIdx();
+							$this->tkns[$prevTokenIdx] = null;
+						}
+						array_pop($contextStack);
+					}
+					break;
+			}
+			$this->tkns[$this->ptr] = [$id, $text];
+		}
+		return $this->renderLight();
 	}
 };
 final class SurrogateToken {

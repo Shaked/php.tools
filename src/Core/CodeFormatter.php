@@ -11,6 +11,7 @@ final class CodeFormatter {
 		'UpgradeToPreg' => false,
 		'DocBlockToComment' => false,
 		'LongArray' => false,
+
 		'StripExtraCommaInArray' => false,
 		'NoSpaceAfterPHPDocBlocks' => false,
 		'RemoveUseLeadingSlash' => false,
@@ -67,6 +68,7 @@ final class CodeFormatter {
 		'ReindentColonBlocks' => false,
 
 		'ResizeSpaces' => false,
+		'StripExtraCommaInList' => false,
 		'YodaComparisons' => false,
 
 		'MergeDoubleArrowAndArray' => false,
@@ -97,25 +99,26 @@ final class CodeFormatter {
 	];
 
 	public function __construct() {
-		$this->passes['TwoCommandsInSameLine'] = new TwoCommandsInSameLine();
-		$this->passes['RemoveIncludeParentheses'] = new RemoveIncludeParentheses();
-		$this->passes['NormalizeIsNotEquals'] = new NormalizeIsNotEquals();
-		$this->passes['OrderUseClauses'] = new OrderUseClauses();
 		$this->passes['AddMissingCurlyBraces'] = new AddMissingCurlyBraces();
+		$this->passes['EliminateDuplicatedEmptyLines'] = new EliminateDuplicatedEmptyLines();
 		$this->passes['ExtraCommaInArray'] = new ExtraCommaInArray();
-		$this->passes['NormalizeLnAndLtrimLines'] = new NormalizeLnAndLtrimLines();
-		$this->passes['MergeParenCloseWithCurlyOpen'] = new MergeParenCloseWithCurlyOpen();
+		$this->passes['LeftAlignComment'] = new LeftAlignComment();
 		$this->passes['MergeCurlyCloseAndDoWhile'] = new MergeCurlyCloseAndDoWhile();
 		$this->passes['MergeDoubleArrowAndArray'] = new MergeDoubleArrowAndArray();
-		$this->passes['ResizeSpaces'] = new ResizeSpaces();
-		$this->passes['ReindentColonBlocks'] = new ReindentColonBlocks();
-		$this->passes['ReindentLoopColonBlocks'] = new ReindentLoopColonBlocks();
-		$this->passes['ReindentIfColonBlocks'] = new ReindentIfColonBlocks();
-		$this->passes['ReindentObjOps'] = new ReindentObjOps();
+		$this->passes['MergeParenCloseWithCurlyOpen'] = new MergeParenCloseWithCurlyOpen();
+		$this->passes['NormalizeIsNotEquals'] = new NormalizeIsNotEquals();
+		$this->passes['NormalizeLnAndLtrimLines'] = new NormalizeLnAndLtrimLines();
+		$this->passes['OrderUseClauses'] = new OrderUseClauses();
 		$this->passes['Reindent'] = new Reindent();
-		$this->passes['EliminateDuplicatedEmptyLines'] = new EliminateDuplicatedEmptyLines();
-		$this->passes['LeftAlignComment'] = new LeftAlignComment();
+		$this->passes['ReindentColonBlocks'] = new ReindentColonBlocks();
+		$this->passes['ReindentIfColonBlocks'] = new ReindentIfColonBlocks();
+		$this->passes['ReindentLoopColonBlocks'] = new ReindentLoopColonBlocks();
+		$this->passes['ReindentObjOps'] = new ReindentObjOps();
+		$this->passes['RemoveIncludeParentheses'] = new RemoveIncludeParentheses();
+		$this->passes['ResizeSpaces'] = new ResizeSpaces();
 		$this->passes['RTrim'] = new RTrim();
+		$this->passes['StripExtraCommaInList'] = new StripExtraCommaInList();
+		$this->passes['TwoCommandsInSameLine'] = new TwoCommandsInSameLine();
 	}
 
 	public function enablePass($pass) {
