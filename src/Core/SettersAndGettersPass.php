@@ -61,18 +61,15 @@ final class SettersAndGettersPass extends FormatterPass {
 						if (T_VARIABLE == $id && T_PUBLIC == $touchedVisibility) {
 							$attributes['public'][] = $text;
 							$touchedVisibility = null;
-							$this->appendCode(';' . $this->newLine . sprintf(self::PLACEHOLDER, $text));
-							each($this->tkns);
+							$this->printPlaceholder($text);
 						} elseif (T_VARIABLE == $id && T_PRIVATE == $touchedVisibility) {
 							$attributes['private'][] = $text;
 							$touchedVisibility = null;
-							$this->appendCode(';' . $this->newLine . sprintf(self::PLACEHOLDER, $text));
-							each($this->tkns);
+							$this->printPlaceholder($text);
 						} elseif (T_VARIABLE == $id && T_PROTECTED == $touchedVisibility) {
 							$attributes['protected'][] = $text;
 							$touchedVisibility = null;
-							$this->appendCode(';' . $this->newLine . sprintf(self::PLACEHOLDER, $text));
-							each($this->tkns);
+							$this->printPlaceholder($text);
 						} elseif (T_FUNCTION == $id) {
 							$touchedFunction = true;
 						} elseif ($touchedFunction && T_STRING == $id) {
@@ -141,5 +138,13 @@ final class SettersAndGettersPass extends FormatterPass {
 		$str = $this->newLine . $visibility . ' function Set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . '){' . $this->newLine . '$this->' . str_replace('$', '', $var) . ' = ' . $var . ';' . $this->newLine . '}' . $this->newLine . $this->newLine;
 		$str .= $visibility . ' function ' . ucfirst(str_replace('$', '', $var)) . '(){' . $this->newLine . 'return $this->' . str_replace('$', '', $var) . ';' . $this->newLine . '}' . $this->newLine;
 		return $str;
+	}
+	private function printPlaceholder($text) {
+		if ($this->rightUsefulTokenIs(ST_EQUAL)) {
+			$this->printAndStopAt(ST_SEMI_COLON);
+		} else {
+			each($this->tkns);
+		}
+		$this->appendCode(';' . $this->newLine . sprintf(self::PLACEHOLDER, $text));
 	}
 }
