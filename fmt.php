@@ -8834,7 +8834,7 @@ if (!isset($testEnv)) {
 			}
 			if ($inPhar) {
 				if (!file_exists($arg)) {
-					$arg = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $arg;
+					$arg = getcwd() . DIRECTORY_SEPARATOR . $arg;
 				}
 			}
 			if (is_file($arg)) {
