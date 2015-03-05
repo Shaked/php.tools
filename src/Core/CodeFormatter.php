@@ -7,6 +7,7 @@ final class CodeFormatter {
 		'RTrim' => false,
 		'WordWrap' => false,
 
+		'IndentTernaryConditions' => false,
 		'RestoreComments' => false,
 		'UpgradeToPreg' => false,
 		'DocBlockToComment' => false,

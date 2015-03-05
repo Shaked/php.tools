@@ -76,6 +76,7 @@ require 'Additionals/CakePHPStyle.php';
 require 'Additionals/DocBlockToComment.php';
 require 'Additionals/EncapsulateNamespaces.php';
 require 'Additionals/GeneratePHPDoc.php';
+require 'Additionals/IndentTernaryConditions.php';
 require 'Additionals/JoinToImplode.php';
 require 'Additionals/LongArray.php';
 require 'Additionals/MergeElseIf.php';
