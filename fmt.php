@@ -8560,6 +8560,7 @@ if (!isset($testEnv)) {
 		];
 		if ($inPhar) {
 			$options['--selfupdate'] = 'self-update fmt.phar from Github';
+			$options['--version'] = 'version';
 		}
 		if (!$enableCache) {
 			unset($options['--cache[=FILENAME]']);
@@ -8606,6 +8607,7 @@ if (!isset($testEnv)) {
 	];
 	if ($inPhar) {
 		$getoptLongOptions[] = 'selfupdate';
+		$getoptLongOptions[] = 'version';
 	}
 	if (!$enableCache) {
 		unset($getoptLongOptions['cache::']);
@@ -8652,6 +8654,15 @@ if (!isset($testEnv)) {
 			fwrite(STDERR, 'Updated successfully' . PHP_EOL);
 		} else {
 			fwrite(STDERR, 'Up-to-date!' . PHP_EOL);
+		}
+		exit(0);
+	}
+	if (isset($opts['version'])) {
+		if ($inPhar) {
+			if (!file_exists($argv[0])) {
+				$argv[0] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[0];
+			}
+			echo $argv[0] . ' ' . sha1_file($argv[0]), PHP_EOL;
 		}
 		exit(0);
 	}
