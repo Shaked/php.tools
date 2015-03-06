@@ -21,6 +21,9 @@ if (class_exists('SQLite3')) {
 	$enableCache = true;
 	require 'Core/Cache.php';
 }
+
+require 'version.php';
+
 require 'Core/constants.php';
 require 'Core/FormatterPass.php';
 require 'Additionals/AdditionalPass.php';
@@ -272,10 +275,7 @@ if (!isset($testEnv)) {
 	}
 	if (isset($opts['version'])) {
 		if ($inPhar) {
-			if (!file_exists($argv[0])) {
-				$argv[0] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[0];
-			}
-			echo $argv[0] . ' ' . sha1_file($argv[0]), PHP_EOL;
+			echo $argv[0], ' ', VERSION, PHP_EOL;
 		}
 		exit(0);
 	}

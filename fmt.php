@@ -298,6 +298,9 @@ final class Cache {
 }
 ;
 }
+
+define("VERSION", "7.9.1");;
+
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
 //
@@ -8659,10 +8662,7 @@ if (!isset($testEnv)) {
 	}
 	if (isset($opts['version'])) {
 		if ($inPhar) {
-			if (!file_exists($argv[0])) {
-				$argv[0] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[0];
-			}
-			echo $argv[0] . ' ' . sha1_file($argv[0]), PHP_EOL;
+			echo $argv[0], ' ', VERSION, PHP_EOL;
 		}
 		exit(0);
 	}

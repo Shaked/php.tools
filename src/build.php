@@ -1,10 +1,30 @@
 <?php
 if (ini_get('phar.readonly')) {
-	passthru($_SERVER['_'] . ' -dphar.readonly=0 build.php 2>&1');
+	unset($argv[0]);
+	passthru($_SERVER['_'] . ' -dphar.readonly=0 build.php ' . implode(' ', $argv) . ' 2>&1');
 	exit(0);
 }
 include 'vendor/dericofilho/csp/csp.php';
 include "Core/FormatterPass.php";
+include "version.php";
+
+error_reporting(E_ALL);
+$opt = getopt("Mmp");
+$newver = '';
+if (isset($opt['M'])) {
+	$tmp = explode('.', VERSION);
+	$newver = '<?php define("VERSION", "' . ($tmp[0] + 1) . '.0.0");';
+} elseif (isset($opt['m'])) {
+	$tmp = explode('.', VERSION);
+	$newver = '<?php define("VERSION", "' . ($tmp[0]) . '.' . ($tmp[1] + 1) . '.0");';
+} elseif (isset($opt['p'])) {
+	$tmp = explode('.', VERSION);
+	$newver = '<?php define("VERSION", "' . ($tmp[0]) . '.' . ($tmp[1]) . '.' . ($tmp[2] + 1) . '");';
+}
+if (!empty($newver)) {
+	echo "Bumping version to: ", $newver, PHP_EOL;
+	file_put_contents('version.php', $newver);
+}
 
 class Build extends FormatterPass {
 	public function candidate($source, $foundTokens) {
@@ -77,7 +97,7 @@ echo 'Building PHARs...';
 $phars = ['fmt', 'refactor'];
 foreach ($phars as $target) {
 	file_put_contents($target . '.stub.php', '<?php $inPhar = true;' . "\n" . str_replace('#!/usr/bin/env php' . "\n" . '<?php', '', file_get_contents($target . '.stub.php')));
-	$phar = new Phar($target . '.phar', FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::KEY_AS_FILENAME, $target . '.phar');
+	$phar = new Phar($target . '.phar', FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::KEY_AS_FILENAME, $target . '.phar');
 	$phar[$target . ".stub.php"] = file_get_contents($target . '.stub.php');
 	$phar->setStub('#!/usr/bin/env php' . "\n" . $phar->createDefaultStub($target . '.stub.php'));
 	file_put_contents($target . ".phar.sha1", sha1_file($target . '.phar'));
