@@ -97,6 +97,7 @@ final class CodeFormatter {
 		'PrettyPrintDocBlocks' => false,
 		'StrictBehavior' => false,
 		'StrictComparison' => false,
+		'ReplaceIsNull' => false,
 	];
 
 	public function __construct() {
