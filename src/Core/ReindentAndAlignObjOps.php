@@ -1,6 +1,9 @@
 <?php
-final class ReindentObjOps extends FormatterPass {
+final class ReindentAndAlignObjOps extends FormatterPass {
+	const ALIGNABLE_OBJOP = "\x2 OBJOP%d.%d.%d \x3";
+
 	const ALIGN_WITH_INDENT = 1;
+	const ALIGN_WITH_SPACES = 2;
 
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_OBJECT_OPERATOR])) {
@@ -51,6 +54,7 @@ final class ReindentObjOps extends FormatterPass {
 				case T_FUNCTION:
 					$this->appendCode($text);
 					if (!$this->rightUsefulTokenIs(T_STRING)) {
+						// $this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 						$this->printUntil(ST_PARENTHESES_OPEN);
 						$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 						$this->printUntil(ST_CURLY_OPEN);
@@ -99,17 +103,53 @@ final class ReindentObjOps extends FormatterPass {
 								$this->indentParenthesesContent();
 							}
 						} else {
-							$this->appendCode($text);
+							$alignType[$levelCounter][$levelEntranceCounter[$levelCounter]] = self::ALIGN_WITH_SPACES;
+							if (!isset($printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]])) {
+								$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]] = 0;
+							}
+							++$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]];
+							$placeholder = sprintf(
+								self::ALIGNABLE_OBJOP,
+								$levelCounter,
+								$levelEntranceCounter[$levelCounter],
+								$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
+							);
+							$this->appendCode($placeholder . $text);
+							$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, $this->newLine]);
+							if (ST_SEMI_COLON == $foundToken) {
+								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+							} elseif (ST_PARENTHESES_OPEN == $foundToken || ST_PARENTHESES_CLOSE == $foundToken) {
+								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+								$this->injectPlaceholderParenthesesContent($placeholder);
+							}
 						}
 					} elseif ($this->hasLnBefore() || $this->hasLnLeftToken()) {
 						++$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
-						$this->appendCode($this->getIndent(+1) . $text);
-						$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, $this->newLine]);
-						if (ST_SEMI_COLON == $foundToken) {
-							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
-						} elseif (ST_PARENTHESES_OPEN == $foundToken || ST_PARENTHESES_CLOSE == $foundToken) {
-							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
-							$this->indentParenthesesContent();
+						if (self::ALIGN_WITH_SPACES == $alignType[$levelCounter][$levelEntranceCounter[$levelCounter]]) {
+							++$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]];
+							$placeholder = sprintf(
+								self::ALIGNABLE_OBJOP,
+								$levelCounter,
+								$levelEntranceCounter[$levelCounter],
+								$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
+							);
+							$this->appendCode($placeholder . $text);
+							$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, $this->newLine]);
+							if (ST_SEMI_COLON == $foundToken) {
+								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+							} elseif (ST_PARENTHESES_OPEN == $foundToken || ST_PARENTHESES_CLOSE == $foundToken) {
+								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+								$this->injectPlaceholderParenthesesContent($placeholder);
+							}
+						} else {
+							$this->appendCode($this->getIndent(+1) . $text);
+							$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, $this->newLine]);
+							if (ST_SEMI_COLON == $foundToken) {
+								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+							} elseif (ST_PARENTHESES_OPEN == $foundToken || ST_PARENTHESES_CLOSE == $foundToken) {
+								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+								$this->indentParenthesesContent();
+							}
 						}
 					} else {
 						$this->appendCode($text);
@@ -122,10 +162,21 @@ final class ReindentObjOps extends FormatterPass {
 						isset($alignType[$levelCounter]) &&
 						isset($levelEntranceCounter[$levelCounter]) &&
 						isset($alignType[$levelCounter][$levelEntranceCounter[$levelCounter]]) &&
-						($this->hasLnBefore() || $this->hasLnLeftToken()) &&
-						self::ALIGN_WITH_INDENT == $alignType[$levelCounter][$levelEntranceCounter[$levelCounter]]
+						($this->hasLnBefore() || $this->hasLnLeftToken())
 					) {
-						$this->appendCode($this->getIndent(+1));
+						if (self::ALIGN_WITH_SPACES == $alignType[$levelCounter][$levelEntranceCounter[$levelCounter]]) {
+							++$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]];
+							$this->appendCode(
+								sprintf(
+									self::ALIGNABLE_OBJOP,
+									$levelCounter,
+									$levelEntranceCounter[$levelCounter],
+									$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
+								)
+							);
+						} elseif (self::ALIGN_WITH_INDENT == $alignType[$levelCounter][$levelEntranceCounter[$levelCounter]]) {
+							$this->appendCode($this->getIndent(+1));
+						}
 					}
 					$this->appendCode($text);
 					break;
@@ -142,6 +193,51 @@ final class ReindentObjOps extends FormatterPass {
 				default:
 					$this->appendCode($text);
 					break;
+			}
+		}
+		$orig_code = $this->code;
+		foreach ($maxContextCounter as $level => $entrances) {
+			foreach ($entrances as $entrance => $context) {
+				for ($j = 0; $j <= $context; ++$j) {
+					if (!isset($printedPlaceholder[$level][$entrance][$j])) {
+						continue;
+					}
+					if (0 === $printedPlaceholder[$level][$entrance][$j]) {
+						continue;
+					}
+
+					$placeholder = sprintf(self::ALIGNABLE_OBJOP, $level, $entrance, $j);
+					if (1 === $printedPlaceholder[$level][$entrance][$j]) {
+						$this->code = str_replace($placeholder, '', $this->code);
+						continue;
+					}
+
+					$lines = explode($this->newLine, $this->code);
+					$linesWithObjop = [];
+					$blockCount = 0;
+
+					foreach ($lines as $idx => $line) {
+						if (false !== strpos($line, $placeholder)) {
+							$linesWithObjop[] = $idx;
+						}
+					}
+
+					$farthest = 0;
+					foreach ($linesWithObjop as $idx) {
+						$farthest = max($farthest, strpos($lines[$idx], $placeholder . '->'));
+					}
+					foreach ($linesWithObjop as $idx) {
+						$line = $lines[$idx];
+						$current = strpos($line, $placeholder);
+						$delta = abs($farthest - $current);
+						if ($delta > 0) {
+							$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
+							$lines[$idx] = $line;
+						}
+					}
+
+					$this->code = str_replace($placeholder, '', implode($this->newLine, $lines));
+				}
 			}
 		}
 		return $this->code;

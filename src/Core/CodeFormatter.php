@@ -3,6 +3,12 @@
  * @codeCoverageIgnore
  */
 final class CodeFormatter {
+
+	private $shortcircuit = [
+		'ReindentAndAlignObjOps' => 'ReindentObjOps',
+		'ReindentObjOps' => 'ReindentAndAlignObjOps',
+	];
+
 	private $passes = [
 		'RTrim' => false,
 		'WordWrap' => false,
@@ -57,6 +63,7 @@ final class CodeFormatter {
 
 		'EliminateDuplicatedEmptyLines' => false,
 		'Reindent' => false,
+		'ReindentAndAlignObjOps' => false,
 		'ReindentObjOps' => false,
 
 		'AlignDoubleSlashComments' => false,
@@ -115,7 +122,7 @@ final class CodeFormatter {
 		$this->passes['ReindentColonBlocks'] = new ReindentColonBlocks();
 		$this->passes['ReindentIfColonBlocks'] = new ReindentIfColonBlocks();
 		$this->passes['ReindentLoopColonBlocks'] = new ReindentLoopColonBlocks();
-		$this->passes['ReindentObjOps'] = new ReindentObjOps();
+		$this->passes['ReindentAndAlignObjOps'] = new ReindentAndAlignObjOps();
 		$this->passes['RemoveIncludeParentheses'] = new RemoveIncludeParentheses();
 		$this->passes['ResizeSpaces'] = new ResizeSpaces();
 		$this->passes['RTrim'] = new RTrim();
@@ -129,6 +136,11 @@ final class CodeFormatter {
 			$this->passes[$pass] = new $pass();
 		} else {
 			$this->passes[$pass] = new $pass($args[1]);
+		}
+
+		$scPass = &$this->shortcircuit[$pass];
+		if (isset($scPass)) {
+			$this->disablePass($scPass);
 		}
 	}
 

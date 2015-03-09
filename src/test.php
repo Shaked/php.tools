@@ -101,7 +101,7 @@ foreach ($cases as $caseIn) {
 						$fmt->enablePass('ReindentIfColonBlocks');
 						$fmt->enablePass('AlignEquals');
 						$fmt->enablePass('AlignDoubleArrow');
-						$fmt->enablePass('ReindentObjOps');
+						$fmt->enablePass('ReindentAndAlignObjOps');
 						$fmt->enablePass('Reindent');
 						$fmt->enablePass('EliminateDuplicatedEmptyLines');
 						$fmt->enablePass('LeftAlignComment');
@@ -130,7 +130,7 @@ foreach ($cases as $caseIn) {
 		$fmt->enablePass('ReindentIfColonBlocks');
 		$fmt->enablePass('AlignEquals');
 		$fmt->enablePass('AlignDoubleArrow');
-		$fmt->enablePass('ReindentObjOps');
+		$fmt->enablePass('ReindentAndAlignObjOps');
 		$fmt->enablePass('Reindent');
 		$fmt->enablePass('EliminateDuplicatedEmptyLines');
 		$fmt->enablePass('LeftAlignComment');
@@ -198,7 +198,7 @@ if (!$bailOut) {
 						$fmt->enablePass('ReindentIfColonBlocks');
 						$fmt->enablePass('AlignEquals');
 						$fmt->enablePass('AlignDoubleArrow');
-						$fmt->enablePass('ReindentObjOps');
+						$fmt->enablePass('ReindentAndAlignObjOps');
 						$fmt->enablePass('Reindent');
 						$fmt->enablePass('EliminateDuplicatedEmptyLines');
 						$fmt->enablePass('PSR2AlignObjOp');
@@ -228,7 +228,7 @@ if (!$bailOut) {
 			$fmt->enablePass('ReindentIfColonBlocks');
 			$fmt->enablePass('AlignEquals');
 			$fmt->enablePass('AlignDoubleArrow');
-			$fmt->enablePass('ReindentObjOps');
+			$fmt->enablePass('ReindentAndAlignObjOps');
 			$fmt->enablePass('Reindent');
 			$fmt->enablePass('EliminateDuplicatedEmptyLines');
 			$fmt->enablePass('PSR2AlignObjOp');
@@ -303,7 +303,7 @@ if (!$bailOut) {
 			$fmt->enablePass('ReindentIfColonBlocks');
 			$fmt->enablePass('AlignEquals');
 			$fmt->enablePass('AlignDoubleArrow');
-			$fmt->enablePass('ReindentObjOps');
+			$fmt->enablePass('ReindentAndAlignObjOps');
 			$fmt->enablePass('Reindent');
 			$fmt->enablePass('EliminateDuplicatedEmptyLines');
 			$fmt->enablePass('PSR2AlignObjOp');
