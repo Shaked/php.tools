@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.10.0");;
+define("VERSION", "7.11.0");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
