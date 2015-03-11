@@ -1,5 +1,5 @@
 <?php
-final class ReindentAndAlignObjOps extends FormatterPass {
+class ReindentAndAlignObjOps extends FormatterPass {
 	const ALIGNABLE_OBJOP = "\x2 OBJOP%d.%d.%d \x3";
 
 	const ALIGN_WITH_INDENT = 1;
@@ -54,7 +54,6 @@ final class ReindentAndAlignObjOps extends FormatterPass {
 				case T_FUNCTION:
 					$this->appendCode($text);
 					if (!$this->rightUsefulTokenIs(T_STRING)) {
-						// $this->increment_counters($level_counter, $level_entrance_counter, $context_counter, $max_context_counter, $touch_counter, $align_type, $printed_placeholder);
 						$this->printUntil(ST_PARENTHESES_OPEN);
 						$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 						$this->printUntil(ST_CURLY_OPEN);
@@ -243,14 +242,17 @@ final class ReindentAndAlignObjOps extends FormatterPass {
 		return $this->code;
 	}
 
-	private function indentParenthesesContent() {
+	protected function indentParenthesesContent() {
 		$count = 0;
 		$i = $this->ptr;
 		$sizeof_tokens = sizeof($this->tkns);
 		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
 			$token = &$this->tkns[$i];
 			list($id, $text) = $this->getToken($token);
-			if (T_WHITESPACE == $id && $this->hasLn($text)) {
+			if (
+				(T_WHITESPACE == $id || T_DOC_COMMENT == $id || T_COMMENT == $id)
+				&& $this->hasLn($text)
+			) {
 				$token[1] = $text . $this->getIndent(+1);
 				continue;
 			}
@@ -266,14 +268,15 @@ final class ReindentAndAlignObjOps extends FormatterPass {
 		}
 	}
 
-	private function injectPlaceholderParenthesesContent($placeholder) {
+	protected function injectPlaceholderParenthesesContent($placeholder) {
 		$count = 0;
 		$i = $this->ptr;
 		$sizeof_tokens = sizeof($this->tkns);
 		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
 			$token = &$this->tkns[$i];
 			list($id, $text) = $this->getToken($token);
-			if (T_WHITESPACE == $id && $this->hasLn($text)) {
+			if ((T_WHITESPACE == $id || T_DOC_COMMENT == $id || T_COMMENT == $id)
+				&& $this->hasLn($text)) {
 				$token[1] = str_replace($this->newLine, $this->newLine . $placeholder, $text);
 				continue;
 			}
@@ -289,7 +292,7 @@ final class ReindentAndAlignObjOps extends FormatterPass {
 		}
 	}
 
-	private function incrementCounters(
+	protected function incrementCounters(
 		&$levelCounter,
 		&$levelEntranceCounter,
 		&$contextCounter,

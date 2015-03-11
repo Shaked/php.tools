@@ -1,14 +1,6 @@
 <?php
-final class ReindentObjOps extends FormatterPass {
+final class ReindentObjOps extends ReindentAndAlignObjOps {
 	const ALIGN_WITH_INDENT = 1;
-
-	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_OBJECT_OPERATOR])) {
-			return true;
-		}
-
-		return false;
-	}
 
 	public function format($source) {
 		$this->tkns = token_get_all($source);
@@ -145,77 +137,5 @@ final class ReindentObjOps extends FormatterPass {
 			}
 		}
 		return $this->code;
-	}
-
-	private function indentParenthesesContent() {
-		$count = 0;
-		$i = $this->ptr;
-		$sizeof_tokens = sizeof($this->tkns);
-		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
-			$token = &$this->tkns[$i];
-			list($id, $text) = $this->getToken($token);
-			if (T_WHITESPACE == $id && $this->hasLn($text)) {
-				$token[1] = $text . $this->getIndent(+1);
-				continue;
-			}
-			if (ST_PARENTHESES_OPEN == $id) {
-				++$count;
-			}
-			if (ST_PARENTHESES_CLOSE == $id) {
-				--$count;
-			}
-			if (0 == $count) {
-				break;
-			}
-		}
-	}
-
-	private function injectPlaceholderParenthesesContent($placeholder) {
-		$count = 0;
-		$i = $this->ptr;
-		$sizeof_tokens = sizeof($this->tkns);
-		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
-			$token = &$this->tkns[$i];
-			list($id, $text) = $this->getToken($token);
-			if (T_WHITESPACE == $id && $this->hasLn($text)) {
-				$token[1] = str_replace($this->newLine, $this->newLine . $placeholder, $text);
-				continue;
-			}
-			if (ST_PARENTHESES_OPEN == $id) {
-				++$count;
-			}
-			if (ST_PARENTHESES_CLOSE == $id) {
-				--$count;
-			}
-			if (0 == $count) {
-				break;
-			}
-		}
-	}
-
-	private function incrementCounters(
-		&$levelCounter,
-		&$levelEntranceCounter,
-		&$contextCounter,
-		&$maxContextCounter,
-		&$touchCounter,
-		&$alignType,
-		&$printedPlaceholder
-	) {
-		++$levelCounter;
-		if (!isset($levelEntranceCounter[$levelCounter])) {
-			$levelEntranceCounter[$levelCounter] = 0;
-		}
-		++$levelEntranceCounter[$levelCounter];
-		if (!isset($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
-			$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
-			$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
-			$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
-			$alignType[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
-			$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]] = 0;
-		}
-		++$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
-		$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = max($maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]);
-
 	}
 }
