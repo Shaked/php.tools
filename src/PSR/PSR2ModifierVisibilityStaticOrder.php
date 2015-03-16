@@ -54,6 +54,8 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						$this->appendCode($text);
 					}
 					break;
+				case T_VAR:
+					$text = 'public';
 				case T_PUBLIC:
 				case T_PRIVATE:
 				case T_PROTECTED:

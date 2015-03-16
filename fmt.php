@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.13.0");;
+define("VERSION", "7.13.1");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -4560,6 +4560,8 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						$this->appendCode($text);
 					}
 					break;
+				case T_VAR:
+					$text = 'public';
 				case T_PUBLIC:
 				case T_PRIVATE:
 				case T_PROTECTED:

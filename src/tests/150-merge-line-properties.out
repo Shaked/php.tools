@@ -11,7 +11,7 @@ class Foo {
 	protected static $var_foo3;
 	private static $FooBar3;
 	private static $FooBar5;
-	var $old = 'foo';
+	public $old = 'foo';
 }
 
 abstract class Foo2 {
