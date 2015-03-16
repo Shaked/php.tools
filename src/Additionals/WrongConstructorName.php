@@ -16,7 +16,9 @@ final class WrongConstructorName extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					$touchedNamespace = true;
+					if (!$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+						$touchedNamespace = true;
+					}
 					$this->appendCode($text);
 					break;
 				case T_CLASS:

@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.12.0");;
+define("VERSION", "7.12.1");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -1350,7 +1350,7 @@ final class AutoImportPass extends FormatterPass {
 			$nextTokens[] = $popToken;
 			while (($token = array_shift($nextTokens))) {
 				list($id, $text) = $this->getToken($token);
-				if (T_NAMESPACE == $id) {
+				if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 					$touchedNamespace = true;
 				}
 				if (T_USE === $id) {
@@ -1446,7 +1446,7 @@ final class AutoImportPass extends FormatterPass {
 		$namespaceName = '';
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
-			if (T_NAMESPACE == $id) {
+			if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 				while (list($index, $token) = each($tokens)) {
 					list($id, $text) = $this->getToken($token);
 					if (T_NS_SEPARATOR == $id || T_STRING == $id) {
@@ -1491,7 +1491,7 @@ final class AutoImportPass extends FormatterPass {
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 
-			if (T_NAMESPACE == $id) {
+			if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 				$touchedNamespace = true;
 			}
 			if (T_FUNCTION == $id) {
@@ -1530,7 +1530,7 @@ final class AutoImportPass extends FormatterPass {
 		$tokens = token_get_all($source);
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
-			if (T_NAMESPACE == $id) {
+			if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 				++$namespaceCount;
 			}
 		}
@@ -1546,6 +1546,9 @@ final class AutoImportPass extends FormatterPass {
 			switch ($id) {
 				case T_NAMESPACE:
 					$return .= $text;
+					if ($this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+						break;
+					}
 					while (list($index, $token) = each($tokens)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
@@ -2342,7 +2345,7 @@ final class OrderUseClauses extends FormatterPass {
 			) {
 				++$classRelatedCount;
 			}
-			if (T_NAMESPACE == $id) {
+			if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 				++$namespaceCount;
 			}
 		}
@@ -2400,7 +2403,7 @@ final class OrderUseClauses extends FormatterPass {
 								$touchedTUse = true;
 							}
 
-							if (T_NAMESPACE == $id) {
+							if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 								prev($tokens);
 								break;
 							}
@@ -3542,10 +3545,12 @@ final class ResizeSpaces extends FormatterPass {
 					}
 					$touchedUse = true;
 					break;
+				case T_NAMESPACE:
+					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_SEMI_COLON, T_NS_SEPARATOR])));
+					break;
 				case T_RETURN:
 				case T_YIELD:
 				case T_ECHO:
-				case T_NAMESPACE:
 				case T_VAR:
 				case T_NEW:
 				case T_CONST:
@@ -4463,6 +4468,10 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
+					if ($this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+						$this->appendCode($text);
+						break;
+					}
 					$this->appendCode($this->getCrlf($this->leftTokenIs(ST_CURLY_CLOSE)) . $text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
@@ -5808,6 +5817,9 @@ final class EncapsulateNamespaces extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
+					if ($this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+						break;
+					}
 					$this->appendCode($text);
 					list($foundId, $foundText) = $this->printAndStopAt([ST_CURLY_OPEN, ST_SEMI_COLON]);
 					if (ST_CURLY_OPEN == $foundId) {
@@ -6315,7 +6327,7 @@ final class MergeNamespaceWithOpenTag extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					if ($this->leftTokenIs(T_OPEN_TAG)) {
+					if ($this->leftTokenIs(T_OPEN_TAG) && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 						$this->rtrimAndAppendCode($this->newLine . $text);
 						break 2;
 					}
@@ -8008,7 +8020,9 @@ final class WrongConstructorName extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					$touchedNamespace = true;
+					if (!$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+						$touchedNamespace = true;
+					}
 					$this->appendCode($text);
 					break;
 				case T_CLASS:
@@ -8585,7 +8599,7 @@ final class NamespaceMergeWithOpenTag extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
-					if ($this->leftTokenIs(T_OPEN_TAG)) {
+					if ($this->leftTokenIs(T_OPEN_TAG) && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 						$this->rtrimAndAppendCode($this->getSpace() . $text);
 						break 2;
 					}

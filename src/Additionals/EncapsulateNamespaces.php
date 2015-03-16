@@ -16,6 +16,9 @@ final class EncapsulateNamespaces extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
+					if ($this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+						break;
+					}
 					$this->appendCode($text);
 					list($foundId, $foundText) = $this->printAndStopAt([ST_CURLY_OPEN, ST_SEMI_COLON]);
 					if (ST_CURLY_OPEN == $foundId) {

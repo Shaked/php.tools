@@ -25,7 +25,7 @@ final class AutoImportPass extends FormatterPass {
 			$nextTokens[] = $popToken;
 			while (($token = array_shift($nextTokens))) {
 				list($id, $text) = $this->getToken($token);
-				if (T_NAMESPACE == $id) {
+				if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 					$touchedNamespace = true;
 				}
 				if (T_USE === $id) {
@@ -121,7 +121,7 @@ final class AutoImportPass extends FormatterPass {
 		$namespaceName = '';
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
-			if (T_NAMESPACE == $id) {
+			if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 				while (list($index, $token) = each($tokens)) {
 					list($id, $text) = $this->getToken($token);
 					if (T_NS_SEPARATOR == $id || T_STRING == $id) {
@@ -166,7 +166,7 @@ final class AutoImportPass extends FormatterPass {
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 
-			if (T_NAMESPACE == $id) {
+			if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 				$touchedNamespace = true;
 			}
 			if (T_FUNCTION == $id) {
@@ -205,7 +205,7 @@ final class AutoImportPass extends FormatterPass {
 		$tokens = token_get_all($source);
 		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
-			if (T_NAMESPACE == $id) {
+			if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 				++$namespaceCount;
 			}
 		}
@@ -221,6 +221,9 @@ final class AutoImportPass extends FormatterPass {
 			switch ($id) {
 				case T_NAMESPACE:
 					$return .= $text;
+					if ($this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+						break;
+					}
 					while (list($index, $token) = each($tokens)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;

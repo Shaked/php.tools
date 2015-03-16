@@ -16,6 +16,10 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_NAMESPACE:
+					if ($this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+						$this->appendCode($text);
+						break;
+					}
 					$this->appendCode($this->getCrlf($this->leftTokenIs(ST_CURLY_CLOSE)) . $text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);

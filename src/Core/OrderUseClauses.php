@@ -249,7 +249,7 @@ final class OrderUseClauses extends FormatterPass {
 			) {
 				++$classRelatedCount;
 			}
-			if (T_NAMESPACE == $id) {
+			if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 				++$namespaceCount;
 			}
 		}
@@ -307,7 +307,7 @@ final class OrderUseClauses extends FormatterPass {
 								$touchedTUse = true;
 							}
 
-							if (T_NAMESPACE == $id) {
+							if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 								prev($tokens);
 								break;
 							}
