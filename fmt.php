@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.11.1");;
+define("VERSION", "7.12.0");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -436,6 +436,17 @@ abstract class FormatterPass {
 		return $this->getToken($this->tkns[$this->ptr + $delta]);
 	}
 
+	protected function isShortArray() {
+		return !$this->leftTokenIs([
+			ST_BRACKET_CLOSE,
+			ST_CURLY_CLOSE,
+			ST_PARENTHESES_CLOSE,
+			ST_QUOTE,
+			T_CONSTANT_ENCAPSED_STRING,
+			T_STRING,
+			T_VARIABLE,
+		]);
+	}
 	protected function leftToken($ignoreList = [], $idx = false) {
 		$i = $this->leftTokenIdx($ignoreList);
 
@@ -1764,7 +1775,7 @@ final class ExtraCommaInArray extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
-					if (!$this->leftTokenIs([ST_BRACKET_CLOSE, ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, T_STRING, T_VARIABLE, T_ARRAY_CAST])) {
+					if ($this->isShortArray()) {
 						$contextStack[] = self::ST_SHORT_ARRAY_OPEN;
 					} else {
 						$contextStack[] = ST_BRACKET_OPEN;
@@ -6150,7 +6161,7 @@ final class LongArray extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
-					if (!$this->leftTokenIs(array(ST_BRACKET_CLOSE, ST_PARENTHESES_CLOSE, T_STRING, T_VARIABLE, T_ARRAY_CAST))) {
+					if ($this->isShortArray()) {
 						$contextStack[] = self::ST_SHORT_ARRAY_OPEN;
 						$id = self::ST_SHORT_ARRAY_OPEN;
 						$text = 'array(';
@@ -7490,7 +7501,7 @@ final class StripExtraCommaInArray extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
-					if (!$this->leftTokenIs([ST_BRACKET_CLOSE, ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, T_STRING, T_VARIABLE, T_ARRAY_CAST])) {
+					if ($this->isShortArray()) {
 						$contextStack[] = self::ST_SHORT_ARRAY_OPEN;
 					} else {
 						$contextStack[] = ST_BRACKET_OPEN;

@@ -80,6 +80,17 @@ abstract class FormatterPass {
 		return $this->getToken($this->tkns[$this->ptr + $delta]);
 	}
 
+	protected function isShortArray() {
+		return !$this->leftTokenIs([
+			ST_BRACKET_CLOSE,
+			ST_CURLY_CLOSE,
+			ST_PARENTHESES_CLOSE,
+			ST_QUOTE,
+			T_CONSTANT_ENCAPSED_STRING,
+			T_STRING,
+			T_VARIABLE,
+		]);
+	}
 	protected function leftToken($ignoreList = [], $idx = false) {
 		$i = $this->leftTokenIdx($ignoreList);
 

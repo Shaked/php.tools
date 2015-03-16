@@ -16,7 +16,7 @@ final class LongArray extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
-					if (!$this->leftTokenIs(array(ST_BRACKET_CLOSE, ST_PARENTHESES_CLOSE, T_STRING, T_VARIABLE, T_ARRAY_CAST))) {
+					if ($this->isShortArray()) {
 						$contextStack[] = self::ST_SHORT_ARRAY_OPEN;
 						$id = self::ST_SHORT_ARRAY_OPEN;
 						$text = 'array(';

@@ -15,7 +15,7 @@ final class ExtraCommaInArray extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
-					if (!$this->leftTokenIs([ST_BRACKET_CLOSE, ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, T_STRING, T_VARIABLE, T_ARRAY_CAST])) {
+					if ($this->isShortArray()) {
 						$contextStack[] = self::ST_SHORT_ARRAY_OPEN;
 					} else {
 						$contextStack[] = ST_BRACKET_OPEN;
