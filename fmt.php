@@ -351,6 +351,9 @@ if (!defined("T_YIELD")) {
 if (!defined("T_FINALLY")) {
 	define("T_FINALLY", "finally");
 }
+if (!defined("T_SPACESHIP")) {
+	define("T_SPACESHIP", "<=>");
+}
 
 define('ST_PARENTHESES_BLOCK', 'ST_PARENTHESES_BLOCK');
 define('ST_BRACKET_BLOCK', 'ST_BRACKET_BLOCK');
@@ -3623,6 +3626,7 @@ final class ResizeSpaces extends FormatterPass {
 				case T_IS_NOT_EQUAL:
 				case T_IS_NOT_IDENTICAL:
 				case T_IS_SMALLER_OR_EQUAL:
+				case T_SPACESHIP:
 				case T_MINUS_EQUAL:
 				case T_MOD_EQUAL:
 				case T_MUL_EQUAL:

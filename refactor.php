@@ -61,6 +61,9 @@ if (!defined("T_YIELD")) {
 if (!defined("T_FINALLY")) {
 	define("T_FINALLY", "finally");
 }
+if (!defined("T_SPACESHIP")) {
+	define("T_SPACESHIP", "<=>");
+}
 
 define('ST_PARENTHESES_BLOCK', 'ST_PARENTHESES_BLOCK');
 define('ST_BRACKET_BLOCK', 'ST_BRACKET_BLOCK');

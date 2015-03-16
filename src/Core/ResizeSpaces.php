@@ -287,6 +287,7 @@ final class ResizeSpaces extends FormatterPass {
 				case T_IS_NOT_EQUAL:
 				case T_IS_NOT_IDENTICAL:
 				case T_IS_SMALLER_OR_EQUAL:
+				case T_SPACESHIP:
 				case T_MINUS_EQUAL:
 				case T_MOD_EQUAL:
 				case T_MUL_EQUAL:
