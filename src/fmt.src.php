@@ -78,6 +78,7 @@ require 'Additionals/AlignTypehint.php';
 require 'Additionals/AutoPreincrement.php';
 require 'Additionals/CakePHPStyle.php';
 require 'Additionals/DocBlockToComment.php';
+require 'Additionals/DoubleToSingleQuote.php';
 require 'Additionals/EncapsulateNamespaces.php';
 require 'Additionals/GeneratePHPDoc.php';
 require 'Additionals/IndentTernaryConditions.php';
