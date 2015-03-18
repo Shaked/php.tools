@@ -52,13 +52,13 @@ class Parser
      */
     public function parse($value, $exceptionOnInvalidType = false, $objectSupport = false, $objectForMap = false)
     {
-        $this->currentLineNb = -1;
-        $this->currentLine = '';
-        $this->lines = explode("\n", $this->cleanup($value));
-
         if (!preg_match('//u', $value)) {
             throw new ParseException('The YAML value does not appear to be valid UTF-8.');
         }
+        $this->currentLineNb = -1;
+        $this->currentLine = '';
+        $value = $this->cleanup($value);
+        $this->lines = explode("\n", $value);
 
         if (function_exists('mb_internal_encoding') && ((int) ini_get('mbstring.func_overload')) & 2) {
             $mbEncoding = mb_internal_encoding();
@@ -98,7 +98,6 @@ class Parser
                     $data[] = $parser->parse($this->getNextEmbedBlock(null, true), $exceptionOnInvalidType, $objectSupport, $objectForMap);
                 } else {
                     if (isset($values['leadspaces'])
-                        && ' ' == $values['leadspaces']
                         && preg_match('#^(?P<key>'.Inline::REGEX_QUOTED_STRING.'|[^ \'"\{\[].*?) *\:(\s+(?P<value>.+?))?\s*$#u', $values['value'], $matches)
                     ) {
                         // this is a compact notation element, add to next block and parse
@@ -108,7 +107,7 @@ class Parser
 
                         $block = $values['value'];
                         if ($this->isNextLineIndented()) {
-                            $block .= "\n".$this->getNextEmbedBlock($this->getCurrentLineIndentation() + 2);
+                            $block .= "\n".$this->getNextEmbedBlock($this->getCurrentLineIndentation() + strlen($values['leadspaces']) + 1);
                         }
 
                         $data[] = $parser->parse($block, $exceptionOnInvalidType, $objectSupport, $objectForMap);
@@ -234,9 +233,8 @@ class Parser
                     throw new ParseException('Multiple documents are not supported.');
                 }
 
-                // 1-liner optionally followed by newline
-                $lineCount = count($this->lines);
-                if (1 === $lineCount || (2 === $lineCount && empty($this->lines[1]))) {
+                // 1-liner optionally followed by newline(s)
+                if ($this->lines[0] === trim($value)) {
                     try {
                         $value = Inline::parse($this->lines[0], $exceptionOnInvalidType, $objectSupport, $objectForMap, $this->refs);
                     } catch (ParseException $e) {
@@ -349,7 +347,14 @@ class Parser
             $newIndent = $indentation;
         }
 
-        $data = array(substr($this->currentLine, $newIndent));
+        $data = array();
+        if ($this->getCurrentLineIndentation() >= $newIndent) {
+            $data[] = substr($this->currentLine, $newIndent);
+        } else {
+            $this->moveToPreviousLine();
+
+            return;
+        }
 
         if ($inSequence && $oldLineIndentation === $newIndent && '-' === $data[0][0]) {
             // the previous line contained a dash but no item content, this line is a sequence item with the same indentation
@@ -372,7 +377,7 @@ class Parser
                 $removeComments = !preg_match($removeCommentsPattern, $this->currentLine);
             }
 
-            if ($isItUnindentedCollection && !$this->isStringUnIndentedCollectionItem($this->currentLine)) {
+            if ($isItUnindentedCollection && !$this->isStringUnIndentedCollectionItem($this->currentLine) && $newIndent === $indent) {
                 $this->moveToPreviousLine();
                 break;
             }
@@ -455,7 +460,7 @@ class Parser
         if (preg_match('/^'.self::FOLDED_SCALAR_PATTERN.'$/', $value, $matches)) {
             $modifiers = isset($matches['modifiers']) ? $matches['modifiers'] : '';
 
-            return $this->parseFoldedScalar($matches['separator'], preg_replace('#\d+#', '', $modifiers), intval(abs($modifiers)));
+            return $this->parseFoldedScalar($matches['separator'], preg_replace('#\d+#', '', $modifiers), (int) abs($modifiers));
         }
 
         try {
@@ -623,7 +628,7 @@ class Parser
 
         // strip YAML header
         $count = 0;
-        $value = preg_replace('#^\%YAML[: ][\d\.]+.*\n#su', '', $value, -1, $count);
+        $value = preg_replace('#^\%YAML[: ][\d\.]+.*\n#u', '', $value, -1, $count);
         $this->offset += $count;
 
         // remove leading comments
