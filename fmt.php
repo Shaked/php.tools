@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.14.0");;
+define("VERSION", "7.14.1");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -6755,11 +6755,27 @@ final class PrettyPrintDocBlocks extends AdditionalPass {
 			}
 
 			if ($weightA == $weightB) {
-				$weightA = substr(strrchr($a, ":"), 1);
-				$weightB = substr(strrchr($b, ":"), 1);
+				$weightA = substr(strrchr($a, ':'), 1);
+				$weightB = substr(strrchr($b, ':'), 1);
 			}
 			return $weightA - $weightB;
 		});
+
+		// Filter empty lines before '@' block
+		$emptyLineCount = 0;
+		foreach ($lines as $idx => $line) {
+			if (
+				'@' == $lines[$idx][0] &&
+				$idx - 1 > 0 &&
+				$idx - 2 > 0 &&
+				isset($lines[$idx - 2]) &&
+				empty(substr($lines[$idx - 1], 0, -2)) &&
+				empty(substr($lines[$idx - 2], 0, -2))
+			) {
+				unset($lines[$idx - 1]);
+				break;
+			}
+		}
 
 		// Align tags
 		$patterns = [
