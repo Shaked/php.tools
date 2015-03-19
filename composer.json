@@ -5,7 +5,7 @@
     "license": "BSD-3-Clause",
     "keywords": ["language syntax", "formatter", "formatting", "psr1", "psr2", "coding", "style"],
     "homepage": "http://www.cirello.org/php.tools/",
-    "bin": ["fmt.php","refactor.php","php.tools"],
+    "bin": ["fmt.php","refactor.php","php.tools","aphpfmt"],
     "authors": [
         {
             "name": "Carlos C",
