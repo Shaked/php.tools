@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.14.1");;
+define("VERSION", "7.15.0");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -1082,7 +1082,6 @@ final class CodeFormatter {
 		'RTrim' => false,
 		'WordWrap' => false,
 
-		'IndentTernaryConditions' => false,
 		'RestoreComments' => false,
 		'UpgradeToPreg' => false,
 		'DocBlockToComment' => false,
@@ -1131,6 +1130,7 @@ final class CodeFormatter {
 		'PSR1OpenTags' => false,
 
 		'EliminateDuplicatedEmptyLines' => false,
+		'IndentTernaryConditions' => false,
 		'Reindent' => false,
 		'ReindentAndAlignObjOps' => false,
 		'ReindentObjOps' => false,

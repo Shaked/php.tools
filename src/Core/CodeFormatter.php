@@ -13,7 +13,6 @@ final class CodeFormatter {
 		'RTrim' => false,
 		'WordWrap' => false,
 
-		'IndentTernaryConditions' => false,
 		'RestoreComments' => false,
 		'UpgradeToPreg' => false,
 		'DocBlockToComment' => false,
@@ -62,6 +61,7 @@ final class CodeFormatter {
 		'PSR1OpenTags' => false,
 
 		'EliminateDuplicatedEmptyLines' => false,
+		'IndentTernaryConditions' => false,
 		'Reindent' => false,
 		'ReindentAndAlignObjOps' => false,
 		'ReindentObjOps' => false,
