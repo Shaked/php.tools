@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.15.1");;
+define("VERSION", "7.15.2");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -2746,6 +2746,8 @@ class ReindentAndAlignObjOps extends FormatterPass {
 							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 							$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 							$this->printUntilAny([ST_PARENTHESES_CLOSE, ST_COMMA]);
+						} elseif (ST_PARENTHESES_CLOSE == $foundToken) {
+							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 						}
 					}
 					break;
