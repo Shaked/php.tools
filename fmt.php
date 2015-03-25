@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.15.0");;
+define("VERSION", "7.15.1");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -4317,6 +4317,9 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 								break;
 							} elseif (ST_CURLY_OPEN === $id) {
 								prev($this->tkns);
+								break;
+							} elseif (ST_SEMI_COLON === $id) {
+								$this->appendCode($text);
 								break;
 							} else {
 								$this->appendCode($text);

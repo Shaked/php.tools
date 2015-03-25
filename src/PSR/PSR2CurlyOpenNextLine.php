@@ -53,6 +53,9 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 							} elseif (ST_CURLY_OPEN === $id) {
 								prev($this->tkns);
 								break;
+							} elseif (ST_SEMI_COLON === $id) {
+								$this->appendCode($text);
+								break;
 							} else {
 								$this->appendCode($text);
 							}
