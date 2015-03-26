@@ -32,26 +32,26 @@ if ($this->{$bar}[$idx](1 == $a) === "") {}
 
 if ($a == $b) {}
 
-$result = null === $b ? (null === $a ? 0 : 0 === $a->b):0 === $b->a;
+$result = null === $b ? (null === $a ? 0 : 0 === $a->b) : 0 === $b->a;
 
 if ($a == $b) {
-	$result = null === $b ? (null === $a ? 0 : 0 === $a->b):0 === $b->a;
+	$result = null === $b ? (null === $a ? 0 : 0 === $a->b) : 0 === $b->a;
 }
 
 if ($a == $b) {
-	$result = null === $b ? (null === $a ? 0 : 0 === $a->{$b}):0 === $b->{$a};
+	$result = null === $b ? (null === $a ? 0 : 0 === $a->{$b}) : 0 === $b->{$a};
 } elseif ((null === $b) === $c) {
 	$result = false === $d;
 }
 
 if ($a == $b) {
-	$result = null === $b ? (null === $a ? 0 : 0 === $a->b->c):0 === $b->a->c;
+	$result = null === $b ? (null === $a ? 0 : 0 === $a->b->c) : 0 === $b->a->c;
 } elseif ((null === $b) === $c) {
 	$result = false === $d;
 }
 
 if ($a == $b) {
-	$result = null === $b ? (null === $a ? 0 : 0 === $a->{$b}->c):0 === $b->{$a}->c;
+	$result = null === $b ? (null === $a ? 0 : 0 === $a->{$b}->c) : 0 === $b->{$a}->c;
 } elseif ((null === $b) === $c) {
 	$result = false === $d;
 }
@@ -124,26 +124,26 @@ if ($this->{$bar}[$idx](1 != $a) !== "") {}
 
 if ($a != $b) {}
 
-$result = null !== $b ? (null !== $a ? 0 : 0 !== $a->b):0 !== $b->a;
+$result = null !== $b ? (null !== $a ? 0 : 0 !== $a->b) : 0 !== $b->a;
 
 if ($a != $b) {
-	$result = null !== $b ? (null !== $a ? 0 : 0 !== $a->b):0 !== $b->a;
+	$result = null !== $b ? (null !== $a ? 0 : 0 !== $a->b) : 0 !== $b->a;
 }
 
 if ($a != $b) {
-	$result = null !== $b ? (null !== $a ? 0 : 0 !== $a->{$b}):0 !== $b->{$a};
+	$result = null !== $b ? (null !== $a ? 0 : 0 !== $a->{$b}) : 0 !== $b->{$a};
 } elseif ((null !== $b) !== $c) {
 	$result = false !== $d;
 }
 
 if ($a != $b) {
-	$result = null !== $b ? (null !== $a ? 0 : 0 !== $a->b->c):0 !== $b->a->c;
+	$result = null !== $b ? (null !== $a ? 0 : 0 !== $a->b->c) : 0 !== $b->a->c;
 } elseif ((null !== $b) !== $c) {
 	$result = false !== $d;
 }
 
 if ($a != $b) {
-	$result = null !== $b ? (null !== $a ? 0 : 0 !== $a->{$b}->c):0 !== $b->{$a}->c;
+	$result = null !== $b ? (null !== $a ? 0 : 0 !== $a->{$b}->c) : 0 !== $b->{$a}->c;
 } elseif ((null !== $b) !== $c) {
 	$result = false !== $d;
 }

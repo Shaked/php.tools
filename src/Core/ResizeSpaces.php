@@ -23,7 +23,7 @@ final class ResizeSpaces extends FormatterPass {
 		$this->code = '';
 		$this->useCache = true;
 
-		$inTernaryOperator = false;
+		$inTernaryOperator = 0;
 		$shortTernaryOperator = false;
 		$touchedFunction = false;
 		$touchedUse = false;
@@ -84,7 +84,7 @@ final class ResizeSpaces extends FormatterPass {
 				case ST_QUESTION:
 				case ST_CONCAT:
 					if (ST_QUESTION == $id) {
-						$inTernaryOperator = true;
+						$inTernaryOperator++;
 						$shortTernaryOperator = $this->rightTokenIs(ST_COLON);
 					}
 					list($prevId, $prevText) = $this->inspectToken(-1);
@@ -122,26 +122,28 @@ final class ResizeSpaces extends FormatterPass {
 					) {
 						$this->appendCode($text . $this->getSpace());
 					} elseif (
-						$inTernaryOperator &&
+						$inTernaryOperator > 0 &&
 						T_WHITESPACE === $prevId &&
 						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($text . $this->getSpace());
-						$inTernaryOperator = false;
+						$inTernaryOperator--;
 					} elseif (
-						$inTernaryOperator &&
+						$inTernaryOperator > 0 &&
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE === $nextId
 					) {
 						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text);
-						$inTernaryOperator = false;
+						$inTernaryOperator--;
 					} elseif (
-						$inTernaryOperator &&
+						$inTernaryOperator > 0 &&
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text . $this->getSpace());
-						$inTernaryOperator = false;
+						$inTernaryOperator--;
+					} elseif (0 == $inTernaryOperator && $this->leftUsefulTokenIs(ST_PARENTHESES_CLOSE)) {
+						$this->appendCode($text . $this->getSpace());
 					} else {
 						$this->appendCode($text);
 					}
