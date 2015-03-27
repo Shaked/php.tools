@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.16.0");;
+define("VERSION", "7.16.1");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -1257,7 +1257,8 @@ final class CodeFormatter {
 			return [$token, $token];
 		}
 	}
-};
+}
+;
 
 final class AddMissingCurlyBraces extends FormatterPass {
 	public function candidate($source, $foundTokens) {
@@ -4525,6 +4526,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 		$finalOrAbstract = null;
 		$static = null;
 		$skipWhitespaces = false;
+		$touchedClassInterfaceTrait = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -4539,20 +4541,26 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					break;
 				case T_CLASS:
 					$found[] = T_CLASS;
+					$touchedClassInterfaceTrait = true;
 					$this->appendCode($text);
 					break;
 				case T_INTERFACE:
 					$found[] = T_INTERFACE;
+					$touchedClassInterfaceTrait = true;
 					$this->appendCode($text);
 					break;
 				case T_TRAIT:
 					$found[] = T_TRAIT;
+					$touchedClassInterfaceTrait = true;
 					$this->appendCode($text);
 					break;
 				case ST_CURLY_OPEN:
 				case ST_PARENTHESES_OPEN:
-					$found[] = $text;
+					if ($touchedClassInterfaceTrait) {
+						$found[] = $text;
+					}
 					$this->appendCode($text);
+					$touchedClassInterfaceTrait = false;
 					break;
 				case ST_CURLY_CLOSE:
 				case ST_PARENTHESES_CLOSE:
@@ -4612,19 +4620,19 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					$this->appendCode($text);
 					break;
 				case T_FUNCTION:
-					$has_found_class_or_interface = isset($found[0]) && (T_CLASS === $found[0] || T_INTERFACE === $found[0] || T_TRAIT === $found[0]) && $this->rightUsefulTokenIs([T_STRING, ST_REFERENCE]);
-					if (isset($found[0]) && $has_found_class_or_interface && null !== $finalOrAbstract) {
+					$hasFoundClassOrInterface = isset($found[0]) && (ST_CURLY_OPEN == $found[0] || T_CLASS === $found[0] || T_INTERFACE === $found[0] || T_TRAIT === $found[0]) && $this->rightUsefulTokenIs([T_STRING, ST_REFERENCE]);
+					if ($hasFoundClassOrInterface && null !== $finalOrAbstract) {
 						$this->appendCode($finalOrAbstract . $this->getSpace());
 					}
-					if (isset($found[0]) && $has_found_class_or_interface && null !== $visibility) {
+					if ($hasFoundClassOrInterface && null !== $visibility) {
 						$this->appendCode($visibility . $this->getSpace());
 					} elseif (
-						isset($found[0]) && $has_found_class_or_interface &&
+						$hasFoundClassOrInterface &&
 						!$this->leftTokenIs([T_DOUBLE_ARROW, T_RETURN, ST_EQUAL, ST_COMMA, ST_PARENTHESES_OPEN])
 					) {
 						$this->appendCode('public' . $this->getSpace());
 					}
-					if (isset($found[0]) && $has_found_class_or_interface && null !== $static) {
+					if ($hasFoundClassOrInterface && null !== $static) {
 						$this->appendCode($static . $this->getSpace());
 					}
 					$this->appendCode($text);
@@ -4646,7 +4654,8 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 		}
 		return $this->code;
 	}
-};
+}
+;
 final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;

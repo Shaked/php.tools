@@ -1,0 +1,25 @@
+<?php
+namespace A {
+    class Test
+    {
+        public static function show()
+        {
+            echo "Test::show\n";
+        }
+    }
+
+    if ($a) {
+        function a()
+        {
+
+        }
+    }
+
+}
+
+if ($a) {
+    function a()
+    {
+
+    }
+}
