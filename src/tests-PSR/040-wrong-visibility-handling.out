@@ -2,6 +2,8 @@
 namespace A {
     class Test
     {
+        protected static $rules = array();
+
         public static function show()
         {
             echo "Test::show\n";

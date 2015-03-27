@@ -104,6 +104,7 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						$skipWhitespaces = false;
 					}
 					$this->appendCode($text);
+					$this->printUntil(ST_SEMI_COLON);
 					break;
 				case T_FUNCTION:
 					$hasFoundClassOrInterface = isset($found[0]) && (ST_CURLY_OPEN == $found[0] || T_CLASS === $found[0] || T_INTERFACE === $found[0] || T_TRAIT === $found[0]) && $this->rightUsefulTokenIs([T_STRING, ST_REFERENCE]);
