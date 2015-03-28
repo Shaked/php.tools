@@ -7,4 +7,5 @@ Somclass\join();
 Join\do();
 
 new Join\ClassName();
-new \join();
+new \implode();
+new NS\join();

@@ -212,7 +212,7 @@ final class ResizeSpaces extends FormatterPass {
 					$touchedUse = true;
 					break;
 				case T_NAMESPACE:
-					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_SEMI_COLON, T_NS_SEPARATOR])));
+					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_SEMI_COLON, T_NS_SEPARATOR, T_DOUBLE_COLON])));
 					break;
 				case T_RETURN:
 				case T_YIELD:

@@ -8,3 +8,4 @@ Join\do();
 
 new Join\ClassName();
 new \join();
+new NS\join();

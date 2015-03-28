@@ -71,6 +71,7 @@ require 'PSR/PSR2SingleEmptyLineAndStripClosingTag.php';
 require 'PSR/PsrDecorator.php';
 
 require 'Additionals/AddMissingParentheses.php';
+require 'Additionals/AliasToMaster.php';
 require 'Additionals/AlignDoubleArrow.php';
 require 'Additionals/AlignDoubleSlashComments.php';
 require 'Additionals/AlignEquals.php';
