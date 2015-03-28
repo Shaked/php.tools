@@ -13,6 +13,7 @@ final class CodeFormatter {
 		'RTrim' => false,
 		'WordWrap' => false,
 
+		'ConvertOpenTagWithEcho' => false,
 		'RestoreComments' => false,
 		'UpgradeToPreg' => false,
 		'DocBlockToComment' => false,

@@ -77,6 +77,7 @@ require 'Additionals/AlignEquals.php';
 require 'Additionals/AlignTypehint.php';
 require 'Additionals/AutoPreincrement.php';
 require 'Additionals/CakePHPStyle.php';
+require 'Additionals/ConvertOpenTagWithEcho.php';
 require 'Additionals/DocBlockToComment.php';
 require 'Additionals/DoubleToSingleQuote.php';
 require 'Additionals/EncapsulateNamespaces.php';
