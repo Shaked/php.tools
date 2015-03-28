@@ -240,7 +240,7 @@ if (!isset($testEnv)) {
 	if (isset($opts['selfupdate'])) {
 		$opts = [
 			'http' => [
-				'method' => "GET",
+				'method' => 'GET',
 				'header' => "User-agent: php.tools fmt.phar selfupdate\r\n",
 			],
 		];
@@ -269,7 +269,7 @@ if (!isset($testEnv)) {
 			}
 		}
 		if (sha1_file($argv[0]) != $phar_sha1) {
-			copy($argv[0], $argv[0] . "~");
+			copy($argv[0], $argv[0] . '~');
 			file_put_contents($argv[0], $phar_file);
 			chmod($argv[0], 0777 & ~umask());
 			fwrite(STDERR, 'Updated successfully' . PHP_EOL);
@@ -292,7 +292,7 @@ if (!isset($testEnv)) {
 		}
 		$iniOpts = parse_ini_file($opts['config'], true);
 		if (!empty($iniOpts)) {
-			$opts = $iniOpts;
+			$opts += $iniOpts;
 		}
 	} elseif (file_exists('.php.tools.ini') && is_file('.php.tools.ini')) {
 		fwrite(STDERR, 'Configuration file found' . PHP_EOL);
@@ -497,7 +497,7 @@ if (!isset($testEnv)) {
 			exit(0);
 		}
 		if (!is_file($argv[1])) {
-			fwrite(STDERR, "File not found: " . $argv[1] . PHP_EOL);
+			fwrite(STDERR, 'File not found: ' . $argv[1] . PHP_EOL);
 			exit(255);
 		}
 		$argv = array_values($argv);
@@ -667,7 +667,7 @@ if (!isset($testEnv)) {
 		fwrite(STDERR, ' ' . $fileCount . ' files total' . PHP_EOL);
 		fwrite(STDERR, 'Took ' . round(microtime(true) - $start, 2) . 's' . PHP_EOL);
 		if (sizeof($missingFiles)) {
-			fwrite(STDERR, "Files not found: " . PHP_EOL);
+			fwrite(STDERR, 'Files not found: ' . PHP_EOL);
 			foreach ($missingFiles as $file) {
 				fwrite(STDERR, "\t - " . $file . PHP_EOL);
 			}
