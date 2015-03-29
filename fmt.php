@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.18.1");;
+define("VERSION", "7.18.2");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -2942,6 +2942,7 @@ class ReindentAndAlignObjOps extends FormatterPass {
 				}
 			}
 		}
+		$this->code = preg_replace('/' . str_replace('%d', '.*', preg_quote(self::ALIGNABLE_OBJOP)) . '/', '', $this->code);
 		return $this->code;
 	}
 

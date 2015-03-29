@@ -241,6 +241,7 @@ class ReindentAndAlignObjOps extends FormatterPass {
 				}
 			}
 		}
+		$this->code = preg_replace('/' . str_replace('%d', '.*', preg_quote(self::ALIGNABLE_OBJOP)) . '/', '', $this->code);
 		return $this->code;
 	}
 
