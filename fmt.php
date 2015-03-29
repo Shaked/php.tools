@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.18.2");;
+define("VERSION", "7.19.0");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -2730,6 +2730,19 @@ class ReindentAndAlignObjOps extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case ST_QUOTE:
+					$this->appendCode($text);
+					$this->printUntilTheEndOfString();
+					break;
+				case T_CLOSE_TAG:
+					$this->appendCode($text);
+					$this->printUntil(T_OPEN_TAG);
+					break;
+				case T_START_HEREDOC:
+					$this->appendCode($text);
+					$this->printUntil(T_END_HEREDOC);
+					break;
+
 				case T_WHILE:
 				case T_IF:
 				case T_FOR:
@@ -3165,6 +3178,19 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case ST_QUOTE:
+					$this->appendCode($text);
+					$this->printUntilTheEndOfString();
+					break;
+				case T_CLOSE_TAG:
+					$this->appendCode($text);
+					$this->printUntil(T_OPEN_TAG);
+					break;
+				case T_START_HEREDOC:
+					$this->appendCode($text);
+					$this->printUntil(T_END_HEREDOC);
+					break;
+
 				case T_WHILE:
 				case T_IF:
 				case T_FOR:

@@ -18,6 +18,19 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case ST_QUOTE:
+					$this->appendCode($text);
+					$this->printUntilTheEndOfString();
+					break;
+				case T_CLOSE_TAG:
+					$this->appendCode($text);
+					$this->printUntil(T_OPEN_TAG);
+					break;
+				case T_START_HEREDOC:
+					$this->appendCode($text);
+					$this->printUntil(T_END_HEREDOC);
+					break;
+
 				case T_WHILE:
 				case T_IF:
 				case T_FOR:
