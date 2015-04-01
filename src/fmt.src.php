@@ -85,6 +85,7 @@ require 'Additionals/EncapsulateNamespaces.php';
 require 'Additionals/GeneratePHPDoc.php';
 require 'Additionals/IndentTernaryConditions.php';
 require 'Additionals/JoinToImplode.php';
+require 'Additionals/LeftWordWrap.php';
 require 'Additionals/LongArray.php';
 require 'Additionals/MergeElseIf.php';
 require 'Additionals/MergeNamespaceWithOpenTag.php';
