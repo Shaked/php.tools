@@ -3641,7 +3641,13 @@ final class ResizeSpaces extends FormatterPass {
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_SEMI_COLON)));
 					break;
 				case T_CLASS:
-					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_SEMI_COLON) && !$this->leftTokenIs([T_DOUBLE_COLON])));
+					$this->appendCode(
+						$text .
+						$this->getSpace(
+							$this->rightTokenIs(ST_PARENTHESES_OPEN) ||
+							(!$this->rightTokenIs(ST_SEMI_COLON) && !$this->leftTokenIs([T_DOUBLE_COLON]))
+						)
+					);
 					break;
 				case T_EXTENDS:
 				case T_IMPLEMENTS:
