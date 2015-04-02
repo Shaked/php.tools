@@ -273,6 +273,7 @@ final class ResizeSpaces extends FormatterPass {
 				case T_INSTANCEOF:
 				case T_INSTEADOF:
 				case T_AS:
+				case T_COALESCE:
 					$this->appendCode($this->getSpace() . $text . $this->getSpace());
 					break;
 				case T_LOGICAL_AND:
