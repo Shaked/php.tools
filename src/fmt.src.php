@@ -78,6 +78,8 @@ require 'Additionals/AlignEquals.php';
 require 'Additionals/AlignTypehint.php';
 require 'Additionals/AutoPreincrement.php';
 require 'Additionals/CakePHPStyle.php';
+require 'Additionals/ClassToSelf.php';
+require 'Additionals/ClassToStatic.php';
 require 'Additionals/ConvertOpenTagWithEcho.php';
 require 'Additionals/DocBlockToComment.php';
 require 'Additionals/DoubleToSingleQuote.php';

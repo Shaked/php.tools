@@ -108,6 +108,8 @@ final class CodeFormatter {
 		'ReplaceIsNull' => false,
 		'DoubleToSingleQuote' => false,
 		'LeftWordWrap' => false,
+		'ClassToSelf' => false,
+		'ClassToStatic' => false,
 	];
 
 	public function __construct() {
