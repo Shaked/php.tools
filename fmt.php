@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.21.0");;
+define("VERSION", "7.21.1");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -6201,7 +6201,11 @@ final class DoubleToSingleQuote extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CONSTANT_ENCAPSED_STRING:
-					if ('"' == $text[0] && false === strpos($text, '\\')) {
+					if (
+						'"' == $text[0] &&
+						false === strpos($text, '\'') &&
+						!preg_match('/(?<!\\\\)(?:\\\\{2})*\\\\(?!["\\\\])/', $text)
+					) {
 						$text[0] = '\'';
 						$lastByte = strlen($text) - 1;
 						$text[$lastByte] = '\'';

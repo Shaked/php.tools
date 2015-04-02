@@ -3,6 +3,6 @@
 $var = 'some var';
 
 $a = 'literal' . 'anotherliteral' . "$var";
-$b = "\"literal\"" . 'anotherliteral' . "$var";
+$b = '"literal"' . 'anotherliteral' . "$var";
 echo $a, PHP_EOL;
 echo $b, PHP_EOL;
