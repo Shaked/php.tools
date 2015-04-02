@@ -274,7 +274,7 @@ final class ResizeSpaces extends FormatterPass {
 					$this->appendCode(
 						$text .
 						$this->getSpace(
-							!($this->rightTokenIs(ST_PARENTHESES_OPEN) && $this->leftUsefulTokenIs(T_NEW))
+							!($this->rightTokenIs([ST_PARENTHESES_OPEN, T_EXTENDS, T_IMPLEMENTS]) && $this->leftUsefulTokenIs(T_NEW))
 							&&
 							(!$this->rightTokenIs(ST_SEMI_COLON) && !$this->leftTokenIs([T_DOUBLE_COLON]))
 						)
