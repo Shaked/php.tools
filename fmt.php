@@ -3402,6 +3402,7 @@ final class ResizeSpaces extends FormatterPass {
 		$shortTernaryOperator = false;
 		$touchedFunction = false;
 		$touchedUse = false;
+		$touchedGroupedUse = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -3557,6 +3558,10 @@ final class ResizeSpaces extends FormatterPass {
 					} elseif ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC])) {
 						$this->appendCode($text . $this->getSpace());
 						break;
+					} elseif ($this->leftUsefulTokenIs(T_NS_SEPARATOR)) {
+						$touchedGroupedUse = true;
+						$this->appendCode($text . $this->getSpace());
+						break;
 					} else {
 						$this->appendCode($text);
 						break;
@@ -3644,7 +3649,8 @@ final class ResizeSpaces extends FormatterPass {
 					$this->appendCode(
 						$text .
 						$this->getSpace(
-							$this->rightTokenIs(ST_PARENTHESES_OPEN) ||
+							!($this->rightTokenIs(ST_PARENTHESES_OPEN) && $this->leftUsefulTokenIs(T_NEW))
+							&&
 							(!$this->rightTokenIs(ST_SEMI_COLON) && !$this->leftTokenIs([T_DOUBLE_COLON]))
 						)
 					);
@@ -3739,6 +3745,15 @@ final class ResizeSpaces extends FormatterPass {
 						$this->appendCode($text . $this->getSpace());
 						break;
 					}
+
+				case ST_CURLY_CLOSE:
+					if ($touchedGroupedUse) {
+						$touchedGroupedUse = false;
+						$this->appendCode($this->getSpace(!$this->hasLnBefore()));
+					}
+					$this->appendCode($text);
+					break;
+
 				default:
 					$this->appendCode($text);
 					break;
