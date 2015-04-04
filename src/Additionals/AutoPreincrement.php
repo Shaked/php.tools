@@ -108,7 +108,11 @@ class AutoPreincrement extends AdditionalPass {
 					list($id, $text) = $this->getToken($token);
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidateTokens);
+						$text = $this->scanAndReplaceCurly($tkns, $ptr, ST_CURLY_OPEN, 'swap', $this->candidateTokens);
+					} elseif (T_CURLY_OPEN == $id) {
+						$text = $this->scanAndReplaceCurly($tkns, $ptr, ST_CURLY_OPEN, 'swap', $this->candidateTokens);
+					} elseif (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+						$text = $this->scanAndReplaceCurly($tkns, $ptr, ST_DOLLAR . ST_CURLY_OPEN, 'swap', $this->candidateTokens);
 					} elseif (ST_BRACKET_OPEN == $id) {
 						$text = $this->scanAndReplace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', $this->candidateTokens);
 					} elseif (ST_PARENTHESES_OPEN == $id) {

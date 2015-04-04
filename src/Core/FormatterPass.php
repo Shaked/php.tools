@@ -411,6 +411,51 @@ abstract class FormatterPass {
 
 	}
 
+	protected function scanAndReplaceCurly(&$tkns, &$ptr, $start, $call, $look_for) {
+		$look_for = array_flip($look_for);
+		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
+		$tmp = '';
+		$tknCount = 1;
+		$foundPotentialTokens = false;
+		while (list($ptr, $token) = each($tkns)) {
+			list($id, $text) = $this->getToken($token);
+			if (isset($look_for[$id])) {
+				$foundPotentialTokens = true;
+			}
+			if (ST_CURLY_OPEN == $id) {
+				if (empty($start)) {
+					$start = ST_CURLY_OPEN;
+				}
+				++$tknCount;
+			}
+			if (T_CURLY_OPEN == $id) {
+				if (empty($start)) {
+					$start = ST_CURLY_OPEN;
+				}
+				++$tknCount;
+			}
+			if (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+				if (empty($start)) {
+					$start = ST_DOLLAR . ST_CURLY_OPEN;
+				}
+				++$tknCount;
+			}
+			if (ST_CURLY_CLOSE == $id) {
+				--$tknCount;
+			}
+			$tkns[$ptr] = null;
+			if (0 == $tknCount) {
+				break;
+			}
+			$tmp .= $text;
+		}
+		if ($foundPotentialTokens) {
+			return $start . str_replace($placeholder, '', $this->{$call}($placeholder . $tmp)) . ST_CURLY_CLOSE;
+		}
+		return $start . $tmp . ST_CURLY_CLOSE;
+
+	}
+
 	protected function setIndent($increment) {
 		$this->indent += $increment;
 		if ($this->indent < 0) {

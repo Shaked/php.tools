@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.21.1");;
+define("VERSION", "7.21.2");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -770,6 +770,51 @@ abstract class FormatterPass {
 			return $start . str_replace($placeholder, '', $this->{$call}($placeholder . $tmp)) . $end;
 		}
 		return $start . $tmp . $end;
+
+	}
+
+	protected function scanAndReplaceCurly(&$tkns, &$ptr, $start, $call, $look_for) {
+		$look_for = array_flip($look_for);
+		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
+		$tmp = '';
+		$tknCount = 1;
+		$foundPotentialTokens = false;
+		while (list($ptr, $token) = each($tkns)) {
+			list($id, $text) = $this->getToken($token);
+			if (isset($look_for[$id])) {
+				$foundPotentialTokens = true;
+			}
+			if (ST_CURLY_OPEN == $id) {
+				if (empty($start)) {
+					$start = ST_CURLY_OPEN;
+				}
+				++$tknCount;
+			}
+			if (T_CURLY_OPEN == $id) {
+				if (empty($start)) {
+					$start = ST_CURLY_OPEN;
+				}
+				++$tknCount;
+			}
+			if (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+				if (empty($start)) {
+					$start = ST_DOLLAR . ST_CURLY_OPEN;
+				}
+				++$tknCount;
+			}
+			if (ST_CURLY_CLOSE == $id) {
+				--$tknCount;
+			}
+			$tkns[$ptr] = null;
+			if (0 == $tknCount) {
+				break;
+			}
+			$tmp .= $text;
+		}
+		if ($foundPotentialTokens) {
+			return $start . str_replace($placeholder, '', $this->{$call}($placeholder . $tmp)) . ST_CURLY_CLOSE;
+		}
+		return $start . $tmp . ST_CURLY_CLOSE;
 
 	}
 
@@ -5566,7 +5611,11 @@ class AutoPreincrement extends AdditionalPass {
 					list($id, $text) = $this->getToken($token);
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'swap', $this->candidateTokens);
+						$text = $this->scanAndReplaceCurly($tkns, $ptr, ST_CURLY_OPEN, 'swap', $this->candidateTokens);
+					} elseif (T_CURLY_OPEN == $id) {
+						$text = $this->scanAndReplaceCurly($tkns, $ptr, ST_CURLY_OPEN, 'swap', $this->candidateTokens);
+					} elseif (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+						$text = $this->scanAndReplaceCurly($tkns, $ptr, ST_DOLLAR . ST_CURLY_OPEN, 'swap', $this->candidateTokens);
 					} elseif (ST_BRACKET_OPEN == $id) {
 						$text = $this->scanAndReplace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'swap', $this->candidateTokens);
 					} elseif (ST_PARENTHESES_OPEN == $id) {
@@ -8759,7 +8808,7 @@ final class YodaComparisons extends AdditionalPass {
 				if (!$this->rightTokenSubsetIsAtIdx(
 					$tkns,
 					$ptr,
-					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
+					[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN, T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES]
 				)) {
 					continue;
 				}
@@ -8767,7 +8816,11 @@ final class YodaComparisons extends AdditionalPass {
 					list($id, $text) = $this->getToken($token);
 					$tkns[$ptr] = null;
 					if (ST_CURLY_OPEN == $id) {
-						$text = $this->scanAndReplace($tkns, $ptr, ST_CURLY_OPEN, ST_CURLY_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+						$text = $this->scanAndReplaceCurly($tkns, $ptr, ST_CURLY_OPEN, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+					} elseif (T_CURLY_OPEN == $id) {
+						$text = $this->scanAndReplaceCurly($tkns, $ptr, ST_CURLY_OPEN, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
+					} elseif (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+						$text = $this->scanAndReplaceCurly($tkns, $ptr, T_DOLLAR . ST_CURLY_OPEN, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					} elseif (ST_BRACKET_OPEN == $id) {
 						$text = $this->scanAndReplace($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE, 'yodise', [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL]);
 					} elseif (ST_PARENTHESES_OPEN == $id) {
@@ -8784,7 +8837,7 @@ final class YodaComparisons extends AdditionalPass {
 						!$this->rightTokenSubsetIsAtIdx(
 							$tkns,
 							$ptr,
-							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN]
+							[T_STRING, T_VARIABLE, T_NS_SEPARATOR, T_OBJECT_OPERATOR, T_DOUBLE_COLON, ST_CURLY_OPEN, ST_PARENTHESES_OPEN, ST_BRACKET_OPEN, T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES]
 						)
 					) {
 						break;
