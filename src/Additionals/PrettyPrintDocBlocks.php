@@ -10,7 +10,6 @@ final class PrettyPrintDocBlocks extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$touchedNamespace = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -79,7 +78,6 @@ final class PrettyPrintDocBlocks extends AdditionalPass {
 		// Strip envelope
 		$docBlock = trim(str_replace(['/**', '*/'], '', $docBlock));
 		$lines = explode($this->newLine, $docBlock);
-		$newText = '';
 		foreach ($lines as $idx => $v) {
 			$v = ltrim($v);
 			if ('* ' === substr($v, 0, 2)) {
@@ -117,7 +115,6 @@ final class PrettyPrintDocBlocks extends AdditionalPass {
 		});
 
 		// Filter empty lines before '@' block
-		$emptyLineCount = 0;
 		foreach ($lines as $idx => $line) {
 			if (
 				'@' == $lines[$idx][0] &&
@@ -147,7 +144,6 @@ final class PrettyPrintDocBlocks extends AdditionalPass {
 			'@var' => 4,
 			'@type' => 4,
 		];
-		$alignableIdx = [];
 		$maxColumn = [];
 
 		foreach ($lines as $idx => $line) {

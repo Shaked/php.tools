@@ -17,22 +17,22 @@ final class YodaComparisons extends AdditionalPass {
 			if (is_null($token)) {
 				continue;
 			}
-			list($id, $text) = $this->getToken($token);
+			list($id) = $this->getToken($token);
 			switch ($id) {
 				case T_IS_EQUAL:
 				case T_IS_IDENTICAL:
 				case T_IS_NOT_EQUAL:
 				case T_IS_NOT_IDENTICAL:
 					list($left, $right) = $this->siblings($tkns, $ptr);
-					list($leftId, $leftText) = $tkns[$left];
-					list($rightId, $rightText) = $tkns[$right];
+					list($leftId) = $tkns[$left];
+					list($rightId) = $tkns[$right];
 					if ($leftId == $rightId) {
 						continue;
 					}
 
 					$leftPureVariable = $this->isPureVariable($leftId);
 					for ($leftmost = $left; $leftmost >= 0; --$leftmost) {
-						list($leftScanId, $leftScanText) = $this->getToken($tkns[$leftmost]);
+						list($leftScanId) = $this->getToken($tkns[$leftmost]);
 						if ($this->isLowerPrecedence($leftScanId)) {
 							++$leftmost;
 							break;
@@ -42,7 +42,7 @@ final class YodaComparisons extends AdditionalPass {
 
 					$rightPureVariable = $this->isPureVariable($rightId);
 					for ($rightmost = $right; $rightmost < sizeof($tkns) - 1; ++$rightmost) {
-						list($rightScanId, $rightScanText) = $this->getToken($tkns[$rightmost]);
+						list($rightScanId) = $this->getToken($tkns[$rightmost]);
 						if ($this->isLowerPrecedence($rightScanId)) {
 							--$rightmost;
 							break;

@@ -9,8 +9,6 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$parenCount = 0;
-		$bracketCount = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;

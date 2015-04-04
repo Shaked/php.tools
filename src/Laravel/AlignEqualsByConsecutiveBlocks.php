@@ -42,13 +42,13 @@ final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 				$currLine = $token[2];
 				if ($seen != $currLine) {
 					$processed[($seen - 1)] = $tokensLine;
-					$tokensLine = token_name($token[0]) . " ";
+					$tokensLine = token_name($token[0]) . ' ';
 					$seen = $currLine;
 				} else {
-					$tokensLine .= token_name($token[0]) . " ";
+					$tokensLine .= token_name($token[0]) . ' ';
 				}
 			} else {
-				$tokensLine .= $token . " ";
+				$tokensLine .= $token . ' ';
 			}
 		}
 		$processed[($seen - 1)] = $tokensLine;
@@ -105,7 +105,7 @@ final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 				}
 			}
 			array_push($temp, $index);
-			if ((count($seenArray) - 1) == $j and (count($temp) > 1)) {
+			if ((count($seenArray) - 1) == $j && (count($temp) > 1)) {
 				array_push($seenBuckets, $temp); //push to bucket
 			}
 		}

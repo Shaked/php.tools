@@ -5,11 +5,11 @@ if (ini_get('phar.readonly')) {
 	exit(0);
 }
 include 'vendor/dericofilho/csp/csp.php';
-include "Core/FormatterPass.php";
-include "version.php";
+include 'Core/FormatterPass.php';
+include 'version.php';
 
 error_reporting(E_ALL);
-$opt = getopt("Mmp");
+$opt = getopt('Mmp');
 $newver = '';
 if (isset($opt['M'])) {
 	$tmp = explode('.', VERSION);
@@ -22,7 +22,7 @@ if (isset($opt['M'])) {
 	$newver = '<?php define("VERSION", "' . ($tmp[0]) . '.' . ($tmp[1]) . '.' . ($tmp[2] + 1) . '");';
 }
 if (!empty($newver)) {
-	echo "Bumping version to: ", $newver, PHP_EOL;
+	echo 'Bumping version to: ', $newver, PHP_EOL;
 	file_put_contents('version.php', $newver);
 }
 
@@ -31,7 +31,7 @@ class Build extends FormatterPass {
 		return true;
 	}
 	public function format($source) {
-		$this->tkns = SplFixedArray::fromArray(token_get_all($source));
+		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -61,7 +61,7 @@ $pass = new Build();
 $chn = make_channel();
 $chn_done = make_channel();
 $workers = 2;
-echo "Starting ", $workers, " workers...", PHP_EOL;
+echo 'Starting ', $workers, ' workers...', PHP_EOL;
 for ($i = 0; $i < $workers; ++$i) {
 	cofunc(function ($pass, $chn, $chn_done) {
 		while (true) {
@@ -98,9 +98,9 @@ $phars = ['fmt', 'refactor'];
 foreach ($phars as $target) {
 	file_put_contents($target . '.stub.php', '<?php $inPhar = true;' . "\n" . str_replace('#!/usr/bin/env php' . "\n" . '<?php', '', file_get_contents($target . '.stub.php')));
 	$phar = new Phar($target . '.phar', FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::KEY_AS_FILENAME, $target . '.phar');
-	$phar[$target . ".stub.php"] = file_get_contents($target . '.stub.php');
+	$phar[$target . '.stub.php'] = file_get_contents($target . '.stub.php');
 	$phar->setStub('#!/usr/bin/env php' . "\n" . $phar->createDefaultStub($target . '.stub.php'));
-	file_put_contents($target . ".phar.sha1", sha1_file($target . '.phar'));
+	file_put_contents($target . '.phar.sha1', sha1_file($target . '.phar'));
 	unlink($target . '.stub.php');
 }
 echo 'done', PHP_EOL;

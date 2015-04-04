@@ -4,6 +4,11 @@ final class ConstructorPass extends FormatterPass {
 	const TYPE_SNAKE_CASE = 'snake';
 	const TYPE_GOLANG = 'golang';
 
+	/**
+	 * @var string
+	 */
+	private $type;
+
 	public function __construct($type = self::TYPE_CAMEL_CASE) {
 		if (self::TYPE_CAMEL_CASE == $type || self::TYPE_SNAKE_CASE == $type || self::TYPE_GOLANG == $type) {
 			$this->type = $type;

@@ -81,6 +81,8 @@ final class DocBlockToComment extends AdditionalPass {
 	}
 
 	protected function walkUntil($tknid) {
+		$id = null;
+		$text = null;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;

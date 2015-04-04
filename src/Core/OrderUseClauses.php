@@ -32,8 +32,6 @@ final class OrderUseClauses extends FormatterPass {
 		$newTokens = [];
 		$useStack = [0 => []];
 		$foundComma = false;
-		$touchedTUse = false;
-
 		$groupCount = 0;
 
 		$stopTokens = [ST_SEMI_COLON, ST_CURLY_OPEN];
@@ -46,7 +44,7 @@ final class OrderUseClauses extends FormatterPass {
 
 			if ((T_TRAIT === $id || T_CLASS === $id) && !$this->leftTokenSubsetIsAtIdx($tokens, $index, [T_DOUBLE_COLON], $this->ignoreFutileTokens)) {
 				$newTokens[] = $token;
-				while (list($index, $token) = each($tokens)) {
+				while (list(, $token) = each($tokens)) {
 					list($id, $text) = $this->getToken($token);
 					$newTokens[] = $token;
 				}
@@ -76,7 +74,6 @@ final class OrderUseClauses extends FormatterPass {
 				list($useTokens, $foundToken) = $this->walkAndAccumulateStopAtAny($tokens, $stopTokens);
 
 				if (ST_SEMI_COLON == $foundToken) {
-					$touchedTUse = true;
 					$useStack[$groupCount][] = 'use ' . ltrim($useTokens) . ';';
 					$newTokens[] = new SurrogateToken();
 					next($tokens);
@@ -84,7 +81,6 @@ final class OrderUseClauses extends FormatterPass {
 					$foundComma = false;
 
 				} elseif ($splitComma && ST_COMMA == $foundToken) {
-					$touchedTUse = true;
 					$useStack[$groupCount][] = 'use ' . ltrim($useTokens) . ';';
 					$newTokens[] = new SurrogateToken();
 					$newTokens[] = [T_WHITESPACE, $this->newLine . $this->newLine];
@@ -275,8 +271,8 @@ final class OrderUseClauses extends FormatterPass {
 							break;
 						}
 					}
+					$namespaceBlock = '';
 					if (ST_CURLY_OPEN === $id) {
-						$namespaceBlock = '';
 						$curlyCount = 1;
 						while (list($index, $token) = each($tokens)) {
 							list($id, $text) = $this->getToken($token);
@@ -298,7 +294,6 @@ final class OrderUseClauses extends FormatterPass {
 							}
 						}
 					} elseif (ST_SEMI_COLON === $id) {
-						$namespaceBlock = '';
 						while (list($index, $token) = each($tokens)) {
 							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;

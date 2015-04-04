@@ -12,7 +12,6 @@ final class ReindentColonBlocks extends FormatterPass {
 		$this->useCache = true;
 		$this->code = '';
 
-		$foundColon = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			if (T_DEFAULT == $id || T_CASE == $id || T_SWITCH == $id) {
@@ -25,7 +24,6 @@ final class ReindentColonBlocks extends FormatterPass {
 		$switchLevel = 0;
 		$switchCurlyCount = [];
 		$switchCurlyCount[$switchLevel] = 0;
-		$isNextCaseOrDefault = false;
 		$touchedColon = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);

@@ -6,6 +6,11 @@ final class SettersAndGettersPass extends FormatterPass {
 	const PLACEHOLDER = "/*SETTERSANDGETTERSPLACEHOLDER%s\x3*/";
 	const PLACEHOLDER_REGEX = '/(;\n\/\*SETTERSANDGETTERSPLACEHOLDER).*(\*\/)/';
 
+	/**
+	 * @var string
+	 */
+	private $type;
+
 	public function __construct($type = self::TYPE_CAMEL_CASE) {
 		if (self::TYPE_CAMEL_CASE == $type || self::TYPE_SNAKE_CASE == $type || self::TYPE_GOLANG == $type) {
 			$this->type = $type;

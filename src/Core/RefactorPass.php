@@ -46,6 +46,7 @@ final class RefactorPass extends FormatterPass {
 
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$skipCall = null;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;

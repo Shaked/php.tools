@@ -12,6 +12,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 		$this->code = '';
 		$touchedVisibility = false;
 		$touchedDocComment = false;
+		$visibilityIdx = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -38,7 +39,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 					} else {
 						$origIdx = $visibilityIdx;
 					}
-					list($ntId, $ntText) = $this->getToken($this->rightToken());
+					list($ntId) = $this->getToken($this->rightToken());
 					if (T_STRING != $ntId) {
 						$this->appendCode($text);
 						break;

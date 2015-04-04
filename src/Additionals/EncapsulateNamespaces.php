@@ -10,7 +10,6 @@ final class EncapsulateNamespaces extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$in_namespace_context = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -25,7 +24,6 @@ final class EncapsulateNamespaces extends AdditionalPass {
 						$this->appendCode($foundText);
 						$this->printCurlyBlock();
 					} elseif (ST_SEMI_COLON == $foundId) {
-						$in_namespace_context = true;
 						$this->appendCode(ST_CURLY_OPEN);
 						list($foundId, $foundText) = $this->printAndStopAt([T_NAMESPACE, T_CLOSE_TAG]);
 						if (T_CLOSE_TAG == $foundId) {

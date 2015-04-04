@@ -105,7 +105,7 @@ final class AutoImportPass extends FormatterPass {
 
 	private function singleNamespace($source) {
 		$classList = [];
-		$results = $this->oracle->query("SELECT class FROM classes ORDER BY class");
+		$results = $this->oracle->query('SELECT class FROM classes ORDER BY class');
 		while (($row = $results->fetchArray())) {
 			$className = $row['class'];
 			$classNameParts = explode('\\', $className);
@@ -181,7 +181,7 @@ final class AutoImportPass extends FormatterPass {
 			$return .= $text;
 		}
 		while (list(, $token) = each($tokens)) {
-			list($id, $text) = $this->getToken($token);
+			list(, $text) = $this->getToken($token);
 			$return .= $text;
 		}
 

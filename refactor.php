@@ -82,7 +82,7 @@ abstract class FormatterPass {
 	protected $cache = [];
 	protected $ignoreFutileTokens = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
 
-	protected function appendCode($code = "") {
+	protected function appendCode($code = '') {
 		$this->code .= $code;
 	}
 
@@ -102,7 +102,7 @@ abstract class FormatterPass {
 	}
 
 	protected function getCrlf($true = true) {
-		return $true ? $this->newLine : "";
+		return $true ? $this->newLine : '';
 	}
 
 	protected function getCrlfIndent() {
@@ -114,7 +114,7 @@ abstract class FormatterPass {
 	}
 
 	protected function getSpace($true = true) {
-		return $true ? " " : "";
+		return $true ? ' ' : '';
 	}
 
 	protected function hasLn($text) {
@@ -136,12 +136,12 @@ abstract class FormatterPass {
 	}
 
 	protected function hasLnLeftToken() {
-		list($id, $text) = $this->getToken($this->leftToken());
+		list(, $text) = $this->getToken($this->leftToken());
 		return $this->hasLn($text);
 	}
 
 	protected function hasLnRightToken() {
-		list($id, $text) = $this->getToken($this->rightToken());
+		list(, $text) = $this->getToken($this->rightToken());
 		return $this->hasLn($text);
 	}
 
@@ -163,7 +163,7 @@ abstract class FormatterPass {
 			T_VARIABLE,
 		]);
 	}
-	protected function leftToken($ignoreList = [], $idx = false) {
+	protected function leftToken($ignoreList = []) {
 		$i = $this->leftTokenIdx($ignoreList);
 
 		return $this->tkns[$i];
@@ -205,9 +205,10 @@ abstract class FormatterPass {
 		$tknids = array_flip($tknids);
 		$tknsSize = sizeof($tkns);
 		$countTokens = [];
+		$id = null;
 		for ($i = $ptr; $i < $tknsSize; $i++) {
 			$token = $tkns[$i];
-			list($id, $text) = $this->getToken($token);
+			list($id) = $this->getToken($token);
 			if (T_WHITESPACE == $id || T_COMMENT == $id || T_DOC_COMMENT == $id) {
 				continue;
 			}
@@ -219,7 +220,6 @@ abstract class FormatterPass {
 				break;
 			}
 		}
-
 		return [$id, $countTokens];
 	}
 
@@ -336,6 +336,7 @@ abstract class FormatterPass {
 	protected function printUntilAny($tknids) {
 		$tknids = array_flip($tknids);
 		$whitespaceNewLine = false;
+		$id = null;
 		if (isset($tknids[$this->newLine])) {
 			$whitespaceNewLine = true;
 		}
@@ -366,7 +367,7 @@ abstract class FormatterPass {
 		$tkns = array_filter($tkns);
 		$str = '';
 		foreach ($tkns as $token) {
-			list($id, $text) = $this->getToken($token);
+			list(, $text) = $this->getToken($token);
 			$str .= $text;
 		}
 		return $str;
@@ -449,7 +450,7 @@ abstract class FormatterPass {
 		return $this->rightTokenIs($token, $this->ignoreFutileTokens);
 	}
 
-	protected function rtrimAndAppendCode($code = "") {
+	protected function rtrimAndAppendCode($code = '') {
 		$this->code = rtrim($this->code) . $code;
 	}
 
@@ -595,6 +596,7 @@ abstract class FormatterPass {
 	protected function walkAndAccumulateStopAtAny(&$tkns, $tknids) {
 		$tknids = array_flip($tknids);
 		$ret = '';
+		$id = null;
 		while (list($index, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -868,6 +870,7 @@ final class RefactorPass extends FormatterPass {
 
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$skipCall = null;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;

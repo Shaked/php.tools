@@ -7,13 +7,12 @@ final class ReplaceIsNull extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$this->useCache = true;
-		$touchedReturn = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
 
-			if (T_STRING == $id && "is_null" == strtolower($text) && !$this->leftUsefulTokenIs([T_OBJECT_OPERATOR, T_DOUBLE_COLON])) {
+			if (T_STRING == $id && 'is_null' == strtolower($text) && !$this->leftUsefulTokenIs([T_OBJECT_OPERATOR, T_DOUBLE_COLON])) {
 				$this->appendCode('null');
 				$this->printAndStopAt(ST_PARENTHESES_OPEN);
 				$this->appendCode('===');

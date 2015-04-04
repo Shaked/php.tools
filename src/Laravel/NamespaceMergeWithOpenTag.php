@@ -25,8 +25,8 @@ final class NamespaceMergeWithOpenTag extends FormatterPass {
 					$this->appendCode($text);
 			}
 		}
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
+		while (list(, $token) = each($this->tkns)) {
+			list(, $text) = $this->getToken($token);
 			$this->appendCode($text);
 		}
 		return $this->code;

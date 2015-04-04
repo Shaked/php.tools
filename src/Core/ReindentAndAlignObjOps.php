@@ -209,7 +209,6 @@ class ReindentAndAlignObjOps extends FormatterPass {
 					break;
 			}
 		}
-		$orig_code = $this->code;
 		foreach ($maxContextCounter as $level => $entrances) {
 			foreach ($entrances as $entrance => $context) {
 				for ($j = 0; $j <= $context; ++$j) {
@@ -228,7 +227,6 @@ class ReindentAndAlignObjOps extends FormatterPass {
 
 					$lines = explode($this->newLine, $this->code);
 					$linesWithObjop = [];
-					$blockCount = 0;
 
 					foreach ($lines as $idx => $line) {
 						if (false !== strpos($line, $placeholder)) {
@@ -260,7 +258,6 @@ class ReindentAndAlignObjOps extends FormatterPass {
 
 	protected function indentParenthesesContent() {
 		$count = 0;
-		$i = $this->ptr;
 		$sizeof_tokens = sizeof($this->tkns);
 		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
 			$token = &$this->tkns[$i];
@@ -286,7 +283,6 @@ class ReindentAndAlignObjOps extends FormatterPass {
 
 	protected function injectPlaceholderParenthesesContent($placeholder) {
 		$count = 0;
-		$i = $this->ptr;
 		$sizeof_tokens = sizeof($this->tkns);
 		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
 			$token = &$this->tkns[$i];

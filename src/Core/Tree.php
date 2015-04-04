@@ -24,9 +24,9 @@ final class Tree extends FormatterPass {
 					$open .
 					rtrim($block) .
 					(
-						("\t" == substr($block, -1) || " " == substr($block, -1))
-						? "\n"
-						: ""
+						("\t" == substr($block, -1) || ' ' == substr($block, -1))
+							? "\n"
+							: ''
 					) .
 					$close
 				);
@@ -43,8 +43,7 @@ final class Tree extends FormatterPass {
 	public function parseTree($tokens) {
 		$tree = [];
 
-		$lastTouchedOperator = null;
-		while (list($index, $token) = each($tokens)) {
+		while (list(, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 
 			// SOLVE COLON BLOCKS
@@ -108,7 +107,7 @@ final class Tree extends FormatterPass {
 	public function consumeBlock(&$tkns, $start, $end) {
 		$count = 1;
 		$block = [];
-		while (list($index, $token) = each($tkns)) {
+		while (list(, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
 
 			if ($start == $id) {
@@ -129,7 +128,7 @@ final class Tree extends FormatterPass {
 	public function consumeCurlyBlock(&$tkns) {
 		$count = 1;
 		$block = [];
-		while (list($index, $token) = each($tkns)) {
+		while (list(, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
 
 			if (ST_CURLY_OPEN == $id) {

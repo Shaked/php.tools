@@ -14,7 +14,7 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		$foundEndforeach = false;
 		$foundEndfor = false;
 		foreach ($tkns as $token) {
-			list($id, $text) = $this->getToken($token);
+			list($id) = $this->getToken($token);
 			if (!$foundEndwhile && T_ENDWHILE == $id) {
 				$source = $this->formatWhileBlocks($source);
 				$foundEndwhile = true;

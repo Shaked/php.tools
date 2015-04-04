@@ -13,7 +13,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		$this->code = '';
 		for ($index = sizeof($this->tkns) - 1; 0 <= $index; --$index) {
 			$token = $this->tkns[$index];
-			list($id, $text) = $this->getToken($token);
+			list($id) = $this->getToken($token);
 			$this->ptr = $index;
 
 			$hasCurlyOnLeft = false;

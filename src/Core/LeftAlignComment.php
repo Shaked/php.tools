@@ -18,21 +18,6 @@ final class LeftAlignComment extends FormatterPass {
 				case T_DOC_COMMENT:
 					list(, $prevText) = $this->inspectToken(-1);
 					if (self::NON_INDENTABLE_COMMENT === $prevText) {
-						// Benchmark me
-						// $new_text = '';
-						// $tok = strtok($text, $this->new_line);
-						// while (false !== $tok) {
-						// 	$v = ltrim($tok);
-						// 	if ('*' === substr($v, 0, 1)) {
-						// 		$v = ' ' . $v;
-						// 	}
-						// 	$new_text .= $v;
-						// 	if (substr($v, -2, 2) != '*/') {
-						// 		$new_text .= $this->new_line;
-						// 	}
-						// 	$tok = strtok($this->new_line);
-						// }
-						// $this->append_code($new_text);
 						$lines = explode($this->newLine, $text);
 						$lines = array_map(function ($v) {
 							$v = ltrim($v);

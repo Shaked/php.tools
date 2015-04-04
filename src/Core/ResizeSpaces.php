@@ -56,7 +56,7 @@ final class ResizeSpaces extends FormatterPass {
 					}
 					break;
 				case '*':
-					list($prevId, $prevText) = $this->inspectToken(-1);
+					list($prevId) = $this->inspectToken(-1);
 					list($nextId, $nextText) = $this->inspectToken(+1);
 					if (
 						T_WHITESPACE === $prevId &&
@@ -88,7 +88,7 @@ final class ResizeSpaces extends FormatterPass {
 						$inTernaryOperator++;
 						$shortTernaryOperator = $this->rightTokenIs(ST_COLON);
 					}
-					list($prevId, $prevText) = $this->inspectToken(-1);
+					list($prevId) = $this->inspectToken(-1);
 					list($nextId, $nextText) = $this->inspectToken(+1);
 					if (
 						T_WHITESPACE === $prevId &&
@@ -110,7 +110,7 @@ final class ResizeSpaces extends FormatterPass {
 						break;
 					}
 				case ST_COLON:
-					list($prevId, $prevText) = $this->inspectToken(-1);
+					list($prevId) = $this->inspectToken(-1);
 					list($nextId, $nextText) = $this->inspectToken(+1);
 
 					if (
@@ -363,7 +363,7 @@ final class ResizeSpaces extends FormatterPass {
 
 				case T_COMMENT:
 					if (substr($text, 0, 2) == '//') {
-						list($leftId, $leftText) = $this->inspectToken(-1);
+						list($leftId) = $this->inspectToken(-1);
 						$this->appendCode($this->getSpace(T_VARIABLE == $leftId) . $text);
 						break;
 					} elseif (!$this->hasLn($text) && !$this->hasLnBefore() && !$this->hasLnAfter() && $this->leftUsefulTokenIs(ST_COMMA) && $this->rightUsefulTokenIs(T_VARIABLE)) {

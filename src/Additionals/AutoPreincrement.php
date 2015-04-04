@@ -21,7 +21,7 @@ class AutoPreincrement extends AdditionalPass {
 		$tkns = $this->aggregateVariables($source);
 		$touchedConcat = false;
 		while (list($ptr, $token) = each($tkns)) {
-			list($id, $text) = $this->getToken($token);
+			list($id) = $this->getToken($token);
 			switch ($id) {
 				case ST_CONCAT:
 					$touchedConcat = true;
@@ -29,7 +29,7 @@ class AutoPreincrement extends AdditionalPass {
 				case T_INC:
 				case T_DEC:
 					$prevToken = $tkns[$ptr - 1];
-					list($prevId, ) = $prevToken;
+					list($prevId) = $prevToken;
 					if (
 						(
 							!$this->checkAgainstConcat

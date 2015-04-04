@@ -92,7 +92,6 @@ final class AlignDoubleArrow extends AdditionalPass {
 
 					$lines = explode($this->newLine, $this->code);
 					$linesWithObjop = [];
-					$blockCount = 0;
 
 					foreach ($lines as $idx => $line) {
 						if (false !== strpos($line, $placeholder)) {

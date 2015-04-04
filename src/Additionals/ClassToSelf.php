@@ -21,7 +21,7 @@ class ClassToSelf extends AdditionalPass {
 
 		for ($ptr = 0; $ptr < $tknsLen; $ptr++) {
 			$token = $this->tkns[$ptr];
-			list($id, $text) = $this->getToken($token);
+			list($id) = $this->getToken($token);
 
 			if (
 				T_CLASS == $id ||
