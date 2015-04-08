@@ -9,3 +9,5 @@ namespace NS1{
 function a(){
 	a();
 }
+
+namespace\ns::class;

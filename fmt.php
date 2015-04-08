@@ -6770,7 +6770,6 @@ final class MergeElseIf extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$isHHVM = defined('HHVM_VERSION');
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -6783,10 +6782,7 @@ final class MergeElseIf extends AdditionalPass {
 					$this->appendCode($text);
 					break;
 				case T_ELSEIF:
-					if ($isHHVM) {
-						$text = str_replace(' ', '', $text);
-					}
-					$this->appendCode($text);
+					$this->appendCode(str_replace(' ', '', $text));
 					break;
 				default:
 					$this->appendCode($text);

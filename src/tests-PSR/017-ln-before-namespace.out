@@ -12,3 +12,5 @@ function a()
 {
     a();
 }
+
+namespace\ns::class;
