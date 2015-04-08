@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.21.2");;
+define("VERSION", "7.21.3");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -4379,6 +4379,9 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 				case T_TRAIT:
 				case T_CLASS:
 					$this->appendCode($text);
+					if ($this->leftUsefulTokenIs(T_DOUBLE_COLON)) {
+						break;
+					}
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
@@ -4435,7 +4438,8 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 		}
 		return $this->code;
 	}
-};
+}
+;
 final class PSR2IndentWithSpace extends FormatterPass {
 	private $size = 4;
 
