@@ -148,6 +148,30 @@ function lint($file) {
 	exec('php -l ' . escapeshellarg($file), $output, $ret);
 	return 0 == $ret;
 }
+
+function tabwriter(array $lines) {
+	$colsize = [];
+	foreach ($lines as $line) {
+		foreach ($line as $idx => $text) {
+			$cs = &$colsize[$idx];
+			$len = strlen($text);
+			$cs = max($cs, $len);
+		}
+	}
+
+	$final = '';
+	foreach ($lines as $line) {
+		$out = '';
+		foreach ($line as $idx => $text) {
+			$cs = &$colsize[$idx];
+			$out .= str_pad($text, $cs) . ' ';
+		}
+		$final .= rtrim($out) . PHP_EOL;
+	}
+
+	return $final;
+}
+
 if (!isset($inPhar)) {
 	$inPhar = false;
 }
@@ -166,6 +190,7 @@ if (!isset($testEnv)) {
 			'--laravel' => 'Apply Laravel coding style',
 			'--lint-before' => 'lint files before pretty printing (PHP must be declared in %PATH%/$PATH)',
 			'--list' => 'list possible transformations',
+			'--list-simple' => 'list possible transformations - parseable',
 			'--no-backup' => 'no backup file (original.php~)',
 			'--passes=pass1,passN' => 'call specific compiler pass',
 			'--prepasses=pass1,passN' => 'call specific compiler pass, before the rest of stack (deprecated)',
@@ -215,6 +240,7 @@ if (!isset($testEnv)) {
 		'laravel',
 		'lint-before',
 		'list',
+		'list-simple',
 		'no-backup',
 		'oracleDB::',
 		'passes:',
@@ -240,6 +266,33 @@ if (!isset($testEnv)) {
 		'ihvo:',
 		$getoptLongOptions
 	);
+
+	if (isset($opts['list'])) {
+		echo 'Usage: ', $argv[0], ' --help-pass=PASSNAME', PHP_EOL;
+		$classes = get_declared_classes();
+		$helpLines = [];
+		foreach ($classes as $className) {
+			if (is_subclass_of($className, 'AdditionalPass')) {
+				$pass = new $className();
+				$helpLines[] = ["\t- " . $className, $pass->getDescription()];
+			}
+		}
+		echo tabwriter($helpLines);
+		die();
+	}
+
+	if (isset($opts['list-simple'])) {
+		$classes = get_declared_classes();
+		$helpLines = [];
+		foreach ($classes as $className) {
+			if (is_subclass_of($className, 'AdditionalPass')) {
+				$pass = new $className();
+				$helpLines[] = [$className, $pass->getDescription()];
+			}
+		}
+		echo tabwriter($helpLines);
+		die();
+	}
 	if (isset($opts['selfupdate'])) {
 		$opts = [
 			'http' => [
@@ -319,17 +372,6 @@ if (!isset($testEnv)) {
 			$pass = new $optPass();
 			echo $argv[0], ': "', $optPass, '" - ', $pass->getDescription(), PHP_EOL, PHP_EOL;
 			echo 'Example:', PHP_EOL, $pass->getExample(), PHP_EOL;
-		}
-		die();
-	}
-
-	if (isset($opts['list'])) {
-		echo 'Usage: ', $argv[0], ' --help-pass=PASSNAME', PHP_EOL;
-		$classes = get_declared_classes();
-		foreach ($classes as $className) {
-			if (is_subclass_of($className, 'AdditionalPass')) {
-				echo "\t- ", $className, PHP_EOL;
-			}
 		}
 		die();
 	}
