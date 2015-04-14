@@ -489,6 +489,10 @@ if (!isset($testEnv)) {
 	if (isset($opts['laravel'])) {
 		LaravelDecorator::decorate($fmt);
 		$argv = extractFromArgv($argv, 'laravel');
+		$argv = extractFromArgv($argv, 'psr');
+		$argv = extractFromArgv($argv, 'psr1');
+		$argv = extractFromArgv($argv, 'psr1-naming');
+		$argv = extractFromArgv($argv, 'psr2');
 	}
 
 	if (isset($opts['cakephp'])) {

@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.22.0");;
+define("VERSION", "7.22.1");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -9621,6 +9621,10 @@ if (!isset($testEnv)) {
 	if (isset($opts['laravel'])) {
 		LaravelDecorator::decorate($fmt);
 		$argv = extractFromArgv($argv, 'laravel');
+		$argv = extractFromArgv($argv, 'psr');
+		$argv = extractFromArgv($argv, 'psr1');
+		$argv = extractFromArgv($argv, 'psr1-naming');
+		$argv = extractFromArgv($argv, 'psr2');
 	}
 
 	if (isset($opts['cakephp'])) {
