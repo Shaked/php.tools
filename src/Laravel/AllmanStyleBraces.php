@@ -9,11 +9,23 @@ final class AllmanStyleBraces extends FormatterPass {
 		$this->code = '';
 		$foundStack = [];
 		$currentIndentation = 0;
+		$touchedCaseOrDefault = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_CASE:
+				case T_DEFAULT:
+					$touchedCaseOrDefault = true;
+					$this->appendCode($text);
+					break;
+
+				case T_BREAK:
+					$touchedCaseOrDefault = false;
+					$this->appendCode($text);
+					break;
+
 				case T_FUNCTION:
 					$currentIndentation = 0;
 					$poppedID = array_pop($foundStack);
@@ -24,10 +36,10 @@ final class AllmanStyleBraces extends FormatterPass {
 					$foundStack[] = $poppedID;
 					$this->appendCode($text);
 					break;
+
 				case ST_CURLY_OPEN:
 					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO])) {
-						list($prevId, $prevText) = $this->getToken($this->leftToken());
-						if (!$this->hasLn($prevText)) {
+						if (!$this->hasLnLeftToken()) {
 							$this->appendCode($this->getCrlfIndent());
 						}
 					}
@@ -36,6 +48,10 @@ final class AllmanStyleBraces extends FormatterPass {
 						'implicit' => true,
 					];
 					$adjustedIndendation = max($currentIndentation - $this->indent, 0);
+					if ($touchedCaseOrDefault) {
+						$touchedCaseOrDefault = false;
+						$adjustedIndendation++;
+					}
 					$this->appendCode(str_repeat($this->indentChar, $adjustedIndendation) . $text);
 					$currentIndentation = 0;
 					if ($this->hasLnAfter()) {
@@ -98,8 +114,7 @@ final class AllmanStyleBraces extends FormatterPass {
 					if (' ' == substr($this->code, -1, 1)) {
 						$this->code = substr($this->code, 0, -1);
 					}
-					list($prevId, $prevText) = $this->getToken($this->leftToken());
-					if (!$this->hasLn($prevText)) {
+					if (!$this->hasLnLeftToken()) {
 						$this->appendCode($this->getCrlfIndent());
 					}
 					$this->appendCode($text);
