@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.22.2");;
+define("VERSION", "7.22.3");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -9020,7 +9020,6 @@ final class AllmanStyleBraces extends FormatterPass {
 					];
 					$adjustedIndendation = max($currentIndentation - $this->indent, 0);
 					if ($touchedCaseOrDefault) {
-						$touchedCaseOrDefault = false;
 						$adjustedIndendation++;
 					}
 					$this->appendCode(str_repeat($this->indentChar, $adjustedIndendation) . $text);
@@ -9077,6 +9076,9 @@ final class AllmanStyleBraces extends FormatterPass {
 					list($prevId, $prevText) = $this->getToken($this->leftToken());
 					if (!$this->hasLn($prevText) && T_OPEN_TAG != $prevId) {
 						$this->appendCode($this->getCrlfIndent());
+						if ($touchedCaseOrDefault) {
+							$this->appendCode($this->indentChar);
+						}
 					}
 					$this->appendCode($text);
 					break;
@@ -9087,6 +9089,9 @@ final class AllmanStyleBraces extends FormatterPass {
 					}
 					if (!$this->hasLnLeftToken()) {
 						$this->appendCode($this->getCrlfIndent());
+						if ($touchedCaseOrDefault) {
+							$this->appendCode($this->indentChar);
+						}
 					}
 					$this->appendCode($text);
 					break;
