@@ -493,6 +493,7 @@ if (!isset($testEnv)) {
 		$argv = extractFromArgv($argv, 'psr1');
 		$argv = extractFromArgv($argv, 'psr1-naming');
 		$argv = extractFromArgv($argv, 'psr2');
+		$argv = extractFromArgv($argv, 'indent_with_space');
 	}
 
 	if (isset($opts['cakephp'])) {
