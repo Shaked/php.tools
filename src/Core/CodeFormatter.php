@@ -7,6 +7,7 @@ final class CodeFormatter {
 	private $shortcircuit = [
 		'ReindentAndAlignObjOps' => 'ReindentObjOps',
 		'ReindentObjOps' => 'ReindentAndAlignObjOps',
+		'AllmanStyleBraces' => 'PSR2CurlyOpenNextLine',
 	];
 
 	private $passes = [

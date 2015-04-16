@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.22.3");;
+define("VERSION", "7.22.4");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -1126,6 +1126,7 @@ final class CodeFormatter {
 	private $shortcircuit = [
 		'ReindentAndAlignObjOps' => 'ReindentObjOps',
 		'ReindentObjOps' => 'ReindentAndAlignObjOps',
+		'AllmanStyleBraces' => 'PSR2CurlyOpenNextLine',
 	];
 
 	private $passes = [
