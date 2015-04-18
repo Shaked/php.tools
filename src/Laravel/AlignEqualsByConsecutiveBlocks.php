@@ -72,7 +72,7 @@ final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 			// ratio of highest : second highest > 1.5, else use the second highest
 			// just run the top 5 to seek the alternative
 			rsort($toBeSorted);
-			for ($i = 1; $i <= 5; $i++) {
+			for ($i = 1; $i <= 5; ++$i) {
 				if (isset($toBeSorted[$i])) {
 					if ($toBeSorted[($i - 1)] / $toBeSorted[$i] > 1.5) {
 						$maxPosition = $toBeSorted[$i];

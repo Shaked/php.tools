@@ -19,7 +19,7 @@ class ClassToSelf extends AdditionalPass {
 		$this->code = '';
 		$tknsLen = sizeof($this->tkns);
 
-		for ($ptr = 0; $ptr < $tknsLen; $ptr++) {
+		for ($ptr = 0; $ptr < $tknsLen; ++$ptr) {
 			$token = $this->tkns[$ptr];
 			list($id) = $this->getToken($token);
 

@@ -250,7 +250,7 @@ abstract class FormatterPass {
 		$tknsSize = sizeof($tkns);
 		$countTokens = [];
 		$id = null;
-		for ($i = $ptr; $i < $tknsSize; $i++) {
+		for ($i = $ptr; $i < $tknsSize; ++$i) {
 			$token = $tkns[$i];
 			list($id) = $this->getToken($token);
 			if (T_WHITESPACE == $id || T_COMMENT == $id || T_DOC_COMMENT == $id) {
@@ -292,7 +292,7 @@ abstract class FormatterPass {
 			$this->cache = [];
 
 			if (ST_COMMA == $id && 1 == $count) {
-				$paramCount++;
+				++$paramCount;
 			}
 			if (ST_BRACKET_OPEN == $id) {
 				$this->appendCode($text);
@@ -684,7 +684,7 @@ abstract class FormatterPass {
 
 	protected function refWalkBlock($tkns, &$ptr, $start, $end) {
 		$count = 0;
-		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; $ptr++) {
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
 			$id = $tkns[$ptr][0];
 			if ($start == $id) {
 				++$count;
@@ -700,7 +700,7 @@ abstract class FormatterPass {
 
 	protected function refWalkCurlyBlock($tkns, &$ptr) {
 		$count = 0;
-		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; $ptr++) {
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
 			$id = $tkns[$ptr][0];
 			if (ST_CURLY_OPEN == $id) {
 				++$count;
@@ -722,8 +722,8 @@ abstract class FormatterPass {
 
 	protected function refSkipIfTokenIsAny($tkns, &$ptr, $skipIds) {
 		$skipIds = array_flip($skipIds);
-		$ptr++;
-		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; $ptr++) {
+		++$ptr;
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
 			$id = $tkns[$ptr][0];
 			if (!isset($skipIds[$id])) {
 				break;
@@ -732,7 +732,7 @@ abstract class FormatterPass {
 	}
 
 	protected function refSkipBlocks($tkns, &$ptr) {
-		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; $ptr++) {
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
 			$id = $tkns[$ptr][0];
 
 			if (T_CLOSE_TAG == $id) {
@@ -858,12 +858,12 @@ abstract class FormatterPass {
 				return;
 			}
 		}
-		$ptr--;
+		--$ptr;
 	}
 
 	protected function refInsert(&$tkns, &$ptr, $item) {
 		array_splice($tkns, $ptr, 0, [$item]);
-		$ptr++;
+		++$ptr;
 	}
 }
 ;

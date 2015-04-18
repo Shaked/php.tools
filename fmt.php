@@ -540,7 +540,7 @@ abstract class FormatterPass {
 		$tknsSize = sizeof($tkns);
 		$countTokens = [];
 		$id = null;
-		for ($i = $ptr; $i < $tknsSize; $i++) {
+		for ($i = $ptr; $i < $tknsSize; ++$i) {
 			$token = $tkns[$i];
 			list($id) = $this->getToken($token);
 			if (T_WHITESPACE == $id || T_COMMENT == $id || T_DOC_COMMENT == $id) {
@@ -582,7 +582,7 @@ abstract class FormatterPass {
 			$this->cache = [];
 
 			if (ST_COMMA == $id && 1 == $count) {
-				$paramCount++;
+				++$paramCount;
 			}
 			if (ST_BRACKET_OPEN == $id) {
 				$this->appendCode($text);
@@ -974,7 +974,7 @@ abstract class FormatterPass {
 
 	protected function refWalkBlock($tkns, &$ptr, $start, $end) {
 		$count = 0;
-		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; $ptr++) {
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
 			$id = $tkns[$ptr][0];
 			if ($start == $id) {
 				++$count;
@@ -990,7 +990,7 @@ abstract class FormatterPass {
 
 	protected function refWalkCurlyBlock($tkns, &$ptr) {
 		$count = 0;
-		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; $ptr++) {
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
 			$id = $tkns[$ptr][0];
 			if (ST_CURLY_OPEN == $id) {
 				++$count;
@@ -1012,8 +1012,8 @@ abstract class FormatterPass {
 
 	protected function refSkipIfTokenIsAny($tkns, &$ptr, $skipIds) {
 		$skipIds = array_flip($skipIds);
-		$ptr++;
-		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; $ptr++) {
+		++$ptr;
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
 			$id = $tkns[$ptr][0];
 			if (!isset($skipIds[$id])) {
 				break;
@@ -1022,7 +1022,7 @@ abstract class FormatterPass {
 	}
 
 	protected function refSkipBlocks($tkns, &$ptr) {
-		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; $ptr++) {
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
 			$id = $tkns[$ptr][0];
 
 			if (T_CLOSE_TAG == $id) {
@@ -1148,12 +1148,12 @@ abstract class FormatterPass {
 				return;
 			}
 		}
-		$ptr--;
+		--$ptr;
 	}
 
 	protected function refInsert(&$tkns, &$ptr, $item) {
 		array_splice($tkns, $ptr, 0, [$item]);
-		$ptr++;
+		++$ptr;
 	}
 }
 ;
@@ -1419,7 +1419,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		if (T_CLOSE_TAG == $this->tkns[$this->ptr][0]) {
 			$this->refInsert($this->tkns, $this->ptr, [ST_SEMI_COLON, ST_SEMI_COLON]);
 		} else {
-			$this->ptr++;
+			++$this->ptr;
 		}
 		$this->refInsert($this->tkns, $this->ptr, [T_WHITESPACE, $this->newLine]);
 		$this->refInsert($this->tkns, $this->ptr, [ST_CURLY_CLOSE, ST_CURLY_CLOSE]);
@@ -2246,7 +2246,7 @@ final class OrderUseClauses extends FormatterPass {
 					(T_COMMENT === $id && '/' == $text[2])
 				) && substr_count($text, $this->newLine) >= 2
 			) {
-				$groupCount++;
+				++$groupCount;
 				$useStack[$groupCount] = [];
 				$newTokens[] = $token;
 				continue;
@@ -3521,7 +3521,7 @@ final class ResizeSpaces extends FormatterPass {
 				case ST_QUESTION:
 				case ST_CONCAT:
 					if (ST_QUESTION == $id) {
-						$inTernaryOperator++;
+						++$inTernaryOperator;
 						$shortTernaryOperator = $this->rightTokenIs(ST_COLON);
 					}
 					list($prevId) = $this->inspectToken(-1);
@@ -3564,21 +3564,21 @@ final class ResizeSpaces extends FormatterPass {
 						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($text . $this->getSpace());
-						$inTernaryOperator--;
+						--$inTernaryOperator;
 					} elseif (
 						$inTernaryOperator > 0 &&
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE === $nextId
 					) {
 						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text);
-						$inTernaryOperator--;
+						--$inTernaryOperator;
 					} elseif (
 						$inTernaryOperator > 0 &&
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text . $this->getSpace());
-						$inTernaryOperator--;
+						--$inTernaryOperator;
 					} elseif (0 == $inTernaryOperator && $this->leftUsefulTokenIs(ST_PARENTHESES_CLOSE)) {
 						$this->appendCode($text . $this->getSpace());
 					} else {
@@ -4805,7 +4805,7 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$tokenCount = count($this->tkns) - 1;
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, ) = $this->getToken($token);
+			list($id) = $this->getToken($token);
 			$this->ptr = $index;
 			if (T_INLINE_HTML == $id && $this->ptr != $tokenCount) {
 				return $source;
@@ -4996,7 +4996,7 @@ class AliasToMaster extends AdditionalPass {
 	}
 
 	private function checkIfEmptyNS($id) {
-		if ($id != T_NS_SEPARATOR) {
+		if (T_NS_SEPARATOR != $id) {
 			return;
 		}
 
@@ -5840,7 +5840,7 @@ class ClassToSelf extends AdditionalPass {
 		$this->code = '';
 		$tknsLen = sizeof($this->tkns);
 
-		for ($ptr = 0; $ptr < $tknsLen; $ptr++) {
+		for ($ptr = 0; $ptr < $tknsLen; ++$ptr) {
 			$token = $this->tkns[$ptr];
 			list($id) = $this->getToken($token);
 
@@ -6623,7 +6623,7 @@ final class LongArray extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 
-		$contextStack = array();
+		$contextStack = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -6660,7 +6660,7 @@ final class LongArray extends AdditionalPass {
 					if (isset($contextStack[0]) && T_ARRAY == end($contextStack) && $this->rightTokenIs(ST_PARENTHESES_CLOSE)) {
 						array_pop($contextStack);
 						$contextStack[] = self::EMPTY_ARRAY;
-					} elseif (!$this->leftTokenIs(array(T_ARRAY, T_STRING))) {
+					} elseif (!$this->leftTokenIs([T_ARRAY, T_STRING])) {
 						$contextStack[] = ST_PARENTHESES_OPEN;
 					}
 					break;
@@ -6670,7 +6670,7 @@ final class LongArray extends AdditionalPass {
 					}
 					break;
 			}
-			$this->tkns[$this->ptr] = array($id, $text);
+			$this->tkns[$this->ptr] = [$id, $text];
 		}
 
 		return $this->renderLight();
@@ -7852,7 +7852,7 @@ final class StrictBehavior extends AdditionalPass {
 			$paramCount = $this->printAndStopAtEndOfParamBlock();
 
 			if ($paramCount < $maxParams) {
-				for ($paramCount++; $paramCount < $maxParams; $paramCount++) {
+				for (++$paramCount; $paramCount < $maxParams; ++$paramCount) {
 					$this->appendCode(', null');
 				}
 				$this->appendCode(', true');
@@ -8195,7 +8195,7 @@ final class TightConcat extends AdditionalPass {
 					if (!$this->leftUsefulTokenIs([T_LNUMBER, T_DNUMBER])) {
 						$this->code = rtrim($this->code, $whitespaces);
 					}
-					list($nextId, ) = $this->inspectToken(+1);
+					list($nextId) = $this->inspectToken(+1);
 					if (T_WHITESPACE == $nextId && !$this->rightUsefulTokenIs([T_LNUMBER, T_DNUMBER])) {
 						each($this->tkns);
 					}
@@ -8871,7 +8871,7 @@ final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 			// ratio of highest : second highest > 1.5, else use the second highest
 			// just run the top 5 to seek the alternative
 			rsort($toBeSorted);
-			for ($i = 1; $i <= 5; $i++) {
+			for ($i = 1; $i <= 5; ++$i) {
 				if (isset($toBeSorted[$i])) {
 					if ($toBeSorted[($i - 1)] / $toBeSorted[$i] > 1.5) {
 						$maxPosition = $toBeSorted[$i];
@@ -8962,7 +8962,7 @@ final class AllmanStyleBraces extends FormatterPass {
 					];
 					$adjustedIndendation = max($currentIndentation - $this->indent, 0);
 					if ($touchedCaseOrDefault) {
-						$adjustedIndendation++;
+						++$adjustedIndendation;
 					}
 					$this->appendCode(str_repeat($this->indentChar, $adjustedIndendation) . $text);
 					$currentIndentation = 0;

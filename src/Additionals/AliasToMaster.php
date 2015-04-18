@@ -86,7 +86,7 @@ class AliasToMaster extends AdditionalPass {
 	}
 
 	private function checkIfEmptyNS($id) {
-		if ($id != T_NS_SEPARATOR) {
+		if (T_NS_SEPARATOR != $id) {
 			return;
 		}
 

@@ -49,7 +49,7 @@ final class AllmanStyleBraces extends FormatterPass {
 					];
 					$adjustedIndendation = max($currentIndentation - $this->indent, 0);
 					if ($touchedCaseOrDefault) {
-						$adjustedIndendation++;
+						++$adjustedIndendation;
 					}
 					$this->appendCode(str_repeat($this->indentChar, $adjustedIndendation) . $text);
 					$currentIndentation = 0;

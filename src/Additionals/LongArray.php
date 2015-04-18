@@ -10,7 +10,7 @@ final class LongArray extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 
-		$contextStack = array();
+		$contextStack = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -47,7 +47,7 @@ final class LongArray extends AdditionalPass {
 					if (isset($contextStack[0]) && T_ARRAY == end($contextStack) && $this->rightTokenIs(ST_PARENTHESES_CLOSE)) {
 						array_pop($contextStack);
 						$contextStack[] = self::EMPTY_ARRAY;
-					} elseif (!$this->leftTokenIs(array(T_ARRAY, T_STRING))) {
+					} elseif (!$this->leftTokenIs([T_ARRAY, T_STRING])) {
 						$contextStack[] = ST_PARENTHESES_OPEN;
 					}
 					break;
@@ -57,7 +57,7 @@ final class LongArray extends AdditionalPass {
 					}
 					break;
 			}
-			$this->tkns[$this->ptr] = array($id, $text);
+			$this->tkns[$this->ptr] = [$id, $text];
 		}
 
 		return $this->renderLight();

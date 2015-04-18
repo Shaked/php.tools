@@ -85,7 +85,7 @@ final class ResizeSpaces extends FormatterPass {
 				case ST_QUESTION:
 				case ST_CONCAT:
 					if (ST_QUESTION == $id) {
-						$inTernaryOperator++;
+						++$inTernaryOperator;
 						$shortTernaryOperator = $this->rightTokenIs(ST_COLON);
 					}
 					list($prevId) = $this->inspectToken(-1);
@@ -128,21 +128,21 @@ final class ResizeSpaces extends FormatterPass {
 						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($text . $this->getSpace());
-						$inTernaryOperator--;
+						--$inTernaryOperator;
 					} elseif (
 						$inTernaryOperator > 0 &&
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE === $nextId
 					) {
 						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text);
-						$inTernaryOperator--;
+						--$inTernaryOperator;
 					} elseif (
 						$inTernaryOperator > 0 &&
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text . $this->getSpace());
-						$inTernaryOperator--;
+						--$inTernaryOperator;
 					} elseif (0 == $inTernaryOperator && $this->leftUsefulTokenIs(ST_PARENTHESES_CLOSE)) {
 						$this->appendCode($text . $this->getSpace());
 					} else {

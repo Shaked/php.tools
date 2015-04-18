@@ -59,7 +59,7 @@ final class OrderUseClauses extends FormatterPass {
 					(T_COMMENT === $id && '/' == $text[2])
 				) && substr_count($text, $this->newLine) >= 2
 			) {
-				$groupCount++;
+				++$groupCount;
 				$useStack[$groupCount] = [];
 				$newTokens[] = $token;
 				continue;

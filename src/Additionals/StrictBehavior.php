@@ -52,7 +52,7 @@ final class StrictBehavior extends AdditionalPass {
 			$paramCount = $this->printAndStopAtEndOfParamBlock();
 
 			if ($paramCount < $maxParams) {
-				for ($paramCount++; $paramCount < $maxParams; $paramCount++) {
+				for (++$paramCount; $paramCount < $maxParams; ++$paramCount) {
 					$this->appendCode(', null');
 				}
 				$this->appendCode(', true');
