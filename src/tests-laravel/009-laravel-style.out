@@ -41,7 +41,7 @@ class B {
 
 		try {
 			throw new Exception();
-		}/*Comment*/
+		} /*Comment*/
 		catch (Exception $e)
 		{
 			print_r($e);

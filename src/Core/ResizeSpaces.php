@@ -175,12 +175,16 @@ final class ResizeSpaces extends FormatterPass {
 						$this->appendCode($text);
 						break;
 					} elseif (!$this->hasLnLeftToken() && $this->leftUsefulTokenIs([T_STRING, T_DO, T_FINALLY, ST_PARENTHESES_CLOSE])) {
-						$this->rtrimAndAppendCode($this->getSpace() . $text);
+						$this->rtrimAndAppendCode(
+							$this->getSpace() .
+							$text .
+							$this->getSpace($this->rightTokenIs(T_COMMENT))
+						);
 						break;
 					} elseif ($this->rightTokenIs(ST_CURLY_CLOSE) || ($this->rightTokenIs([T_VARIABLE]) && $this->leftTokenIs([T_OBJECT_OPERATOR, ST_DOLLAR]))) {
 						$this->appendCode($text);
 						break;
-					} elseif ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC])) {
+					} elseif ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC, T_COMMENT])) {
 						$this->appendCode($text . $this->getSpace());
 						break;
 					} elseif ($this->leftUsefulTokenIs(T_NS_SEPARATOR)) {
@@ -203,6 +207,9 @@ final class ResizeSpaces extends FormatterPass {
 						$this->rtrimAndAppendCode($this->getSpace() . $text);
 					} else {
 						$this->appendCode($text);
+					}
+					if (!$this->hasLnAfter() && $this->rightTokenIs(T_COMMENT)) {
+						$this->appendCode($this->getSpace());
 					}
 					break;
 				case ST_PARENTHESES_CLOSE:
@@ -365,11 +372,12 @@ final class ResizeSpaces extends FormatterPass {
 					if (substr($text, 0, 2) == '//') {
 						list($leftId) = $this->inspectToken(-1);
 						$this->appendCode($this->getSpace(T_VARIABLE == $leftId) . $text);
-						break;
 					} elseif (!$this->hasLn($text) && !$this->hasLnBefore() && !$this->hasLnAfter() && $this->leftUsefulTokenIs(ST_COMMA) && $this->rightUsefulTokenIs(T_VARIABLE)) {
 						$this->appendCode($text . $this->getSpace());
-						break;
+					} else {
+						$this->appendCode($text);
 					}
+					break;
 
 				case ST_CURLY_CLOSE:
 					if ($touchedGroupedUse) {
@@ -377,8 +385,17 @@ final class ResizeSpaces extends FormatterPass {
 						$this->appendCode($this->getSpace(!$this->hasLnBefore()));
 					}
 					$this->appendCode($text);
+					if (!$this->hasLnAfter() && $this->rightTokenIs(T_COMMENT)) {
+						$this->appendCode($this->getSpace());
+					}
 					break;
 
+				case T_CONSTANT_ENCAPSED_STRING:
+					$this->appendCode($text);
+					if (!$this->hasLnAfter() && $this->rightTokenIs(T_COMMENT)) {
+						$this->appendCode($this->getSpace());
+					}
+					break;
 				default:
 					$this->appendCode($text);
 					break;
