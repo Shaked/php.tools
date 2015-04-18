@@ -135,12 +135,11 @@ class AutoPreincrement extends AdditionalPass {
 						break;
 					}
 				}
+				$tkns[$initialIndex] = [self::CHAIN_LITERAL, $stack];
 				if (substr(trim($stack), -1, 1) == ST_PARENTHESES_CLOSE) {
 					$tkns[$initialIndex] = [self::CHAIN_FUNC, $stack];
 				} elseif ($touchedVariable) {
 					$tkns[$initialIndex] = [self::CHAIN_VARIABLE, $stack];
-				} else {
-					$tkns[$initialIndex] = [self::CHAIN_LITERAL, $stack];
 				}
 			}
 		}

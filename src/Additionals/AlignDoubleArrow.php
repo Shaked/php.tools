@@ -78,6 +78,40 @@ final class AlignDoubleArrow extends AdditionalPass {
 			}
 		}
 
+		$this->align($maxContextCounter);
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Vertically align T_DOUBLE_ARROW (=>).';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+$a = [
+	1 => 1,
+	22 => 22,
+	333 => 333,
+];
+
+$a = [
+	1   => 1,
+	22  => 22,
+	333 => 333,
+];
+?>
+EOT;
+	}
+
+	private function align($maxContextCounter) {
 		foreach ($maxContextCounter as $level => $entrances) {
 			foreach ($entrances as $entrance => $context) {
 				for ($j = 0; $j <= $context; ++$j) {
@@ -117,35 +151,5 @@ final class AlignDoubleArrow extends AdditionalPass {
 				}
 			}
 		}
-
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Vertically align T_DOUBLE_ARROW (=>).';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-$a = [
-	1 => 1,
-	22 => 22,
-	333 => 333,
-];
-
-$a = [
-	1   => 1,
-	22  => 22,
-	333 => 333,
-];
-?>
-EOT;
 	}
 }

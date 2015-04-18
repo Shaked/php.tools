@@ -117,7 +117,7 @@ final class CakePHPStyle extends AdditionalPass {
 	private function addUnderscoresBeforeName($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$level_touched = null;
+		$levelTouched = null;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -125,26 +125,26 @@ final class CakePHPStyle extends AdditionalPass {
 				case T_PUBLIC:
 				case T_PRIVATE:
 				case T_PROTECTED:
-					$level_touched = $id;
+					$levelTouched = $id;
 					$this->appendCode($text);
 					break;
 
 				case T_VARIABLE:
-					if (null !== $level_touched && $this->leftUsefulTokenIs([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC])) {
+					if (null !== $levelTouched && $this->leftUsefulTokenIs([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC])) {
 						$text = str_replace('$_', '$', $text);
 						$text = str_replace('$_', '$', $text);
-						if (T_PROTECTED == $level_touched) {
+						if (T_PROTECTED == $levelTouched) {
 							$text = str_replace('$', '$_', $text);
-						} elseif (T_PRIVATE == $level_touched) {
+						} elseif (T_PRIVATE == $levelTouched) {
 							$text = str_replace('$', '$__', $text);
 						}
 					}
 					$this->appendCode($text);
-					$level_touched = null;
+					$levelTouched = null;
 					break;
 				case T_STRING:
 					if (
-						null !== $level_touched &&
+						null !== $levelTouched &&
 						$this->leftUsefulTokenIs(T_FUNCTION) &&
 						'_' != $text &&
 						'__' != $text &&
@@ -170,14 +170,14 @@ final class CakePHPStyle extends AdditionalPass {
 						if (substr($text, 0, 1) == '_') {
 							$text = substr($text, 1);
 						}
-						if (T_PROTECTED == $level_touched) {
+						if (T_PROTECTED == $levelTouched) {
 							$text = '_' . $text;
-						} elseif (T_PRIVATE == $level_touched) {
+						} elseif (T_PRIVATE == $levelTouched) {
 							$text = '__' . $text;
 						}
 					}
 					$this->appendCode($text);
-					$level_touched = null;
+					$levelTouched = null;
 					break;
 				default:
 					$this->appendCode($text);

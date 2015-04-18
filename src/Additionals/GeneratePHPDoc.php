@@ -34,10 +34,9 @@ final class GeneratePHPDoc extends AdditionalPass {
 						$touchedDocComment = false;
 						break;
 					}
+					$origIdx = $visibilityIdx;
 					if (!$touchedVisibility) {
 						$origIdx = $this->ptr;
-					} else {
-						$origIdx = $visibilityIdx;
 					}
 					list($ntId) = $this->getToken($this->rightToken());
 					if (T_STRING != $ntId) {
