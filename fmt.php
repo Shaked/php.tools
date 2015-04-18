@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.23.0");;
+define("VERSION", "7.23.1");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -1169,9 +1169,9 @@ final class CodeFormatter {
 		'PSR2EmptyFunction' => false,
 		'PSR2SingleEmptyLineAndStripClosingTag' => false,
 		'PSR2ModifierVisibilityStaticOrder' => false,
+		'PSR2IndentWithSpace' => false,
 		'PSR2CurlyOpenNextLine' => false,
 		'PSR2LnAfterNamespace' => false,
-		'PSR2IndentWithSpace' => false,
 		'PSR2KeywordsLowerCase' => false,
 
 		'PSR1MethodNames' => false,
@@ -4376,7 +4376,6 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 		return true;
 	}
 	public function format($source) {
-		$this->indentChar = '    ';
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 

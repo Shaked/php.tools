@@ -50,9 +50,9 @@ final class CodeFormatter {
 		'PSR2EmptyFunction' => false,
 		'PSR2SingleEmptyLineAndStripClosingTag' => false,
 		'PSR2ModifierVisibilityStaticOrder' => false,
+		'PSR2IndentWithSpace' => false,
 		'PSR2CurlyOpenNextLine' => false,
 		'PSR2LnAfterNamespace' => false,
-		'PSR2IndentWithSpace' => false,
 		'PSR2KeywordsLowerCase' => false,
 
 		'PSR1MethodNames' => false,

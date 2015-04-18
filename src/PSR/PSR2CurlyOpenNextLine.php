@@ -4,7 +4,6 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 		return true;
 	}
 	public function format($source) {
-		$this->indentChar = '    ';
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
