@@ -11,7 +11,6 @@ final class ReturnNull extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$this->useCache = true;
-		$touchedReturn = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -51,8 +50,8 @@ final class ReturnNull extends AdditionalPass {
 				continue;
 			}
 			if (T_STRING == $id && strtolower($text) == 'null') {
-				list($prevId, ) = $this->getToken($this->leftUsefulToken());
-				list($nextId, ) = $this->getToken($this->rightUsefulToken());
+				list($prevId) = $this->getToken($this->leftUsefulToken());
+				list($nextId) = $this->getToken($this->rightUsefulToken());
 				if (T_RETURN == $prevId && ST_SEMI_COLON == $nextId) {
 					continue;
 				}

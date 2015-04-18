@@ -372,6 +372,50 @@ abstract class FormatterPass {
 	protected $cache = [];
 	protected $ignoreFutileTokens = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
 
+	protected function alignPlaceholders($origPlaceholder, $contextCounter) {
+		for ($j = 0; $j <= $contextCounter; ++$j) {
+			$placeholder = sprintf($origPlaceholder, $j);
+			if (false === strpos($this->code, $placeholder)) {
+				continue;
+			}
+			if (1 === substr_count($this->code, $placeholder)) {
+				$this->code = str_replace($placeholder, '', $this->code);
+				continue;
+			}
+			$lines = explode($this->newLine, $this->code);
+			$linesWithPlaceholder = [];
+			$blockCount = 0;
+
+			foreach ($lines as $idx => $line) {
+				if (false !== strpos($line, $placeholder)) {
+					$linesWithPlaceholder[$blockCount][] = $idx;
+				} else {
+					++$blockCount;
+					$linesWithPlaceholder[$blockCount] = [];
+				}
+			}
+
+			$i = 0;
+			foreach ($linesWithPlaceholder as $group) {
+				++$i;
+				$farthest = 0;
+				foreach ($group as $idx) {
+					$farthest = max($farthest, strpos($lines[$idx], $placeholder));
+				}
+				foreach ($group as $idx) {
+					$line = $lines[$idx];
+					$current = strpos($line, $placeholder);
+					$delta = abs($farthest - $current);
+					if ($delta > 0) {
+						$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
+						$lines[$idx] = $line;
+					}
+				}
+			}
+			$this->code = str_replace($placeholder, '', implode($this->newLine, $lines));
+		}
+	}
+
 	protected function appendCode($code = '') {
 		$this->code .= $code;
 	}
@@ -2405,7 +2449,6 @@ final class OrderUseClauses extends FormatterPass {
 			switch ($id) {
 				case T_NAMESPACE:
 					$return .= $text;
-					$touchedTUse = false;
 					while (list($index, $token) = each($tokens)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
@@ -2422,10 +2465,6 @@ final class OrderUseClauses extends FormatterPass {
 							$this->ptr = $index;
 							$namespaceBlock .= $text;
 
-							if (T_USE === $id) {
-								$touchedTUse = true;
-							}
-
 							if (ST_CURLY_OPEN == $id) {
 								++$curlyCount;
 							} elseif (ST_CURLY_CLOSE == $id) {
@@ -2440,10 +2479,6 @@ final class OrderUseClauses extends FormatterPass {
 						while (list($index, $token) = each($tokens)) {
 							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
-
-							if (T_USE === $id) {
-								$touchedTUse = true;
-							}
 
 							if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 								prev($tokens);
@@ -5175,55 +5210,16 @@ final class AlignDoubleSlashComments extends AdditionalPass {
 					if ($this->hasLn($text)) {
 						++$contextCounter;
 					}
+					$this->appendCode($text);
+					break;
+
 				default:
 					$this->appendCode($text);
 					break;
 			}
 		}
 
-		for ($j = 0; $j <= $contextCounter; ++$j) {
-			$placeholder = sprintf(self::ALIGNABLE_COMMENT, $j);
-			if (false === strpos($this->code, $placeholder)) {
-				continue;
-			}
-			if (1 === substr_count($this->code, $placeholder)) {
-				$this->code = str_replace($placeholder, '', $this->code);
-				continue;
-			}
-
-			$lines = explode($this->newLine, $this->code);
-			$linesWithComment = [];
-			$blockCount = 0;
-
-			foreach ($lines as $idx => $line) {
-				if (false !== strpos($line, $placeholder)) {
-					$linesWithComment[$blockCount][] = $idx;
-				} else {
-					++$blockCount;
-					$linesWithComment[$blockCount] = [];
-				}
-			}
-
-			$i = 0;
-			foreach ($linesWithComment as $group) {
-				++$i;
-				$farthest = 0;
-				foreach ($group as $idx) {
-					$farthest = max($farthest, strpos($lines[$idx], $placeholder));
-				}
-				foreach ($group as $idx) {
-					$line = $lines[$idx];
-					$current = strpos($line, $placeholder);
-					$delta = abs($farthest - $current);
-					if ($delta > 0) {
-						$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
-						$lines[$idx] = $line;
-					}
-				}
-			}
-
-			$this->code = str_replace($placeholder, '', implode($this->newLine, $lines));
-		}
+		$this->alignPlaceholders(self::ALIGNABLE_COMMENT, $contextCounter);
 
 		return $this->code;
 	}
@@ -5302,49 +5298,7 @@ final class AlignEquals extends AdditionalPass {
 			}
 		}
 
-		for ($j = 0; $j <= $contextCounter; ++$j) {
-			$placeholder = sprintf(self::ALIGNABLE_EQUAL, $j);
-			if (false === strpos($this->code, $placeholder)) {
-				continue;
-			}
-			if (1 === substr_count($this->code, $placeholder)) {
-				$this->code = str_replace($placeholder, '', $this->code);
-				continue;
-			}
-
-			$lines = explode($this->newLine, $this->code);
-			$linesWithObjop = [];
-			$blockCount = 0;
-
-			foreach ($lines as $idx => $line) {
-				if (false !== strpos($line, $placeholder)) {
-					$linesWithObjop[$blockCount][] = $idx;
-				} else {
-					++$blockCount;
-					$linesWithObjop[$blockCount] = [];
-				}
-			}
-
-			$i = 0;
-			foreach ($linesWithObjop as $group) {
-				++$i;
-				$farthest = 0;
-				foreach ($group as $idx) {
-					$farthest = max($farthest, strpos($lines[$idx], $placeholder));
-				}
-				foreach ($group as $idx) {
-					$line = $lines[$idx];
-					$current = strpos($line, $placeholder);
-					$delta = abs($farthest - $current);
-					if ($delta > 0) {
-						$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
-						$lines[$idx] = $line;
-					}
-				}
-			}
-
-			$this->code = str_replace($placeholder, '', implode($this->newLine, $lines));
-		}
+		$this->alignPlaceholders(self::ALIGNABLE_EQUAL, $contextCounter);
 
 		return $this->code;
 	}
@@ -5417,49 +5371,7 @@ final class AlignTypehint extends AdditionalPass {
 			}
 		}
 
-		for ($j = 0; $j <= $contextCounter; ++$j) {
-			$placeholder = sprintf(self::ALIGNABLE_TYPEHINT, $j);
-			if (false === strpos($this->code, $placeholder)) {
-				continue;
-			}
-			if (1 === substr_count($this->code, $placeholder)) {
-				$this->code = str_replace($placeholder, '', $this->code);
-				continue;
-			}
-
-			$lines = explode($this->newLine, $this->code);
-			$linesWithComment = [];
-			$blockCount = 0;
-
-			foreach ($lines as $idx => $line) {
-				if (false !== strpos($line, $placeholder)) {
-					$linesWithComment[$blockCount][] = $idx;
-				} else {
-					++$blockCount;
-					$linesWithComment[$blockCount] = [];
-				}
-			}
-
-			$i = 0;
-			foreach ($linesWithComment as $group) {
-				++$i;
-				$farthest = 0;
-				foreach ($group as $idx) {
-					$farthest = max($farthest, strpos($lines[$idx], $placeholder));
-				}
-				foreach ($group as $idx) {
-					$line = $lines[$idx];
-					$current = strpos($line, $placeholder);
-					$delta = abs($farthest - $current);
-					if ($delta > 0) {
-						$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
-						$lines[$idx] = $line;
-					}
-				}
-			}
-
-			$this->code = str_replace($placeholder, '', implode($this->newLine, $lines));
-		}
+		$this->alignPlaceholders(self::ALIGNABLE_TYPEHINT, $contextCounter);
 
 		return $this->code;
 	}
@@ -5737,11 +5649,13 @@ final class CakePHPStyle extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				// Otherwise, just print me
 				case ST_REFERENCE:
 					if ($this->leftUsefulTokenIs(ST_EQUAL)) {
 						$this->rtrimAndAppendCode($text . $this->getSpace());
 						break;
 					}
+
 				default:
 					$this->appendCode($text);
 			}
@@ -5779,6 +5693,8 @@ final class CakePHPStyle extends AdditionalPass {
 						$this->rtrimAndAppendCode($text);
 						break;
 					}
+					$this->appendCode($text);
+					break;
 				default:
 					$this->appendCode($text);
 					break;
@@ -6253,21 +6169,12 @@ final class DoubleToSingleQuote extends AdditionalPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			switch ($id) {
-				case T_CONSTANT_ENCAPSED_STRING:
-					if (
-						'"' == $text[0] &&
-						false === strpos($text, '\'') &&
-						!preg_match('/(?<!\\\\)(?:\\\\{2})*\\\\(?!["\\\\])/', $text)
-					) {
-						$text[0] = '\'';
-						$lastByte = strlen($text) - 1;
-						$text[$lastByte] = '\'';
-						$text = str_replace('\"', '"', $text);
-					}
-				default:
-					$this->appendCode($text);
+
+			if ($this->hasDoubleQuote($id, $text)) {
+				$text = $this->convertToSingleQuote($text);
 			}
+
+			$this->appendCode($text);
 		}
 
 		return $this->code;
@@ -6291,6 +6198,23 @@ $a = "";
 $a = '';
 ?>
 EOT;
+	}
+
+	private function hasDoubleQuote($id, $text) {
+		return (
+			T_CONSTANT_ENCAPSED_STRING == $id &&
+			'"' == $text[0] &&
+			false === strpos($text, '\'') &&
+			!preg_match('/(?<!\\\\)(?:\\\\{2})*\\\\(?!["\\\\])/', $text)
+		);
+	}
+
+	private function convertToSingleQuote($text) {
+		$text[0] = '\'';
+		$lastByte = strlen($text) - 1;
+		$text[$lastByte] = '\'';
+		$text = str_replace('\"', '"', $text);
+		return $text;
 	}
 }
 ;
@@ -7566,7 +7490,6 @@ final class ReturnNull extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$this->useCache = true;
-		$touchedReturn = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -7606,8 +7529,8 @@ final class ReturnNull extends AdditionalPass {
 				continue;
 			}
 			if (T_STRING == $id && strtolower($text) == 'null') {
-				list($prevId, ) = $this->getToken($this->leftUsefulToken());
-				list($nextId, ) = $this->getToken($this->rightUsefulToken());
+				list($prevId) = $this->getToken($this->leftUsefulToken());
+				list($nextId) = $this->getToken($this->rightUsefulToken());
 				if (T_RETURN == $prevId && ST_SEMI_COLON == $nextId) {
 					continue;
 				}
@@ -9315,7 +9238,7 @@ function lint($file) {
 	$output = null;
 	$ret = null;
 	exec('php -l ' . escapeshellarg($file), $output, $ret);
-	return 0 == $ret;
+	return 0 === $ret;
 }
 
 function tabwriter(array $lines) {
@@ -9770,7 +9693,7 @@ if (!isset($testEnv)) {
 						fwrite(STDERR, 'Starting ' . $workers . ' workers ...' . PHP_EOL);
 					}
 					for ($i = 0; $i < $workers; ++$i) {
-						cofunc(function ($fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore, $id) {
+						cofunc(function ($fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore) {
 							$cache = null;
 							if (null !== $cache_fn) {
 								$cache = new Cache($cache_fn);
@@ -9793,7 +9716,7 @@ if (!isset($testEnv)) {
 								}
 								if (null !== $cache) {
 									$content = $cache->is_changed($target_dir, $file);
-									if (!$content) {
+									if (false === $content) {
 										++$cacheHitCount;
 										continue;
 									}
@@ -9810,7 +9733,7 @@ if (!isset($testEnv)) {
 								rename($file . '-tmp', $file);
 							}
 							$chn_done->in([$cacheHitCount, $cache_miss_count]);
-						}, $fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore, $i);
+						}, $fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore);
 					}
 				}
 				foreach ($files as $file) {
@@ -9835,7 +9758,7 @@ if (!isset($testEnv)) {
 						}
 						if (null !== $cache) {
 							$content = $cache->is_changed($target_dir, $file);
-							if (!$content) {
+							if (false === $content) {
 								++$fileCount;
 								++$cacheHitCount;
 								continue;

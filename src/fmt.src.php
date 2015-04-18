@@ -146,7 +146,7 @@ function lint($file) {
 	$output = null;
 	$ret = null;
 	exec('php -l ' . escapeshellarg($file), $output, $ret);
-	return 0 == $ret;
+	return 0 === $ret;
 }
 
 function tabwriter(array $lines) {
@@ -601,7 +601,7 @@ if (!isset($testEnv)) {
 						fwrite(STDERR, 'Starting ' . $workers . ' workers ...' . PHP_EOL);
 					}
 					for ($i = 0; $i < $workers; ++$i) {
-						cofunc(function ($fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore, $id) {
+						cofunc(function ($fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore) {
 							$cache = null;
 							if (null !== $cache_fn) {
 								$cache = new Cache($cache_fn);
@@ -624,7 +624,7 @@ if (!isset($testEnv)) {
 								}
 								if (null !== $cache) {
 									$content = $cache->is_changed($target_dir, $file);
-									if (!$content) {
+									if (false === $content) {
 										++$cacheHitCount;
 										continue;
 									}
@@ -641,7 +641,7 @@ if (!isset($testEnv)) {
 								rename($file . '-tmp', $file);
 							}
 							$chn_done->in([$cacheHitCount, $cache_miss_count]);
-						}, $fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore, $i);
+						}, $fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore);
 					}
 				}
 				foreach ($files as $file) {
@@ -666,7 +666,7 @@ if (!isset($testEnv)) {
 						}
 						if (null !== $cache) {
 							$content = $cache->is_changed($target_dir, $file);
-							if (!$content) {
+							if (false === $content) {
 								++$fileCount;
 								++$cacheHitCount;
 								continue;

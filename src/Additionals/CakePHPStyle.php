@@ -61,11 +61,13 @@ final class CakePHPStyle extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				// Otherwise, just print me
 				case ST_REFERENCE:
 					if ($this->leftUsefulTokenIs(ST_EQUAL)) {
 						$this->rtrimAndAppendCode($text . $this->getSpace());
 						break;
 					}
+
 				default:
 					$this->appendCode($text);
 			}
@@ -103,6 +105,8 @@ final class CakePHPStyle extends AdditionalPass {
 						$this->rtrimAndAppendCode($text);
 						break;
 					}
+					$this->appendCode($text);
+					break;
 				default:
 					$this->appendCode($text);
 					break;

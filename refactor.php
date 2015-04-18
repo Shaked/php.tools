@@ -82,6 +82,50 @@ abstract class FormatterPass {
 	protected $cache = [];
 	protected $ignoreFutileTokens = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
 
+	protected function alignPlaceholders($origPlaceholder, $contextCounter) {
+		for ($j = 0; $j <= $contextCounter; ++$j) {
+			$placeholder = sprintf($origPlaceholder, $j);
+			if (false === strpos($this->code, $placeholder)) {
+				continue;
+			}
+			if (1 === substr_count($this->code, $placeholder)) {
+				$this->code = str_replace($placeholder, '', $this->code);
+				continue;
+			}
+			$lines = explode($this->newLine, $this->code);
+			$linesWithPlaceholder = [];
+			$blockCount = 0;
+
+			foreach ($lines as $idx => $line) {
+				if (false !== strpos($line, $placeholder)) {
+					$linesWithPlaceholder[$blockCount][] = $idx;
+				} else {
+					++$blockCount;
+					$linesWithPlaceholder[$blockCount] = [];
+				}
+			}
+
+			$i = 0;
+			foreach ($linesWithPlaceholder as $group) {
+				++$i;
+				$farthest = 0;
+				foreach ($group as $idx) {
+					$farthest = max($farthest, strpos($lines[$idx], $placeholder));
+				}
+				foreach ($group as $idx) {
+					$line = $lines[$idx];
+					$current = strpos($line, $placeholder);
+					$delta = abs($farthest - $current);
+					if ($delta > 0) {
+						$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
+						$lines[$idx] = $line;
+					}
+				}
+			}
+			$this->code = str_replace($placeholder, '', implode($this->newLine, $lines));
+		}
+	}
+
 	protected function appendCode($code = '') {
 		$this->code .= $code;
 	}

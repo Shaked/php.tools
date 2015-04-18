@@ -245,11 +245,11 @@ if (version_compare(phpversion(), '5.5.0', '<')) {
 
 list(, $ok) = which('git');
 if (!$ok) {
-	fwrite(STDERR, "This tool needs Git to work." . PHP_EOL);
-	fwrite(STDERR, "Please, install git using:" . PHP_EOL);
-	fwrite(STDERR, "  sudo yum install git" . PHP_EOL);
-	fwrite(STDERR, "or" . PHP_EOL);
-	fwrite(STDERR, "  sudo apt-get install git" . PHP_EOL);
+	fwrite(STDERR, 'This tool needs Git to work.' . PHP_EOL);
+	fwrite(STDERR, 'Please, install git using:' . PHP_EOL);
+	fwrite(STDERR, '  sudo yum install git' . PHP_EOL);
+	fwrite(STDERR, 'or' . PHP_EOL);
+	fwrite(STDERR, '  sudo apt-get install git' . PHP_EOL);
 	exit(255);
 }
 
@@ -399,45 +399,45 @@ $execute = function () {
 };
 
 function updatePhpunitXml($DIRS) {
-	$phpunit_xml_template = "
+	$phpunit_xml_template = '
 	<phpunit
-	         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-	         xsi:noNamespaceSchemaLocation=\"http://schema.phpunit.de/3.7/phpunit.xsd\"
-	         colors=\"true\"
-	         verbose=\"false\">
+	         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/3.7/phpunit.xsd"
+	         colors="true"
+	         verbose="false">
 	         <testsuite>
-	";
+	';
 	foreach ($DIRS as $i) {
-		$phpunit_xml_template .= "<directory suffix=\"_test.php\">" . $i . "</directory>";
+		$phpunit_xml_template .= '<directory suffix="_test.php">' . $i . '</directory>';
 	}
-	$phpunit_xml_template .= "</testsuite>";
+	$phpunit_xml_template .= '</testsuite>';
 
-	$phpunit_xml_template .= "<filter>";
-	$phpunit_xml_template .= "<whitelist processUncoveredFilesFromWhitelist=\"true\" >";
+	$phpunit_xml_template .= '<filter>';
+	$phpunit_xml_template .= '<whitelist processUncoveredFilesFromWhitelist="true" >';
 	foreach ($DIRS as $i) {
 		$phpunit_xml_template .= "<directory suffix=\".php\">$i</directory>";
 	}
-	$phpunit_xml_template .= "<exclude>";
+	$phpunit_xml_template .= '<exclude>';
 	foreach ($DIRS as $i) {
 		$phpunit_xml_template .= "<directory suffix=\"_test.php\">$i</directory>";
 	}
-	$phpunit_xml_template .= "</exclude>";
-	$phpunit_xml_template .= "</whitelist>";
-	$phpunit_xml_template .= "</filter></phpunit>";
+	$phpunit_xml_template .= '</exclude>';
+	$phpunit_xml_template .= '</whitelist>';
+	$phpunit_xml_template .= '</filter></phpunit>';
 
 	file_put_contents('phpunit.xml', $phpunit_xml_template);
 }
 
-$WATCH = "";
-if (isset($argv[1]) && "watch" == $argv[1]) {
-	$WATCH = "watch";
+$WATCH = '';
+if (isset($argv[1]) && 'watch' == $argv[1]) {
+	$WATCH = 'watch';
 	array_shift($argv);
 }
 
-if ($clocBin && isset($argv[1]) && "cloc" == $argv[1]) {
+if (false !== $clocBin && isset($argv[1]) && 'cloc' == $argv[1]) {
 	$execute = function () {
 		GLOBAL $clocBin, $DIRS;
-		$src = "nice -n 20 $clocBin " . implode(" ",
+		$src = "nice -n 20 $clocBin " . implode(' ',
 			array_map(function ($v) {
 				return escapeshellarg($v);
 			}, $DIRS)
@@ -446,7 +446,7 @@ if ($clocBin && isset($argv[1]) && "cloc" == $argv[1]) {
 	};
 }
 
-if ($ctagsBin && isset($argv[1]) && "ctags" == $argv[1]) {
+if (false !== $ctagsBin && isset($argv[1]) && 'ctags' == $argv[1]) {
 	$execute = function () {
 		GLOBAL $ctagsBin, $DIRS;
 
@@ -469,20 +469,20 @@ if ($ctagsBin && isset($argv[1]) && "ctags" == $argv[1]) {
 	};
 }
 
-if ($phpunitBin && isset($argv[1]) && "test" == $argv[1]) {
+if (false !== $phpunitBin && isset($argv[1]) && 'test' == $argv[1]) {
 	updatePhpunitXml($DIRS);
 	$execute = function () use ($phpunitBin) {
 		$argv = $GLOBALS['argv'];
-		$TEST = "";
+		$TEST = '';
 		unset($argv[0]);
 		if (isset($argv[1])) {
 			$argv[1] = trim($argv[1]);
 			$argv[1] = str_replace('.php', '', trim($argv[1]));
 			if (strpos($argv[1], '/') !== false) {
-				$TEST = $argv[1] . "Test " . $argv[1] . "_test.php";
-			} elseif (strpos($argv[1], "\\") !== false) {
-				$FN = str_replace("\\", '/', $argv[1]);
-				$TEST = $argv[1] . "Test " . $FN . "_test.php";
+				$TEST = $argv[1] . 'Test ' . $argv[1] . '_test.php';
+			} elseif (strpos($argv[1], '\\') !== false) {
+				$FN = str_replace('\\', '/', $argv[1]);
+				$TEST = $argv[1] . 'Test ' . $FN . '_test.php';
 			}
 			array_shift($argv);
 			array_shift($argv);
@@ -491,20 +491,20 @@ if ($phpunitBin && isset($argv[1]) && "test" == $argv[1]) {
 	};
 }
 
-if ($phpunitBin && isset($argv[1]) && "cover" == $argv[1]) {
+if (false !== $phpunitBin && isset($argv[1]) && 'cover' == $argv[1]) {
 	updatePhpunitXml($DIRS);
 	$execute = function () use ($phpunitBin) {
 		$argv = $GLOBALS['argv'];
-		$TEST = "";
+		$TEST = '';
 		unset($argv[0]);
 		if (isset($argv[1])) {
 			$argv[1] = trim($argv[1]);
 			$argv[1] = str_replace('.php', '', trim($argv[1]));
 			if (strpos($argv[1], '/') !== false) {
-				$TEST = $argv[1] . "Test " . $argv[1] . "_test.php";
-			} elseif (strpos($argv[1], "\\") !== false) {
-				$FN = str_replace("\\", '/', $argv[1]);
-				$TEST = $argv[1] . "Test " . $FN . "_test.php";
+				$TEST = $argv[1] . 'Test ' . $argv[1] . '_test.php';
+			} elseif (strpos($argv[1], '\\') !== false) {
+				$FN = str_replace('\\', '/', $argv[1]);
+				$TEST = $argv[1] . 'Test ' . $FN . '_test.php';
 			}
 			array_shift($argv);
 			array_shift($argv);
@@ -513,39 +513,39 @@ if ($phpunitBin && isset($argv[1]) && "cover" == $argv[1]) {
 	};
 }
 
-if ($phpdocBin && isset($argv[1]) && "doc" == $argv[1]) {
+if (false !== $phpdocBin && isset($argv[1]) && 'doc' == $argv[1]) {
 	$execute = function () use ($phpdocBin) {
 		GLOBAL $DIRS;
-		$NEW_DIRS = "";
+		$NEW_DIRS = '';
 		foreach ($DIRS as $i) {
-			$NEW_DIRS = "-d " . escapeshellarg($i) . " " . $NEW_DIRS;
+			$NEW_DIRS = '-d ' . escapeshellarg($i) . ' ' . $NEW_DIRS;
 		}
-		passthru("php " . $phpdocBin . " " . $NEW_DIRS . " -t docs/");
+		passthru('php ' . $phpdocBin . ' ' . $NEW_DIRS . ' -t docs/');
 	};
 }
 
-if (isset($argv[1]) && "lint" == $argv[1]) {
+if (isset($argv[1]) && 'lint' == $argv[1]) {
 	if (!isset($argv[2])) {
 		$execute = function () {
 			GLOBAL $concurrent;
 
 			$files = [];
 			exec('git status -s | grep -i "\.php$" | awk -F \' \' \'{ print $2 }\'', $files);
-			echo "Differential linting...";
+			echo 'Differential linting...';
 			if ($concurrent) {
 				list($chn, $chnDone) = concurrentExec('php -l %s');
-				echo "Running lint...", PHP_EOL;
-				foreach ($files as $file) {
+				echo 'Running lint...', PHP_EOL;
+				foreach ((array) $files as $file) {
 					$chn->in($file);
 				}
 				stopExec($chn, $chnDone);
 			} else {
-				foreach ($files as $file) {
+				foreach ((array) $files as $file) {
 					passthru('php -l ' . $file);
 				}
 			}
 		};
-	} elseif ("all" == $argv[2]) {
+	} elseif ('all' == $argv[2]) {
 		$execute = function () {
 			GLOBAL $concurrent;
 
@@ -553,10 +553,10 @@ if (isset($argv[1]) && "lint" == $argv[1]) {
 			$iterator = new RecursiveIteratorIterator($directory);
 			$regex = new RegexIterator($iterator, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
 
-			echo "Full linting...", PHP_EOL;
+			echo 'Full linting...', PHP_EOL;
 			if ($concurrent) {
 				list($chn, $chnDone) = concurrentExec('php -l %s');
-				echo "Running lint...", PHP_EOL;
+				echo 'Running lint...', PHP_EOL;
 				foreach ($regex as $file) {
 					$file = $file[0];
 					$chn->in($file);
@@ -572,18 +572,18 @@ if (isset($argv[1]) && "lint" == $argv[1]) {
 	}
 }
 
-if ($fmtBin && isset($argv[1]) && "fmt" == $argv[1]) {
+if (false !== $fmtBin && isset($argv[1]) && 'fmt' == $argv[1]) {
 	if (!isset($argv[2])) {
 		$execute = function () use ($fmtBin) {
 			list($chn, $chnDone) = concurrentExec('php ' . $fmtBin . ' --lint-before %s');
 			$files = [];
 			exec("git status -s | grep -i \"\.php$\" | awk -F ' ' '{ print $2 } '", $files);
-			foreach ($files as $file) {
+			foreach ((array) $files as $file) {
 				$chn->in($file);
 			}
 			stopExec($chn, $chnDone);
 		};
-	} elseif ("clean" == $argv[2]) {
+	} elseif ('clean' == $argv[2]) {
 		$execute = function () use ($fmtBin) {
 			$directory = new RecursiveDirectoryIterator('.');
 			$iterator = new RecursiveIteratorIterator($directory);
@@ -594,7 +594,7 @@ if ($fmtBin && isset($argv[1]) && "fmt" == $argv[1]) {
 				unlink($file);
 			}
 		};
-	} elseif ("all" == $argv[2]) {
+	} elseif ('all' == $argv[2]) {
 		$execute = function () use ($fmtBin) {
 			passthru('php ' . $fmtBin . ' --lint-before .');
 		};
@@ -631,13 +631,13 @@ function which($cmd) {
 	$output = [];
 	$retcode = 0;
 	$which = exec('which ' . escapeshellarg($cmd), $output, $retcode);
-	return [$which, 0 == $retcode];
+	return [$which, (0 === $retcode || null === $retcode)];
 }
 
 function concurrentExec($cmd) {
 	$chn = make_channel();
 	$chnDone = make_channel();
-	echo "Starting " . FMTWORKERS . "...", PHP_EOL;
+	echo 'Starting ' . FMTWORKERS . '...', PHP_EOL;
 	for ($i = 0; $i < FMTWORKERS; ++$i) {
 		cofunc(function ($chn, $chnDone, $cmd, $i) {
 			while (true) {
@@ -650,10 +650,6 @@ function concurrentExec($cmd) {
 			$chnDone->in('OK');
 		}, $chn, $chnDone, $cmd, $i);
 	}
-
-	cofunc(function ($chn, $chnDone) {
-
-	}, $chn, $chnDone);
 
 	return [$chn, $chnDone];
 }

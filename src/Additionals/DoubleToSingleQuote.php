@@ -14,21 +14,12 @@ final class DoubleToSingleQuote extends AdditionalPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			switch ($id) {
-				case T_CONSTANT_ENCAPSED_STRING:
-					if (
-						'"' == $text[0] &&
-						false === strpos($text, '\'') &&
-						!preg_match('/(?<!\\\\)(?:\\\\{2})*\\\\(?!["\\\\])/', $text)
-					) {
-						$text[0] = '\'';
-						$lastByte = strlen($text) - 1;
-						$text[$lastByte] = '\'';
-						$text = str_replace('\"', '"', $text);
-					}
-				default:
-					$this->appendCode($text);
+
+			if ($this->hasDoubleQuote($id, $text)) {
+				$text = $this->convertToSingleQuote($text);
 			}
+
+			$this->appendCode($text);
 		}
 
 		return $this->code;
@@ -52,5 +43,22 @@ $a = "";
 $a = '';
 ?>
 EOT;
+	}
+
+	private function hasDoubleQuote($id, $text) {
+		return (
+			T_CONSTANT_ENCAPSED_STRING == $id &&
+			'"' == $text[0] &&
+			false === strpos($text, '\'') &&
+			!preg_match('/(?<!\\\\)(?:\\\\{2})*\\\\(?!["\\\\])/', $text)
+		);
+	}
+
+	private function convertToSingleQuote($text) {
+		$text[0] = '\'';
+		$lastByte = strlen($text) - 1;
+		$text[$lastByte] = '\'';
+		$text = str_replace('\"', '"', $text);
+		return $text;
 	}
 }

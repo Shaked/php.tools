@@ -31,55 +31,16 @@ final class AlignDoubleSlashComments extends AdditionalPass {
 					if ($this->hasLn($text)) {
 						++$contextCounter;
 					}
+					$this->appendCode($text);
+					break;
+
 				default:
 					$this->appendCode($text);
 					break;
 			}
 		}
 
-		for ($j = 0; $j <= $contextCounter; ++$j) {
-			$placeholder = sprintf(self::ALIGNABLE_COMMENT, $j);
-			if (false === strpos($this->code, $placeholder)) {
-				continue;
-			}
-			if (1 === substr_count($this->code, $placeholder)) {
-				$this->code = str_replace($placeholder, '', $this->code);
-				continue;
-			}
-
-			$lines = explode($this->newLine, $this->code);
-			$linesWithComment = [];
-			$blockCount = 0;
-
-			foreach ($lines as $idx => $line) {
-				if (false !== strpos($line, $placeholder)) {
-					$linesWithComment[$blockCount][] = $idx;
-				} else {
-					++$blockCount;
-					$linesWithComment[$blockCount] = [];
-				}
-			}
-
-			$i = 0;
-			foreach ($linesWithComment as $group) {
-				++$i;
-				$farthest = 0;
-				foreach ($group as $idx) {
-					$farthest = max($farthest, strpos($lines[$idx], $placeholder));
-				}
-				foreach ($group as $idx) {
-					$line = $lines[$idx];
-					$current = strpos($line, $placeholder);
-					$delta = abs($farthest - $current);
-					if ($delta > 0) {
-						$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
-						$lines[$idx] = $line;
-					}
-				}
-			}
-
-			$this->code = str_replace($placeholder, '', implode($this->newLine, $lines));
-		}
+		$this->alignPlaceholders(self::ALIGNABLE_COMMENT, $contextCounter);
 
 		return $this->code;
 	}

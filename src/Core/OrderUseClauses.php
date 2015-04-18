@@ -262,7 +262,6 @@ final class OrderUseClauses extends FormatterPass {
 			switch ($id) {
 				case T_NAMESPACE:
 					$return .= $text;
-					$touchedTUse = false;
 					while (list($index, $token) = each($tokens)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
@@ -279,10 +278,6 @@ final class OrderUseClauses extends FormatterPass {
 							$this->ptr = $index;
 							$namespaceBlock .= $text;
 
-							if (T_USE === $id) {
-								$touchedTUse = true;
-							}
-
 							if (ST_CURLY_OPEN == $id) {
 								++$curlyCount;
 							} elseif (ST_CURLY_CLOSE == $id) {
@@ -297,10 +292,6 @@ final class OrderUseClauses extends FormatterPass {
 						while (list($index, $token) = each($tokens)) {
 							list($id, $text) = $this->getToken($token);
 							$this->ptr = $index;
-
-							if (T_USE === $id) {
-								$touchedTUse = true;
-							}
 
 							if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
 								prev($tokens);
