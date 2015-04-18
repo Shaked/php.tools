@@ -60,7 +60,7 @@ if (!isset($testEnv)) {
 		die();
 	}
 	if (isset($opts['from']) && !isset($opts['to'])) {
-		fwrite(STDERR, "Refactor must have --from and --to parameters" . PHP_EOL);
+		fwrite(STDERR, 'Refactor must have --from and --to parameters' . PHP_EOL);
 		exit(255);
 	}
 

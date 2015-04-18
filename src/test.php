@@ -20,34 +20,34 @@ $isCoveralls = isset($opt['coveralls']);
 if ($isCoverage) {
 	require 'vendor/autoload.php';
 	$filter = new PHP_CodeCoverage_Filter();
-	$filter->addFileToBlacklist("fmt.php");
-	$filter->addFileToBlacklist("fmt.src.php");
-	$filter->addFileToBlacklist("test.php");
-	$filter->addDirectoryToBlacklist("vendor");
+	$filter->addFileToBlacklist('fmt.php');
+	$filter->addFileToBlacklist('fmt.src.php');
+	$filter->addFileToBlacklist('test.php');
+	$filter->addDirectoryToBlacklist('vendor');
 	$coverage = new PHP_CodeCoverage(null, $filter);
 }
 
-$testNumber = "";
+$testNumber = '';
 if (isset($opt['testNumber'])) {
 	if (is_numeric($opt['testNumber'])) {
-		$testNumber = sprintf("%03d", (int) $opt['testNumber']);
+		$testNumber = sprintf('%03d', (int) $opt['testNumber']);
 	} else {
-		$testNumber = sprintf("%s", $opt['testNumber']);
+		$testNumber = sprintf('%s', $opt['testNumber']);
 	}
 }
 $start = microtime(true);
 $testEnv = true;
 ob_start();
 if (!isset($opt['deployed'])) {
-	include realpath(__DIR__ . "/fmt.src.php");
+	include realpath(__DIR__ . '/fmt.src.php');
 } else {
-	include realpath(__DIR__ . "/../fmt.php");
+	include realpath(__DIR__ . '/../fmt.php');
 }
 ob_end_clean();
 echo 'Running tests...', PHP_EOL;
 $brokenTests = [];
 
-$cases = glob(__DIR__ . "/tests/" . $testNumber . "*.in");
+$cases = glob(__DIR__ . '/tests/' . $testNumber . '*.in');
 $count = 0;
 $bailOut = false;
 foreach ($cases as $caseIn) {
@@ -155,7 +155,7 @@ foreach ($cases as $caseIn) {
 	$isCoverage && $coverage->stop();
 }
 
-$cases = glob(__DIR__ . "/tests-PSR/" . $testNumber . "*.in");
+$cases = glob(__DIR__ . '/tests-PSR/' . $testNumber . '*.in');
 if (!$bailOut) {
 	foreach ($cases as $caseIn) {
 		++$count;
@@ -256,7 +256,7 @@ if (!$bailOut) {
 	}
 }
 
-$cases = glob(__DIR__ . "/tests-laravel/" . $testNumber . "*.in");
+$cases = glob(__DIR__ . '/tests-laravel/' . $testNumber . '*.in');
 if (!$bailOut) {
 	foreach ($cases as $caseIn) {
 		++$count;
@@ -340,7 +340,7 @@ if (isset($opt['v']) || isset($opt['verbose'])) {
 		unlink($caseOut . '-got');
 	}
 }
-echo "Took ", (microtime(true) - $start), PHP_EOL;
+echo 'Took ', (microtime(true) - $start), PHP_EOL;
 if ($isCoverage && !$isCoveralls) {
 	$writer = new PHP_CodeCoverage_Report_HTML();
 	$writer->process($coverage, './cover/');
@@ -351,7 +351,7 @@ if ($isCoveralls) {
 }
 
 if (sizeof($brokenTests) > 0) {
-	echo "run test.php -v to see the error diffs", PHP_EOL;
+	echo 'run test.php -v to see the error diffs', PHP_EOL;
 	exit(255);
 }
 exit(0);
