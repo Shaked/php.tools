@@ -33,9 +33,8 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 							$this->appendCode($this->getCrlfIndent());
 							prev($this->tkns);
 							break;
-						} else {
-							$this->appendCode($text);
 						}
+						$this->appendCode($text);
 					}
 					break;
 				case T_FUNCTION:
@@ -58,14 +57,12 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 							} elseif (ST_SEMI_COLON === $id) {
 								$this->appendCode($text);
 								break;
-							} else {
-								$this->appendCode($text);
 							}
+							$this->appendCode($text);
 						}
 						break;
-					} else {
-						$this->appendCode($text);
 					}
+					$this->appendCode($text);
 					break;
 				case ST_CURLY_OPEN:
 					$this->appendCode($text);

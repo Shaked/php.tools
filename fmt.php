@@ -3614,10 +3614,9 @@ final class ResizeSpaces extends FormatterPass {
 					if ($this->rightTokenIs([T_VARIABLE, T_DOUBLE_ARROW])) {
 						$this->appendCode($text . $this->getSpace());
 						break;
-					} else {
-						$this->appendCode($text);
-						break;
 					}
+					$this->appendCode($text);
+					break;
 				case ST_CURLY_OPEN:
 					$touchedFunction = false;
 					if (!$touchedUse && $this->leftUsefulTokenIs([T_VARIABLE, T_STRING]) && $this->rightUsefulTokenIs([T_VARIABLE, T_STRING])) {
@@ -3640,10 +3639,9 @@ final class ResizeSpaces extends FormatterPass {
 						$touchedGroupedUse = true;
 						$this->appendCode($text . $this->getSpace());
 						break;
-					} else {
-						$this->appendCode($text);
-						break;
 					}
+					$this->appendCode($text);
+					break;
 
 				case ST_SEMI_COLON:
 					$touchedUse = false;
@@ -3665,12 +3663,12 @@ final class ResizeSpaces extends FormatterPass {
 					$this->appendCode($text . $this->getSpace($this->rightTokenIs([T_COMMENT, T_DOC_COMMENT])));
 					break;
 				case T_USE:
+					$touchedUse = true;
 					if ($this->leftTokenIs(ST_PARENTHESES_CLOSE)) {
 						$this->appendCode($this->getSpace() . $text . $this->getSpace());
-					} else {
-						$this->appendCode($text . $this->getSpace());
+						break;
 					}
-					$touchedUse = true;
+					$this->appendCode($text . $this->getSpace());
 					break;
 				case T_NAMESPACE:
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_SEMI_COLON, T_NS_SEPARATOR, T_DOUBLE_COLON])));
@@ -3778,23 +3776,23 @@ final class ResizeSpaces extends FormatterPass {
 				case T_FINALLY:
 					if ($this->hasLnLeftToken()) {
 						$this->appendCode($this->getSpace() . $text . $this->getSpace());
-					} else {
-						$this->rtrimAndAppendCode($this->getSpace() . $text . $this->getSpace());
+						break;
 					}
+					$this->rtrimAndAppendCode($this->getSpace() . $text . $this->getSpace());
 					break;
 				case T_ELSEIF:
 					if (!$this->leftTokenIs(ST_CURLY_CLOSE)) {
 						$this->appendCode($text . $this->getSpace());
-					} else {
-						$this->appendCode($this->getSpace() . $text . $this->getSpace());
+						break;
 					}
+					$this->appendCode($this->getSpace() . $text . $this->getSpace());
 					break;
 				case T_ELSE:
 					if (!$this->leftUsefulTokenIs(ST_CURLY_CLOSE)) {
 						$this->appendCode($text);
-					} else {
-						$this->appendCode($this->getSpace(!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) . $text . $this->getSpace());
+						break;
 					}
+					$this->appendCode($this->getSpace(!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) . $text . $this->getSpace());
 					break;
 				case T_ARRAY_CAST:
 				case T_BOOL_CAST:
@@ -3821,11 +3819,12 @@ final class ResizeSpaces extends FormatterPass {
 					if (substr($text, 0, 2) == '//') {
 						list($leftId) = $this->inspectToken(-1);
 						$this->appendCode($this->getSpace(T_VARIABLE == $leftId) . $text);
+						break;
 					} elseif (!$this->hasLn($text) && !$this->hasLnBefore() && !$this->hasLnAfter() && $this->leftUsefulTokenIs(ST_COMMA) && $this->rightUsefulTokenIs(T_VARIABLE)) {
 						$this->appendCode($text . $this->getSpace());
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+					$this->appendCode($text);
 					break;
 
 				case ST_CURLY_CLOSE:
@@ -4395,10 +4394,10 @@ final class PSR2AlignObjOp extends FormatterPass {
 			foreach ($lines as $idx => $line) {
 				if (false !== strpos($line, $placeholder)) {
 					$linesWithObjop[$blockCount][] = $idx;
-				} else {
-					++$blockCount;
-					$linesWithObjop[$blockCount] = [];
+					break;
 				}
+				++$blockCount;
+				$linesWithObjop[$blockCount] = [];
 			}
 
 			foreach ($linesWithObjop as $group) {
@@ -4455,9 +4454,8 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 							$this->appendCode($this->getCrlfIndent());
 							prev($this->tkns);
 							break;
-						} else {
-							$this->appendCode($text);
 						}
+						$this->appendCode($text);
 					}
 					break;
 				case T_FUNCTION:
@@ -4480,14 +4478,12 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 							} elseif (ST_SEMI_COLON === $id) {
 								$this->appendCode($text);
 								break;
-							} else {
-								$this->appendCode($text);
 							}
+							$this->appendCode($text);
 						}
 						break;
-					} else {
-						$this->appendCode($text);
 					}
+					$this->appendCode($text);
 					break;
 				case ST_CURLY_OPEN:
 					$this->appendCode($text);
@@ -4743,20 +4739,21 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					if (!$this->rightTokenIs([T_CLASS])) {
 						$finalOrAbstract = $text;
 						$skipWhitespaces = true;
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+					$this->appendCode($text);
 					break;
 				case T_STATIC:
 					if (!is_null($visibility)) {
 						$static = $text;
 						$skipWhitespaces = true;
+						break;
 					} elseif (!$this->rightTokenIs([T_VARIABLE, T_DOUBLE_COLON]) && !$this->leftTokenIs([T_NEW])) {
 						$static = $text;
 						$skipWhitespaces = true;
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+					$this->appendCode($text);
 					break;
 				case T_VARIABLE:
 					if (
@@ -4792,16 +4789,17 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						$this->appendCode($static . $this->getSpace());
 					}
 					$this->appendCode($text);
-					if ('abstract' == strtolower($finalOrAbstract)) {
-						$this->printUntil(ST_SEMI_COLON);
-					} else {
-						$this->printUntil(ST_CURLY_OPEN);
-						$this->printCurlyBlock();
-					}
-					$finalOrAbstract = null;
 					$visibility = null;
 					$static = null;
 					$skipWhitespaces = false;
+					if ('abstract' == strtolower($finalOrAbstract)) {
+						$finalOrAbstract = null;
+						$this->printUntil(ST_SEMI_COLON);
+						break;
+					}
+					$finalOrAbstract = null;
+					$this->printUntil(ST_CURLY_OPEN);
+					$this->printCurlyBlock();
 					break;
 				default:
 					$this->appendCode($text);

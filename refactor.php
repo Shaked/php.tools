@@ -965,9 +965,10 @@ final class RefactorPass extends FormatterPass {
 				}
 
 				$this->appendCode($buffer);
-			} else {
-				$this->appendCode($text);
+				continue;
 			}
+
+			$this->appendCode($text);
 		}
 		return $this->code;
 	}

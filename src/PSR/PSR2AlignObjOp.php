@@ -56,10 +56,10 @@ final class PSR2AlignObjOp extends FormatterPass {
 			foreach ($lines as $idx => $line) {
 				if (false !== strpos($line, $placeholder)) {
 					$linesWithObjop[$blockCount][] = $idx;
-				} else {
-					++$blockCount;
-					$linesWithObjop[$blockCount] = [];
+					break;
 				}
+				++$blockCount;
+				$linesWithObjop[$blockCount] = [];
 			}
 
 			foreach ($linesWithObjop as $group) {

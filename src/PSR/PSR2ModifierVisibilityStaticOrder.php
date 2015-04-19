@@ -74,20 +74,21 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 					if (!$this->rightTokenIs([T_CLASS])) {
 						$finalOrAbstract = $text;
 						$skipWhitespaces = true;
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+					$this->appendCode($text);
 					break;
 				case T_STATIC:
 					if (!is_null($visibility)) {
 						$static = $text;
 						$skipWhitespaces = true;
+						break;
 					} elseif (!$this->rightTokenIs([T_VARIABLE, T_DOUBLE_COLON]) && !$this->leftTokenIs([T_NEW])) {
 						$static = $text;
 						$skipWhitespaces = true;
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+					$this->appendCode($text);
 					break;
 				case T_VARIABLE:
 					if (
@@ -123,16 +124,17 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 						$this->appendCode($static . $this->getSpace());
 					}
 					$this->appendCode($text);
-					if ('abstract' == strtolower($finalOrAbstract)) {
-						$this->printUntil(ST_SEMI_COLON);
-					} else {
-						$this->printUntil(ST_CURLY_OPEN);
-						$this->printCurlyBlock();
-					}
-					$finalOrAbstract = null;
 					$visibility = null;
 					$static = null;
 					$skipWhitespaces = false;
+					if ('abstract' == strtolower($finalOrAbstract)) {
+						$finalOrAbstract = null;
+						$this->printUntil(ST_SEMI_COLON);
+						break;
+					}
+					$finalOrAbstract = null;
+					$this->printUntil(ST_CURLY_OPEN);
+					$this->printCurlyBlock();
 					break;
 				default:
 					$this->appendCode($text);

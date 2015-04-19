@@ -175,10 +175,9 @@ final class ResizeSpaces extends FormatterPass {
 					if ($this->rightTokenIs([T_VARIABLE, T_DOUBLE_ARROW])) {
 						$this->appendCode($text . $this->getSpace());
 						break;
-					} else {
-						$this->appendCode($text);
-						break;
 					}
+					$this->appendCode($text);
+					break;
 				case ST_CURLY_OPEN:
 					$touchedFunction = false;
 					if (!$touchedUse && $this->leftUsefulTokenIs([T_VARIABLE, T_STRING]) && $this->rightUsefulTokenIs([T_VARIABLE, T_STRING])) {
@@ -201,10 +200,9 @@ final class ResizeSpaces extends FormatterPass {
 						$touchedGroupedUse = true;
 						$this->appendCode($text . $this->getSpace());
 						break;
-					} else {
-						$this->appendCode($text);
-						break;
 					}
+					$this->appendCode($text);
+					break;
 
 				case ST_SEMI_COLON:
 					$touchedUse = false;
@@ -226,12 +224,12 @@ final class ResizeSpaces extends FormatterPass {
 					$this->appendCode($text . $this->getSpace($this->rightTokenIs([T_COMMENT, T_DOC_COMMENT])));
 					break;
 				case T_USE:
+					$touchedUse = true;
 					if ($this->leftTokenIs(ST_PARENTHESES_CLOSE)) {
 						$this->appendCode($this->getSpace() . $text . $this->getSpace());
-					} else {
-						$this->appendCode($text . $this->getSpace());
+						break;
 					}
-					$touchedUse = true;
+					$this->appendCode($text . $this->getSpace());
 					break;
 				case T_NAMESPACE:
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_SEMI_COLON, T_NS_SEPARATOR, T_DOUBLE_COLON])));
@@ -339,23 +337,23 @@ final class ResizeSpaces extends FormatterPass {
 				case T_FINALLY:
 					if ($this->hasLnLeftToken()) {
 						$this->appendCode($this->getSpace() . $text . $this->getSpace());
-					} else {
-						$this->rtrimAndAppendCode($this->getSpace() . $text . $this->getSpace());
+						break;
 					}
+					$this->rtrimAndAppendCode($this->getSpace() . $text . $this->getSpace());
 					break;
 				case T_ELSEIF:
 					if (!$this->leftTokenIs(ST_CURLY_CLOSE)) {
 						$this->appendCode($text . $this->getSpace());
-					} else {
-						$this->appendCode($this->getSpace() . $text . $this->getSpace());
+						break;
 					}
+					$this->appendCode($this->getSpace() . $text . $this->getSpace());
 					break;
 				case T_ELSE:
 					if (!$this->leftUsefulTokenIs(ST_CURLY_CLOSE)) {
 						$this->appendCode($text);
-					} else {
-						$this->appendCode($this->getSpace(!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) . $text . $this->getSpace());
+						break;
 					}
+					$this->appendCode($this->getSpace(!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) . $text . $this->getSpace());
 					break;
 				case T_ARRAY_CAST:
 				case T_BOOL_CAST:
@@ -382,11 +380,12 @@ final class ResizeSpaces extends FormatterPass {
 					if (substr($text, 0, 2) == '//') {
 						list($leftId) = $this->inspectToken(-1);
 						$this->appendCode($this->getSpace(T_VARIABLE == $leftId) . $text);
+						break;
 					} elseif (!$this->hasLn($text) && !$this->hasLnBefore() && !$this->hasLnAfter() && $this->leftUsefulTokenIs(ST_COMMA) && $this->rightUsefulTokenIs(T_VARIABLE)) {
 						$this->appendCode($text . $this->getSpace());
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+					$this->appendCode($text);
 					break;
 
 				case ST_CURLY_CLOSE:
