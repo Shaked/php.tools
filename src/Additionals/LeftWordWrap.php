@@ -24,10 +24,8 @@ final class LeftWordWrap extends AdditionalPass {
 					str_repeat(' ', self::$tabSizeInSpace),
 					$text
 				);
-				$textLen = strlen($text);
-			} else {
-				$textLen = strlen($text);
 			}
+			$textLen = strlen($text);
 
 			$currentLineLength += $textLen;
 

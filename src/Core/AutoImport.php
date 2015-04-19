@@ -39,9 +39,8 @@ final class AutoImportPass extends FormatterPass {
 							$useItem .= ST_SEMI_COLON . $this->newLine;
 							$nextTokens[] = [T_USE, 'use'];
 							break;
-						} else {
-							$useItem .= $text;
 						}
+						$useItem .= $text;
 					}
 					$useStack[] = $useItem;
 					$token = new SurrogateToken();
@@ -80,18 +79,18 @@ final class AutoImportPass extends FormatterPass {
 		foreach ($newTokens as $token) {
 			if (!($token instanceof SurrogateToken)) {
 				list($id, $text) = $this->getToken($token);
-				$lower_text = strtolower($text);
-				if (T_STRING === $id && isset($aliasList[$lower_text])) {
-					++$aliasCount[$lower_text];
+				$lowerText = strtolower($text);
+				if (T_STRING === $id && isset($aliasList[$lowerText])) {
+					++$aliasCount[$lowerText];
 				}
 			}
 		}
 
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
-			$lower_text = strtolower($text);
-			if (T_STRING === $id && isset($aliasList[$lower_text]) && ($this->leftTokenSubsetIsAtIdx($tokens, $index, T_NEW) || $this->rightTokenSubsetIsAtIdx($tokens, $index, T_DOUBLE_COLON))) {
-				++$aliasCount[$lower_text];
+			$lowerText = strtolower($text);
+			if (T_STRING === $id && isset($aliasList[$lowerText]) && ($this->leftTokenSubsetIsAtIdx($tokens, $index, T_NEW) || $this->rightTokenSubsetIsAtIdx($tokens, $index, T_DOUBLE_COLON))) {
+				++$aliasCount[$lowerText];
 			} elseif (T_DOC_COMMENT === $id) {
 				foreach ($aliasList as $alias => $use) {
 					if (false !== stripos($text, $alias)) {
@@ -149,12 +148,12 @@ final class AutoImportPass extends FormatterPass {
 				}
 			}
 
-			$lower_text = strtolower($text);
+			$lowerText = strtolower($text);
 			if (T_STRING === $id && ($this->leftTokenSubsetIsAtIdx($tokens, $index, T_NEW) || $this->rightTokenSubsetIsAtIdx($tokens, $index, T_DOUBLE_COLON))) {
-				if (!isset($aliasCount[$lower_text])) {
-					$aliasCount[$lower_text] = 0;
+				if (!isset($aliasCount[$lowerText])) {
+					$aliasCount[$lowerText] = 0;
 				}
-				++$aliasCount[$lower_text];
+				++$aliasCount[$lowerText];
 			}
 		}
 		$autoImportCandidates = array_intersect_key($classList, $aliasCount);

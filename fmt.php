@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.24.0");;
+define("VERSION", "7.24.1");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -428,15 +428,15 @@ abstract class FormatterPass {
 	abstract public function format($source);
 
 	protected function getToken($token) {
+		$ret = [$token, $token];
 		if (isset($token[1])) {
-			return $token;
-		} else {
-			return [$token, $token];
+			$ret = $token;
 		}
+		return $ret;
 	}
 
-	protected function getCrlf($true = true) {
-		return $true ? $this->newLine : '';
+	protected function getCrlf() {
+		return $this->newLine;
 	}
 
 	protected function getCrlfIndent() {
@@ -788,15 +788,15 @@ abstract class FormatterPass {
 		$this->code = rtrim($this->code) . $code;
 	}
 
-	protected function scanAndReplace(&$tkns, &$ptr, $start, $end, $call, $look_for) {
-		$look_for = array_flip($look_for);
+	protected function scanAndReplace(&$tkns, &$ptr, $start, $end, $call, $lookFor) {
+		$lookFor = array_flip($lookFor);
 		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
 		$tmp = '';
 		$tknCount = 1;
 		$foundPotentialTokens = false;
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
-			if (isset($look_for[$id])) {
+			if (isset($lookFor[$id])) {
 				$foundPotentialTokens = true;
 			}
 			if ($start == $id) {
@@ -818,15 +818,15 @@ abstract class FormatterPass {
 
 	}
 
-	protected function scanAndReplaceCurly(&$tkns, &$ptr, $start, $call, $look_for) {
-		$look_for = array_flip($look_for);
+	protected function scanAndReplaceCurly(&$tkns, &$ptr, $start, $call, $lookFor) {
+		$lookFor = array_flip($lookFor);
 		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
 		$tmp = '';
 		$tknCount = 1;
 		$foundPotentialTokens = false;
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
-			if (isset($look_for[$id])) {
+			if (isset($lookFor[$id])) {
 				$foundPotentialTokens = true;
 			}
 			if (ST_CURLY_OPEN == $id) {
@@ -1302,10 +1302,9 @@ final class CodeFormatter {
 	public function enablePass($pass) {
 		$args = func_get_args();
 		if (!isset($args[1])) {
-			$this->passes[$pass] = new $pass();
-		} else {
-			$this->passes[$pass] = new $pass($args[1]);
+			$args[1] = null;
 		}
+		$this->passes[$pass] = new $pass($args[1]);
 
 		$scPass = &$this->shortcircuit[$pass];
 		if (isset($scPass)) {
@@ -1350,11 +1349,11 @@ final class CodeFormatter {
 	}
 
 	protected function getToken($token) {
+		$ret = [$token, $token];
 		if (isset($token[1])) {
-			return $token;
-		} else {
-			return [$token, $token];
+			$ret = $token;
 		}
+		return $ret;
 	}
 }
 ;
@@ -1467,9 +1466,8 @@ final class AutoImportPass extends FormatterPass {
 							$useItem .= ST_SEMI_COLON . $this->newLine;
 							$nextTokens[] = [T_USE, 'use'];
 							break;
-						} else {
-							$useItem .= $text;
 						}
+						$useItem .= $text;
 					}
 					$useStack[] = $useItem;
 					$token = new SurrogateToken();
@@ -1508,18 +1506,18 @@ final class AutoImportPass extends FormatterPass {
 		foreach ($newTokens as $token) {
 			if (!($token instanceof SurrogateToken)) {
 				list($id, $text) = $this->getToken($token);
-				$lower_text = strtolower($text);
-				if (T_STRING === $id && isset($aliasList[$lower_text])) {
-					++$aliasCount[$lower_text];
+				$lowerText = strtolower($text);
+				if (T_STRING === $id && isset($aliasList[$lowerText])) {
+					++$aliasCount[$lowerText];
 				}
 			}
 		}
 
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
-			$lower_text = strtolower($text);
-			if (T_STRING === $id && isset($aliasList[$lower_text]) && ($this->leftTokenSubsetIsAtIdx($tokens, $index, T_NEW) || $this->rightTokenSubsetIsAtIdx($tokens, $index, T_DOUBLE_COLON))) {
-				++$aliasCount[$lower_text];
+			$lowerText = strtolower($text);
+			if (T_STRING === $id && isset($aliasList[$lowerText]) && ($this->leftTokenSubsetIsAtIdx($tokens, $index, T_NEW) || $this->rightTokenSubsetIsAtIdx($tokens, $index, T_DOUBLE_COLON))) {
+				++$aliasCount[$lowerText];
 			} elseif (T_DOC_COMMENT === $id) {
 				foreach ($aliasList as $alias => $use) {
 					if (false !== stripos($text, $alias)) {
@@ -1577,12 +1575,12 @@ final class AutoImportPass extends FormatterPass {
 				}
 			}
 
-			$lower_text = strtolower($text);
+			$lowerText = strtolower($text);
 			if (T_STRING === $id && ($this->leftTokenSubsetIsAtIdx($tokens, $index, T_NEW) || $this->rightTokenSubsetIsAtIdx($tokens, $index, T_DOUBLE_COLON))) {
-				if (!isset($aliasCount[$lower_text])) {
-					$aliasCount[$lower_text] = 0;
+				if (!isset($aliasCount[$lowerText])) {
+					$aliasCount[$lowerText] = 0;
 				}
-				++$aliasCount[$lower_text];
+				++$aliasCount[$lowerText];
 			}
 		}
 		$autoImportCandidates = array_intersect_key($classList, $aliasCount);
@@ -1701,10 +1699,9 @@ final class ConstructorPass extends FormatterPass {
 	private $type;
 
 	public function __construct($type = self::TYPE_CAMEL_CASE) {
+		$this->type = self::TYPE_CAMEL_CASE;
 		if (self::TYPE_CAMEL_CASE == $type || self::TYPE_SNAKE_CASE == $type || self::TYPE_GOLANG == $type) {
 			$this->type = $type;
-		} else {
-			$this->type = self::TYPE_CAMEL_CASE;
 		}
 	}
 
@@ -1884,11 +1881,11 @@ final class ExtraCommaInArray extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
+					$found = ST_BRACKET_OPEN;
 					if ($this->isShortArray()) {
-						$contextStack[] = self::ST_SHORT_ARRAY_OPEN;
-					} else {
-						$contextStack[] = ST_BRACKET_OPEN;
+						$found = self::ST_SHORT_ARRAY_OPEN;
 					}
+					$contextStack[] = $found;
 					break;
 				case ST_BRACKET_CLOSE:
 					if (isset($contextStack[0]) && !$this->leftTokenIs(ST_BRACKET_OPEN)) {
@@ -1907,13 +1904,13 @@ final class ExtraCommaInArray extends FormatterPass {
 					}
 					break;
 				case ST_PARENTHESES_OPEN:
+					$found = ST_PARENTHESES_OPEN;
 					if ($this->leftUsefulTokenIs(T_STRING)) {
-						$contextStack[] = T_STRING;
+						$found = T_STRING;
 					} elseif ($this->leftUsefulTokenIs(T_ARRAY)) {
-						$contextStack[] = T_ARRAY;
-					} else {
-						$contextStack[] = ST_PARENTHESES_OPEN;
+						$found = T_ARRAY;
 					}
+					$contextStack[] = $found;
 					break;
 				case ST_PARENTHESES_CLOSE:
 					if (isset($contextStack[0])) {
@@ -4625,7 +4622,10 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 						$this->appendCode($text);
 						break;
 					}
-					$this->appendCode($this->getCrlf($this->leftTokenIs(ST_CURLY_CLOSE)) . $text);
+					if ($this->leftTokenIs(ST_CURLY_CLOSE)) {
+						$this->appendCode($this->getCrlf());
+					}
+					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
@@ -6399,8 +6399,8 @@ final class GeneratePHPDoc extends AdditionalPass {
 						}
 					}
 
-					$func_token = &$this->tkns[$origIdx];
-					$func_token[1] = $this->renderDocBlock($paramStack, $returnStack) . $func_token[1];
+					$funcToken = &$this->tkns[$origIdx];
+					$funcToken[1] = $this->renderDocBlock($paramStack, $returnStack) . $funcToken[1];
 					$touchedVisibility = false;
 			}
 		}
@@ -6571,10 +6571,8 @@ final class LeftWordWrap extends AdditionalPass {
 					str_repeat(' ', self::$tabSizeInSpace),
 					$text
 				);
-				$textLen = strlen($text);
-			} else {
-				$textLen = strlen($text);
 			}
+			$textLen = strlen($text);
 
 			$currentLineLength += $textLen;
 
@@ -6629,13 +6627,13 @@ final class LongArray extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
+					$found = ST_BRACKET_OPEN;
 					if ($this->isShortArray()) {
-						$contextStack[] = self::ST_SHORT_ARRAY_OPEN;
+						$found = self::ST_SHORT_ARRAY_OPEN;
 						$id = self::ST_SHORT_ARRAY_OPEN;
 						$text = 'array(';
-					} else {
-						$contextStack[] = ST_BRACKET_OPEN;
 					}
+					$contextStack[] = $found;
 					break;
 				case ST_BRACKET_CLOSE:
 					if (isset($contextStack[0]) && !$this->leftTokenIs(ST_BRACKET_OPEN)) {
@@ -6931,12 +6929,12 @@ final class OrderMethod extends AdditionalPass {
 							break;
 						}
 					}
-					if (!$touchedMethod) {
-						$return .= $stack;
-					} else {
+					$appendWith = $stack;
+					if ($touchedMethod) {
 						$functionList[$functionName] = $stack;
-						$return .= self::METHOD_REPLACEMENT_PLACEHOLDER;
+						$appendWith = self::METHOD_REPLACEMENT_PLACEHOLDER;
 					}
+					$return .= $appendWith;
 					break;
 				default:
 					$return .= $text;
@@ -7587,25 +7585,25 @@ final class ShortArray extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$found_paren = [];
+		$foundParen = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ARRAY:
 					if ($this->rightTokenIs([ST_PARENTHESES_OPEN])) {
-						$found_paren[] = self::FOUND_ARRAY;
+						$foundParen[] = self::FOUND_ARRAY;
 						$this->printAndStopAt(ST_PARENTHESES_OPEN);
 						$this->appendCode(ST_BRACKET_OPEN);
 						break;
 					}
 				case ST_PARENTHESES_OPEN:
-					$found_paren[] = self::FOUND_PARENTHESES;
+					$foundParen[] = self::FOUND_PARENTHESES;
 					$this->appendCode($text);
 					break;
 
 				case ST_PARENTHESES_CLOSE:
-					$popToken = array_pop($found_paren);
+					$popToken = array_pop($foundParen);
 					if (self::FOUND_ARRAY == $popToken) {
 						$this->appendCode(ST_BRACKET_CLOSE);
 						break;
@@ -7973,11 +7971,11 @@ final class StripExtraCommaInArray extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
+					$found = ST_BRACKET_OPEN;
 					if ($this->isShortArray()) {
-						$contextStack[] = self::ST_SHORT_ARRAY_OPEN;
-					} else {
-						$contextStack[] = ST_BRACKET_OPEN;
+						$found = self::ST_SHORT_ARRAY_OPEN;
 					}
+					$contextStack[] = $found;
 					break;
 				case ST_BRACKET_CLOSE:
 					if (isset($contextStack[0]) && !$this->leftTokenIs(ST_BRACKET_OPEN)) {
@@ -8758,13 +8756,13 @@ final class YodaComparisons extends AdditionalPass {
 						break;
 					}
 				}
+				$chain = [self::CHAIN_LITERAL, $stack];
 				if (substr(trim($stack), -1, 1) == ST_PARENTHESES_CLOSE) {
-					$tkns[$initialIndex] = [self::CHAIN_FUNC, $stack];
+					$chain = [self::CHAIN_FUNC, $stack];
 				} elseif ($touchedVariable) {
-					$tkns[$initialIndex] = [self::CHAIN_VARIABLE, $stack];
-				} else {
-					$tkns[$initialIndex] = [self::CHAIN_LITERAL, $stack];
+					$chain = [self::CHAIN_VARIABLE, $stack];
 				}
+				$tkns[$initialIndex] = $chain;
 			}
 		}
 		$tkns = array_values(array_filter($tkns));

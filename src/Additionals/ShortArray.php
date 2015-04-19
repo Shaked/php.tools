@@ -15,25 +15,25 @@ final class ShortArray extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
-		$found_paren = [];
+		$foundParen = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_ARRAY:
 					if ($this->rightTokenIs([ST_PARENTHESES_OPEN])) {
-						$found_paren[] = self::FOUND_ARRAY;
+						$foundParen[] = self::FOUND_ARRAY;
 						$this->printAndStopAt(ST_PARENTHESES_OPEN);
 						$this->appendCode(ST_BRACKET_OPEN);
 						break;
 					}
 				case ST_PARENTHESES_OPEN:
-					$found_paren[] = self::FOUND_PARENTHESES;
+					$foundParen[] = self::FOUND_PARENTHESES;
 					$this->appendCode($text);
 					break;
 
 				case ST_PARENTHESES_CLOSE:
-					$popToken = array_pop($found_paren);
+					$popToken = array_pop($foundParen);
 					if (self::FOUND_ARRAY == $popToken) {
 						$this->appendCode(ST_BRACKET_CLOSE);
 						break;

@@ -20,7 +20,10 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 						$this->appendCode($text);
 						break;
 					}
-					$this->appendCode($this->getCrlf($this->leftTokenIs(ST_CURLY_CLOSE)) . $text);
+					if ($this->leftTokenIs(ST_CURLY_CLOSE)) {
+						$this->appendCode($this->getCrlf());
+					}
+					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;

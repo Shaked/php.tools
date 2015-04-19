@@ -10,10 +10,9 @@ final class ConstructorPass extends FormatterPass {
 	private $type;
 
 	public function __construct($type = self::TYPE_CAMEL_CASE) {
+		$this->type = self::TYPE_CAMEL_CASE;
 		if (self::TYPE_CAMEL_CASE == $type || self::TYPE_SNAKE_CASE == $type || self::TYPE_GOLANG == $type) {
 			$this->type = $type;
-		} else {
-			$this->type = self::TYPE_CAMEL_CASE;
 		}
 	}
 

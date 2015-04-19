@@ -139,10 +139,9 @@ final class CodeFormatter {
 	public function enablePass($pass) {
 		$args = func_get_args();
 		if (!isset($args[1])) {
-			$this->passes[$pass] = new $pass();
-		} else {
-			$this->passes[$pass] = new $pass($args[1]);
+			$args[1] = null;
 		}
+		$this->passes[$pass] = new $pass($args[1]);
 
 		$scPass = &$this->shortcircuit[$pass];
 		if (isset($scPass)) {
@@ -187,10 +186,10 @@ final class CodeFormatter {
 	}
 
 	protected function getToken($token) {
+		$ret = [$token, $token];
 		if (isset($token[1])) {
-			return $token;
-		} else {
-			return [$token, $token];
+			$ret = $token;
 		}
+		return $ret;
 	}
 }

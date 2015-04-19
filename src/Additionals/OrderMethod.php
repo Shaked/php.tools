@@ -49,12 +49,12 @@ final class OrderMethod extends AdditionalPass {
 							break;
 						}
 					}
-					if (!$touchedMethod) {
-						$return .= $stack;
-					} else {
+					$appendWith = $stack;
+					if ($touchedMethod) {
 						$functionList[$functionName] = $stack;
-						$return .= self::METHOD_REPLACEMENT_PLACEHOLDER;
+						$appendWith = self::METHOD_REPLACEMENT_PLACEHOLDER;
 					}
+					$return .= $appendWith;
 					break;
 				default:
 					$return .= $text;

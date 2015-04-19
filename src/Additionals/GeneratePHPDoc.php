@@ -106,8 +106,8 @@ final class GeneratePHPDoc extends AdditionalPass {
 						}
 					}
 
-					$func_token = &$this->tkns[$origIdx];
-					$func_token[1] = $this->renderDocBlock($paramStack, $returnStack) . $func_token[1];
+					$funcToken = &$this->tkns[$origIdx];
+					$funcToken[1] = $this->renderDocBlock($paramStack, $returnStack) . $funcToken[1];
 					$touchedVisibility = false;
 			}
 		}

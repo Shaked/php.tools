@@ -138,15 +138,15 @@ abstract class FormatterPass {
 	abstract public function format($source);
 
 	protected function getToken($token) {
+		$ret = [$token, $token];
 		if (isset($token[1])) {
-			return $token;
-		} else {
-			return [$token, $token];
+			$ret = $token;
 		}
+		return $ret;
 	}
 
-	protected function getCrlf($true = true) {
-		return $true ? $this->newLine : '';
+	protected function getCrlf() {
+		return $this->newLine;
 	}
 
 	protected function getCrlfIndent() {
@@ -498,15 +498,15 @@ abstract class FormatterPass {
 		$this->code = rtrim($this->code) . $code;
 	}
 
-	protected function scanAndReplace(&$tkns, &$ptr, $start, $end, $call, $look_for) {
-		$look_for = array_flip($look_for);
+	protected function scanAndReplace(&$tkns, &$ptr, $start, $end, $call, $lookFor) {
+		$lookFor = array_flip($lookFor);
 		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
 		$tmp = '';
 		$tknCount = 1;
 		$foundPotentialTokens = false;
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
-			if (isset($look_for[$id])) {
+			if (isset($lookFor[$id])) {
 				$foundPotentialTokens = true;
 			}
 			if ($start == $id) {
@@ -528,15 +528,15 @@ abstract class FormatterPass {
 
 	}
 
-	protected function scanAndReplaceCurly(&$tkns, &$ptr, $start, $call, $look_for) {
-		$look_for = array_flip($look_for);
+	protected function scanAndReplaceCurly(&$tkns, &$ptr, $start, $call, $lookFor) {
+		$lookFor = array_flip($lookFor);
 		$placeholder = '<?php' . ' /*\x2 PHPOPEN \x3*/';
 		$tmp = '';
 		$tknCount = 1;
 		$foundPotentialTokens = false;
 		while (list($ptr, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
-			if (isset($look_for[$id])) {
+			if (isset($lookFor[$id])) {
 				$foundPotentialTokens = true;
 			}
 			if (ST_CURLY_OPEN == $id) {

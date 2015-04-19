@@ -16,11 +16,11 @@ final class StripExtraCommaInArray extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
+					$found = ST_BRACKET_OPEN;
 					if ($this->isShortArray()) {
-						$contextStack[] = self::ST_SHORT_ARRAY_OPEN;
-					} else {
-						$contextStack[] = ST_BRACKET_OPEN;
+						$found = self::ST_SHORT_ARRAY_OPEN;
 					}
+					$contextStack[] = $found;
 					break;
 				case ST_BRACKET_CLOSE:
 					if (isset($contextStack[0]) && !$this->leftTokenIs(ST_BRACKET_OPEN)) {

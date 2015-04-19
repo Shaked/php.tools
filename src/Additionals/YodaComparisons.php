@@ -195,13 +195,13 @@ final class YodaComparisons extends AdditionalPass {
 						break;
 					}
 				}
+				$chain = [self::CHAIN_LITERAL, $stack];
 				if (substr(trim($stack), -1, 1) == ST_PARENTHESES_CLOSE) {
-					$tkns[$initialIndex] = [self::CHAIN_FUNC, $stack];
+					$chain = [self::CHAIN_FUNC, $stack];
 				} elseif ($touchedVariable) {
-					$tkns[$initialIndex] = [self::CHAIN_VARIABLE, $stack];
-				} else {
-					$tkns[$initialIndex] = [self::CHAIN_LITERAL, $stack];
+					$chain = [self::CHAIN_VARIABLE, $stack];
 				}
+				$tkns[$initialIndex] = $chain;
 			}
 		}
 		$tkns = array_values(array_filter($tkns));
