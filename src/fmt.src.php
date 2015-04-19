@@ -487,6 +487,9 @@ if (!isset($testEnv)) {
 	}
 
 	if (isset($opts['laravel'])) {
+		fwrite(STDERR, 'Laravel support is deprecated, as of Laravel 5.1 they will adhere to PSR2 standard' . PHP_EOL);
+		fwrite(STDERR, 'See: https://laravel-news.com/2015/02/laravel-5-1/' . PHP_EOL);
+
 		LaravelDecorator::decorate($fmt);
 		$argv = extractFromArgv($argv, 'laravel');
 		$argv = extractFromArgv($argv, 'psr');
