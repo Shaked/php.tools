@@ -51,9 +51,9 @@ final class ResizeSpaces extends FormatterPass {
 						$this->rightUsefulTokenIs([T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
 					) {
 						$this->appendCode($this->getSpace() . $text . $this->getSpace());
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+					$this->appendCode($text);
 					break;
 				case '*':
 					list($prevId) = $this->inspectToken(-1);
@@ -63,19 +63,24 @@ final class ResizeSpaces extends FormatterPass {
 						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($text . $this->getSpace());
+						break;
+
 					} elseif (
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE === $nextId
 					) {
 						$this->appendCode($this->getSpace() . $text);
+						break;
+
 					} elseif (
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($this->getSpace() . $text . $this->getSpace());
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+
+					$this->appendCode($text);
 					break;
 
 				case '%':

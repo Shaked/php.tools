@@ -30,10 +30,10 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 		foreach ($lines as $idx => $line) {
 			if (trim($line) === self::EMPTY_LINE) {
 				$emptyLines[$blockCount][] = $idx;
-			} else {
-				++$blockCount;
-				$emptyLines[$blockCount] = [];
+				continue;
 			}
+			++$blockCount;
+			$emptyLines[$blockCount] = [];
 		}
 
 		foreach ($emptyLines as $group) {

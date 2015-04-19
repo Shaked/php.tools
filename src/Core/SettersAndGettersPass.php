@@ -12,10 +12,9 @@ final class SettersAndGettersPass extends FormatterPass {
 	private $type;
 
 	public function __construct($type = self::TYPE_CAMEL_CASE) {
+		$this->type = self::TYPE_CAMEL_CASE;
 		if (self::TYPE_CAMEL_CASE == $type || self::TYPE_SNAKE_CASE == $type || self::TYPE_GOLANG == $type) {
 			$this->type = $type;
-		} else {
-			$this->type = self::TYPE_CAMEL_CASE;
 		}
 	}
 	public function candidate($source, $foundTokens) {
@@ -97,9 +96,9 @@ final class SettersAndGettersPass extends FormatterPass {
 							}
 							if ($append) {
 								$this->appendCode($str);
-							} else {
-								$this->code = str_replace(sprintf(self::PLACEHOLDER, $var), $str, $this->code);
+								continue;
 							}
+							$this->code = str_replace(sprintf(self::PLACEHOLDER, $var), $str, $this->code);
 						}
 					}
 

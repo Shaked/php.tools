@@ -99,10 +99,10 @@ abstract class FormatterPass {
 			foreach ($lines as $idx => $line) {
 				if (false !== strpos($line, $placeholder)) {
 					$linesWithPlaceholder[$blockCount][] = $idx;
-				} else {
-					++$blockCount;
-					$linesWithPlaceholder[$blockCount] = [];
+					continue;
 				}
+				++$blockCount;
+				$linesWithPlaceholder[$blockCount] = [];
 			}
 
 			$i = 0;
@@ -429,12 +429,10 @@ abstract class FormatterPass {
 	}
 
 	private function resolveIgnoreList($ignoreList = []) {
-		if (empty($ignoreList)) {
-			$ignoreList[T_WHITESPACE] = true;
-		} else {
-			$ignoreList = array_flip($ignoreList);
+		if (!empty($ignoreList)) {
+			return array_flip($ignoreList);
 		}
-		return $ignoreList;
+		return [T_WHITESPACE => true];
 	}
 
 	private function resolveTokenMatch($tkns, $idx, $token) {
@@ -817,6 +815,7 @@ abstract class FormatterPass {
 						$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 						$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
 						$this->refWalkCurlyBlock($tkns, $ptr);
+						continue;
 					} elseif (
 						$this->rightTokenSubsetIsAtIdx(
 							$tkns,
@@ -828,9 +827,8 @@ abstract class FormatterPass {
 						$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
 						$this->refWalkCurlyBlock($tkns, $ptr);
 						break;
-					} else {
-						break;
 					}
+					break;
 				}
 				return;
 			}
@@ -947,9 +945,8 @@ final class RefactorPass extends FormatterPass {
 								}
 								if ($sMatch) {
 									break;
-								} else {
-									continue;
 								}
+								continue;
 							}
 							if (strtolower($text) == $stopText) {
 								$match = false;

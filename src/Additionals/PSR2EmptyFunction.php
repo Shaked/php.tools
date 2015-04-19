@@ -24,9 +24,9 @@ final class PSR2EmptyFunction extends AdditionalPass {
 						$this->rtrimAndAppendCode($this->getSpace() . ST_CURLY_OPEN);
 						$this->printAndStopAt(ST_CURLY_CLOSE);
 						$this->rtrimAndAppendCode(ST_CURLY_CLOSE);
-					} else {
-						prev($this->tkns);
+						break;
 					}
+					prev($this->tkns);
 					break;
 				default:
 					$this->appendCode($text);

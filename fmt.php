@@ -389,10 +389,10 @@ abstract class FormatterPass {
 			foreach ($lines as $idx => $line) {
 				if (false !== strpos($line, $placeholder)) {
 					$linesWithPlaceholder[$blockCount][] = $idx;
-				} else {
-					++$blockCount;
-					$linesWithPlaceholder[$blockCount] = [];
+					continue;
 				}
+				++$blockCount;
+				$linesWithPlaceholder[$blockCount] = [];
 			}
 
 			$i = 0;
@@ -719,12 +719,10 @@ abstract class FormatterPass {
 	}
 
 	private function resolveIgnoreList($ignoreList = []) {
-		if (empty($ignoreList)) {
-			$ignoreList[T_WHITESPACE] = true;
-		} else {
-			$ignoreList = array_flip($ignoreList);
+		if (!empty($ignoreList)) {
+			return array_flip($ignoreList);
 		}
-		return $ignoreList;
+		return [T_WHITESPACE => true];
 	}
 
 	private function resolveTokenMatch($tkns, $idx, $token) {
@@ -1107,6 +1105,7 @@ abstract class FormatterPass {
 						$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 						$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
 						$this->refWalkCurlyBlock($tkns, $ptr);
+						continue;
 					} elseif (
 						$this->rightTokenSubsetIsAtIdx(
 							$tkns,
@@ -1118,9 +1117,8 @@ abstract class FormatterPass {
 						$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
 						$this->refWalkCurlyBlock($tkns, $ptr);
 						break;
-					} else {
-						break;
 					}
+					break;
 				}
 				return;
 			}
@@ -1842,10 +1840,10 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 		foreach ($lines as $idx => $line) {
 			if (trim($line) === self::EMPTY_LINE) {
 				$emptyLines[$blockCount][] = $idx;
-			} else {
-				++$blockCount;
-				$emptyLines[$blockCount] = [];
+				continue;
 			}
+			++$blockCount;
+			$emptyLines[$blockCount] = [];
 		}
 
 		foreach ($emptyLines as $group) {
@@ -2071,18 +2069,16 @@ final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 			switch ($id) {
 				case ST_CURLY_OPEN:
 					if ($this->leftTokenIs([T_ELSE, T_STRING, ST_PARENTHESES_CLOSE])) {
-						$this->rtrimAndAppendCode($text);
-					} else {
-						$this->appendCode($text);
+						$this->code = rtrim($this->code);
 					}
+					$this->appendCode($text);
 					break;
 				case T_ELSE:
 				case T_ELSEIF:
 					if ($this->leftTokenIs(ST_CURLY_CLOSE)) {
-						$this->rtrimAndAppendCode($text);
-					} else {
-						$this->appendCode($text);
+						$this->code = rtrim($this->code);
 					}
+					$this->appendCode($text);
 					break;
 				default:
 					$this->appendCode($text);
@@ -2311,27 +2307,28 @@ final class OrderUseClauses extends FormatterPass {
 				if ($blanklineAfterUseBlock && !isset($useStack[0])) {
 					$return .= $this->newLine;
 				}
+				continue;
 			} elseif (T_WHITESPACE == $token[0] && isset($newTokens[$idx - 1], $newTokens[$idx + 1]) && $newTokens[$idx - 1] instanceof SurrogateToken && $newTokens[$idx + 1] instanceof SurrogateToken) {
 				if ($stripBlankLines) {
 					$return .= $this->newLine;
-				} else {
-					$return .= $token[1];
+					continue;
 				}
+
+				$return .= $token[1];
 				continue;
-			} else {
-				list($id, $text) = $this->getToken($token);
-				$lowerText = strtolower($text);
-				if (T_STRING === $id && isset($aliasList[$lowerText])) {
-					++$aliasCount[$lowerText];
-				} elseif (T_DOC_COMMENT === $id) {
-					foreach ($aliasList as $alias => $use) {
-						if (false !== stripos($text, $alias)) {
-							++$aliasCount[$alias];
-						}
+			}
+			list($id, $text) = $this->getToken($token);
+			$lowerText = strtolower($text);
+			if (T_STRING === $id && isset($aliasList[$lowerText])) {
+				++$aliasCount[$lowerText];
+			} elseif (T_DOC_COMMENT === $id) {
+				foreach ($aliasList as $alias => $use) {
+					if (false !== stripos($text, $alias)) {
+						++$aliasCount[$alias];
 					}
 				}
-				$return .= $text;
 			}
+			$return .= $text;
 		}
 
 		$unusedImport = [];
@@ -2676,19 +2673,19 @@ final class ReindentColonBlocks extends FormatterPass {
 						$isNextCaseOrDefault = $this->rightUsefulTokenIs([T_CASE, T_DEFAULT]);
 						if ($touchedColon && T_COMMENT == $id && $isNextCaseOrDefault) {
 							$this->appendCode($text);
+							break;
 						} elseif ($touchedColon && T_COMMENT == $id && !$isNextCaseOrDefault) {
 							$this->appendCode($this->getIndent($switchLevel) . $text);
 							if (!$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
 								$this->appendCode($this->getIndent($switchLevel));
 							}
+							break;
 						} elseif (!$isNextCaseOrDefault && !$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
 							$this->appendCode($text . $this->getIndent($switchLevel));
-						} else {
-							$this->appendCode($text);
+							break;
 						}
-					} else {
-						$this->appendCode($text);
 					}
+					$this->appendCode($text);
 					break;
 			}
 		}
@@ -3325,8 +3322,7 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 								$this->indentParenthesesContent();
 							}
-						} else {
-							$this->appendCode($text);
+							break;
 						}
 					} elseif ($this->hasLnBefore() || $this->hasLnLeftToken()) {
 						++$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
@@ -3338,9 +3334,9 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 							$this->indentParenthesesContent();
 						}
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+					$this->appendCode($text);
 					break;
 
 				case T_COMMENT:
@@ -3484,9 +3480,9 @@ final class ResizeSpaces extends FormatterPass {
 						$this->rightUsefulTokenIs([T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
 					) {
 						$this->appendCode($this->getSpace() . $text . $this->getSpace());
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+					$this->appendCode($text);
 					break;
 				case '*':
 					list($prevId) = $this->inspectToken(-1);
@@ -3496,19 +3492,24 @@ final class ResizeSpaces extends FormatterPass {
 						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($text . $this->getSpace());
+						break;
+
 					} elseif (
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE === $nextId
 					) {
 						$this->appendCode($this->getSpace() . $text);
+						break;
+
 					} elseif (
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE !== $nextId
 					) {
 						$this->appendCode($this->getSpace() . $text . $this->getSpace());
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+
+					$this->appendCode($text);
 					break;
 
 				case '%':
@@ -3891,10 +3892,9 @@ final class SettersAndGettersPass extends FormatterPass {
 	private $type;
 
 	public function __construct($type = self::TYPE_CAMEL_CASE) {
+		$this->type = self::TYPE_CAMEL_CASE;
 		if (self::TYPE_CAMEL_CASE == $type || self::TYPE_SNAKE_CASE == $type || self::TYPE_GOLANG == $type) {
 			$this->type = $type;
-		} else {
-			$this->type = self::TYPE_CAMEL_CASE;
 		}
 	}
 	public function candidate($source, $foundTokens) {
@@ -3976,9 +3976,9 @@ final class SettersAndGettersPass extends FormatterPass {
 							}
 							if ($append) {
 								$this->appendCode($str);
-							} else {
-								$this->code = str_replace(sprintf(self::PLACEHOLDER, $var), $str, $this->code);
+								continue;
 							}
+							$this->code = str_replace(sprintf(self::PLACEHOLDER, $var), $str, $this->code);
 						}
 					}
 
@@ -7323,9 +7323,9 @@ final class PSR2EmptyFunction extends AdditionalPass {
 						$this->rtrimAndAppendCode($this->getSpace() . ST_CURLY_OPEN);
 						$this->printAndStopAt(ST_CURLY_CLOSE);
 						$this->rtrimAndAppendCode(ST_CURLY_CLOSE);
-					} else {
-						prev($this->tkns);
+						break;
 					}
+					prev($this->tkns);
 					break;
 				default:
 					$this->appendCode($text);

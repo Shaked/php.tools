@@ -76,19 +76,19 @@ final class ReindentColonBlocks extends FormatterPass {
 						$isNextCaseOrDefault = $this->rightUsefulTokenIs([T_CASE, T_DEFAULT]);
 						if ($touchedColon && T_COMMENT == $id && $isNextCaseOrDefault) {
 							$this->appendCode($text);
+							break;
 						} elseif ($touchedColon && T_COMMENT == $id && !$isNextCaseOrDefault) {
 							$this->appendCode($this->getIndent($switchLevel) . $text);
 							if (!$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
 								$this->appendCode($this->getIndent($switchLevel));
 							}
+							break;
 						} elseif (!$isNextCaseOrDefault && !$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
 							$this->appendCode($text . $this->getIndent($switchLevel));
-						} else {
-							$this->appendCode($text);
+							break;
 						}
-					} else {
-						$this->appendCode($text);
 					}
+					$this->appendCode($text);
 					break;
 			}
 		}

@@ -127,27 +127,28 @@ final class OrderUseClauses extends FormatterPass {
 				if ($blanklineAfterUseBlock && !isset($useStack[0])) {
 					$return .= $this->newLine;
 				}
+				continue;
 			} elseif (T_WHITESPACE == $token[0] && isset($newTokens[$idx - 1], $newTokens[$idx + 1]) && $newTokens[$idx - 1] instanceof SurrogateToken && $newTokens[$idx + 1] instanceof SurrogateToken) {
 				if ($stripBlankLines) {
 					$return .= $this->newLine;
-				} else {
-					$return .= $token[1];
+					continue;
 				}
+
+				$return .= $token[1];
 				continue;
-			} else {
-				list($id, $text) = $this->getToken($token);
-				$lowerText = strtolower($text);
-				if (T_STRING === $id && isset($aliasList[$lowerText])) {
-					++$aliasCount[$lowerText];
-				} elseif (T_DOC_COMMENT === $id) {
-					foreach ($aliasList as $alias => $use) {
-						if (false !== stripos($text, $alias)) {
-							++$aliasCount[$alias];
-						}
+			}
+			list($id, $text) = $this->getToken($token);
+			$lowerText = strtolower($text);
+			if (T_STRING === $id && isset($aliasList[$lowerText])) {
+				++$aliasCount[$lowerText];
+			} elseif (T_DOC_COMMENT === $id) {
+				foreach ($aliasList as $alias => $use) {
+					if (false !== stripos($text, $alias)) {
+						++$aliasCount[$alias];
 					}
 				}
-				$return .= $text;
 			}
+			$return .= $text;
 		}
 
 		$unusedImport = [];

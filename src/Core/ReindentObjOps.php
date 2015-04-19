@@ -103,8 +103,7 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 								$this->indentParenthesesContent();
 							}
-						} else {
-							$this->appendCode($text);
+							break;
 						}
 					} elseif ($this->hasLnBefore() || $this->hasLnLeftToken()) {
 						++$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
@@ -116,9 +115,9 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 							$this->indentParenthesesContent();
 						}
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+					$this->appendCode($text);
 					break;
 
 				case T_COMMENT:

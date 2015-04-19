@@ -18,18 +18,16 @@ final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 			switch ($id) {
 				case ST_CURLY_OPEN:
 					if ($this->leftTokenIs([T_ELSE, T_STRING, ST_PARENTHESES_CLOSE])) {
-						$this->rtrimAndAppendCode($text);
-					} else {
-						$this->appendCode($text);
+						$this->code = rtrim($this->code);
 					}
+					$this->appendCode($text);
 					break;
 				case T_ELSE:
 				case T_ELSEIF:
 					if ($this->leftTokenIs(ST_CURLY_CLOSE)) {
-						$this->rtrimAndAppendCode($text);
-					} else {
-						$this->appendCode($text);
+						$this->code = rtrim($this->code);
 					}
+					$this->appendCode($text);
 					break;
 				default:
 					$this->appendCode($text);

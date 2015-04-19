@@ -79,9 +79,8 @@ final class RefactorPass extends FormatterPass {
 								}
 								if ($sMatch) {
 									break;
-								} else {
-									continue;
 								}
+								continue;
 							}
 							if (strtolower($text) == $stopText) {
 								$match = false;
