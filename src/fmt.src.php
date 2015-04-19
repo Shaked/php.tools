@@ -187,7 +187,7 @@ if (!isset($testEnv)) {
 			'--exclude=pass1,passN' => 'disable specific passes',
 			'--ignore=PATTERN1,PATTERN2' => 'ignore file names whose names contain any PATTERN-N',
 			'--indent_with_space=SIZE' => 'use spaces instead of tabs for indentation. Default 4',
-			'--laravel' => 'Apply Laravel coding style',
+			'--laravel' => 'Apply Laravel coding style (deprecated)',
 			'--lint-before' => 'lint files before pretty printing (PHP must be declared in %PATH%/$PATH)',
 			'--list' => 'list possible transformations',
 			'--list-simple' => 'list possible transformations - parseable',

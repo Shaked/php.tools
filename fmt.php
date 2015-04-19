@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define('VERSION', '7.23.1');;
+define("VERSION", "7.24.0");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -9049,6 +9049,8 @@ final class AllmanStyleBraces extends FormatterPass {
 ;
 final class LaravelDecorator {
 	public static function decorate(CodeFormatter &$fmt) {
+		fwrite(STDERR, 'Laravel support is deprecated, as of Laravel 5.1 they will adhere to PSR2 standard' . PHP_EOL);
+		fwrite(STDERR, 'See: https://laravel-news.com/2015/02/laravel-5-1/' . PHP_EOL);
 		$fmt->disablePass('AlignEquals');
 		$fmt->disablePass('AlignDoubleArrow');
 		$fmt->enablePass('NamespaceMergeWithOpenTag');
@@ -9281,7 +9283,7 @@ if (!isset($testEnv)) {
 			'--exclude=pass1,passN' => 'disable specific passes',
 			'--ignore=PATTERN1,PATTERN2' => 'ignore file names whose names contain any PATTERN-N',
 			'--indent_with_space=SIZE' => 'use spaces instead of tabs for indentation. Default 4',
-			'--laravel' => 'Apply Laravel coding style',
+			'--laravel' => 'Apply Laravel coding style (deprecated)',
 			'--lint-before' => 'lint files before pretty printing (PHP must be declared in %PATH%/$PATH)',
 			'--list' => 'list possible transformations',
 			'--list-simple' => 'list possible transformations - parseable',
