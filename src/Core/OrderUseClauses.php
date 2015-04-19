@@ -136,9 +136,9 @@ final class OrderUseClauses extends FormatterPass {
 				continue;
 			} else {
 				list($id, $text) = $this->getToken($token);
-				$lower_text = strtolower($text);
-				if (T_STRING === $id && isset($aliasList[$lower_text])) {
-					++$aliasCount[$lower_text];
+				$lowerText = strtolower($text);
+				if (T_STRING === $id && isset($aliasList[$lowerText])) {
+					++$aliasCount[$lowerText];
 				} elseif (T_DOC_COMMENT === $id) {
 					foreach ($aliasList as $alias => $use) {
 						if (false !== stripos($text, $alias)) {

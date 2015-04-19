@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.24.2");;
+define("VERSION", "7.24.3");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -2320,9 +2320,9 @@ final class OrderUseClauses extends FormatterPass {
 				continue;
 			} else {
 				list($id, $text) = $this->getToken($token);
-				$lower_text = strtolower($text);
-				if (T_STRING === $id && isset($aliasList[$lower_text])) {
-					++$aliasCount[$lower_text];
+				$lowerText = strtolower($text);
+				if (T_STRING === $id && isset($aliasList[$lowerText])) {
+					++$aliasCount[$lowerText];
 				} elseif (T_DOC_COMMENT === $id) {
 					foreach ($aliasList as $alias => $use) {
 						if (false !== stripos($text, $alias)) {
@@ -3025,8 +3025,8 @@ class ReindentAndAlignObjOps extends FormatterPass {
 
 	protected function indentParenthesesContent() {
 		$count = 0;
-		$sizeof_tokens = sizeof($this->tkns);
-		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
+		$sizeofTokens = sizeof($this->tkns);
+		for ($i = $this->ptr; $i < $sizeofTokens; ++$i) {
 			$token = &$this->tkns[$i];
 			list($id, $text) = $this->getToken($token);
 			if (
@@ -3050,8 +3050,8 @@ class ReindentAndAlignObjOps extends FormatterPass {
 
 	protected function injectPlaceholderParenthesesContent($placeholder) {
 		$count = 0;
-		$sizeof_tokens = sizeof($this->tkns);
-		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
+		$sizeofTokens = sizeof($this->tkns);
+		for ($i = $this->ptr; $i < $sizeofTokens; ++$i) {
 			$token = &$this->tkns[$i];
 			list($id, $text) = $this->getToken($token);
 			if ((T_WHITESPACE == $id || T_DOC_COMMENT == $id || T_COMMENT == $id)
@@ -3130,7 +3130,7 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		return $source;
 	}
 
-	private function formatBlocks($source, $open_token, $close_token) {
+	private function formatBlocks($source, $openToken, $closeToken) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
@@ -3138,11 +3138,11 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case $close_token:
+				case $closeToken:
 					$this->setIndent(-1);
 					$this->appendCode($text);
 					break;
-				case $open_token:
+				case $openToken:
 					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
@@ -3159,9 +3159,9 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 					}
 					break;
 				default:
-					if ($this->hasLn($text) && !$this->rightTokenIs([$close_token])) {
+					if ($this->hasLn($text) && !$this->rightTokenIs([$closeToken])) {
 						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
-					} elseif ($this->hasLn($text) && $this->rightTokenIs([$close_token])) {
+					} elseif ($this->hasLn($text) && $this->rightTokenIs([$closeToken])) {
 						$this->setIndent(-1);
 						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 						$this->setIndent(+1);
@@ -3440,15 +3440,15 @@ final class ResizeSpaces extends FormatterPass {
 	private function filterWhitespaces($source) {
 		$tkns = token_get_all($source);
 
-		$new_tkns = [];
-		foreach ($tkns as $idx => $token) {
+		$newTkns = [];
+		foreach ($tkns as $token) {
 			if (T_WHITESPACE === $token[0] && !$this->hasLn($token[1])) {
 				continue;
 			}
-			$new_tkns[] = $token;
+			$newTkns[] = $token;
 		}
 
-		return $new_tkns;
+		return $newTkns;
 	}
 
 	public function format($source) {
@@ -4253,13 +4253,13 @@ final class PSR1MethodNames extends FormatterPass {
 				case T_STRING:
 					if ($foundMethod) {
 						$count = 0;
-						$orig_text = $text;
+						$origText = $text;
 						$tmp = ucwords(str_replace(['-', '_'], ' ', strtolower($text), $count));
 						if ($count > 0 && '' !== trim($tmp) && '_' !== substr($text, 0, 1)) {
 							$text = lcfirst(str_replace(' ', '', $tmp));
 						}
 
-						$methodReplaceList[$orig_text] = $text;
+						$methodReplaceList[$origText] = $text;
 						$this->appendCode($text);
 
 						$foundMethod = false;
@@ -4384,15 +4384,15 @@ final class PSR2AlignObjOp extends FormatterPass {
 			}
 
 			foreach ($linesWithObjop as $group) {
-				$first_line = reset($group);
-				$position_at_first_line = strpos($lines[$first_line], $placeholder);
+				$firstline = reset($group);
+				$positionFirstline = strpos($lines[$firstline], $placeholder);
 
 				foreach ($group as $idx) {
-					if ($idx == $first_line) {
+					if ($idx == $firstline) {
 						continue;
 					}
 					$line = ltrim($lines[$idx]);
-					$line = str_replace($placeholder, str_repeat(' ', $position_at_first_line) . $placeholder, $line);
+					$line = str_replace($placeholder, str_repeat(' ', $positionFirstline) . $placeholder, $line);
 					$lines[$idx] = $line;
 				}
 			}
@@ -4500,7 +4500,7 @@ final class PSR2IndentWithSpace extends FormatterPass {
 		return true;
 	}
 	public function format($source) {
-		$indent_spaces = str_repeat(' ', (int) $this->size);
+		$spaces = str_repeat(' ', (int) $this->size);
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
@@ -4510,7 +4510,7 @@ final class PSR2IndentWithSpace extends FormatterPass {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
 				case T_WHITESPACE:
-					$this->appendCode(str_replace($this->indentChar, $indent_spaces, $text));
+					$this->appendCode(str_replace($this->indentChar, $spaces, $text));
 					break;
 				default:
 					$this->appendCode($text);
@@ -4629,18 +4629,15 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
+						$this->appendCode($text);
 						if (ST_SEMI_COLON === $id) {
-							$this->appendCode($text);
 							list(, $text) = $this->inspectToken();
 							if (1 === substr_count($text, $this->newLine)) {
 								$this->appendCode($this->newLine);
 							}
 							break;
 						} elseif (ST_CURLY_OPEN === $id) {
-							$this->appendCode($text);
 							break;
-						} else {
-							$this->appendCode($text);
 						}
 					}
 					break;
@@ -8408,10 +8405,8 @@ final class WordWrap extends AdditionalPass {
 					str_repeat(' ', self::$tabSizeInSpace),
 					$text
 				);
-				$textLen = strlen($text);
-			} else {
-				$textLen = strlen($text);
 			}
+			$textLen = strlen($text);
 
 			$currentLineLength += $textLen;
 			if ($this->hasLn($text)) {
@@ -8834,19 +8829,19 @@ final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 		$processed = [];
 		$seen = 1;
 		$tokensLine = '';
-		foreach ($tokens as $index => $token) {
-			if (isset($token[2])) {
-				$currLine = $token[2];
-				if ($seen != $currLine) {
-					$processed[($seen - 1)] = $tokensLine;
-					$tokensLine = token_name($token[0]) . ' ';
-					$seen = $currLine;
-				} else {
-					$tokensLine .= token_name($token[0]) . ' ';
-				}
-			} else {
+		foreach ($tokens as $token) {
+			if (!isset($token[2])) {
 				$tokensLine .= $token . ' ';
+				continue;
 			}
+			$currLine = $token[2];
+			if ($seen == $currLine) {
+				$tokensLine .= token_name($token[0]) . ' ';
+				continue;
+			}
+			$processed[($seen - 1)] = $tokensLine;
+			$tokensLine = token_name($token[0]) . ' ';
+			$seen = $currLine;
 		}
 		$processed[($seen - 1)] = $tokensLine;
 		return $processed;
@@ -9303,10 +9298,9 @@ if (!isset($testEnv)) {
 			$options['--selfupdate'] = 'self-update fmt.phar from Github';
 			$options['--version'] = 'version';
 		}
+		$options['--cache[=FILENAME]'] .= (Cache::DEFAULT_CACHE_FILENAME);
 		if (!$enableCache) {
 			unset($options['--cache[=FILENAME]']);
-		} else {
-			$options['--cache[=FILENAME]'] .= (Cache::DEFAULT_CACHE_FILENAME);
 		}
 		ksort($options);
 		$maxLen = max(array_map(function ($v) {
@@ -9316,7 +9310,6 @@ if (!isset($testEnv)) {
 			echo '  ', str_pad($k, $maxLen), '  ', $v, PHP_EOL;
 		}
 		echo PHP_EOL, 'If - is blank, it reads from stdin', PHP_EOL;
-		die();
 	}
 	$getoptLongOptions = [
 		'cache::',
@@ -9456,6 +9449,7 @@ if (!isset($testEnv)) {
 	}
 	if (isset($opts['h']) || isset($opts['help'])) {
 		showHelp($argv, $enableCache, $inPhar);
+		exit(0);
 	}
 
 	if (isset($opts['help-pass'])) {

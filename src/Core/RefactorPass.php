@@ -68,16 +68,16 @@ final class RefactorPass extends FormatterPass {
 							list($id, $text) = $this->getToken($token);
 							$buffer .= $text;
 							if ($id == $from[$i][0]) {
-								$tmp_i = $i;
-								$tmp_ptr = $this->ptr;
-								$s_match = true;
-								for ($tmp_i; $tmp_i < $fromSize; ++$tmp_i, ++$tmp_ptr) {
-									if ($from[$tmp_i][0] != $this->tkns[$tmp_ptr][0]) {
-										$s_match = false;
+								$tmpI = $i;
+								$tmpPtr = $this->ptr;
+								$sMatch = true;
+								for ($tmpI; $tmpI < $fromSize; ++$tmpI, ++$tmpPtr) {
+									if ($from[$tmpI][0] != $this->tkns[$tmpPtr][0]) {
+										$sMatch = false;
 										break;
 									}
 								}
-								if ($s_match) {
+								if ($sMatch) {
 									break;
 								} else {
 									continue;

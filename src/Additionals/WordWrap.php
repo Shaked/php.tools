@@ -28,10 +28,8 @@ final class WordWrap extends AdditionalPass {
 					str_repeat(' ', self::$tabSizeInSpace),
 					$text
 				);
-				$textLen = strlen($text);
-			} else {
-				$textLen = strlen($text);
 			}
+			$textLen = strlen($text);
 
 			$currentLineLength += $textLen;
 			if ($this->hasLn($text)) {

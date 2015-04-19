@@ -11,7 +11,7 @@ final class PSR2IndentWithSpace extends FormatterPass {
 		return true;
 	}
 	public function format($source) {
-		$indent_spaces = str_repeat(' ', (int) $this->size);
+		$spaces = str_repeat(' ', (int) $this->size);
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		while (list($index, $token) = each($this->tkns)) {
@@ -21,7 +21,7 @@ final class PSR2IndentWithSpace extends FormatterPass {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
 				case T_WHITESPACE:
-					$this->appendCode(str_replace($this->indentChar, $indent_spaces, $text));
+					$this->appendCode(str_replace($this->indentChar, $spaces, $text));
 					break;
 				default:
 					$this->appendCode($text);

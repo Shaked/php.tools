@@ -37,19 +37,19 @@ final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 		$processed = [];
 		$seen = 1;
 		$tokensLine = '';
-		foreach ($tokens as $index => $token) {
-			if (isset($token[2])) {
-				$currLine = $token[2];
-				if ($seen != $currLine) {
-					$processed[($seen - 1)] = $tokensLine;
-					$tokensLine = token_name($token[0]) . ' ';
-					$seen = $currLine;
-				} else {
-					$tokensLine .= token_name($token[0]) . ' ';
-				}
-			} else {
+		foreach ($tokens as $token) {
+			if (!isset($token[2])) {
 				$tokensLine .= $token . ' ';
+				continue;
 			}
+			$currLine = $token[2];
+			if ($seen == $currLine) {
+				$tokensLine .= token_name($token[0]) . ' ';
+				continue;
+			}
+			$processed[($seen - 1)] = $tokensLine;
+			$tokensLine = token_name($token[0]) . ' ';
+			$seen = $currLine;
 		}
 		$processed[($seen - 1)] = $tokensLine;
 		return $processed;

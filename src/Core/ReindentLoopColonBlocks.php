@@ -31,7 +31,7 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		return $source;
 	}
 
-	private function formatBlocks($source, $open_token, $close_token) {
+	private function formatBlocks($source, $openToken, $closeToken) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
@@ -39,11 +39,11 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case $close_token:
+				case $closeToken:
 					$this->setIndent(-1);
 					$this->appendCode($text);
 					break;
-				case $open_token:
+				case $openToken:
 					$this->appendCode($text);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
@@ -60,9 +60,9 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 					}
 					break;
 				default:
-					if ($this->hasLn($text) && !$this->rightTokenIs([$close_token])) {
+					if ($this->hasLn($text) && !$this->rightTokenIs([$closeToken])) {
 						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
-					} elseif ($this->hasLn($text) && $this->rightTokenIs([$close_token])) {
+					} elseif ($this->hasLn($text) && $this->rightTokenIs([$closeToken])) {
 						$this->setIndent(-1);
 						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 						$this->setIndent(+1);

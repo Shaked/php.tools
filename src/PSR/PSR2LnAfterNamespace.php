@@ -27,18 +27,15 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
+						$this->appendCode($text);
 						if (ST_SEMI_COLON === $id) {
-							$this->appendCode($text);
 							list(, $text) = $this->inspectToken();
 							if (1 === substr_count($text, $this->newLine)) {
 								$this->appendCode($this->newLine);
 							}
 							break;
 						} elseif (ST_CURLY_OPEN === $id) {
-							$this->appendCode($text);
 							break;
-						} else {
-							$this->appendCode($text);
 						}
 					}
 					break;

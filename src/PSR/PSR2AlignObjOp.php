@@ -63,15 +63,15 @@ final class PSR2AlignObjOp extends FormatterPass {
 			}
 
 			foreach ($linesWithObjop as $group) {
-				$first_line = reset($group);
-				$position_at_first_line = strpos($lines[$first_line], $placeholder);
+				$firstline = reset($group);
+				$positionFirstline = strpos($lines[$firstline], $placeholder);
 
 				foreach ($group as $idx) {
-					if ($idx == $first_line) {
+					if ($idx == $firstline) {
 						continue;
 					}
 					$line = ltrim($lines[$idx]);
-					$line = str_replace($placeholder, str_repeat(' ', $position_at_first_line) . $placeholder, $line);
+					$line = str_replace($placeholder, str_repeat(' ', $positionFirstline) . $placeholder, $line);
 					$lines[$idx] = $line;
 				}
 			}

@@ -7,15 +7,15 @@ final class ResizeSpaces extends FormatterPass {
 	private function filterWhitespaces($source) {
 		$tkns = token_get_all($source);
 
-		$new_tkns = [];
-		foreach ($tkns as $idx => $token) {
+		$newTkns = [];
+		foreach ($tkns as $token) {
 			if (T_WHITESPACE === $token[0] && !$this->hasLn($token[1])) {
 				continue;
 			}
-			$new_tkns[] = $token;
+			$newTkns[] = $token;
 		}
 
-		return $new_tkns;
+		return $newTkns;
 	}
 
 	public function format($source) {

@@ -211,10 +211,9 @@ if (!isset($testEnv)) {
 			$options['--selfupdate'] = 'self-update fmt.phar from Github';
 			$options['--version'] = 'version';
 		}
+		$options['--cache[=FILENAME]'] .= (Cache::DEFAULT_CACHE_FILENAME);
 		if (!$enableCache) {
 			unset($options['--cache[=FILENAME]']);
-		} else {
-			$options['--cache[=FILENAME]'] .= (Cache::DEFAULT_CACHE_FILENAME);
 		}
 		ksort($options);
 		$maxLen = max(array_map(function ($v) {
@@ -224,7 +223,6 @@ if (!isset($testEnv)) {
 			echo '  ', str_pad($k, $maxLen), '  ', $v, PHP_EOL;
 		}
 		echo PHP_EOL, 'If - is blank, it reads from stdin', PHP_EOL;
-		die();
 	}
 	$getoptLongOptions = [
 		'cache::',
@@ -364,6 +362,7 @@ if (!isset($testEnv)) {
 	}
 	if (isset($opts['h']) || isset($opts['help'])) {
 		showHelp($argv, $enableCache, $inPhar);
+		exit(0);
 	}
 
 	if (isset($opts['help-pass'])) {

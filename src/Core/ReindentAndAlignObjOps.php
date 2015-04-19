@@ -258,8 +258,8 @@ class ReindentAndAlignObjOps extends FormatterPass {
 
 	protected function indentParenthesesContent() {
 		$count = 0;
-		$sizeof_tokens = sizeof($this->tkns);
-		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
+		$sizeofTokens = sizeof($this->tkns);
+		for ($i = $this->ptr; $i < $sizeofTokens; ++$i) {
 			$token = &$this->tkns[$i];
 			list($id, $text) = $this->getToken($token);
 			if (
@@ -283,8 +283,8 @@ class ReindentAndAlignObjOps extends FormatterPass {
 
 	protected function injectPlaceholderParenthesesContent($placeholder) {
 		$count = 0;
-		$sizeof_tokens = sizeof($this->tkns);
-		for ($i = $this->ptr; $i < $sizeof_tokens; ++$i) {
+		$sizeofTokens = sizeof($this->tkns);
+		for ($i = $this->ptr; $i < $sizeofTokens; ++$i) {
 			$token = &$this->tkns[$i];
 			list($id, $text) = $this->getToken($token);
 			if ((T_WHITESPACE == $id || T_DOC_COMMENT == $id || T_COMMENT == $id)

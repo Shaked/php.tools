@@ -23,13 +23,13 @@ final class PSR1MethodNames extends FormatterPass {
 				case T_STRING:
 					if ($foundMethod) {
 						$count = 0;
-						$orig_text = $text;
+						$origText = $text;
 						$tmp = ucwords(str_replace(['-', '_'], ' ', strtolower($text), $count));
 						if ($count > 0 && '' !== trim($tmp) && '_' !== substr($text, 0, 1)) {
 							$text = lcfirst(str_replace(' ', '', $tmp));
 						}
 
-						$methodReplaceList[$orig_text] = $text;
+						$methodReplaceList[$origText] = $text;
 						$this->appendCode($text);
 
 						$foundMethod = false;
