@@ -1413,14 +1413,17 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		$this->refInsert($this->tkns, $this->ptr, [ST_CURLY_OPEN, ST_CURLY_OPEN]);
 		$this->refInsert($this->tkns, $this->ptr, [T_WHITESPACE, $this->newLine]);
 		$this->refSkipBlocks($this->tkns, $this->ptr);
-		if (T_CLOSE_TAG == $this->tkns[$this->ptr][0]) {
-			$this->refInsert($this->tkns, $this->ptr, [ST_SEMI_COLON, ST_SEMI_COLON]);
-		} else {
-			++$this->ptr;
-		}
+		$this->addSemicolon();
 		$this->refInsert($this->tkns, $this->ptr, [T_WHITESPACE, $this->newLine]);
 		$this->refInsert($this->tkns, $this->ptr, [ST_CURLY_CLOSE, ST_CURLY_CLOSE]);
 		$this->refInsert($this->tkns, $this->ptr, [T_WHITESPACE, $this->newLine]);
+	}
+
+	private function addSemicolon() {
+		if (T_CLOSE_TAG == $this->tkns[$this->ptr][0]) {
+			return $this->refInsert($this->tkns, $this->ptr, [ST_SEMI_COLON, ST_SEMI_COLON]);
+		}
+		++$this->ptr;
 	}
 }
 ;
@@ -1492,11 +1495,7 @@ final class AutoImportPass extends FormatterPass {
 		$aliasList = [];
 		$aliasCount = [];
 		foreach ($useStack as $use) {
-			if (false !== stripos($use, ' as ')) {
-				$alias = substr(strstr($use, ' as '), strlen(' as '), -1);
-			} else {
-				$alias = basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
-			}
+			$alias = $this->calculateAlias($use);
 			$alias = strtolower($alias);
 			$aliasList[$alias] = strtolower($use);
 			$aliasCount[$alias] = 0;
@@ -1684,6 +1683,13 @@ final class AutoImportPass extends FormatterPass {
 		}
 
 		return $return;
+	}
+
+	private function calculateAlias($use) {
+		if (false !== stripos($use, ' as ')) {
+			return substr(strstr($use, ' as '), strlen(' as '), -1);
+		}
+		return basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 	}
 };
 final class ConstructorPass extends FormatterPass {
@@ -2290,11 +2296,7 @@ final class OrderUseClauses extends FormatterPass {
 		$aliasList = [];
 		$aliasCount = [];
 		foreach ($useStack as $use) {
-			if (false !== stripos($use, ' as ')) {
-				$alias = substr(strstr($use, ' as '), strlen(' as '), -1);
-			} else {
-				$alias = basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
-			}
+			$alias = $this->calculateAlias($use);
 			$alias = str_replace(ST_SEMI_COLON, '', strtolower($alias));
 			$aliasList[$alias] = trim(strtolower($use));
 			$aliasCount[$alias] = 0;
@@ -2496,6 +2498,13 @@ final class OrderUseClauses extends FormatterPass {
 		}
 
 		return $return;
+	}
+
+	private function calculateAlias($use) {
+		if (false !== stripos($use, ' as ')) {
+			return substr(strstr($use, ' as '), strlen(' as '), -1);
+		}
+		return basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 	}
 }
 ;
@@ -2880,27 +2889,28 @@ class ReindentAndAlignObjOps extends FormatterPass {
 								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 								$this->indentParenthesesContent();
 							}
-						} else {
-							$alignType[$levelCounter][$levelEntranceCounter[$levelCounter]] = self::ALIGN_WITH_SPACES;
-							if (!isset($printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]])) {
-								$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]] = 0;
-							}
-							++$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]];
-							$placeholder = sprintf(
-								self::ALIGNABLE_OBJOP,
-								$levelCounter,
-								$levelEntranceCounter[$levelCounter],
-								$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
-							);
-							$this->appendCode($placeholder . $text);
-							$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, $this->newLine]);
-							if (ST_SEMI_COLON == $foundToken) {
-								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
-							} elseif (ST_PARENTHESES_OPEN == $foundToken || ST_PARENTHESES_CLOSE == $foundToken) {
-								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
-								$this->injectPlaceholderParenthesesContent($placeholder);
-							}
+							break;
 						}
+						$alignType[$levelCounter][$levelEntranceCounter[$levelCounter]] = self::ALIGN_WITH_SPACES;
+						if (!isset($printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]])) {
+							$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]] = 0;
+						}
+						++$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]];
+						$placeholder = sprintf(
+							self::ALIGNABLE_OBJOP,
+							$levelCounter,
+							$levelEntranceCounter[$levelCounter],
+							$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
+						);
+						$this->appendCode($placeholder . $text);
+						$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, $this->newLine]);
+						if (ST_SEMI_COLON == $foundToken) {
+							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+						} elseif (ST_PARENTHESES_OPEN == $foundToken || ST_PARENTHESES_CLOSE == $foundToken) {
+							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+							$this->injectPlaceholderParenthesesContent($placeholder);
+						}
+						break;
 					} elseif ($this->hasLnBefore() || $this->hasLnLeftToken()) {
 						++$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
 						if (self::ALIGN_WITH_SPACES == $alignType[$levelCounter][$levelEntranceCounter[$levelCounter]]) {
@@ -2919,19 +2929,19 @@ class ReindentAndAlignObjOps extends FormatterPass {
 								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 								$this->injectPlaceholderParenthesesContent($placeholder);
 							}
-						} else {
-							$this->appendCode($this->getIndent(+1) . $text);
-							$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, $this->newLine]);
-							if (ST_SEMI_COLON == $foundToken) {
-								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
-							} elseif (ST_PARENTHESES_OPEN == $foundToken || ST_PARENTHESES_CLOSE == $foundToken) {
-								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
-								$this->indentParenthesesContent();
-							}
+							break;
 						}
-					} else {
-						$this->appendCode($text);
+						$this->appendCode($this->getIndent(+1) . $text);
+						$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, $this->newLine]);
+						if (ST_SEMI_COLON == $foundToken) {
+							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+						} elseif (ST_PARENTHESES_OPEN == $foundToken || ST_PARENTHESES_CLOSE == $foundToken) {
+							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+							$this->indentParenthesesContent();
+						}
+						break;
 					}
+					$this->appendCode($text);
 					break;
 
 				case T_COMMENT:
@@ -3556,6 +3566,7 @@ final class ResizeSpaces extends FormatterPass {
 						&& $this->rightUsefulTokenIs(T_CLOSE_TAG)
 					) {
 						$this->appendCode($text . $this->getSpace());
+						break;
 					} elseif (
 						$inTernaryOperator > 0 &&
 						T_WHITESPACE === $prevId &&
@@ -3563,6 +3574,7 @@ final class ResizeSpaces extends FormatterPass {
 					) {
 						$this->appendCode($text . $this->getSpace());
 						--$inTernaryOperator;
+						break;
 					} elseif (
 						$inTernaryOperator > 0 &&
 						T_WHITESPACE !== $prevId &&
@@ -3570,6 +3582,7 @@ final class ResizeSpaces extends FormatterPass {
 					) {
 						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text);
 						--$inTernaryOperator;
+						break;
 					} elseif (
 						$inTernaryOperator > 0 &&
 						T_WHITESPACE !== $prevId &&
@@ -3577,16 +3590,18 @@ final class ResizeSpaces extends FormatterPass {
 					) {
 						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text . $this->getSpace());
 						--$inTernaryOperator;
+						break;
 					} elseif (0 == $inTernaryOperator && $this->leftUsefulTokenIs(ST_PARENTHESES_CLOSE)) {
 						$this->appendCode($text . $this->getSpace());
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+					$this->appendCode($text);
 					break;
 
 				case T_PRINT:
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_PARENTHESES_OPEN])));
 					break;
+
 				case T_ARRAY:
 					if ($this->rightTokenIs([T_VARIABLE, ST_REFERENCE])) {
 						$this->appendCode($text . $this->getSpace());
@@ -4024,12 +4039,15 @@ final class SettersAndGettersPass extends FormatterPass {
 		return $str;
 	}
 	private function printPlaceholder($text) {
-		if ($this->rightUsefulTokenIs(ST_EQUAL)) {
-			$this->printAndStopAt(ST_SEMI_COLON);
-		} else {
-			each($this->tkns);
-		}
+		$this->skipPlaceholderUntilSemicolon();
+
 		$this->appendCode(';' . $this->newLine . sprintf(self::PLACEHOLDER, $text));
+	}
+	private function skipPlaceholderUntilSemicolon() {
+		if ($this->rightUsefulTokenIs(ST_EQUAL)) {
+			return $this->printAndStopAt(ST_SEMI_COLON);
+		}
+		each($this->tkns);
 	}
 };
 final class StripExtraCommaInList extends FormatterPass {

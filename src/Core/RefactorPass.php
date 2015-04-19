@@ -95,11 +95,7 @@ final class RefactorPass extends FormatterPass {
 					}
 				}
 				if ($match) {
-					if (strpos($toStr, '/*skip*/')) {
-						$buffer = str_replace(explode($skipCall, $fromStr), explode('/*skip*/', $toStr), $buffer);
-					} else {
-						$buffer = str_replace($fromStr, $toStr, $buffer);
-					}
+					$buffer = $this->calculateBuffer($fromStr, $toStr, $skipCall, $buffer);
 				}
 
 				$this->appendCode($buffer);
@@ -108,5 +104,12 @@ final class RefactorPass extends FormatterPass {
 			}
 		}
 		return $this->code;
+	}
+
+	public function calculateBuffer($fromStr, $toStr, $skipCall, $buffer) {
+		if (strpos($toStr, '/*skip*/')) {
+			return str_replace(explode($skipCall, $fromStr), explode('/*skip*/', $toStr), $buffer);
+		}
+		return str_replace($fromStr, $toStr, $buffer);
 	}
 }

@@ -144,11 +144,14 @@ final class SettersAndGettersPass extends FormatterPass {
 		return $str;
 	}
 	private function printPlaceholder($text) {
-		if ($this->rightUsefulTokenIs(ST_EQUAL)) {
-			$this->printAndStopAt(ST_SEMI_COLON);
-		} else {
-			each($this->tkns);
-		}
+		$this->skipPlaceholderUntilSemicolon();
+
 		$this->appendCode(';' . $this->newLine . sprintf(self::PLACEHOLDER, $text));
+	}
+	private function skipPlaceholderUntilSemicolon() {
+		if ($this->rightUsefulTokenIs(ST_EQUAL)) {
+			return $this->printAndStopAt(ST_SEMI_COLON);
+		}
+		each($this->tkns);
 	}
 }

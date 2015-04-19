@@ -127,6 +127,7 @@ final class ResizeSpaces extends FormatterPass {
 						&& $this->rightUsefulTokenIs(T_CLOSE_TAG)
 					) {
 						$this->appendCode($text . $this->getSpace());
+						break;
 					} elseif (
 						$inTernaryOperator > 0 &&
 						T_WHITESPACE === $prevId &&
@@ -134,6 +135,7 @@ final class ResizeSpaces extends FormatterPass {
 					) {
 						$this->appendCode($text . $this->getSpace());
 						--$inTernaryOperator;
+						break;
 					} elseif (
 						$inTernaryOperator > 0 &&
 						T_WHITESPACE !== $prevId &&
@@ -141,6 +143,7 @@ final class ResizeSpaces extends FormatterPass {
 					) {
 						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text);
 						--$inTernaryOperator;
+						break;
 					} elseif (
 						$inTernaryOperator > 0 &&
 						T_WHITESPACE !== $prevId &&
@@ -148,16 +151,18 @@ final class ResizeSpaces extends FormatterPass {
 					) {
 						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text . $this->getSpace());
 						--$inTernaryOperator;
+						break;
 					} elseif (0 == $inTernaryOperator && $this->leftUsefulTokenIs(ST_PARENTHESES_CLOSE)) {
 						$this->appendCode($text . $this->getSpace());
-					} else {
-						$this->appendCode($text);
+						break;
 					}
+					$this->appendCode($text);
 					break;
 
 				case T_PRINT:
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_PARENTHESES_OPEN])));
 					break;
+
 				case T_ARRAY:
 					if ($this->rightTokenIs([T_VARIABLE, ST_REFERENCE])) {
 						$this->appendCode($text . $this->getSpace());

@@ -56,13 +56,16 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		$this->refInsert($this->tkns, $this->ptr, [ST_CURLY_OPEN, ST_CURLY_OPEN]);
 		$this->refInsert($this->tkns, $this->ptr, [T_WHITESPACE, $this->newLine]);
 		$this->refSkipBlocks($this->tkns, $this->ptr);
-		if (T_CLOSE_TAG == $this->tkns[$this->ptr][0]) {
-			$this->refInsert($this->tkns, $this->ptr, [ST_SEMI_COLON, ST_SEMI_COLON]);
-		} else {
-			++$this->ptr;
-		}
+		$this->addSemicolon();
 		$this->refInsert($this->tkns, $this->ptr, [T_WHITESPACE, $this->newLine]);
 		$this->refInsert($this->tkns, $this->ptr, [ST_CURLY_CLOSE, ST_CURLY_CLOSE]);
 		$this->refInsert($this->tkns, $this->ptr, [T_WHITESPACE, $this->newLine]);
+	}
+
+	private function addSemicolon() {
+		if (T_CLOSE_TAG == $this->tkns[$this->ptr][0]) {
+			return $this->refInsert($this->tkns, $this->ptr, [ST_SEMI_COLON, ST_SEMI_COLON]);
+		}
+		++$this->ptr;
 	}
 }

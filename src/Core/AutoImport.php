@@ -67,11 +67,7 @@ final class AutoImportPass extends FormatterPass {
 		$aliasList = [];
 		$aliasCount = [];
 		foreach ($useStack as $use) {
-			if (false !== stripos($use, ' as ')) {
-				$alias = substr(strstr($use, ' as '), strlen(' as '), -1);
-			} else {
-				$alias = basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
-			}
+			$alias = $this->calculateAlias($use);
 			$alias = strtolower($alias);
 			$aliasList[$alias] = strtolower($use);
 			$aliasCount[$alias] = 0;
@@ -259,5 +255,12 @@ final class AutoImportPass extends FormatterPass {
 		}
 
 		return $return;
+	}
+
+	private function calculateAlias($use) {
+		if (false !== stripos($use, ' as ')) {
+			return substr(strstr($use, ' as '), strlen(' as '), -1);
+		}
+		return basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 	}
 }
