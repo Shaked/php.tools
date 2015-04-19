@@ -3651,10 +3651,9 @@ final class ResizeSpaces extends FormatterPass {
 					}
 				case ST_PARENTHESES_OPEN:
 					if (!$this->hasLnLeftToken() && $this->leftUsefulTokenIs([T_WHILE, T_CATCH])) {
-						$this->rtrimAndAppendCode($this->getSpace() . $text);
-					} else {
-						$this->appendCode($text);
+						$this->rtrimAndAppendCode($this->getSpace());
 					}
+					$this->appendCode($text);
 					if (!$this->hasLnAfter() && $this->rightTokenIs(T_COMMENT)) {
 						$this->appendCode($this->getSpace());
 					}

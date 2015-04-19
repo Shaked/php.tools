@@ -25,8 +25,8 @@ final class Tree extends FormatterPass {
 					rtrim($block) .
 					(
 						("\t" == substr($block, -1) || ' ' == substr($block, -1))
-						? "\n"
-						: ''
+							? "\n"
+							: ''
 					) .
 					$close
 				);
@@ -51,12 +51,11 @@ final class Tree extends FormatterPass {
 
 			if (T_WHITESPACE == $id) {
 				$lnCount = substr_count($text, "\n");
+				$text = str_repeat("\n", $lnCount);
 				if (0 == $lnCount) {
 					$text = ' ';
 				} elseif ($lnCount > 2) {
 					$lnCount = 2;
-					$text = str_repeat("\n", $lnCount);
-				} else {
 					$text = str_repeat("\n", $lnCount);
 				}
 			}
