@@ -10,23 +10,28 @@ func TestNoop(t *testing.T) {
 
 }
 
-func BenchmarkHead(b *testing.B) {
-	benchmarkFmt(0, b)
+func BenchmarkHeadMinus5(b *testing.B) {
+	benchmarkFmt(5, b)
 }
-func BenchmarkHeadMinus1(b *testing.B) {
-	benchmarkFmt(1, b)
-}
-func BenchmarkHeadMinus2(b *testing.B) {
-	benchmarkFmt(2, b)
-}
-func BenchmarkHeadMinus3(b *testing.B) {
-	benchmarkFmt(3, b)
-}
+
 func BenchmarkHeadMinus4(b *testing.B) {
 	benchmarkFmt(4, b)
 }
-func BenchmarkHeadMinus5(b *testing.B) {
-	benchmarkFmt(5, b)
+
+func BenchmarkHeadMinus3(b *testing.B) {
+	benchmarkFmt(3, b)
+}
+
+func BenchmarkHeadMinus2(b *testing.B) {
+	benchmarkFmt(2, b)
+}
+
+func BenchmarkHeadMinus1(b *testing.B) {
+	benchmarkFmt(1, b)
+}
+
+func BenchmarkHead(b *testing.B) {
+	benchmarkFmt(0, b)
 }
 
 func benchmarkFmt(commits int, b *testing.B) {
