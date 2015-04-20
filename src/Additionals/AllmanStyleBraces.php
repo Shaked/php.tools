@@ -1,5 +1,5 @@
 <?php
-final class AllmanStyleBraces extends FormatterPass {
+final class AllmanStyleBraces extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -26,6 +26,7 @@ final class AllmanStyleBraces extends FormatterPass {
 					$this->appendCode($text);
 					break;
 
+				case T_CLASS:
 				case T_FUNCTION:
 					$currentIndentation = 0;
 					$poppedID = array_pop($foundStack);
@@ -38,7 +39,7 @@ final class AllmanStyleBraces extends FormatterPass {
 					break;
 
 				case ST_CURLY_OPEN:
-					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO])) {
+					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO, T_STRING])) {
 						if (!$this->hasLnLeftToken()) {
 							$this->appendCode($this->getCrlfIndent());
 						}
@@ -127,9 +128,36 @@ final class AllmanStyleBraces extends FormatterPass {
 
 				default:
 					$this->appendCode($text);
+					break;
 			}
 		}
 
 		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Transform all curly braces into Allman-style.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+if ($a) {
+
+}
+
+
+if ($a)
+{
+
+}
+?>
+EOT;
 	}
 }

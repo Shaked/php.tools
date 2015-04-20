@@ -40,7 +40,11 @@ final class CodeFormatter {
 		'SpaceAroundExclamationMark' => false,
 		'NoSpaceBetweenFunctionAndBracket' => false,
 		'TightConcat' => false,
+
+		'PSR2IndentWithSpace' => false,
+
 		'AllmanStyleBraces' => false,
+		'LaravelAllmanStyleBraces' => false,
 		'NamespaceMergeWithOpenTag' => false,
 		'MergeNamespaceWithOpenTag' => false,
 

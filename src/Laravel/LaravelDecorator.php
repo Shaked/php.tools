@@ -4,7 +4,7 @@ final class LaravelDecorator {
 		$fmt->disablePass('AlignEquals');
 		$fmt->disablePass('AlignDoubleArrow');
 		$fmt->enablePass('NamespaceMergeWithOpenTag');
-		$fmt->enablePass('AllmanStyleBraces');
+		$fmt->enablePass('LaravelAllmanStyleBraces');
 		$fmt->enablePass('RTrim');
 		$fmt->enablePass('TightConcat');
 		$fmt->enablePass('NoSpaceBetweenFunctionAndBracket');

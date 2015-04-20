@@ -76,6 +76,7 @@ require 'Additionals/AlignDoubleArrow.php';
 require 'Additionals/AlignDoubleSlashComments.php';
 require 'Additionals/AlignEquals.php';
 require 'Additionals/AlignTypehint.php';
+require 'Additionals/AllmanStyleBraces.php';
 require 'Additionals/AutoPreincrement.php';
 require 'Additionals/CakePHPStyle.php';
 require 'Additionals/ClassToSelf.php';
@@ -114,7 +115,7 @@ require 'Additionals/WrongConstructorName.php';
 require 'Additionals/YodaComparisons.php';
 
 require 'Laravel/AlignEqualsByConsecutiveBlocks.php';
-require 'Laravel/AllmanStyleBraces.php';
+require 'Laravel/LaravelAllmanStyleBraces.php';
 require 'Laravel/LaravelDecorator.php';
 require 'Laravel/NamespaceMergeWithOpenTag.php';
 require 'Laravel/NoneDocBlockMinorCleanUp.php';

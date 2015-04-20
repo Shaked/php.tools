@@ -1,0 +1,135 @@
+<?php
+final class LaravelAllmanStyleBraces extends FormatterPass {
+	public function candidate($source, $foundTokens) {
+		return true;
+	}
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$foundStack = [];
+		$currentIndentation = 0;
+		$touchedCaseOrDefault = false;
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_CASE:
+				case T_DEFAULT:
+					$touchedCaseOrDefault = true;
+					$this->appendCode($text);
+					break;
+
+				case T_BREAK:
+					$touchedCaseOrDefault = false;
+					$this->appendCode($text);
+					break;
+
+				case T_FUNCTION:
+					$currentIndentation = 0;
+					$poppedID = array_pop($foundStack);
+					if (true === $poppedID['implicit']) {
+						list($prevId, $prevText) = $this->inspectToken(-1);
+						$currentIndentation = substr_count($prevText, $this->indentChar, strrpos($prevText, "\n"));
+					}
+					$foundStack[] = $poppedID;
+					$this->appendCode($text);
+					break;
+
+				case ST_CURLY_OPEN:
+					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO])) {
+						if (!$this->hasLnLeftToken()) {
+							$this->appendCode($this->getCrlfIndent());
+						}
+					}
+					$indentToken = [
+						'id' => $id,
+						'implicit' => true,
+					];
+					$adjustedIndendation = max($currentIndentation - $this->indent, 0);
+					if ($touchedCaseOrDefault) {
+						++$adjustedIndendation;
+					}
+					$this->appendCode(str_repeat($this->indentChar, $adjustedIndendation) . $text);
+					$currentIndentation = 0;
+					if ($this->hasLnAfter()) {
+						$indentToken['implicit'] = false;
+						$this->setIndent(+1);
+					}
+					if (!$this->hasLnAfter() && !$this->leftUsefulTokenIs([T_OBJECT_OPERATOR, T_DOUBLE_COLON])) {
+						$this->setIndent(+1);
+						$this->appendCode($this->getCrlfIndent());
+						$this->setIndent(-1);
+					}
+					$foundStack[] = $indentToken;
+					break;
+
+				case T_DOLLAR_OPEN_CURLY_BRACES:
+				case T_CURLY_OPEN:
+					$indentToken = [
+						'id' => $id,
+						'implicit' => true,
+					];
+					$this->appendCode($text);
+					$foundStack[] = $indentToken;
+					break;
+
+				case ST_BRACKET_OPEN:
+				case ST_PARENTHESES_OPEN:
+					$indentToken = [
+						'id' => $id,
+						'implicit' => true,
+					];
+					$this->appendCode($text);
+					if ($this->hasLnAfter()) {
+						$indentToken['implicit'] = false;
+						$this->setIndent(+1);
+					}
+					$foundStack[] = $indentToken;
+					break;
+
+				case ST_BRACKET_CLOSE:
+				case ST_PARENTHESES_CLOSE:
+				case ST_CURLY_CLOSE:
+					$poppedID = array_pop($foundStack);
+					if (false === $poppedID['implicit']) {
+						$this->setIndent(-1);
+					}
+					$this->appendCode($text);
+					break;
+
+				case T_ELSE:
+				case T_ELSEIF:
+				case T_FINALLY:
+					list($prevId, $prevText) = $this->getToken($this->leftToken());
+					if (!$this->hasLn($prevText) && T_OPEN_TAG != $prevId) {
+						$this->appendCode($this->getCrlfIndent());
+						if ($touchedCaseOrDefault) {
+							$this->appendCode($this->indentChar);
+						}
+					}
+					$this->appendCode($text);
+					break;
+
+				case T_CATCH:
+					if (' ' == substr($this->code, -1, 1)) {
+						$this->code = substr($this->code, 0, -1);
+					}
+					if (!$this->hasLnLeftToken()) {
+						$this->appendCode($this->getCrlfIndent());
+						if ($touchedCaseOrDefault) {
+							$this->appendCode($this->indentChar);
+						}
+					}
+					$this->appendCode($text);
+					break;
+
+				default:
+					$this->appendCode($text);
+			}
+		}
+
+		return $this->code;
+	}
+}
