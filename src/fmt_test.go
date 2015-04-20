@@ -39,6 +39,9 @@ func benchmarkFmt(commits int, b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	for i := 0; i < 5; i++ {
+		exec.Command("php", "test.php", "-v").Output()
+	}
 	b.Logf("%s", out)
 
 	b.StartTimer()
