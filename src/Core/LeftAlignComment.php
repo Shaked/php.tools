@@ -7,17 +7,19 @@ final class LeftAlignComment extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$touchedNonIndentableComment = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			if (self::NON_INDENTABLE_COMMENT === $text) {
+				$touchedNonIndentableComment = true;
 				continue;
 			}
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					list(, $prevText) = $this->inspectToken(-1);
-					if (self::NON_INDENTABLE_COMMENT === $prevText) {
+					if ($touchedNonIndentableComment) {
+						$touchedNonIndentableComment = false;
 						$lines = explode($this->newLine, $text);
 						$lines = array_map(function ($v) {
 							$v = ltrim($v);
@@ -29,6 +31,9 @@ final class LeftAlignComment extends FormatterPass {
 						$this->appendCode(implode($this->newLine, $lines));
 						break;
 					}
+					$this->appendCode($text);
+					break;
+
 				case T_WHITESPACE:
 					list(, $nextText) = $this->inspectToken(1);
 					if (self::NON_INDENTABLE_COMMENT === $nextText && substr_count($text, "\n") >= 2) {
@@ -40,6 +45,9 @@ final class LeftAlignComment extends FormatterPass {
 						$this->appendCode($text);
 						break;
 					}
+					$this->appendCode($text);
+					break;
+
 				default:
 					$this->appendCode($text);
 					break;

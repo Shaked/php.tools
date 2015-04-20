@@ -11,6 +11,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 	private function addBraces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$touchedCurlyClose = false;
 		for ($index = sizeof($this->tkns) - 1; 0 <= $index; --$index) {
 			$token = $this->tkns[$index];
 			list($id) = $this->getToken($token);
@@ -26,8 +27,13 @@ final class AddMissingCurlyBraces extends FormatterPass {
 					$this->insertCurlyBraces();
 					break;
 
+				case ST_CURLY_CLOSE:
+					$touchedCurlyClose = true;
+					break;
+
 				case T_WHILE:
-					if ($this->leftTokenSubsetIsAtIdx($this->tkns, $this->ptr, [ST_CURLY_CLOSE], $this->ignoreFutileTokens)) {
+					if ($touchedCurlyClose) {
+						$touchedCurlyClose = false;
 						$hasCurlyOnLeft = true;
 					}
 

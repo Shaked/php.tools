@@ -16,7 +16,6 @@ final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 			switch ($id) {
 				case T_WHILE:
 					$str = $text;
-					list($ptId) = $this->getToken($this->leftToken());
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
@@ -34,7 +33,13 @@ final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 						}
 					}
 					break;
+
+				case T_WHITESPACE:
+					$this->appendCode($text);
+					break;
+
 				default:
+					$ptId = $id;
 					$this->appendCode($text);
 					break;
 			}

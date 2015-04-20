@@ -24,6 +24,7 @@ class ReindentAndAlignObjOps extends FormatterPass {
 		$alignType = [];
 		$printedPlaceholder = [];
 		$maxContextCounter = [];
+		$touchedParenOpen = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -54,7 +55,8 @@ class ReindentAndAlignObjOps extends FormatterPass {
 
 				case T_NEW:
 					$this->appendCode($text);
-					if ($this->leftUsefulTokenIs(ST_PARENTHESES_OPEN)) {
+					if ($touchedParenOpen) {
+						$touchedParenOpen = false;
 						$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_COMMA]);
 						if (ST_PARENTHESES_OPEN == $foundToken) {
 							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
@@ -92,6 +94,7 @@ class ReindentAndAlignObjOps extends FormatterPass {
 					break;
 
 				case ST_PARENTHESES_OPEN:
+					$touchedParenOpen = true;
 				case ST_BRACKET_OPEN:
 					$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 					$this->appendCode($text);
@@ -205,7 +208,12 @@ class ReindentAndAlignObjOps extends FormatterPass {
 					$this->appendCode($text);
 					break;
 
+				case T_WHITESPACE:
+					$this->appendCode($text);
+					break;
+
 				default:
+					$touchedParenOpen = false;
 					$this->appendCode($text);
 					break;
 			}

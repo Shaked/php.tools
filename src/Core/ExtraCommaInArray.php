@@ -10,17 +10,21 @@ final class ExtraCommaInArray extends FormatterPass {
 		$this->tkns = token_get_all($source);
 
 		$contextStack = [];
+		$touchedBracketOpen = false;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
+					$touchedBracketOpen = true;
 					$found = ST_BRACKET_OPEN;
 					if ($this->isShortArray()) {
 						$found = self::ST_SHORT_ARRAY_OPEN;
 					}
 					$contextStack[] = $found;
 					break;
+
 				case ST_BRACKET_CLOSE:
 					if (isset($contextStack[0]) && !$this->leftTokenIs(ST_BRACKET_OPEN)) {
 						if (self::ST_SHORT_ARRAY_OPEN == end($contextStack) && ($this->hasLnLeftToken() || $this->hasLnBefore()) && !$this->leftUsefulTokenIs(ST_COMMA)) {
@@ -35,8 +39,11 @@ final class ExtraCommaInArray extends FormatterPass {
 							$this->tkns[$prevTokenIdx] = [$tknId, rtrim($tknText, ',')];
 						}
 						array_pop($contextStack);
+						break;
 					}
+					$touchedBracketOpen = false;
 					break;
+
 				case ST_PARENTHESES_OPEN:
 					$found = ST_PARENTHESES_OPEN;
 					if ($this->leftUsefulTokenIs(T_STRING)) {
@@ -46,6 +53,7 @@ final class ExtraCommaInArray extends FormatterPass {
 					}
 					$contextStack[] = $found;
 					break;
+
 				case ST_PARENTHESES_CLOSE:
 					if (isset($contextStack[0])) {
 						if (T_ARRAY == end($contextStack) && ($this->hasLnLeftToken() || $this->hasLnBefore()) && !$this->leftUsefulTokenIs(ST_COMMA)) {
@@ -61,6 +69,10 @@ final class ExtraCommaInArray extends FormatterPass {
 						}
 						array_pop($contextStack);
 					}
+					break;
+
+				default:
+					$touchedBracketOpen = false;
 					break;
 			}
 			$this->tkns[$this->ptr] = [$id, $text];

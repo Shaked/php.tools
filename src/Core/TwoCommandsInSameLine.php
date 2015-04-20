@@ -6,6 +6,8 @@ final class TwoCommandsInSameLine extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$touchedSemicolon = true;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -13,8 +15,10 @@ final class TwoCommandsInSameLine extends FormatterPass {
 			switch ($id) {
 				case ST_SEMI_COLON:
 					if ($this->leftTokenIs(ST_SEMI_COLON)) {
+						$touchedSemicolon = false;
 						break;
 					}
+					$touchedSemicolon = true;
 					$this->appendCode($text);
 					break;
 
@@ -24,7 +28,8 @@ final class TwoCommandsInSameLine extends FormatterPass {
 				case T_BREAK:
 				case T_ECHO:
 				case T_PRINT:
-					if (!$this->hasLnBefore() && $this->leftTokenIs(ST_SEMI_COLON)) {
+					if (!$this->hasLnBefore() && $touchedSemicolon) {
+						$touchedSemicolon = false;
 						$this->appendCode($this->newLine);
 					}
 					$this->appendCode($text);
@@ -35,7 +40,15 @@ final class TwoCommandsInSameLine extends FormatterPass {
 					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
 
+				case T_WHITESPACE:
+					if ($this->hasLn($text)) {
+						$touchedSemicolon = false;
+					}
+					$this->appendCode($text);
+					break;
+
 				default:
+					$touchedSemicolon = false;
 					$this->appendCode($text);
 					break;
 

@@ -33,6 +33,7 @@ final class OrderUseClauses extends FormatterPass {
 		$useStack = [0 => []];
 		$foundComma = false;
 		$groupCount = 0;
+		$touchedDoubleColon = false;
 
 		$stopTokens = [ST_SEMI_COLON, ST_CURLY_OPEN];
 		if ($splitComma) {
@@ -42,7 +43,16 @@ final class OrderUseClauses extends FormatterPass {
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 
-			if ((T_TRAIT === $id || T_CLASS === $id) && !$this->leftTokenSubsetIsAtIdx($tokens, $index, [T_DOUBLE_COLON], $this->ignoreFutileTokens)) {
+			if (T_DOUBLE_COLON == $id) {
+				$newTokens[] = $token;
+				$touchedDoubleColon = true;
+				continue;
+			}
+
+			if (
+				(T_TRAIT === $id || T_CLASS === $id) &&
+				!$touchedDoubleColon
+			) {
 				$newTokens[] = $token;
 				while (list(, $token) = each($tokens)) {
 					list($id, $text) = $this->getToken($token);
@@ -50,6 +60,8 @@ final class OrderUseClauses extends FormatterPass {
 				}
 				break;
 			}
+
+			$touchedDoubleColon = false;
 
 			if (
 				!$stripBlankLines &&

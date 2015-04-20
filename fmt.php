@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.25.0");;
+define("VERSION", "7.26.0");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -1372,6 +1372,7 @@ final class AddMissingCurlyBraces extends FormatterPass {
 	private function addBraces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$touchedCurlyClose = false;
 		for ($index = sizeof($this->tkns) - 1; 0 <= $index; --$index) {
 			$token = $this->tkns[$index];
 			list($id) = $this->getToken($token);
@@ -1387,8 +1388,13 @@ final class AddMissingCurlyBraces extends FormatterPass {
 					$this->insertCurlyBraces();
 					break;
 
+				case ST_CURLY_CLOSE:
+					$touchedCurlyClose = true;
+					break;
+
 				case T_WHILE:
-					if ($this->leftTokenSubsetIsAtIdx($this->tkns, $this->ptr, [ST_CURLY_CLOSE], $this->ignoreFutileTokens)) {
+					if ($touchedCurlyClose) {
+						$touchedCurlyClose = false;
 						$hasCurlyOnLeft = true;
 					}
 
@@ -1884,17 +1890,21 @@ final class ExtraCommaInArray extends FormatterPass {
 		$this->tkns = token_get_all($source);
 
 		$contextStack = [];
+		$touchedBracketOpen = false;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case ST_BRACKET_OPEN:
+					$touchedBracketOpen = true;
 					$found = ST_BRACKET_OPEN;
 					if ($this->isShortArray()) {
 						$found = self::ST_SHORT_ARRAY_OPEN;
 					}
 					$contextStack[] = $found;
 					break;
+
 				case ST_BRACKET_CLOSE:
 					if (isset($contextStack[0]) && !$this->leftTokenIs(ST_BRACKET_OPEN)) {
 						if (self::ST_SHORT_ARRAY_OPEN == end($contextStack) && ($this->hasLnLeftToken() || $this->hasLnBefore()) && !$this->leftUsefulTokenIs(ST_COMMA)) {
@@ -1909,8 +1919,11 @@ final class ExtraCommaInArray extends FormatterPass {
 							$this->tkns[$prevTokenIdx] = [$tknId, rtrim($tknText, ',')];
 						}
 						array_pop($contextStack);
+						break;
 					}
+					$touchedBracketOpen = false;
 					break;
+
 				case ST_PARENTHESES_OPEN:
 					$found = ST_PARENTHESES_OPEN;
 					if ($this->leftUsefulTokenIs(T_STRING)) {
@@ -1920,6 +1933,7 @@ final class ExtraCommaInArray extends FormatterPass {
 					}
 					$contextStack[] = $found;
 					break;
+
 				case ST_PARENTHESES_CLOSE:
 					if (isset($contextStack[0])) {
 						if (T_ARRAY == end($contextStack) && ($this->hasLnLeftToken() || $this->hasLnBefore()) && !$this->leftUsefulTokenIs(ST_COMMA)) {
@@ -1936,6 +1950,10 @@ final class ExtraCommaInArray extends FormatterPass {
 						array_pop($contextStack);
 					}
 					break;
+
+				default:
+					$touchedBracketOpen = false;
+					break;
 			}
 			$this->tkns[$this->ptr] = [$id, $text];
 		}
@@ -1950,17 +1968,19 @@ final class LeftAlignComment extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$touchedNonIndentableComment = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			if (self::NON_INDENTABLE_COMMENT === $text) {
+				$touchedNonIndentableComment = true;
 				continue;
 			}
 			switch ($id) {
 				case T_COMMENT:
 				case T_DOC_COMMENT:
-					list(, $prevText) = $this->inspectToken(-1);
-					if (self::NON_INDENTABLE_COMMENT === $prevText) {
+					if ($touchedNonIndentableComment) {
+						$touchedNonIndentableComment = false;
 						$lines = explode($this->newLine, $text);
 						$lines = array_map(function ($v) {
 							$v = ltrim($v);
@@ -1972,6 +1992,9 @@ final class LeftAlignComment extends FormatterPass {
 						$this->appendCode(implode($this->newLine, $lines));
 						break;
 					}
+					$this->appendCode($text);
+					break;
+
 				case T_WHITESPACE:
 					list(, $nextText) = $this->inspectToken(1);
 					if (self::NON_INDENTABLE_COMMENT === $nextText && substr_count($text, "\n") >= 2) {
@@ -1983,6 +2006,9 @@ final class LeftAlignComment extends FormatterPass {
 						$this->appendCode($text);
 						break;
 					}
+					$this->appendCode($text);
+					break;
+
 				default:
 					$this->appendCode($text);
 					break;
@@ -2009,7 +2035,6 @@ final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 			switch ($id) {
 				case T_WHILE:
 					$str = $text;
-					list($ptId) = $this->getToken($this->leftToken());
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
@@ -2027,7 +2052,13 @@ final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 						}
 					}
 					break;
+
+				case T_WHITESPACE:
+					$this->appendCode($text);
+					break;
+
 				default:
+					$ptId = $id;
 					$this->appendCode($text);
 					break;
 			}
@@ -2047,14 +2078,34 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$touchedDoubleArrow = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 
-			if (T_ARRAY === $id && $this->leftUsefulTokenIs([T_DOUBLE_ARROW])) {
-				$this->rtrimAndAppendCode($text);
+			if (T_DOUBLE_ARROW == $id) {
+				$touchedDoubleArrow = true;
+				$this->appendCode($text);
 				continue;
 			}
+
+			if ($touchedDoubleArrow) {
+				if (
+					T_WHITESPACE == $id ||
+					T_DOC_COMMENT == $id ||
+					T_COMMENT == $id
+				) {
+					$this->appendCode($text);
+					continue;
+				}
+				if (T_ARRAY === $id) {
+					$this->rtrimAndAppendCode($text);
+					$touchedDoubleArrow = false;
+					continue;
+				}
+				$touchedDoubleArrow = false;
+			}
+
 			$this->appendCode($text);
 		}
 		return $this->code;
@@ -2073,24 +2124,49 @@ final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
+		$touchedElseStringParenClose = false;
+		$touchedCurlyClose = false;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_STRING:
+				case ST_PARENTHESES_CLOSE:
+					$touchedElseStringParenClose = true;
+					$this->appendCode($text);
+					break;
+
+				case ST_CURLY_CLOSE:
+					$touchedCurlyClose = true;
+					$this->appendCode($text);
+					break;
+
 				case ST_CURLY_OPEN:
-					if ($this->leftTokenIs([T_ELSE, T_STRING, ST_PARENTHESES_CLOSE])) {
+					if ($touchedElseStringParenClose) {
+						$touchedElseStringParenClose = false;
 						$this->code = rtrim($this->code);
 					}
 					$this->appendCode($text);
 					break;
+
 				case T_ELSE:
+					$touchedElseStringParenClose = true;
 				case T_ELSEIF:
-					if ($this->leftTokenIs(ST_CURLY_CLOSE)) {
+					if ($touchedCurlyClose) {
 						$this->code = rtrim($this->code);
+						$touchedCurlyClose = false;
 					}
 					$this->appendCode($text);
 					break;
+
+				case T_WHITESPACE:
+					$this->appendCode($text);
+					break;
+
 				default:
+					$touchedElseStringParenClose = false;
+					$touchedCurlyClose = false;
 					$this->appendCode($text);
 					break;
 			}
@@ -2223,6 +2299,7 @@ final class OrderUseClauses extends FormatterPass {
 		$useStack = [0 => []];
 		$foundComma = false;
 		$groupCount = 0;
+		$touchedDoubleColon = false;
 
 		$stopTokens = [ST_SEMI_COLON, ST_CURLY_OPEN];
 		if ($splitComma) {
@@ -2232,7 +2309,16 @@ final class OrderUseClauses extends FormatterPass {
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 
-			if ((T_TRAIT === $id || T_CLASS === $id) && !$this->leftTokenSubsetIsAtIdx($tokens, $index, [T_DOUBLE_COLON], $this->ignoreFutileTokens)) {
+			if (T_DOUBLE_COLON == $id) {
+				$newTokens[] = $token;
+				$touchedDoubleColon = true;
+				continue;
+			}
+
+			if (
+				(T_TRAIT === $id || T_CLASS === $id) &&
+				!$touchedDoubleColon
+			) {
 				$newTokens[] = $token;
 				while (list(, $token) = each($tokens)) {
 					list($id, $text) = $this->getToken($token);
@@ -2240,6 +2326,8 @@ final class OrderUseClauses extends FormatterPass {
 				}
 				break;
 			}
+
+			$touchedDoubleColon = false;
 
 			if (
 				!$stripBlankLines &&
@@ -2635,11 +2723,20 @@ final class ReindentColonBlocks extends FormatterPass {
 		$switchCurlyCount = [];
 		$switchCurlyCount[$switchLevel] = 0;
 		$touchedColon = false;
+		$touchedVariableObjOpDollar = false;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
 			switch ($id) {
+				case T_VARIABLE:
+				case T_OBJECT_OPERATOR:
+				case ST_DOLLAR:
+					$touchedVariableObjOpDollar = true;
+					$this->appendCode($text);
+					break;
+
 				case ST_QUOTE:
 					$this->appendCode($text);
 					$this->printUntilTheEndOfString();
@@ -2654,7 +2751,8 @@ final class ReindentColonBlocks extends FormatterPass {
 
 				case ST_CURLY_OPEN:
 					$this->appendCode($text);
-					if ($this->leftTokenIs([T_VARIABLE, T_OBJECT_OPERATOR, ST_DOLLAR])) {
+					if ($touchedVariableObjOpDollar) {
+						$touchedVariableObjOpDollar = false;
 						$this->printCurlyBlock();
 						break;
 					}
@@ -2681,6 +2779,7 @@ final class ReindentColonBlocks extends FormatterPass {
 					break;
 
 				default:
+					$touchedVariableObjOpDollar = false;
 					$hasLn = $this->hasLn($text);
 					if ($hasLn) {
 						$isNextCaseOrDefault = $this->rightUsefulTokenIs([T_CASE, T_DEFAULT]);
@@ -2801,6 +2900,7 @@ class ReindentAndAlignObjOps extends FormatterPass {
 		$alignType = [];
 		$printedPlaceholder = [];
 		$maxContextCounter = [];
+		$touchedParenOpen = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -2831,7 +2931,8 @@ class ReindentAndAlignObjOps extends FormatterPass {
 
 				case T_NEW:
 					$this->appendCode($text);
-					if ($this->leftUsefulTokenIs(ST_PARENTHESES_OPEN)) {
+					if ($touchedParenOpen) {
+						$touchedParenOpen = false;
 						$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_COMMA]);
 						if (ST_PARENTHESES_OPEN == $foundToken) {
 							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
@@ -2869,6 +2970,7 @@ class ReindentAndAlignObjOps extends FormatterPass {
 					break;
 
 				case ST_PARENTHESES_OPEN:
+					$touchedParenOpen = true;
 				case ST_BRACKET_OPEN:
 					$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 					$this->appendCode($text);
@@ -2982,7 +3084,12 @@ class ReindentAndAlignObjOps extends FormatterPass {
 					$this->appendCode($text);
 					break;
 
+				case T_WHITESPACE:
+					$this->appendCode($text);
+					break;
+
 				default:
+					$touchedParenOpen = false;
 					$this->appendCode($text);
 					break;
 			}
@@ -3246,6 +3353,7 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 		$alignType = [];
 		$printedPlaceholder = [];
 		$maxContextCounter = [];
+		$touchedParenOpen = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -3276,7 +3384,8 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 
 				case T_NEW:
 					$this->appendCode($text);
-					if ($this->leftUsefulTokenIs(ST_PARENTHESES_OPEN)) {
+					if ($touchedParenOpen) {
+						$touchedParenOpen = false;
 						$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_COMMA]);
 						if (ST_PARENTHESES_OPEN == $foundToken) {
 							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
@@ -3376,7 +3485,12 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 					$this->appendCode($text);
 					break;
 
+				case T_WHITESPACE:
+					$this->appendCode($text);
+					break;
+
 				default:
+					$touchedParenOpen = false;
 					$this->appendCode($text);
 					break;
 			}
@@ -4067,33 +4181,42 @@ final class StripExtraCommaInList extends FormatterPass {
 		$this->tkns = token_get_all($source);
 
 		$contextStack = [];
+		$touchedListArrayString = false;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_STRING:
+					$touchedListArrayString = true;
 					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
 						$contextStack[] = T_STRING;
 					}
 					break;
+
 				case T_ARRAY:
+					$touchedListArrayString = true;
 					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
 						$contextStack[] = T_ARRAY;
 					}
 					break;
+
 				case T_LIST:
+					$touchedListArrayString = true;
 					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
 						$contextStack[] = T_LIST;
 					}
 					break;
+
 				case ST_PARENTHESES_OPEN:
 					if (isset($contextStack[0]) && T_LIST == end($contextStack) && $this->rightTokenIs(ST_PARENTHESES_CLOSE)) {
 						array_pop($contextStack);
 						$contextStack[] = self::EMPTY_LIST;
-					} elseif (!$this->leftTokenIs([T_LIST, T_ARRAY, T_STRING])) {
+					} elseif (!$touchedListArrayString) {
 						$contextStack[] = ST_PARENTHESES_OPEN;
 					}
 					break;
+
 				case ST_PARENTHESES_CLOSE:
 					if (isset($contextStack[0])) {
 						if (T_LIST == end($contextStack) && $this->leftUsefulTokenIs(ST_COMMA)) {
@@ -4102,6 +4225,10 @@ final class StripExtraCommaInList extends FormatterPass {
 						}
 						array_pop($contextStack);
 					}
+					break;
+
+				default:
+					$touchedListArrayString = false;
 					break;
 			}
 			$this->tkns[$this->ptr] = [$id, $text];
@@ -4119,6 +4246,8 @@ final class TwoCommandsInSameLine extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$touchedSemicolon = true;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -4126,8 +4255,10 @@ final class TwoCommandsInSameLine extends FormatterPass {
 			switch ($id) {
 				case ST_SEMI_COLON:
 					if ($this->leftTokenIs(ST_SEMI_COLON)) {
+						$touchedSemicolon = false;
 						break;
 					}
+					$touchedSemicolon = true;
 					$this->appendCode($text);
 					break;
 
@@ -4137,7 +4268,8 @@ final class TwoCommandsInSameLine extends FormatterPass {
 				case T_BREAK:
 				case T_ECHO:
 				case T_PRINT:
-					if (!$this->hasLnBefore() && $this->leftTokenIs(ST_SEMI_COLON)) {
+					if (!$this->hasLnBefore() && $touchedSemicolon) {
+						$touchedSemicolon = false;
 						$this->appendCode($this->newLine);
 					}
 					$this->appendCode($text);
@@ -4148,7 +4280,15 @@ final class TwoCommandsInSameLine extends FormatterPass {
 					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					break;
 
+				case T_WHITESPACE:
+					if ($this->hasLn($text)) {
+						$touchedSemicolon = false;
+					}
+					$this->appendCode($text);
+					break;
+
 				default:
+					$touchedSemicolon = false;
 					$this->appendCode($text);
 					break;
 

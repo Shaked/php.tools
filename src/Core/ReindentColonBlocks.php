@@ -25,11 +25,20 @@ final class ReindentColonBlocks extends FormatterPass {
 		$switchCurlyCount = [];
 		$switchCurlyCount[$switchLevel] = 0;
 		$touchedColon = false;
+		$touchedVariableObjOpDollar = false;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
 			switch ($id) {
+				case T_VARIABLE:
+				case T_OBJECT_OPERATOR:
+				case ST_DOLLAR:
+					$touchedVariableObjOpDollar = true;
+					$this->appendCode($text);
+					break;
+
 				case ST_QUOTE:
 					$this->appendCode($text);
 					$this->printUntilTheEndOfString();
@@ -44,7 +53,8 @@ final class ReindentColonBlocks extends FormatterPass {
 
 				case ST_CURLY_OPEN:
 					$this->appendCode($text);
-					if ($this->leftTokenIs([T_VARIABLE, T_OBJECT_OPERATOR, ST_DOLLAR])) {
+					if ($touchedVariableObjOpDollar) {
+						$touchedVariableObjOpDollar = false;
 						$this->printCurlyBlock();
 						break;
 					}
@@ -71,6 +81,7 @@ final class ReindentColonBlocks extends FormatterPass {
 					break;
 
 				default:
+					$touchedVariableObjOpDollar = false;
 					$hasLn = $this->hasLn($text);
 					if ($hasLn) {
 						$isNextCaseOrDefault = $this->rightUsefulTokenIs([T_CASE, T_DEFAULT]);

@@ -13,6 +13,7 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 		$alignType = [];
 		$printedPlaceholder = [];
 		$maxContextCounter = [];
+		$touchedParenOpen = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -43,7 +44,8 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 
 				case T_NEW:
 					$this->appendCode($text);
-					if ($this->leftUsefulTokenIs(ST_PARENTHESES_OPEN)) {
+					if ($touchedParenOpen) {
+						$touchedParenOpen = false;
 						$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_COMMA]);
 						if (ST_PARENTHESES_OPEN == $foundToken) {
 							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
@@ -143,7 +145,12 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 					$this->appendCode($text);
 					break;
 
+				case T_WHITESPACE:
+					$this->appendCode($text);
+					break;
+
 				default:
+					$touchedParenOpen = false;
 					$this->appendCode($text);
 					break;
 			}
