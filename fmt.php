@@ -299,7 +299,8 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.26.0");;
+define("VERSION", "7.26.0");
+;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -1215,7 +1216,6 @@ final class CodeFormatter {
 		'PSR2EmptyFunction' => false,
 		'PSR2SingleEmptyLineAndStripClosingTag' => false,
 		'PSR2ModifierVisibilityStaticOrder' => false,
-		'PSR2IndentWithSpace' => false,
 		'PSR2CurlyOpenNextLine' => false,
 		'PSR2LnAfterNamespace' => false,
 		'PSR2KeywordsLowerCase' => false,
@@ -6631,6 +6631,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 			switch ($id) {
 				case T_DOC_COMMENT:
 					$touchedDocComment = true;
+					break;
 				case T_FINAL:
 				case T_ABSTRACT:
 				case T_PUBLIC:
@@ -6641,6 +6642,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 						$touchedVisibility = true;
 						$visibilityIdx = $this->ptr;
 					}
+					break;
 				case T_FUNCTION:
 					if ($touchedDocComment) {
 						$touchedDocComment = false;

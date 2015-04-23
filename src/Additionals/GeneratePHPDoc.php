@@ -19,6 +19,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 			switch ($id) {
 				case T_DOC_COMMENT:
 					$touchedDocComment = true;
+					break;
 				case T_FINAL:
 				case T_ABSTRACT:
 				case T_PUBLIC:
@@ -29,6 +30,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 						$touchedVisibility = true;
 						$visibilityIdx = $this->ptr;
 					}
+					break;
 				case T_FUNCTION:
 					if ($touchedDocComment) {
 						$touchedDocComment = false;
