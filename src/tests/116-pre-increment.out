@@ -3,31 +3,31 @@
 
 ++$a;
 
-if (++$a) {
+if ($a++) {
 
 }
 
 ++$a;
-$this->a[++$a];
-$this->a{++$b}(++$a);
-$this->a(++$a);
-$this->a{++$b}();
+$this->a[$a++];
+$this->a{$b++}($a++);
+$this->a($a++);
+$this->a{$b++}();
 
-echo "a" . ++$i;
+echo "a" . $i++;
 
 --$a;
 
-if (--$a) {
+if ($a--) {
 
 }
 
 --$a;
-$this->a[--$a];
-$this->a{--$b}(--$a);
-$this->a(--$a);
-$this->a{--$b}();
+$this->a[$a--];
+$this->a{$b--}($a--);
+$this->a($a--);
+$this->a{$b--}();
 
-echo "a" . --$i;
+echo "a" . $i--;
 
 ++$i;
 --$i;

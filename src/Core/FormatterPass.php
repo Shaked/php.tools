@@ -608,6 +608,13 @@ abstract class FormatterPass {
 		} while ($expectedId != $tkns[$ptr][0]);
 	}
 
+	protected function refWalkBackUsefulUntil($tkns, &$ptr, array $expectedId) {
+		$expectedId = array_flip($expectedId);
+		do {
+			$ptr = $this->walkLeft($tkns, $ptr, $this->ignoreFutileTokens);
+		} while (isset($expectedId[$tkns[$ptr][0]]));
+	}
+
 	protected function refWalkBlock($tkns, &$ptr, $start, $end) {
 		$count = 0;
 		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
@@ -639,6 +646,44 @@ abstract class FormatterPass {
 			}
 			if (ST_CURLY_CLOSE == $id) {
 				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
+
+	protected function refWalkBlockReverse($tkns, &$ptr, $start, $end) {
+		$count = 0;
+		for (; $ptr >= 0; --$ptr) {
+			$id = $tkns[$ptr][0];
+			if ($start == $id) {
+				--$count;
+			}
+			if ($end == $id) {
+				++$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
+
+	protected function refWalkCurlyBlockReverse($tkns, &$ptr) {
+		$count = 0;
+		for (; $ptr >= 0; --$ptr) {
+			$id = $tkns[$ptr][0];
+			if (ST_CURLY_OPEN == $id) {
+				--$count;
+			}
+			if (T_CURLY_OPEN == $id) {
+				--$count;
+			}
+			if (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+				--$count;
+			}
+			if (ST_CURLY_CLOSE == $id) {
+				++$count;
 			}
 			if (0 == $count) {
 				break;

@@ -1,5 +1,9 @@
 <?php
 final class MildAutoPreincrement extends AutoPreincrement {
-	protected $candidateTokens = [];
-	protected $checkAgainstConcat = true;
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Automatically convert postincrement to preincrement. (Deprecated pass. Use AutoPreincrement instead).';
+	}
 }
