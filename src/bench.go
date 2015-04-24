@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -12,14 +13,21 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const TOTAL_COMMITS = 10
+const benchmarkResultsFileName = "bench_results"
+const benchmarkResultsDriver = "db"
+
+type dbResults struct {
+}
 
 func main() {
 	flag.Parse()
-
-	result := runBench()
+	d := &dbResults{}
+	result := runBench(d)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(
 			w,
@@ -38,11 +46,11 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
-func runBench() string {
-	var results [TOTAL_COMMITS][2]interface{}
+func runBench(d *dbResults) string {
+	var results [TOTAL_COMMITS][3]interface{}
 
 	for i := TOTAL_COMMITS - 1; i >= 0; i-- {
-		exec.Command("git", "checkout", "master").Output()
+		exec.Command("git", "checkout", "benchmark-db-results").Output()
 		exec.Command("git", "branch", "-D", "performance").Output()
 		exec.Command("git", "checkout", "-b", "performance").Output()
 		exec.Command("git", "reset", "--hard", "HEAD~"+strconv.Itoa(i)).Output()
@@ -66,8 +74,8 @@ func runBench() string {
 			}
 		})
 
-		results[i] = [2]interface{}{
-			// commit[0],
+		results[i] = [3]interface{}{
+			commit[0],
 			commit[1],
 			// b.N,
 			// b.T.Seconds(),
@@ -77,10 +85,72 @@ func runBench() string {
 		exec.Command("git", "branch", "-D", "performance").Output()
 	}
 
-	b, err := json.MarshalIndent(results, "", "\t")
+	err := d.saveBenchResults(results)
+	checkerr(err)
+
+	b, err := toJson(results)
 	checkerr(err)
 
 	return string(b)
+}
+
+func toJson(results [TOTAL_COMMITS][3]interface{}) ([]byte, error) {
+	resultsToJson := [TOTAL_COMMITS][2]interface{}{}
+	for i, result := range results {
+		resultToJson := [2]interface{}{
+			result[1],
+			result[2],
+		}
+		resultsToJson[i] = resultToJson
+	}
+
+	return json.MarshalIndent(resultsToJson, "", "\t")
+}
+
+func (d *dbResults) createTableIfNotExists(db *sql.DB) error {
+	resultsQuery := `
+		CREATE TABLE IF NOT EXISTS results (
+			"id" integer NOT NULL PRIMARY KEY,
+			"commitHash" varchar(128) NOT NULL, 
+			"commitDesc" varchar(128) NOT NULL, 
+			"average" REAL NOT NULL
+		);
+	`
+	_, err := db.Exec(resultsQuery)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+func (d *dbResults) saveBenchResults(results [TOTAL_COMMITS][3]interface{}) error {
+	db, err := sql.Open("sqlite3", fmt.Sprintf("%s.db", benchmarkResultsFileName))
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	err = d.createTableIfNotExists(db)
+	if nil != err {
+		return err
+	}
+	for _, result := range results {
+		tx, err := db.Begin()
+		if err != nil {
+			return err
+		}
+		stmtstr := "insert into results(`commitHash`,`commitDesc`,average) values(?, ?, ?)"
+		stmt, err := tx.Prepare(stmtstr)
+		if err != nil {
+			return err
+		}
+		_, err = stmt.Exec(result[0], result[1], result[2])
+		if nil != err {
+			return err
+		}
+		tx.Commit()
+	}
+	return nil
 }
 
 func averagePerExecution(t, n int64) float64 {
