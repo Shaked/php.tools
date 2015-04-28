@@ -1,5 +1,7 @@
 <?php
 final class AllmanStyleBraces extends AdditionalPass {
+	const OTHER_BLOCK = '';
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -7,9 +9,11 @@ final class AllmanStyleBraces extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$blockStack = [];
 		$foundStack = [];
 		$currentIndentation = 0;
 		$touchedCaseOrDefault = false;
+		$touchedSwitch = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -39,6 +43,13 @@ final class AllmanStyleBraces extends AdditionalPass {
 					break;
 
 				case ST_CURLY_OPEN:
+					$block = self::OTHER_BLOCK;
+					if ($touchedSwitch) {
+						$touchedSwitch = false;
+						$block = T_SWITCH;
+					}
+					$blockStack[] = $block;
+
 					if ($this->leftUsefulTokenIs([ST_PARENTHESES_CLOSE, T_ELSE, T_FINALLY, T_DO, T_STRING])) {
 						if (!$this->hasLnLeftToken()) {
 							$this->appendCode($this->getCrlfIndent());
@@ -78,6 +89,7 @@ final class AllmanStyleBraces extends AdditionalPass {
 
 				case ST_BRACKET_OPEN:
 				case ST_PARENTHESES_OPEN:
+					$blockStack[] = self::OTHER_BLOCK;
 					$indentToken = [
 						'id' => $id,
 						'implicit' => true,
@@ -94,7 +106,11 @@ final class AllmanStyleBraces extends AdditionalPass {
 				case ST_PARENTHESES_CLOSE:
 				case ST_CURLY_CLOSE:
 					$poppedID = array_pop($foundStack);
-					if (false === $poppedID['implicit']) {
+					$poppedBlock = array_pop($blockStack);
+					if (T_SWITCH == $poppedBlock) {
+						$touchedCaseOrDefault = false;
+						$this->setIndent(-1);
+					} elseif (false === $poppedID['implicit']) {
 						$this->setIndent(-1);
 					}
 					$this->appendCode($text);
@@ -123,6 +139,11 @@ final class AllmanStyleBraces extends AdditionalPass {
 							$this->appendCode($this->indentChar);
 						}
 					}
+					$this->appendCode($text);
+					break;
+
+				case T_SWITCH:
+					$touchedSwitch = true;
 					$this->appendCode($text);
 					break;
 
