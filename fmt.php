@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.27.0");;
+define("VERSION", "7.27.1");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -3477,7 +3477,10 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 					break;
 
 				case T_OBJECT_OPERATOR:
-					if (0 == $touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]) {
+					if (!isset($touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]) || 0 == $touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]) {
+						if (!isset($touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
+							$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+						}
 						++$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
 						if ($this->hasLnBefore()) {
 							$alignType[$levelCounter][$levelEntranceCounter[$levelCounter]] = self::ALIGN_WITH_INDENT;
@@ -9592,7 +9595,7 @@ if (!isset($inPhar)) {
 }
 if (!isset($testEnv)) {
 	function showHelp($argv, $enableCache, $inPhar) {
-		echo 'Usage: ' . $argv[0] . ' [-hv] [-o=FILENAME] [--config=FILENAME] ' . ($enableCache ? '[--cache[=FILENAME]] ' : '') . '[--setters_and_getters=type] [--constructor=type] [--psr] [--psr1] [--psr1-naming] [--psr2] [--indent_with_space=SIZE] [--enable_auto_align] [--visibility_order] <target>', PHP_EOL;
+		echo 'Usage: ' . $argv[0] . ' [-hv] [-o=FILENAME] [--config=FILENAME] ' . ($enableCache ? '[--cache[=FILENAME]] ' : '') . '[options] <target>', PHP_EOL;
 		$options = [
 			'--cache[=FILENAME]' => 'cache file. Default: ',
 			'--cakephp' => 'Apply CakePHP coding style',
@@ -9637,6 +9640,7 @@ if (!isset($testEnv)) {
 		foreach ($options as $k => $v) {
 			echo '  ', str_pad($k, $maxLen), '  ', $v, PHP_EOL;
 		}
+
 		echo PHP_EOL, 'If - is blank, it reads from stdin', PHP_EOL;
 	}
 	$getoptLongOptions = [

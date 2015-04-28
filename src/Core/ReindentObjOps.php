@@ -93,7 +93,10 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 					break;
 
 				case T_OBJECT_OPERATOR:
-					if (0 == $touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]) {
+					if (!isset($touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]) || 0 == $touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]) {
+						if (!isset($touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
+							$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+						}
 						++$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
 						if ($this->hasLnBefore()) {
 							$alignType[$levelCounter][$levelEntranceCounter[$levelCounter]] = self::ALIGN_WITH_INDENT;
