@@ -16,12 +16,10 @@ final class PSR1OpenTags extends FormatterPass {
 						break;
 					}
 				case T_CLOSE_TAG:
-					$tail = substr(trim($this->tkns[$index-1][1]), -1);
-					if ($tail and $tail !== ';' and $tail !== ':') {
-						$this->appendCode('; ' . $text);
-					}else{
-						$this->appendCode($text);
+					if (!$this->leftUsefulTokenIs([ST_SEMI_COLON, ST_COLON, ST_CURLY_CLOSE])) {
+						$this->appendCode(ST_SEMI_COLON);
 					}
+					$this->appendCode($text);
 					break;
 				default:
 					$this->appendCode($text);
