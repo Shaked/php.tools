@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.28.1");;
+define("VERSION", "7.28.2");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -4509,6 +4509,7 @@ final class PSR1OpenTags extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$touchedComment = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -4518,12 +4519,29 @@ final class PSR1OpenTags extends FormatterPass {
 						$this->appendCode('<?php' . ($this->hasLnAfter() || $this->hasLn($text) || $this->rightUsefulTokenIs(T_NAMESPACE) ? $this->newLine : $this->getSpace()));
 						break;
 					}
+					$this->appendCode($text);
+					break;
+
 				case T_CLOSE_TAG:
-					if (!$this->leftUsefulTokenIs([ST_SEMI_COLON, ST_COLON, ST_CURLY_CLOSE])) {
+					if (!$touchedComment && !$this->leftUsefulTokenIs([ST_SEMI_COLON, ST_COLON, ST_CURLY_CLOSE])) {
 						$this->appendCode(ST_SEMI_COLON);
+					}
+					$touchedComment = false;
+					$this->appendCode($text);
+					break;
+
+				case T_COMMENT:
+				case T_DOC_COMMENT:
+					if (
+						$this->rightUsefulTokenIs([T_CLOSE_TAG]) &&
+						!$this->leftUsefulTokenIs([ST_SEMI_COLON])
+					) {
+						$touchedComment = true;
+						$this->rtrimAndappendCode(ST_SEMI_COLON . ' ');
 					}
 					$this->appendCode($text);
 					break;
+
 				default:
 					$this->appendCode($text);
 					break;
