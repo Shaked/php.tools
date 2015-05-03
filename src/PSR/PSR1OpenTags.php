@@ -15,6 +15,14 @@ final class PSR1OpenTags extends FormatterPass {
 						$this->appendCode('<?php' . ($this->hasLnAfter() || $this->hasLn($text) || $this->rightUsefulTokenIs(T_NAMESPACE) ? $this->newLine : $this->getSpace()));
 						break;
 					}
+				case T_CLOSE_TAG:
+					$tail = substr(trim($this->tkns[$index-1][1]), -1);
+					if ($tail and $tail !== ';' and $tail !== ':') {
+						$this->appendCode('; ' . $text);
+					}else{
+						$this->appendCode($text);
+					}
+					break;
 				default:
 					$this->appendCode($text);
 					break;

@@ -4519,10 +4519,13 @@ final class PSR1OpenTags extends FormatterPass {
 						break;
 					}
 				case T_CLOSE_TAG:
-					$trailing = substr($this->tkns[$index-1][1], -1);
-					if ($trailing and $trailing !== ';' and $trailing !== ':') {
-						$this->appendCode(';');
+					$tail = substr(trim($this->tkns[$index-1][1]), -1);
+					if ($tail and $tail !== ';' and $tail !== ':') {
+						$this->appendCode('; ' . $text);
+					}else{
+						$this->appendCode($text);
 					}
+					break;
 				default:
 					$this->appendCode($text);
 					break;
