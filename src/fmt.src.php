@@ -446,10 +446,6 @@ if (!isset($testEnv)) {
 		$argv = extractFromArgv($argv, 'enable_auto_align');
 	}
 
-	if (isset($opts['indent_with_space']) && !isset($opts['laravel'])) {
-		$fmt->enablePass('PSR2IndentWithSpace', $opts['indent_with_space']);
-		$argv = extractFromArgv($argv, 'indent_with_space');
-	}
 	if (isset($opts['psr']) && !isset($opts['laravel'])) {
 		PsrDecorator::decorate($fmt);
 		$argv = extractFromArgv($argv, 'psr');
@@ -465,6 +461,10 @@ if (!isset($testEnv)) {
 	if (isset($opts['psr2']) && !isset($opts['laravel'])) {
 		PsrDecorator::PSR2($fmt);
 		$argv = extractFromArgv($argv, 'psr2');
+	}
+	if (isset($opts['indent_with_space']) && !isset($opts['laravel'])) {
+		$fmt->enablePass('PSR2IndentWithSpace', $opts['indent_with_space']);
+		$argv = extractFromArgv($argv, 'indent_with_space');
 	}
 	if ((isset($opts['psr1']) || isset($opts['psr2']) || isset($opts['psr'])) && isset($opts['enable_auto_align']) && !isset($opts['laravel'])) {
 		$fmt->enablePass('PSR2AlignObjOp');
