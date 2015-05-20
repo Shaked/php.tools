@@ -8,6 +8,7 @@ final class LeftAlignComment extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$touchedNonIndentableComment = false;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;

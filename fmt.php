@@ -1416,7 +1416,13 @@ final class AddMissingCurlyBraces extends FormatterPass {
 	private function addBraces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		// Scans from the end to the beginning looking for close curly
+		// braces, whenever one is found ($touchedCurlyClose) skips to
+		// the beginning of the block, otherwise adds the missing curly
+		// braces.
 		$touchedCurlyClose = false;
+		$hasCurlyOnLeft = false; // Deals with do{}while blocks;
+
 		for ($index = sizeof($this->tkns) - 1; 0 <= $index; --$index) {
 			$token = $this->tkns[$index];
 			list($id) = $this->getToken($token);
@@ -1773,12 +1779,22 @@ final class ConstructorPass extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+
+		// It scans for a class, and tracks the attributes, methods,
+		// visibility modifiers and ensures that the constructor is
+		// actually compliant with the behavior of PHP >= 5.
+		$classAttributes = [];
+		$functionList = [];
+		$touchedVisibility = false;
+		$touchedFunction = false;
+		$curlyCount = null;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CLASS:
-					$attributes = [];
+					$classAttributes = [];
 					$functionList = [];
 					$touchedVisibility = false;
 					$touchedFunction = false;
@@ -1812,7 +1828,7 @@ final class ConstructorPass extends FormatterPass {
 								T_PROTECTED == $touchedVisibility
 							)
 						) {
-							$attributes[] = $text;
+							$classAttributes[] = $text;
 							$touchedVisibility = null;
 						} elseif (T_FUNCTION == $id) {
 							$touchedFunction = true;
@@ -1824,8 +1840,8 @@ final class ConstructorPass extends FormatterPass {
 					}
 					$functionList = array_combine($functionList, $functionList);
 					if (!isset($functionList['__construct'])) {
-						$this->appendCode('function __construct(' . implode(', ', $attributes) . '){' . $this->newLine);
-						foreach ($attributes as $var) {
+						$this->appendCode('function __construct(' . implode(', ', $classAttributes) . '){' . $this->newLine);
+						foreach ($classAttributes as $var) {
 							$this->appendCode($this->generate($var));
 						}
 						$this->appendCode('}' . $this->newLine);
@@ -1879,6 +1895,14 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+
+		// It scans for T_WHITESPACE with linebreaks and inserts a
+		// placeholder that later is used to check whether the line is
+		// actually empty.
+		$lines = [];
+		$emptyLines = [];
+		$blockCount = 0;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -1894,8 +1918,6 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 		}
 
 		$lines = explode($this->newLine, $this->code);
-		$emptyLines = [];
-		$blockCount = 0;
 
 		foreach ($lines as $idx => $line) {
 			if (trim($line) === self::EMPTY_LINE) {
@@ -1933,6 +1955,10 @@ final class ExtraCommaInArray extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 
+		// It scans for possible blocks (parentheses, bracket and curly)
+		// and keep track of which block is actually being addressed. If
+		// it is an long array block (T_ARRAY) or short array block ([])
+		// adds the missing comma in the end.
 		$contextStack = [];
 		$touchedBracketOpen = false;
 
@@ -2013,6 +2039,7 @@ final class LeftAlignComment extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$touchedNonIndentableComment = false;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -2168,6 +2195,8 @@ final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
+		// It scans for curly closes preceded by parentheses, string or
+		// T_ELSE and removes linebreaks if any.
 		$touchedElseStringParenClose = false;
 		$touchedCurlyClose = false;
 
@@ -2339,16 +2368,23 @@ final class OrderUseClauses extends FormatterPass {
 
 	private function sortUseClauses($source, $splitComma, $removeUnused, $stripBlankLines, $blanklineAfterUseBlock) {
 		$tokens = token_get_all($source);
+
+		// It scans for T_USE blocks (thus skiping "function () use ()")
+		// either in their pure form or aggregated with commas, then it
+		// breaks the blocks, purges unused classes and adds missing
+		// ones.
 		$newTokens = [];
 		$useStack = [0 => []];
 		$foundComma = false;
 		$groupCount = 0;
 		$touchedDoubleColon = false;
-
 		$stopTokens = [ST_SEMI_COLON, ST_CURLY_OPEN];
 		if ($splitComma) {
 			$stopTokens[] = ST_COMMA;
 		}
+		$aliasList = [];
+		$aliasCount = [];
+		$unusedImport = [];
 
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
@@ -2429,8 +2465,6 @@ final class OrderUseClauses extends FormatterPass {
 		}
 		$useStack = call_user_func_array('array_merge', $useStack);
 
-		$aliasList = [];
-		$aliasCount = [];
 		foreach ($useStack as $use) {
 			$alias = $this->calculateAlias($use);
 			$alias = str_replace(ST_SEMI_COLON, '', strtolower($alias));
@@ -2469,7 +2503,6 @@ final class OrderUseClauses extends FormatterPass {
 			$return .= $text;
 		}
 
-		$unusedImport = [];
 		if ($removeUnused) {
 			$unusedImport = array_keys(
 				array_filter(
@@ -2652,7 +2685,11 @@ final class Reindent extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$this->useCache = true;
+
+		// It scans for indentable blocks, and only indent those blocks
+		// which next token possesses a linebreak.
 		$foundStack = [];
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -5423,7 +5460,11 @@ final class AlignDoubleSlashComments extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+
+		// It injects placeholders before single line comments, in order
+		// to align chunks of them later.
 		$contextCounter = 0;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -5490,9 +5531,13 @@ final class AlignEquals extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+
+		// It skips parentheses and bracket blocks, and aligns '='
+		// everywhere else.
 		$parenCount = 0;
 		$bracketCount = 0;
 		$contextCounter = 0;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -5572,7 +5617,9 @@ final class AlignTypehint extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+
 		$contextCounter = 0;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -7258,8 +7305,14 @@ final class OrderMethod extends AdditionalPass {
 
 	public function orderMethods($source) {
 		$tokens = token_get_all($source);
+
+		// It takes classes' body, and looks for methods and sorts them
 		$return = '';
 		$functionList = [];
+		$curlyCount = null;
+		$touchedMethod = false;
+		$functionName = '';
+
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -7331,7 +7384,12 @@ final class OrderMethod extends AdditionalPass {
 
 	public function format($source) {
 		$this->tkns = token_get_all($source);
+
+		// It scans for classes body and organizes functions internally.
 		$return = '';
+		$classBlock = '';
+		$curlyCount = 0;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;

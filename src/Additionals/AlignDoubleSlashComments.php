@@ -13,7 +13,11 @@ final class AlignDoubleSlashComments extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+
+		// It injects placeholders before single line comments, in order
+		// to align chunks of them later.
 		$contextCounter = 0;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;

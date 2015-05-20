@@ -26,12 +26,22 @@ final class ConstructorPass extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+
+		// It scans for a class, and tracks the attributes, methods,
+		// visibility modifiers and ensures that the constructor is
+		// actually compliant with the behavior of PHP >= 5.
+		$classAttributes = [];
+		$functionList = [];
+		$touchedVisibility = false;
+		$touchedFunction = false;
+		$curlyCount = null;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_CLASS:
-					$attributes = [];
+					$classAttributes = [];
 					$functionList = [];
 					$touchedVisibility = false;
 					$touchedFunction = false;
@@ -65,7 +75,7 @@ final class ConstructorPass extends FormatterPass {
 								T_PROTECTED == $touchedVisibility
 							)
 						) {
-							$attributes[] = $text;
+							$classAttributes[] = $text;
 							$touchedVisibility = null;
 						} elseif (T_FUNCTION == $id) {
 							$touchedFunction = true;
@@ -77,8 +87,8 @@ final class ConstructorPass extends FormatterPass {
 					}
 					$functionList = array_combine($functionList, $functionList);
 					if (!isset($functionList['__construct'])) {
-						$this->appendCode('function __construct(' . implode(', ', $attributes) . '){' . $this->newLine);
-						foreach ($attributes as $var) {
+						$this->appendCode('function __construct(' . implode(', ', $classAttributes) . '){' . $this->newLine);
+						foreach ($classAttributes as $var) {
 							$this->appendCode($this->generate($var));
 						}
 						$this->appendCode('}' . $this->newLine);

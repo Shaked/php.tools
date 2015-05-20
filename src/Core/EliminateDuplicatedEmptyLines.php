@@ -9,6 +9,14 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+
+		// It scans for T_WHITESPACE with linebreaks and inserts a
+		// placeholder that later is used to check whether the line is
+		// actually empty.
+		$lines = [];
+		$emptyLines = [];
+		$blockCount = 0;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -24,8 +32,6 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 		}
 
 		$lines = explode($this->newLine, $this->code);
-		$emptyLines = [];
-		$blockCount = 0;
 
 		foreach ($lines as $idx => $line) {
 			if (trim($line) === self::EMPTY_LINE) {

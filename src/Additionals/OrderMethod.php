@@ -5,8 +5,14 @@ final class OrderMethod extends AdditionalPass {
 
 	public function orderMethods($source) {
 		$tokens = token_get_all($source);
+
+		// It takes classes' body, and looks for methods and sorts them
 		$return = '';
 		$functionList = [];
+		$curlyCount = null;
+		$touchedMethod = false;
+		$functionName = '';
+
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -78,7 +84,12 @@ final class OrderMethod extends AdditionalPass {
 
 	public function format($source) {
 		$this->tkns = token_get_all($source);
+
+		// It scans for classes body and organizes functions internally.
 		$return = '';
+		$classBlock = '';
+		$curlyCount = 0;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;

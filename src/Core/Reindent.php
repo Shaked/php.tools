@@ -7,7 +7,11 @@ final class Reindent extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$this->useCache = true;
+
+		// It scans for indentable blocks, and only indent those blocks
+		// which next token possesses a linebreak.
 		$foundStack = [];
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;

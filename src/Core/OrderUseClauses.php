@@ -29,16 +29,23 @@ final class OrderUseClauses extends FormatterPass {
 
 	private function sortUseClauses($source, $splitComma, $removeUnused, $stripBlankLines, $blanklineAfterUseBlock) {
 		$tokens = token_get_all($source);
+
+		// It scans for T_USE blocks (thus skiping "function () use ()")
+		// either in their pure form or aggregated with commas, then it
+		// breaks the blocks, purges unused classes and adds missing
+		// ones.
 		$newTokens = [];
 		$useStack = [0 => []];
 		$foundComma = false;
 		$groupCount = 0;
 		$touchedDoubleColon = false;
-
 		$stopTokens = [ST_SEMI_COLON, ST_CURLY_OPEN];
 		if ($splitComma) {
 			$stopTokens[] = ST_COMMA;
 		}
+		$aliasList = [];
+		$aliasCount = [];
+		$unusedImport = [];
 
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
@@ -119,8 +126,6 @@ final class OrderUseClauses extends FormatterPass {
 		}
 		$useStack = call_user_func_array('array_merge', $useStack);
 
-		$aliasList = [];
-		$aliasCount = [];
 		foreach ($useStack as $use) {
 			$alias = $this->calculateAlias($use);
 			$alias = str_replace(ST_SEMI_COLON, '', strtolower($alias));
@@ -159,7 +164,6 @@ final class OrderUseClauses extends FormatterPass {
 			$return .= $text;
 		}
 
-		$unusedImport = [];
 		if ($removeUnused) {
 			$unusedImport = array_keys(
 				array_filter(

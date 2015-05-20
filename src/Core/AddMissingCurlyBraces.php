@@ -11,7 +11,13 @@ final class AddMissingCurlyBraces extends FormatterPass {
 	private function addBraces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		// Scans from the end to the beginning looking for close curly
+		// braces, whenever one is found ($touchedCurlyClose) skips to
+		// the beginning of the block, otherwise adds the missing curly
+		// braces.
 		$touchedCurlyClose = false;
+		$hasCurlyOnLeft = false; // Deals with do{}while blocks;
+
 		for ($index = sizeof($this->tkns) - 1; 0 <= $index; --$index) {
 			$token = $this->tkns[$index];
 			list($id) = $this->getToken($token);

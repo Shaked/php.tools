@@ -12,6 +12,8 @@ final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
+		// It scans for curly closes preceded by parentheses, string or
+		// T_ELSE and removes linebreaks if any.
 		$touchedElseStringParenClose = false;
 		$touchedCurlyClose = false;
 

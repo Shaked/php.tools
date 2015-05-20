@@ -7,9 +7,13 @@ final class AlignEquals extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+
+		// It skips parentheses and bracket blocks, and aligns '='
+		// everywhere else.
 		$parenCount = 0;
 		$bracketCount = 0;
 		$contextCounter = 0;
+
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
