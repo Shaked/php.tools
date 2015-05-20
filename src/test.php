@@ -35,6 +35,11 @@ if (isset($opt['testNumber'])) {
 		$testNumber = sprintf('%s', $opt['testNumber']);
 	}
 }
+
+echo 'Calculating baseline... ';
+$bogomips = bogomips();
+echo 'done', PHP_EOL;
+
 $start = microtime(true);
 $testEnv = true;
 ob_start();
@@ -44,6 +49,7 @@ if (!isset($opt['deployed'])) {
 	include realpath(__DIR__ . '/../fmt.php');
 }
 ob_end_clean();
+
 echo 'Running tests...', PHP_EOL;
 $brokenTests = [];
 
@@ -340,7 +346,7 @@ if (isset($opt['v']) || isset($opt['verbose'])) {
 		unlink($caseOut . '-got');
 	}
 }
-echo 'Took ', (microtime(true) - $start), PHP_EOL;
+echo 'Took ', (microtime(true) - $start), ' at ', $bogomips, ' bogomips', PHP_EOL;
 if ($isCoverage && !$isCoveralls) {
 	$writer = new PHP_CodeCoverage_Report_HTML();
 	$writer->process($coverage, './cover/');
@@ -362,4 +368,25 @@ function getToken($token) {
 	} else {
 		return $token;
 	}
+}
+
+function bogomips() {
+	// Please consider using http://pecl.php.net/package/hrtime
+	// Wall clock is susceptible to changes in OS date/time, eg. NTP induced
+	for ($loops = 1; $loops > 0; $loops <<= 1) {
+		$start = microtime(true);
+		delay($loops);
+		$end = microtime(true) - $start;
+
+		if ($end > 1) {
+			$bogomips = $loops / $end / 500000;
+			return $bogomips;
+		}
+	}
+
+	return;
+}
+
+function delay($loops) {
+	for ($i = 0; $i < $loops; $i++);
 }
