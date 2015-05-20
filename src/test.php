@@ -380,7 +380,7 @@ function bogomips() {
 
 		if ($end > 1) {
 			$bogomips = $loops / $end / 500000;
-			return $bogomips;
+			return sprintf('%0.2f', $bogomips);
 		}
 	}
 
