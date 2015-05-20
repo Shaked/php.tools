@@ -374,9 +374,9 @@ function bogomips() {
 	// Please consider using http://pecl.php.net/package/hrtime
 	// Wall clock is susceptible to changes in OS date/time, eg. NTP induced
 	for ($loops = 1; $loops > 0; $loops <<= 1) {
-		$start = microtime(true);
+		$start = time();
 		delay($loops);
-		$end = microtime(true) - $start;
+		$end = time() - $start;
 
 		if ($end > 1) {
 			$bogomips = $loops / $end / 500000;
