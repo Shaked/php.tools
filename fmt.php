@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.29.0");;
+define("VERSION", "7.29.1");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -10125,9 +10125,15 @@ if (!isset($testEnv)) {
 		$cacheHitCount = 0;
 		$workers = 4;
 
+		$hasFnSeparator = false;
+
 		for ($j = 1; $j < $argc; ++$j) {
 			$arg = &$argv[$j];
 			if (!isset($arg)) {
+				continue;
+			}
+			if ('--' == $arg) {
+				$hasFnSeparator = true;
 				continue;
 			}
 			if ($inPhar) {
@@ -10153,7 +10159,6 @@ if (!isset($testEnv)) {
 				$files = new RegexIterator($it, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
 
 				if ($concurrent) {
-
 					$chn = make_channel();
 					$chn_done = make_channel();
 					if ($concurrent) {
@@ -10203,6 +10208,7 @@ if (!isset($testEnv)) {
 						}, $fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore);
 					}
 				}
+
 				foreach ($files as $file) {
 					$file = $file[0];
 					if (null !== $ignore_list) {
@@ -10260,7 +10266,10 @@ if (!isset($testEnv)) {
 					$chn->close();
 				}
 				continue;
-			} elseif (!is_file($arg)) {
+			} elseif (
+				!is_file($arg) &&
+				('--' != substr($arg, 0, 2) || $hasFnSeparator)
+			) {
 				$fileNotFound = true;
 				$missingFiles[] = $arg;
 				fwrite(STDERR, '!');
