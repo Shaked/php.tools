@@ -17,14 +17,21 @@ final class AlignDoubleSlashComments extends AdditionalPass {
 		// It injects placeholders before single line comments, in order
 		// to align chunks of them later.
 		$contextCounter = 0;
+		$touchedNonAlignableComment = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_COMMENT:
+					if (LeftAlignComment::NON_INDENTABLE_COMMENT == $text) {
+						$touchedNonAlignableComment = true;
+						$this->appendCode($text);
+						continue;
+					}
+
 					$prefix = '';
-					if (substr($text, 0, 2) == '//') {
+					if (substr($text, 0, 2) == '//' && !$touchedNonAlignableComment) {
 						$prefix = sprintf(self::ALIGNABLE_COMMENT, $contextCounter);
 					}
 					$this->appendCode($prefix . $text);
@@ -39,6 +46,7 @@ final class AlignDoubleSlashComments extends AdditionalPass {
 					break;
 
 				default:
+					$touchedNonAlignableComment = false;
 					$this->appendCode($text);
 					break;
 			}

@@ -361,16 +361,21 @@ if (!defined('T_COALESCE')) {
 define('ST_PARENTHESES_BLOCK', 'ST_PARENTHESES_BLOCK');
 define('ST_BRACKET_BLOCK', 'ST_BRACKET_BLOCK');
 define('ST_CURLY_BLOCK', 'ST_CURLY_BLOCK');;
+
+//FormatterPass holds all data structures necessary to traverse a stream of
+//tokens, following the concept of bottom-up it works as a platform on which
+//other passes can be built on.
 abstract class FormatterPass {
 	protected $indentChar = "\t";
 	protected $newLine = "\n";
 	protected $indent = 0;
-	protected $code = '';
+	protected $code = ''; // holds the final outputed code
 	protected $ptr = 0;
-	protected $tkns = [];
+	protected $tkns = []; // stream of tokens
+	protected $ignoreFutileTokens = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
+
 	protected $useCache = false;
 	protected $cache = [];
-	protected $ignoreFutileTokens = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
 
 	protected function alignPlaceholders($origPlaceholder, $contextCounter) {
 		for ($j = 0; $j <= $contextCounter; ++$j) {
@@ -5464,14 +5469,21 @@ final class AlignDoubleSlashComments extends AdditionalPass {
 		// It injects placeholders before single line comments, in order
 		// to align chunks of them later.
 		$contextCounter = 0;
+		$touchedNonAlignableComment = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 				case T_COMMENT:
+					if (LeftAlignComment::NON_INDENTABLE_COMMENT == $text) {
+						$touchedNonAlignableComment = true;
+						$this->appendCode($text);
+						continue;
+					}
+
 					$prefix = '';
-					if (substr($text, 0, 2) == '//') {
+					if (substr($text, 0, 2) == '//' && !$touchedNonAlignableComment) {
 						$prefix = sprintf(self::ALIGNABLE_COMMENT, $contextCounter);
 					}
 					$this->appendCode($prefix . $text);
@@ -5486,6 +5498,7 @@ final class AlignDoubleSlashComments extends AdditionalPass {
 					break;
 
 				default:
+					$touchedNonAlignableComment = false;
 					$this->appendCode($text);
 					break;
 			}
