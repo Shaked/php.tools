@@ -1,14 +1,19 @@
 <?php
+
+//FormatterPass holds all data structures necessary to traverse a stream of
+//tokens, following the concept of bottom-up it works as a platform on which
+//other passes can be built on.
 abstract class FormatterPass {
 	protected $indentChar = "\t";
 	protected $newLine = "\n";
 	protected $indent = 0;
-	protected $code = '';
+	protected $code = ''; // holds the final outputed code
 	protected $ptr = 0;
-	protected $tkns = [];
+	protected $tkns = []; // stream of tokens
+	protected $ignoreFutileTokens = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
+
 	protected $useCache = false;
 	protected $cache = [];
-	protected $ignoreFutileTokens = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
 
 	protected function alignPlaceholders($origPlaceholder, $contextCounter) {
 		for ($j = 0; $j <= $contextCounter; ++$j) {
