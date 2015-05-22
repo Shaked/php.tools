@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.29.3");;
+define("VERSION", "8.0.0");;
 
 function extractFromArgv($argv, $item) {
 	return array_values(
