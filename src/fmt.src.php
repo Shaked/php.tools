@@ -24,6 +24,7 @@ if (class_exists('SQLite3')) {
 
 require 'version.php';
 require 'helpers.php';
+require 'selfupdate.php';
 
 require 'Core/constants.php';
 require 'Core/FormatterPass.php';
