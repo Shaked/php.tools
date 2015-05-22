@@ -9,7 +9,7 @@ include 'Core/FormatterPass.php';
 include 'version.php';
 
 error_reporting(E_ALL);
-$opt = getopt('Mmp', ['tags:']);
+$opt = getopt('Mmp', ['suffix:']);
 $newver = '';
 if (isset($opt['M'])) {
 	$tmp = explode('.', VERSION);
@@ -27,10 +27,10 @@ if (!empty($newver)) {
 }
 
 class Build extends FormatterPass {
-	private $tags = [];
-	public function __construct($tags) {
-		$this->tags = explode(',', $tags);
-		$this->tags[] = '';
+	private $suffix = [];
+	public function __construct($suffix) {
+		$this->suffix = explode(',', $suffix);
+		$this->suffix[] = '';
 	}
 
 	public function candidate($source, $foundTokens) {
@@ -45,10 +45,10 @@ class Build extends FormatterPass {
 			switch ($id) {
 				case T_REQUIRE:
 					list($id, $text) = $this->walkUntil(T_CONSTANT_ENCAPSED_STRING);
-					foreach ($this->tags as $tag) {
+					foreach ($this->suffix as $suffix) {
 						$fn = str_replace(['"', "'"], '', $text);
-						if (!empty($tag)) {
-							$fn = str_replace('.php', '_' . $tag . '.php', $fn);
+						if (!empty($suffix)) {
+							$fn = str_replace('.php', '_' . $suffix . '.php', $fn);
 						}
 						if (!file_exists($fn)) {
 							continue;
@@ -72,8 +72,8 @@ class Build extends FormatterPass {
 	}
 }
 
-$tags = &$opt['tags'];
-$pass = new Build($tags);
+$suffix = &$opt['suffix'];
+$pass = new Build($suffix);
 
 $chn = make_channel();
 $chn_done = make_channel();
