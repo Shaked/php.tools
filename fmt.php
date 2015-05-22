@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.29.2");;
+define("VERSION", "7.29.3");;
 
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -9765,15 +9765,15 @@ if (!isset($testEnv)) {
 		'--config=FILENAME' => 'configuration file. Default: .php.tools.ini',
 		'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 		'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
-		'--exclude=pass1,passN' => 'disable specific passes',
-		'--ignore=PATTERN1,PATTERN2' => 'ignore file names whose names contain any PATTERN-N',
+		'--exclude=pass1,passN,...' => 'disable specific passes',
+		'--ignore=PATTERN-1,PATTERN-N,...' => 'ignore file names whose names contain any PATTERN-N',
 		'--indent_with_space=SIZE' => 'use spaces instead of tabs for indentation. Default 4',
 		'--laravel' => 'Apply Laravel coding style (deprecated)',
 		'--lint-before' => 'lint files before pretty printing (PHP must be declared in %PATH%/$PATH)',
 		'--list' => 'list possible transformations',
-		'--list-simple' => 'list possible transformations - parseable',
+		'--list-simple' => 'list possible transformations - greppable',
 		'--no-backup' => 'no backup file (original.php~)',
-		'--passes=pass1,passN' => 'call specific compiler pass',
+		'--passes=pass1,passN,...' => 'call specific compiler pass',
 		'--profile=NAME' => 'use one of profiles present in configuration file',
 		'--psr' => 'activate PSR1 and PSR2 styles',
 		'--psr1' => 'activate PSR1 style',
@@ -9781,10 +9781,11 @@ if (!isset($testEnv)) {
 		'--psr2' => 'activate PSR2 style',
 		'--setters_and_getters=type' => 'analyse classes for attributes and generate setters and getters - camel, snake, golang',
 		'--smart_linebreak_after_curly' => 'convert multistatement blocks into multiline blocks',
-		'--visibility_order' => 'fixes visibiliy order for method in classes. PSR-2 4.2',
+		'--visibility_order' => 'fixes visibiliy order for method in classes - PSR-2 4.2',
 		'--yoda' => 'yoda-style comparisons',
 		'-h, --help' => 'this help message',
 		'-o=file' => 'output the formatted code to "file"',
+		'-o=-' => 'output the formatted code to standard output',
 		'-v' => 'verbose',
 	];
 	if ($inPhar) {
@@ -9897,19 +9898,17 @@ if (isset($opts['selfupdate'])) {
 		fwrite(STDERR, 'Could not autoupdate - not release found' . PHP_EOL);
 		exit(255);
 	}
-	if ($inPhar) {
-		if (!file_exists($argv[0])) {
-			$argv[0] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[0];
-		}
+	if ($inPhar && !file_exists($argv[0])) {
+		$argv[0] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[0];
 	}
 	if (sha1_file($argv[0]) != $phar_sha1) {
 		copy($argv[0], $argv[0] . '~');
 		file_put_contents($argv[0], $phar_file);
 		chmod($argv[0], 0777 & ~umask());
 		fwrite(STDERR, 'Updated successfully' . PHP_EOL);
-	} else {
-		fwrite(STDERR, 'Up-to-date!' . PHP_EOL);
+		exit(0);
 	}
+	fwrite(STDERR, 'Up-to-date!' . PHP_EOL);
 	exit(0);
 }
 if (isset($opts['version'])) {
@@ -9984,15 +9983,16 @@ if (isset($opts['lint-before'])) {
 }
 
 $fmt = new CodeFormatter();
-
 if (isset($opts['setters_and_getters'])) {
 	$argv = extractFromArgv($argv, 'setters_and_getters');
 	$fmt->enablePass('SettersAndGettersPass', $opts['setters_and_getters']);
 }
+
 if (isset($opts['constructor'])) {
 	$argv = extractFromArgv($argv, 'constructor');
 	$fmt->enablePass('ConstructorPass', $opts['constructor']);
 }
+
 if (isset($opts['oracleDB'])) {
 	$argv = extractFromArgv($argv, 'oracleDB');
 	$fmt->enablePass('AutoImportPass', $opts['oracleDB']);
@@ -10018,22 +10018,27 @@ if (isset($opts['psr']) && !isset($opts['laravel'])) {
 	PsrDecorator::decorate($fmt);
 	$argv = extractFromArgv($argv, 'psr');
 }
+
 if (isset($opts['psr1']) && !isset($opts['laravel'])) {
 	PsrDecorator::PSR1($fmt);
 	$argv = extractFromArgv($argv, 'psr1');
 }
+
 if (isset($opts['psr1-naming']) && !isset($opts['laravel'])) {
 	PsrDecorator::PSR1Naming($fmt);
 	$argv = extractFromArgv($argv, 'psr1-naming');
 }
+
 if (isset($opts['psr2']) && !isset($opts['laravel'])) {
 	PsrDecorator::PSR2($fmt);
 	$argv = extractFromArgv($argv, 'psr2');
 }
+
 if (isset($opts['indent_with_space']) && !isset($opts['laravel'])) {
 	$fmt->enablePass('PSR2IndentWithSpace', $opts['indent_with_space']);
 	$argv = extractFromArgv($argv, 'indent_with_space');
 }
+
 if ((isset($opts['psr1']) || isset($opts['psr2']) || isset($opts['psr'])) && isset($opts['enable_auto_align']) && !isset($opts['laravel'])) {
 	$fmt->enablePass('PSR2AlignObjOp');
 }
