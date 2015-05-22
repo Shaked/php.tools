@@ -299,7 +299,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "7.29.1");;
+define("VERSION", "7.29.2");;
 
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -1213,7 +1213,8 @@ abstract class AdditionalPass extends FormatterPass {
 /**
  * @codeCoverageIgnore
  */
-final class CodeFormatter {
+abstract class BaseCodeFormatter {
+	private $hasAfterPass = false;
 
 	private $shortcircuit = [
 		'ReindentAndAlignObjOps' => 'ReindentObjOps',
@@ -1348,6 +1349,7 @@ final class CodeFormatter {
 		$this->passes['RTrim'] = new RTrim();
 		$this->passes['StripExtraCommaInList'] = new StripExtraCommaInList();
 		$this->passes['TwoCommandsInSameLine'] = new TwoCommandsInSameLine();
+		$this->hasAfterPass = method_exists($this, 'afterPass');
 	}
 
 	public function enablePass($pass) {
@@ -1394,6 +1396,7 @@ final class CodeFormatter {
 					$pass->commentStack = $commentStack;
 				}
 				$source = $pass->format($source);
+				$this->hasAfterPass && $this->afterPass($source, $pass);
 			}
 		}
 		return $source;
@@ -1406,6 +1409,12 @@ final class CodeFormatter {
 		}
 		return $ret;
 	}
+}
+;
+/**
+ * @codeCoverageIgnore
+ */
+final class CodeFormatter extends BaseCodeFormatter {
 }
 ;
 

@@ -27,6 +27,7 @@ require 'version.php';
 require 'Core/constants.php';
 require 'Core/FormatterPass.php';
 require 'Additionals/AdditionalPass.php';
+require 'Core/BaseCodeFormatter.php';
 require 'Core/CodeFormatter.php';
 
 require 'Core/AddMissingCurlyBraces.php';

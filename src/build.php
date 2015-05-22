@@ -9,7 +9,7 @@ include 'Core/FormatterPass.php';
 include 'version.php';
 
 error_reporting(E_ALL);
-$opt = getopt('Mmp');
+$opt = getopt('Mmp', ['tags:']);
 $newver = '';
 if (isset($opt['M'])) {
 	$tmp = explode('.', VERSION);
@@ -27,6 +27,12 @@ if (!empty($newver)) {
 }
 
 class Build extends FormatterPass {
+	private $tags = [];
+	public function __construct($tags) {
+		$this->tags = explode(',', $tags);
+		$this->tags[] = '';
+	}
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -39,13 +45,23 @@ class Build extends FormatterPass {
 			switch ($id) {
 				case T_REQUIRE:
 					list($id, $text) = $this->walkUntil(T_CONSTANT_ENCAPSED_STRING);
-					$included = token_get_all(file_get_contents(str_replace(['"', "'"], '', $text)));
-					if (T_OPEN_TAG == $included[0][0]) {
-						unset($included[0]);
-					}
-					while (list(, $token) = each($included)) {
-						list($id, $text) = $this->getToken($token);
-						$this->appendCode($text);
+					foreach ($this->tags as $tag) {
+						$fn = str_replace(['"', "'"], '', $text);
+						if (!empty($tag)) {
+							$fn = str_replace('.php', '_' . $tag . '.php', $fn);
+						}
+						if (!file_exists($fn)) {
+							continue;
+						}
+						$included = token_get_all(file_get_contents(str_replace(['"', "'"], '', $fn)));
+						if (T_OPEN_TAG == $included[0][0]) {
+							unset($included[0]);
+						}
+						while (list(, $token) = each($included)) {
+							list($id, $text) = $this->getToken($token);
+							$this->appendCode($text);
+						}
+						break 2;
 					}
 					break;
 				default:
@@ -56,7 +72,8 @@ class Build extends FormatterPass {
 	}
 }
 
-$pass = new Build();
+$tags = &$opt['tags'];
+$pass = new Build($tags);
 
 $chn = make_channel();
 $chn_done = make_channel();
