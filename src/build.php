@@ -55,6 +55,10 @@ class Build extends FormatterPass {
 					}
 					while (list(, $token) = each($included)) {
 						list($id, $text) = $this->getToken($token);
+						if (T_REQUIRE == $token || T_REQUIRE_ONCE == $token || T_INCLUDE == $token || T_INCLUDE_ONCE == $token) {
+							fwrite(STDERR, 'found ' . $text . '. Include files must not have include files.');
+							exit(-1);
+						}
 						$this->appendCode($text);
 					}
 					break;
