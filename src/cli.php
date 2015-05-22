@@ -167,7 +167,10 @@ if ($enableCache && isset($opts['cache'])) {
 	$cache_fn = $opts['cache'];
 	$cache = new Cache($cache_fn);
 	fwrite(STDERR, 'Using cache ...' . PHP_EOL);
+} elseif (!$enableCache) {
+	$cache = new Cache();
 }
+
 $backup = true;
 if (isset($opts['no-backup'])) {
 	$argv = extractFromArgv($argv, 'no-backup');
@@ -360,10 +363,8 @@ if (isset($opts['i'])) {
 			$hasFnSeparator = true;
 			continue;
 		}
-		if ($inPhar) {
-			if (!file_exists($arg)) {
-				$arg = getcwd() . DIRECTORY_SEPARATOR . $arg;
-			}
+		if ($inPhar && !file_exists($arg)) {
+			$arg = getcwd() . DIRECTORY_SEPARATOR . $arg;
 		}
 		if (is_file($arg)) {
 			$file = $arg;
@@ -390,10 +391,7 @@ if (isset($opts['i'])) {
 				}
 				for ($i = 0; $i < $workers; ++$i) {
 					cofunc(function ($fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore) {
-						$cache = null;
-						if (null !== $cache_fn) {
-							$cache = new Cache($cache_fn);
-						}
+						$cache = new Cache($cache_fn);
 						$cacheHitCount = 0;
 						$cache_miss_count = 0;
 						while (true) {
@@ -410,15 +408,13 @@ if (isset($opts['i'])) {
 								fwrite(STDERR, 'Error lint:' . $file . PHP_EOL);
 								continue;
 							}
-							if (null !== $cache) {
-								$content = $cache->is_changed($target_dir, $file);
-								if (false === $content) {
-									++$cacheHitCount;
-									continue;
-								}
-							} else {
-								$content = file_get_contents($file);
+
+							$content = $cache->is_changed($target_dir, $file);
+							if (false === $content) {
+								++$cacheHitCount;
+								continue;
 							}
+
 							++$cache_miss_count;
 							$fmtCode = $fmt->formatCode($content);
 							if (null !== $cache) {
@@ -453,15 +449,11 @@ if (isset($opts['i'])) {
 					if (0 == ($fileCount % 20)) {
 						fwrite(STDERR, ' ' . $fileCount . PHP_EOL);
 					}
-					if (null !== $cache) {
-						$content = $cache->is_changed($target_dir, $file);
-						if (false === $content) {
-							++$fileCount;
-							++$cacheHitCount;
-							continue;
-						}
-					} else {
-						$content = file_get_contents($file);
+					$content = $cache->is_changed($target_dir, $file);
+					if (false === $content) {
+						++$fileCount;
+						++$cacheHitCount;
+						continue;
 					}
 					if ($lintBefore && !lint($file)) {
 						fwrite(STDERR, 'Error lint:' . $file . PHP_EOL);

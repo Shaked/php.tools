@@ -20,6 +20,8 @@ $enableCache = false;
 if (class_exists('SQLite3')) {
 	$enableCache = true;
 	require 'Core/Cache.php';
+} else {
+	require 'Core/Cache_dummy.php';
 }
 
 require 'version.php';
