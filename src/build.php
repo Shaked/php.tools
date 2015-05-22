@@ -9,7 +9,7 @@ include 'Core/FormatterPass.php';
 include 'version.php';
 
 error_reporting(E_ALL);
-$opt = getopt('Mmp', ['suffix:']);
+$opt = getopt('Mmp');
 $newver = '';
 if (isset($opt['M'])) {
 	$tmp = explode('.', VERSION);
@@ -45,23 +45,17 @@ class Build extends FormatterPass {
 			switch ($id) {
 				case T_REQUIRE:
 					list($id, $text) = $this->walkUntil(T_CONSTANT_ENCAPSED_STRING);
-					foreach ($this->suffix as $suffix) {
-						$fn = str_replace(['"', "'"], '', $text);
-						if (!empty($suffix)) {
-							$fn = str_replace('.php', '_' . $suffix . '.php', $fn);
-						}
-						if (!file_exists($fn)) {
-							continue;
-						}
-						$included = token_get_all(file_get_contents(str_replace(['"', "'"], '', $fn)));
-						if (T_OPEN_TAG == $included[0][0]) {
-							unset($included[0]);
-						}
-						while (list(, $token) = each($included)) {
-							list($id, $text) = $this->getToken($token);
-							$this->appendCode($text);
-						}
-						break 2;
+					$fn = str_replace(['"', "'"], '', $text);
+					if (!empty($suffix)) {
+						$fn = str_replace('.php', '_' . $suffix . '.php', $fn);
+					}
+					$included = token_get_all(file_get_contents(str_replace(['"', "'"], '', $fn)));
+					if (T_OPEN_TAG == $included[0][0]) {
+						unset($included[0]);
+					}
+					while (list(, $token) = each($included)) {
+						list($id, $text) = $this->getToken($token);
+						$this->appendCode($text);
 					}
 					break;
 				default:

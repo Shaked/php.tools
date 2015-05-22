@@ -28,7 +28,11 @@ require 'Core/constants.php';
 require 'Core/FormatterPass.php';
 require 'Additionals/AdditionalPass.php';
 require 'Core/BaseCodeFormatter.php';
-require 'Core/CodeFormatter.php';
+if (1 == getenv('FMTDEBUG')) {
+	require 'Core/CodeFormatter_debug.php';
+} else {
+	require 'Core/CodeFormatter.php';
+}
 
 require 'Core/AddMissingCurlyBraces.php';
 require 'Core/AutoImport.php';
