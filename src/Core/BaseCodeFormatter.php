@@ -81,6 +81,7 @@ abstract class BaseCodeFormatter {
 		'ReindentLoopColonBlocks' => false,
 		'ReindentColonBlocks' => false,
 
+		'SplitCurlyCloseAndTokens' => false,
 		'ResizeSpaces' => false,
 		'StripExtraCommaInList' => false,
 		'YodaComparisons' => false,
@@ -136,6 +137,7 @@ abstract class BaseCodeFormatter {
 		$this->passes['RemoveIncludeParentheses'] = new RemoveIncludeParentheses();
 		$this->passes['ResizeSpaces'] = new ResizeSpaces();
 		$this->passes['RTrim'] = new RTrim();
+		$this->passes['SplitCurlyCloseAndTokens'] = new SplitCurlyCloseAndTokens();
 		$this->passes['StripExtraCommaInList'] = new StripExtraCommaInList();
 		$this->passes['TwoCommandsInSameLine'] = new TwoCommandsInSameLine();
 		$this->hasAfterPass = method_exists($this, 'afterPass');
