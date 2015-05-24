@@ -18,6 +18,7 @@ $opt = getopt('v', ['verbose', 'deployed', 'coverage', 'coveralls', 'testNumber:
 $isCoverage = isset($opt['coverage']) || isset($opt['coveralls']);
 $isCoveralls = isset($opt['coveralls']);
 if ($isCoverage) {
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Exception.php';
 	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/HTML/Renderer.php';
 	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/Node.php';
 	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/Node/Iterator.php';
@@ -29,6 +30,7 @@ if ($isCoverage) {
 	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/Node/Directory.php';
 	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/Factory.php';
 	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/HTML.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/Clover.php';
 	require 'vendor/phpunit/php-token-stream/src/Token/Stream.php';
 	require 'vendor/sebastian/version/src/Version.php';
 	require 'vendor/symfony/yaml/Symfony/Component/Yaml/Yaml.php';
