@@ -18,7 +18,31 @@ $opt = getopt('v', ['verbose', 'deployed', 'coverage', 'coveralls', 'testNumber:
 $isCoverage = isset($opt['coverage']) || isset($opt['coveralls']);
 $isCoveralls = isset($opt['coveralls']);
 if ($isCoverage) {
-	require 'vendor/autoload.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/HTML/Renderer.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/Node.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/Node/Iterator.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Util.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/HTML/Renderer/File.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/HTML/Renderer/Directory.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/HTML/Renderer/Dashboard.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/Node/File.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/Node/Directory.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/Factory.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/HTML.php';
+	require 'vendor/phpunit/php-token-stream/src/Token/Stream.php';
+	require 'vendor/sebastian/version/src/Version.php';
+	require 'vendor/symfony/yaml/Symfony/Component/Yaml/Yaml.php';
+	require 'vendor/phpunit/php-text-template/Text/Template.php';
+	require 'vendor/phpunit/php-token-stream/src/Token.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Driver.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Driver/Xdebug.php';
+	require 'vendor/sebastian/environment/src/Runtime.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage.php';
+	require 'vendor/phpunit/php-file-iterator/File/Iterator.php';
+	require 'vendor/phpunit/php-file-iterator/File/Iterator/Factory.php';
+	require 'vendor/phpunit/php-file-iterator/File/Iterator/Facade.php';
+	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Filter.php';
+
 	$filter = new PHP_CodeCoverage_Filter();
 	$filter->addFileToBlacklist('fmt.php');
 	$filter->addFileToBlacklist('fmt.src.php');
