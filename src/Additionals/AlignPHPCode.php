@@ -1,5 +1,7 @@
 <?php
 final class AlignPHPCode extends AdditionalPass {
+	const PLACEHOLDER_STRING = "\x2 CONSTANT_STRING_%d \x3";
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_INLINE_HTML])) {
 			return true;
@@ -25,10 +27,18 @@ final class AlignPHPCode extends AdditionalPass {
 					}
 					$prevSpace = preg_replace('/[^\s\t]/', ' ', $prevSpace);
 
+					$placeholders = [];
+					$strings = [];
 					$stack = $text;
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
+
+						if (T_CONSTANT_ENCAPSED_STRING == $id) {
+							$strings[] = $text;
+							$text = sprintf(self::PLACEHOLDER_STRING, $this->ptr);
+							$placeholders[] = $text;
+						}
 						$stack .= $text;
 
 						if (T_CLOSE_TAG == $id) {
@@ -55,6 +65,7 @@ final class AlignPHPCode extends AdditionalPass {
 					}
 
 					$stack = implode($this->newLine, $tmp);
+					$stack = str_replace($placeholders, $strings, $stack);
 
 					$this->code = rtrim($this->code, " \t");
 					$this->appendCode($stack);
