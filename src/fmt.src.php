@@ -32,7 +32,7 @@ require 'Core/constants.php';
 require 'Core/FormatterPass.php';
 require 'Additionals/AdditionalPass.php';
 require 'Core/BaseCodeFormatter.php';
-if (1 == getenv('FMTDEBUG')) {
+if (1 == getenv('FMTDEBUG') || 'step' == getenv('FMTDEBUG')) {
 	require 'Core/CodeFormatter_debug.php';
 } else {
 	require 'Core/CodeFormatter.php';

@@ -313,7 +313,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "8.2.1");;
+define("VERSION", "8.2.2");;
 
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -1518,7 +1518,7 @@ abstract class BaseCodeFormatter {
 	}
 }
 ;
-if (1 == getenv('FMTDEBUG')) {
+if (1 == getenv('FMTDEBUG') || 'step' == getenv('FMTDEBUG')) {
 	/**
  * @codeCoverageIgnore
  */
@@ -1528,7 +1528,9 @@ final class CodeFormatter extends BaseCodeFormatter {
 		echo $source, PHP_EOL;
 		echo get_class($className), PHP_EOL;
 		echo '----', PHP_EOL;
-		readline();
+		if ('step' == getenv('FMTDEBUG')) {
+			readline();
+		}
 	}
 }
 ;
