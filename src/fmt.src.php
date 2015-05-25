@@ -85,6 +85,7 @@ require 'Additionals/AliasToMaster.php';
 require 'Additionals/AlignDoubleArrow.php';
 require 'Additionals/AlignDoubleSlashComments.php';
 require 'Additionals/AlignEquals.php';
+require 'Additionals/AlignPHPCode.php';
 require 'Additionals/AlignTypehint.php';
 require 'Additionals/AllmanStyleBraces.php';
 require 'Additionals/AutoPreincrement.php';

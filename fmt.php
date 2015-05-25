@@ -313,7 +313,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "8.1.0");;
+define("VERSION", "8.2.0");;
 
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -1330,6 +1330,7 @@ abstract class BaseCodeFormatter {
 		'RTrim' => false,
 		'WordWrap' => false,
 
+		'AlignPHPCode' => false,
 		'ConvertOpenTagWithEcho' => false,
 		'RestoreComments' => false,
 		'UpgradeToPreg' => false,
@@ -5869,6 +5870,88 @@ $ccc = 333;
 EOT;
 	}
 };
+final class AlignPHPCode extends AdditionalPass {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_INLINE_HTML])) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_OPEN_TAG:
+					list(, $prevText) = $this->getToken($this->leftToken());
+
+					$prevSpace = substr(strrchr($prevText, $this->newLine), 1);
+					$prevSpace = preg_replace('/[^\s\t]/', ' ', $prevSpace);
+
+					$stack = $text;
+					while (list($index, $token) = each($this->tkns)) {
+						list($id, $text) = $this->getToken($token);
+						$this->ptr = $index;
+						$stack .= $text;
+
+						if (T_CLOSE_TAG == $id) {
+							break;
+						}
+					}
+
+					$tmp = explode($this->newLine, $stack);
+					$lastLine = sizeof($tmp) - 2;
+					foreach ($tmp as $idx => $line) {
+						if ('' === trim($line)) {
+							continue;
+						}
+						$indent = '';
+						if (0 != $idx && $idx < $lastLine) {
+							$indent = $this->indentChar;
+						}
+						$tmp[$idx] = $prevSpace . $indent . $line;
+					}
+
+					$stack = implode($this->newLine, $tmp);
+
+					$this->code = rtrim($this->code, " \t");
+					$this->appendCode($stack);
+					break;
+
+				default:
+					$this->appendCode($text);
+					break;
+			}
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Align PHP code within HTML block.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<div>
+	<?php
+		echo $a;
+	?>
+</div>
+EOT;
+	}
+}
+;
 final class AlignTypehint extends AdditionalPass {
 	const ALIGNABLE_TYPEHINT = "\x2 TYPEHINT%d \x3";
 
