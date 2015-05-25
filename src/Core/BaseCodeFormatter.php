@@ -12,6 +12,7 @@ abstract class BaseCodeFormatter {
 	];
 
 	private $passes = [
+		'ReplaceBooleanAndOr' => false,
 		'RTrim' => false,
 		'WordWrap' => false,
 

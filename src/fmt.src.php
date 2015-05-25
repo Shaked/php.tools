@@ -109,6 +109,7 @@ require 'Additionals/OrderMethod.php';
 require 'Additionals/PrettyPrintDocBlocks.php';
 require 'Additionals/PSR2EmptyFunction.php';
 require 'Additionals/RemoveUseLeadingSlash.php';
+require 'Additionals/ReplaceBooleanAndOr.php';
 require 'Additionals/ReplaceIsNull.php';
 require 'Additionals/ReturnNull.php';
 require 'Additionals/ShortArray.php';
