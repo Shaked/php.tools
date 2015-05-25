@@ -3191,9 +3191,21 @@ class ReindentAndAlignObjOps extends FormatterPass {
 
 				case ST_PARENTHESES_OPEN:
 					$touchedParenOpen = true;
-				case ST_BRACKET_OPEN:
-					$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 					$this->appendCode($text);
+					if (!$this->hasLnInBlock($this->tkns, $this->ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE)) {
+						$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+						break;
+					}
+					$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+					break;
+
+				case ST_BRACKET_OPEN:
+					$this->appendCode($text);
+					if (!$this->hasLnInBlock($this->tkns, $this->ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE)) {
+						$this->printBlock(ST_BRACKET_OPEN, ST_BRACKET_CLOSE);
+						break;
+					}
+					$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 					break;
 
 				case ST_PARENTHESES_CLOSE:
@@ -3203,6 +3215,13 @@ class ReindentAndAlignObjOps extends FormatterPass {
 					break;
 
 				case T_OBJECT_OPERATOR:
+					if (!isset($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
+						$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+						$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+						$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+						$alignType[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+						$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]] = 0;
+					}
 					if (0 == $touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]) {
 						++$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
 						if ($this->hasLnBefore()) {
@@ -3433,6 +3452,28 @@ class ReindentAndAlignObjOps extends FormatterPass {
 		++$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
 		$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = max($maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]);
 
+	}
+
+	private function hasLnInBlock($tkns, $ptr, $start, $end) {
+		$sizeOfTkns = sizeof($tkns);
+		$count = 0;
+		for ($i = $ptr; $i < $sizeOfTkns; $i++) {
+			$token = $tkns[$i];
+			list($id, $text) = $this->getToken($token);
+			if ($start == $id) {
+				++$count;
+			}
+			if ($end == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+			if ($this->hasLn($text)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
 ;
