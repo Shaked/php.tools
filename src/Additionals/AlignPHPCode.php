@@ -19,6 +19,10 @@ final class AlignPHPCode extends AdditionalPass {
 					list(, $prevText) = $this->getToken($this->leftToken());
 
 					$prevSpace = substr(strrchr($prevText, $this->newLine), 1);
+					$skipPadLeft = false;
+					if (rtrim($prevSpace) == $prevSpace) {
+						$skipPadLeft = true;
+					}
 					$prevSpace = preg_replace('/[^\s\t]/', ' ', $prevSpace);
 
 					$stack = $text;
@@ -35,6 +39,7 @@ final class AlignPHPCode extends AdditionalPass {
 					$tmp = explode($this->newLine, $stack);
 					$lastLine = sizeof($tmp) - 2;
 					foreach ($tmp as $idx => $line) {
+						$before = $prevSpace;
 						if ('' === trim($line)) {
 							continue;
 						}
@@ -42,7 +47,11 @@ final class AlignPHPCode extends AdditionalPass {
 						if (0 != $idx && $idx < $lastLine) {
 							$indent = $this->indentChar;
 						}
-						$tmp[$idx] = $prevSpace . $indent . $line;
+						if ($skipPadLeft) {
+							$before = '';
+							$skipPadLeft = false;
+						}
+						$tmp[$idx] = $before . $indent . $line;
 					}
 
 					$stack = implode($this->newLine, $tmp);
