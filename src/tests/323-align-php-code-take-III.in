@@ -9,9 +9,9 @@
 	</td>
 	<td><?php
 	    	foreach ($param2_arr as $key) {
-	    		echo $key . '
-	    		a
-	    		';
+	    		echo $key . "
+	    		a$b
+	    		";
 	    	}
 	    ?>
 	</td>

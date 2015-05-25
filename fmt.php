@@ -313,7 +313,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "8.3.1");;
+define("VERSION", "8.3.2");;
 
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -5949,7 +5949,10 @@ final class AlignPHPCode extends AdditionalPass {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 
-						if (T_CONSTANT_ENCAPSED_STRING == $id) {
+						if (
+							T_CONSTANT_ENCAPSED_STRING == $id ||
+							T_ENCAPSED_AND_WHITESPACE == $id
+						) {
 							$strings[] = $text;
 							$text = sprintf(self::PLACEHOLDER_STRING, $this->ptr);
 							$placeholders[] = $text;
