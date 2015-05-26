@@ -313,7 +313,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "8.4.0");;
+define("VERSION", "8.4.1");;
 
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -10356,7 +10356,21 @@ if (isset($opts['constructor'])) {
 
 if (isset($opts['oracleDB'])) {
 	$argv = extractFromArgv($argv, 'oracleDB');
-	$fmt->enablePass('AutoImportPass', $opts['oracleDB']);
+
+	if ('scan' == $opts['oracleDB']) {
+		$oracle = getcwd() . DIRECTORY_SEPARATOR . 'oracle.sqlite';
+		$lastoracle = '';
+		while (!is_file($oracle) && $lastoracle != $oracle) {
+			$lastoracle = $oracle;
+			$oracle = dirname(dirname($oracle)) . DIRECTORY_SEPARATOR . 'oracle.sqlite';
+		}
+		$opts['oracleDB'] = $oracle;
+		fwrite(STDERR, PHP_EOL);
+	}
+
+	if (file_exists($opts['oracleDB']) && is_file($opts['oracleDB'])) {
+		$fmt->enablePass('AutoImportPass', $opts['oracleDB']);
+	}
 }
 
 if (isset($opts['smart_linebreak_after_curly'])) {
