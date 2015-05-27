@@ -313,7 +313,7 @@ final class Cache {
 ;
 }
 
-define("VERSION", "8.4.1");;
+define("VERSION", "8.4.2");;
 
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -3271,6 +3271,12 @@ class ReindentAndAlignObjOps extends FormatterPass {
 							$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, $this->newLine]);
 							if (ST_SEMI_COLON == $foundToken) {
 								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+							} elseif (
+								ST_PARENTHESES_OPEN == $foundToken &&
+								!$this->hasLnInBlock($this->tkns, $this->ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE)
+							) {
+								$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+								break;
 							} elseif (ST_PARENTHESES_OPEN == $foundToken || ST_PARENTHESES_CLOSE == $foundToken) {
 								$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 								$this->injectPlaceholderParenthesesContent($placeholder);
