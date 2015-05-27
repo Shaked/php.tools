@@ -3,7 +3,7 @@ fn aread { 9p read acme/$winid/$1 }
 fn awrite { 9p write acme/$winid/$1 }
 ftmp=`{mktemp /tmp/Aphpfmt.XXXXXX}
 etmp=`{mktemp /tmp/Aphpfmt.XXXXXX}
-if (aread body |php $HOME/bin/fmt.php -o - - $*>$ftmp >[2]$etmp) {
+if (aread body |php $HOME/bin/fmt.php '--config=scan' '--oracleDB=scan' -o - - $*>$ftmp >[2]$etmp) {
        # Don't dirty the window if you don't have to
        if (! aread body | cmp /dev/stdin $ftmp >/dev/null >[2=1]) {
                echo -n mark | awrite ctl
