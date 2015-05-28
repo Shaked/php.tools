@@ -155,9 +155,9 @@ if (isset($opts['config'])) {
 		}
 	}
 
-} elseif (file_exists('.php.tools.ini') && is_file('.php.tools.ini')) {
+} elseif (file_exists(getcwd() . DIRECTORY_SEPARATOR . '.php.tools.ini') && is_file(getcwd() . DIRECTORY_SEPARATOR . '.php.tools.ini')) {
 	fwrite(STDERR, 'Configuration file found' . PHP_EOL);
-	$iniOpts = parse_ini_file('.php.tools.ini', true);
+	$iniOpts = parse_ini_file(getcwd() . DIRECTORY_SEPARATOR . '.php.tools.ini', true);
 	if (isset($opts['profile'])) {
 		$argv = extractFromArgv($argv, 'profile');
 		$profile = &$iniOpts[$opts['profile']];
