@@ -32,7 +32,7 @@ require 'Core/constants.php';
 require 'Core/FormatterPass.php';
 require 'Additionals/AdditionalPass.php';
 require 'Core/BaseCodeFormatter.php';
-if (1 == getenv('FMTDEBUG') || 'step' == getenv('FMTDEBUG')) {
+if (1 === getenv('FMTDEBUG') || 'step' === getenv('FMTDEBUG')) {
 	require 'Core/CodeFormatter_debug.php';
 } else {
 	require 'Core/CodeFormatter.php';
@@ -108,6 +108,7 @@ require 'Additionals/NoSpaceAfterPHPDocBlocks.php';
 require 'Additionals/OrderMethod.php';
 require 'Additionals/PrettyPrintDocBlocks.php';
 require 'Additionals/PSR2EmptyFunction.php';
+require 'Additionals/PSR2MultilineFunctionParams.php';
 require 'Additionals/RemoveUseLeadingSlash.php';
 require 'Additionals/ReplaceBooleanAndOr.php';
 require 'Additionals/ReplaceIsNull.php';

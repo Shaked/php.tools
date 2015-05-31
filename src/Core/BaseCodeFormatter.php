@@ -118,6 +118,7 @@ abstract class BaseCodeFormatter {
 		'LeftWordWrap' => false,
 		'ClassToSelf' => false,
 		'ClassToStatic' => false,
+		'PSR2MultilineFunctionParams' => false,
 	];
 
 	public function __construct() {
@@ -179,7 +180,7 @@ abstract class BaseCodeFormatter {
 		foreach ($tkns as $token) {
 			list($id, $text) = $this->getToken($token);
 			$foundTokens[$id] = $id;
-			if (T_COMMENT == $id) {
+			if (T_COMMENT === $id) {
 				$commentStack[] = [$id, $text];
 			}
 		}
