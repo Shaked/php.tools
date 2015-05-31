@@ -115,6 +115,7 @@ require 'Additionals/ReplaceIsNull.php';
 require 'Additionals/ReturnNull.php';
 require 'Additionals/ShortArray.php';
 require 'Additionals/SmartLnAfterCurlyOpen.php';
+require 'Additionals/SpaceAroundControlStructures.php';
 require 'Additionals/SpaceBetweenMethods.php';
 require 'Additionals/StrictBehavior.php';
 require 'Additionals/StrictComparison.php';
