@@ -32,7 +32,7 @@ final class ReplaceBooleanAndOr extends AdditionalPass {
 	 * @codeCoverageIgnore
 	 */
 	public function getDescription() {
-		return 'Convert from "and"/"or" to "&&"/"||".';
+		return 'Convert from "and"/"or" to "&&"/"||". Danger! This pass leads to behavior change.';
 	}
 
 	/**
