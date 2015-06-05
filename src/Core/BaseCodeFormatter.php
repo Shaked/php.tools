@@ -16,7 +16,6 @@ abstract class BaseCodeFormatter {
 		'RTrim' => false,
 		'WordWrap' => false,
 
-		'AlignPHPCode' => false,
 		'ConvertOpenTagWithEcho' => false,
 		'RestoreComments' => false,
 		'UpgradeToPreg' => false,
@@ -74,6 +73,7 @@ abstract class BaseCodeFormatter {
 		'ReindentAndAlignObjOps' => false,
 		'ReindentObjOps' => false,
 
+		'AlignPHPCode' => false,
 		'AlignDoubleSlashComments' => false,
 		'AlignTypehint' => false,
 		'AlignDoubleArrow' => false,
