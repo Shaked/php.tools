@@ -122,6 +122,7 @@ require 'Additionals/StrictComparison.php';
 require 'Additionals/StripExtraCommaInArray.php';
 require 'Additionals/StripNewlineAfterClassOpen.php';
 require 'Additionals/StripNewlineAfterCurlyOpen.php';
+require 'Additionals/StripSpaceWithinControlStructures.php';
 require 'Additionals/TightConcat.php';
 require 'Additionals/UpgradeToPreg.php';
 require 'Additionals/WordWrap.php';

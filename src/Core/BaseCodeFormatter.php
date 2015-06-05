@@ -88,6 +88,7 @@ abstract class BaseCodeFormatter {
 		'StripExtraCommaInList' => false,
 		'YodaComparisons' => false,
 
+		'StripSpaceWithinControlStructures' => false,
 		'MergeDoubleArrowAndArray' => false,
 		'MergeCurlyCloseAndDoWhile' => false,
 		'MergeParenCloseWithCurlyOpen' => false,
