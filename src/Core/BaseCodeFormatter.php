@@ -85,10 +85,12 @@ abstract class BaseCodeFormatter {
 
 		'SplitCurlyCloseAndTokens' => false,
 		'ResizeSpaces' => false,
+
+		'StripSpaceWithinControlStructures' => false,
+
 		'StripExtraCommaInList' => false,
 		'YodaComparisons' => false,
 
-		'StripSpaceWithinControlStructures' => false,
 		'MergeDoubleArrowAndArray' => false,
 		'MergeCurlyCloseAndDoWhile' => false,
 		'MergeParenCloseWithCurlyOpen' => false,

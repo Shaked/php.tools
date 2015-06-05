@@ -1419,10 +1419,12 @@ abstract class BaseCodeFormatter {
 
 		'SplitCurlyCloseAndTokens' => false,
 		'ResizeSpaces' => false,
+
+		'StripSpaceWithinControlStructures' => false,
+
 		'StripExtraCommaInList' => false,
 		'YodaComparisons' => false,
 
-		'StripSpaceWithinControlStructures' => false,
 		'MergeDoubleArrowAndArray' => false,
 		'MergeCurlyCloseAndDoWhile' => false,
 		'MergeParenCloseWithCurlyOpen' => false,
@@ -8781,7 +8783,8 @@ final class SpaceAroundControlStructures extends AdditionalPass {
 
 				case ST_CURLY_CLOSE:
 					$this->appendCode($text);
-					if (!$this->rightTokenIs([T_ENCAPSED_AND_WHITESPACE, ST_QUOTE])) {
+
+					if (!$this->rightTokenIs([T_ENCAPSED_AND_WHITESPACE, ST_QUOTE, ST_COMMA, ST_SEMI_COLON])) {
 						$this->appendCode($this->newLine);
 					}
 					break;
@@ -9332,6 +9335,7 @@ final class StripSpaceWithinControlStructures extends AdditionalPass {
 
 						if ($this->hasLnAfter()) {
 							each($this->tkns);
+							$this->appendCode($this->newLine);
 							continue;
 						}
 

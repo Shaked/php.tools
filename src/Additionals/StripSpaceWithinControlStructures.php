@@ -54,6 +54,7 @@ final class StripSpaceWithinControlStructures extends AdditionalPass {
 
 						if ($this->hasLnAfter()) {
 							each($this->tkns);
+							$this->appendCode($this->newLine);
 							continue;
 						}
 
