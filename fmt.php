@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 //Copyright (c) 2014, Carlos C
 //All rights reserved.
@@ -12,9 +11,2094 @@
 //3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 //
 //THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-$concurrent = function_exists('pcntl_fork');
-if ($concurrent) {
-	// The MIT License (MIT)
+
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Formatter{
+
+/**
+ * Formatter interface for console output.
+ *
+ * @author Konstantin Kudryashov <ever.zet@gmail.com>
+ *
+ * @api
+ */
+interface OutputFormatterInterface
+{
+    /**
+     * Sets the decorated flag.
+     *
+     * @param bool $decorated Whether to decorate the messages or not
+     *
+     * @api
+     */
+    public function setDecorated($decorated);
+
+    /**
+     * Gets the decorated flag.
+     *
+     * @return bool true if the output will decorate messages, false otherwise
+     *
+     * @api
+     */
+    public function isDecorated();
+
+    /**
+     * Sets a new style.
+     *
+     * @param string                        $name  The style name
+     * @param OutputFormatterStyleInterface $style The style instance
+     *
+     * @api
+     */
+    public function setStyle($name, OutputFormatterStyleInterface $style);
+
+    /**
+     * Checks if output formatter has style with specified name.
+     *
+     * @param string $name
+     *
+     * @return bool
+     *
+     * @api
+     */
+    public function hasStyle($name);
+
+    /**
+     * Gets style options from style with specified name.
+     *
+     * @param string $name
+     *
+     * @return OutputFormatterStyleInterface
+     *
+     * @api
+     */
+    public function getStyle($name);
+
+    /**
+     * Formats a message according to the given styles.
+     *
+     * @param string $message The message to style
+     *
+     * @return string The styled message
+     *
+     * @api
+     */
+    public function format($message);
+}
+
+}
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Helper{
+
+/**
+ * HelperInterface is the interface all helpers must implement.
+ *
+ * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @api
+ */
+interface HelperInterface
+{
+    /**
+     * Sets the helper set associated with this helper.
+     *
+     * @param HelperSet $helperSet A HelperSet instance
+     *
+     * @api
+     */
+    public function setHelperSet(HelperSet $helperSet = null);
+
+    /**
+     * Gets the helper set associated with this helper.
+     *
+     * @return HelperSet A HelperSet instance
+     *
+     * @api
+     */
+    public function getHelperSet();
+
+    /**
+     * Returns the canonical name of this helper.
+     *
+     * @return string The canonical name
+     *
+     * @api
+     */
+    public function getName();
+}
+
+}
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Helper{
+
+use Symfony\Component\Console\Formatter\OutputFormatterInterface;
+
+/**
+ * Helper is the base class for all helper classes.
+ *
+ * @author Fabien Potencier <fabien@symfony.com>
+ */
+abstract class Helper implements HelperInterface
+{
+    protected $helperSet = null;
+
+    /**
+     * Sets the helper set associated with this helper.
+     *
+     * @param HelperSet $helperSet A HelperSet instance
+     */
+    public function setHelperSet(HelperSet $helperSet = null)
+    {
+        $this->helperSet = $helperSet;
+    }
+
+    /**
+     * Gets the helper set associated with this helper.
+     *
+     * @return HelperSet A HelperSet instance
+     */
+    public function getHelperSet()
+    {
+        return $this->helperSet;
+    }
+
+    /**
+     * Returns the length of a string, using mb_strwidth if it is available.
+     *
+     * @param string $string The string to check its length
+     *
+     * @return int The length of the string
+     */
+    public static function strlen($string)
+    {
+        if (!function_exists('mb_strwidth')) {
+            return strlen($string);
+        }
+
+        if (false === $encoding = mb_detect_encoding($string)) {
+            return strlen($string);
+        }
+
+        return mb_strwidth($string, $encoding);
+    }
+
+    public static function formatTime($secs)
+    {
+        static $timeFormats = array(
+            array(0, '< 1 sec'),
+            array(2, '1 sec'),
+            array(59, 'secs', 1),
+            array(60, '1 min'),
+            array(3600, 'mins', 60),
+            array(5400, '1 hr'),
+            array(86400, 'hrs', 3600),
+            array(129600, '1 day'),
+            array(604800, 'days', 86400),
+        );
+
+        foreach ($timeFormats as $format) {
+            if ($secs >= $format[0]) {
+                continue;
+            }
+
+            if (2 == count($format)) {
+                return $format[1];
+            }
+
+            return ceil($secs / $format[2]).' '.$format[1];
+        }
+    }
+
+    public static function formatMemory($memory)
+    {
+        if ($memory >= 1024 * 1024 * 1024) {
+            return sprintf('%.1f GiB', $memory / 1024 / 1024 / 1024);
+        }
+
+        if ($memory >= 1024 * 1024) {
+            return sprintf('%.1f MiB', $memory / 1024 / 1024);
+        }
+
+        if ($memory >= 1024) {
+            return sprintf('%d KiB', $memory / 1024);
+        }
+
+        return sprintf('%d B', $memory);
+    }
+
+    public static function strlenWithoutDecoration(OutputFormatterInterface $formatter, $string)
+    {
+        $isDecorated = $formatter->isDecorated();
+        $formatter->setDecorated(false);
+        // remove <...> formatting
+        $string = $formatter->format($string);
+        // remove already formatted characters
+        $string = preg_replace("/\033\[[^m]*m/", '', $string);
+        $formatter->setDecorated($isDecorated);
+
+        return self::strlen($string);
+    }
+}
+
+}
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Formatter{
+
+/**
+ * @author Jean-François Simon <contact@jfsimon.fr>
+ */
+class OutputFormatterStyleStack
+{
+    /**
+     * @var OutputFormatterStyleInterface[]
+     */
+    private $styles;
+
+    /**
+     * @var OutputFormatterStyleInterface
+     */
+    private $emptyStyle;
+
+    /**
+     * Constructor.
+     *
+     * @param OutputFormatterStyleInterface|null $emptyStyle
+     */
+    public function __construct(OutputFormatterStyleInterface $emptyStyle = null)
+    {
+        $this->emptyStyle = $emptyStyle ?: new OutputFormatterStyle();
+        $this->reset();
+    }
+
+    /**
+     * Resets stack (ie. empty internal arrays).
+     */
+    public function reset()
+    {
+        $this->styles = array();
+    }
+
+    /**
+     * Pushes a style in the stack.
+     *
+     * @param OutputFormatterStyleInterface $style
+     */
+    public function push(OutputFormatterStyleInterface $style)
+    {
+        $this->styles[] = $style;
+    }
+
+    /**
+     * Pops a style from the stack.
+     *
+     * @param OutputFormatterStyleInterface|null $style
+     *
+     * @return OutputFormatterStyleInterface
+     *
+     * @throws \InvalidArgumentException When style tags incorrectly nested
+     */
+    public function pop(OutputFormatterStyleInterface $style = null)
+    {
+        if (empty($this->styles)) {
+            return $this->emptyStyle;
+        }
+
+        if (null === $style) {
+            return array_pop($this->styles);
+        }
+
+        foreach (array_reverse($this->styles, true) as $index => $stackedStyle) {
+            if ($style->apply('') === $stackedStyle->apply('')) {
+                $this->styles = array_slice($this->styles, 0, $index);
+
+                return $stackedStyle;
+            }
+        }
+
+        throw new \InvalidArgumentException('Incorrectly nested style tag found.');
+    }
+
+    /**
+     * Computes current style with stacks top codes.
+     *
+     * @return OutputFormatterStyle
+     */
+    public function getCurrent()
+    {
+        if (empty($this->styles)) {
+            return $this->emptyStyle;
+        }
+
+        return $this->styles[count($this->styles)-1];
+    }
+
+    /**
+     * @param OutputFormatterStyleInterface $emptyStyle
+     *
+     * @return OutputFormatterStyleStack
+     */
+    public function setEmptyStyle(OutputFormatterStyleInterface $emptyStyle)
+    {
+        $this->emptyStyle = $emptyStyle;
+
+        return $this;
+    }
+
+    /**
+     * @return OutputFormatterStyleInterface
+     */
+    public function getEmptyStyle()
+    {
+        return $this->emptyStyle;
+    }
+}
+
+}
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Formatter{
+
+/**
+ * Formatter style interface for defining styles.
+ *
+ * @author Konstantin Kudryashov <ever.zet@gmail.com>
+ *
+ * @api
+ */
+interface OutputFormatterStyleInterface
+{
+    /**
+     * Sets style foreground color.
+     *
+     * @param string $color The color name
+     *
+     * @api
+     */
+    public function setForeground($color = null);
+
+    /**
+     * Sets style background color.
+     *
+     * @param string $color The color name
+     *
+     * @api
+     */
+    public function setBackground($color = null);
+
+    /**
+     * Sets some specific style option.
+     *
+     * @param string $option The option name
+     *
+     * @api
+     */
+    public function setOption($option);
+
+    /**
+     * Unsets some specific style option.
+     *
+     * @param string $option The option name
+     */
+    public function unsetOption($option);
+
+    /**
+     * Sets multiple style options at once.
+     *
+     * @param array $options
+     */
+    public function setOptions(array $options);
+
+    /**
+     * Applies the style to a given text.
+     *
+     * @param string $text The text to style
+     *
+     * @return string
+     */
+    public function apply($text);
+}
+
+}
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Formatter{
+
+/**
+ * Formatter style class for defining styles.
+ *
+ * @author Konstantin Kudryashov <ever.zet@gmail.com>
+ *
+ * @api
+ */
+class OutputFormatterStyle implements OutputFormatterStyleInterface
+{
+    private static $availableForegroundColors = array(
+        'black' => array('set' => 30, 'unset' => 39),
+        'red' => array('set' => 31, 'unset' => 39),
+        'green' => array('set' => 32, 'unset' => 39),
+        'yellow' => array('set' => 33, 'unset' => 39),
+        'blue' => array('set' => 34, 'unset' => 39),
+        'magenta' => array('set' => 35, 'unset' => 39),
+        'cyan' => array('set' => 36, 'unset' => 39),
+        'white' => array('set' => 37, 'unset' => 39),
+    );
+    private static $availableBackgroundColors = array(
+        'black' => array('set' => 40, 'unset' => 49),
+        'red' => array('set' => 41, 'unset' => 49),
+        'green' => array('set' => 42, 'unset' => 49),
+        'yellow' => array('set' => 43, 'unset' => 49),
+        'blue' => array('set' => 44, 'unset' => 49),
+        'magenta' => array('set' => 45, 'unset' => 49),
+        'cyan' => array('set' => 46, 'unset' => 49),
+        'white' => array('set' => 47, 'unset' => 49),
+    );
+    private static $availableOptions = array(
+        'bold' => array('set' => 1, 'unset' => 22),
+        'underscore' => array('set' => 4, 'unset' => 24),
+        'blink' => array('set' => 5, 'unset' => 25),
+        'reverse' => array('set' => 7, 'unset' => 27),
+        'conceal' => array('set' => 8, 'unset' => 28),
+    );
+
+    private $foreground;
+    private $background;
+    private $options = array();
+
+    /**
+     * Initializes output formatter style.
+     *
+     * @param string|null $foreground The style foreground color name
+     * @param string|null $background The style background color name
+     * @param array       $options    The style options
+     *
+     * @api
+     */
+    public function __construct($foreground = null, $background = null, array $options = array())
+    {
+        if (null !== $foreground) {
+            $this->setForeground($foreground);
+        }
+        if (null !== $background) {
+            $this->setBackground($background);
+        }
+        if (count($options)) {
+            $this->setOptions($options);
+        }
+    }
+
+    /**
+     * Sets style foreground color.
+     *
+     * @param string|null $color The color name
+     *
+     * @throws \InvalidArgumentException When the color name isn't defined
+     *
+     * @api
+     */
+    public function setForeground($color = null)
+    {
+        if (null === $color) {
+            $this->foreground = null;
+
+            return;
+        }
+
+        if (!isset(static::$availableForegroundColors[$color])) {
+            throw new \InvalidArgumentException(sprintf(
+                'Invalid foreground color specified: "%s". Expected one of (%s)',
+                $color,
+                implode(', ', array_keys(static::$availableForegroundColors))
+            ));
+        }
+
+        $this->foreground = static::$availableForegroundColors[$color];
+    }
+
+    /**
+     * Sets style background color.
+     *
+     * @param string|null $color The color name
+     *
+     * @throws \InvalidArgumentException When the color name isn't defined
+     *
+     * @api
+     */
+    public function setBackground($color = null)
+    {
+        if (null === $color) {
+            $this->background = null;
+
+            return;
+        }
+
+        if (!isset(static::$availableBackgroundColors[$color])) {
+            throw new \InvalidArgumentException(sprintf(
+                'Invalid background color specified: "%s". Expected one of (%s)',
+                $color,
+                implode(', ', array_keys(static::$availableBackgroundColors))
+            ));
+        }
+
+        $this->background = static::$availableBackgroundColors[$color];
+    }
+
+    /**
+     * Sets some specific style option.
+     *
+     * @param string $option The option name
+     *
+     * @throws \InvalidArgumentException When the option name isn't defined
+     *
+     * @api
+     */
+    public function setOption($option)
+    {
+        if (!isset(static::$availableOptions[$option])) {
+            throw new \InvalidArgumentException(sprintf(
+                'Invalid option specified: "%s". Expected one of (%s)',
+                $option,
+                implode(', ', array_keys(static::$availableOptions))
+            ));
+        }
+
+        if (!in_array(static::$availableOptions[$option], $this->options)) {
+            $this->options[] = static::$availableOptions[$option];
+        }
+    }
+
+    /**
+     * Unsets some specific style option.
+     *
+     * @param string $option The option name
+     *
+     * @throws \InvalidArgumentException When the option name isn't defined
+     */
+    public function unsetOption($option)
+    {
+        if (!isset(static::$availableOptions[$option])) {
+            throw new \InvalidArgumentException(sprintf(
+                'Invalid option specified: "%s". Expected one of (%s)',
+                $option,
+                implode(', ', array_keys(static::$availableOptions))
+            ));
+        }
+
+        $pos = array_search(static::$availableOptions[$option], $this->options);
+        if (false !== $pos) {
+            unset($this->options[$pos]);
+        }
+    }
+
+    /**
+     * Sets multiple style options at once.
+     *
+     * @param array $options
+     */
+    public function setOptions(array $options)
+    {
+        $this->options = array();
+
+        foreach ($options as $option) {
+            $this->setOption($option);
+        }
+    }
+
+    /**
+     * Applies the style to a given text.
+     *
+     * @param string $text The text to style
+     *
+     * @return string
+     */
+    public function apply($text)
+    {
+        $setCodes = array();
+        $unsetCodes = array();
+
+        if (null !== $this->foreground) {
+            $setCodes[] = $this->foreground['set'];
+            $unsetCodes[] = $this->foreground['unset'];
+        }
+        if (null !== $this->background) {
+            $setCodes[] = $this->background['set'];
+            $unsetCodes[] = $this->background['unset'];
+        }
+        if (count($this->options)) {
+            foreach ($this->options as $option) {
+                $setCodes[] = $option['set'];
+                $unsetCodes[] = $option['unset'];
+            }
+        }
+
+        if (0 === count($setCodes)) {
+            return $text;
+        }
+
+        return sprintf("\033[%sm%s\033[%sm", implode(';', $setCodes), $text, implode(';', $unsetCodes));
+    }
+}
+
+}
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Formatter{
+
+/**
+ * Formatter class for console output.
+ *
+ * @author Konstantin Kudryashov <ever.zet@gmail.com>
+ *
+ * @api
+ */
+class OutputFormatter implements OutputFormatterInterface
+{
+    private $decorated;
+    private $styles = array();
+    private $styleStack;
+
+    /**
+     * Escapes "<" special char in given text.
+     *
+     * @param string $text Text to escape
+     *
+     * @return string Escaped text
+     */
+    public static function escape($text)
+    {
+        return preg_replace('/([^\\\\]?)</is', '$1\\<', $text);
+    }
+
+    /**
+     * Initializes console output formatter.
+     *
+     * @param bool                            $decorated Whether this formatter should actually decorate strings
+     * @param OutputFormatterStyleInterface[] $styles    Array of "name => FormatterStyle" instances
+     *
+     * @api
+     */
+    public function __construct($decorated = false, array $styles = array())
+    {
+        $this->decorated = (bool) $decorated;
+
+        $this->setStyle('error', new OutputFormatterStyle('white', 'red'));
+        $this->setStyle('info', new OutputFormatterStyle('green'));
+        $this->setStyle('comment', new OutputFormatterStyle('yellow'));
+        $this->setStyle('question', new OutputFormatterStyle('black', 'cyan'));
+
+        foreach ($styles as $name => $style) {
+            $this->setStyle($name, $style);
+        }
+
+        $this->styleStack = new OutputFormatterStyleStack();
+    }
+
+    /**
+     * Sets the decorated flag.
+     *
+     * @param bool $decorated Whether to decorate the messages or not
+     *
+     * @api
+     */
+    public function setDecorated($decorated)
+    {
+        $this->decorated = (bool) $decorated;
+    }
+
+    /**
+     * Gets the decorated flag.
+     *
+     * @return bool true if the output will decorate messages, false otherwise
+     *
+     * @api
+     */
+    public function isDecorated()
+    {
+        return $this->decorated;
+    }
+
+    /**
+     * Sets a new style.
+     *
+     * @param string                        $name  The style name
+     * @param OutputFormatterStyleInterface $style The style instance
+     *
+     * @api
+     */
+    public function setStyle($name, OutputFormatterStyleInterface $style)
+    {
+        $this->styles[strtolower($name)] = $style;
+    }
+
+    /**
+     * Checks if output formatter has style with specified name.
+     *
+     * @param string $name
+     *
+     * @return bool
+     *
+     * @api
+     */
+    public function hasStyle($name)
+    {
+        return isset($this->styles[strtolower($name)]);
+    }
+
+    /**
+     * Gets style options from style with specified name.
+     *
+     * @param string $name
+     *
+     * @return OutputFormatterStyleInterface
+     *
+     * @throws \InvalidArgumentException When style isn't defined
+     *
+     * @api
+     */
+    public function getStyle($name)
+    {
+        if (!$this->hasStyle($name)) {
+            throw new \InvalidArgumentException(sprintf('Undefined style: %s', $name));
+        }
+
+        return $this->styles[strtolower($name)];
+    }
+
+    /**
+     * Formats a message according to the given styles.
+     *
+     * @param string $message The message to style
+     *
+     * @return string The styled message
+     *
+     * @api
+     */
+    public function format($message)
+    {
+        $offset = 0;
+        $output = '';
+        $tagRegex = '[a-z][a-z0-9_=;-]*';
+        preg_match_all("#<(($tagRegex) | /($tagRegex)?)>#isx", $message, $matches, PREG_OFFSET_CAPTURE);
+        foreach ($matches[0] as $i => $match) {
+            $pos = $match[1];
+            $text = $match[0];
+
+            if (0 != $pos && '\\' == $message[$pos - 1]) {
+                continue;
+            }
+
+            // add the text up to the next tag
+            $output .= $this->applyCurrentStyle(substr($message, $offset, $pos - $offset));
+            $offset = $pos + strlen($text);
+
+            // opening tag?
+            if ($open = '/' != $text[1]) {
+                $tag = $matches[1][$i][0];
+            } else {
+                $tag = isset($matches[3][$i][0]) ? $matches[3][$i][0] : '';
+            }
+
+            if (!$open && !$tag) {
+                // </>
+                $this->styleStack->pop();
+            } elseif (false === $style = $this->createStyleFromString(strtolower($tag))) {
+                $output .= $this->applyCurrentStyle($text);
+            } elseif ($open) {
+                $this->styleStack->push($style);
+            } else {
+                $this->styleStack->pop($style);
+            }
+        }
+
+        $output .= $this->applyCurrentStyle(substr($message, $offset));
+
+        return str_replace('\\<', '<', $output);
+    }
+
+    /**
+     * @return OutputFormatterStyleStack
+     */
+    public function getStyleStack()
+    {
+        return $this->styleStack;
+    }
+
+    /**
+     * Tries to create new style instance from string.
+     *
+     * @param string $string
+     *
+     * @return OutputFormatterStyle|bool false if string is not format string
+     */
+    private function createStyleFromString($string)
+    {
+        if (isset($this->styles[$string])) {
+            return $this->styles[$string];
+        }
+
+        if (!preg_match_all('/([^=]+)=([^;]+)(;|$)/', strtolower($string), $matches, PREG_SET_ORDER)) {
+            return false;
+        }
+
+        $style = new OutputFormatterStyle();
+        foreach ($matches as $match) {
+            array_shift($match);
+
+            if ('fg' == $match[0]) {
+                $style->setForeground($match[1]);
+            } elseif ('bg' == $match[0]) {
+                $style->setBackground($match[1]);
+            } else {
+                try {
+                    $style->setOption($match[1]);
+                } catch (\InvalidArgumentException $e) {
+                    return false;
+                }
+            }
+        }
+
+        return $style;
+    }
+
+    /**
+     * Applies current style from stack to text, if must be applied.
+     *
+     * @param string $text Input text
+     *
+     * @return string Styled text
+     */
+    private function applyCurrentStyle($text)
+    {
+        return $this->isDecorated() && strlen($text) > 0 ? $this->styleStack->getCurrent()->apply($text) : $text;
+    }
+}
+
+}
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Output{
+
+use Symfony\Component\Console\Formatter\OutputFormatterInterface;
+
+/**
+ * OutputInterface is the interface implemented by all Output classes.
+ *
+ * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @api
+ */
+interface OutputInterface
+{
+    const VERBOSITY_QUIET = 0;
+    const VERBOSITY_NORMAL = 1;
+    const VERBOSITY_VERBOSE = 2;
+    const VERBOSITY_VERY_VERBOSE = 3;
+    const VERBOSITY_DEBUG = 4;
+
+    const OUTPUT_NORMAL = 0;
+    const OUTPUT_RAW = 1;
+    const OUTPUT_PLAIN = 2;
+
+    /**
+     * Writes a message to the output.
+     *
+     * @param string|array $messages The message as an array of lines or a single string
+     * @param bool         $newline  Whether to add a newline
+     * @param int          $type     The type of output (one of the OUTPUT constants)
+     *
+     * @throws \InvalidArgumentException When unknown output type is given
+     *
+     * @api
+     */
+    public function write($messages, $newline = false, $type = self::OUTPUT_NORMAL);
+
+    /**
+     * Writes a message to the output and adds a newline at the end.
+     *
+     * @param string|array $messages The message as an array of lines of a single string
+     * @param int          $type     The type of output (one of the OUTPUT constants)
+     *
+     * @throws \InvalidArgumentException When unknown output type is given
+     *
+     * @api
+     */
+    public function writeln($messages, $type = self::OUTPUT_NORMAL);
+
+    /**
+     * Sets the verbosity of the output.
+     *
+     * @param int $level The level of verbosity (one of the VERBOSITY constants)
+     *
+     * @api
+     */
+    public function setVerbosity($level);
+
+    /**
+     * Gets the current verbosity of the output.
+     *
+     * @return int The current level of verbosity (one of the VERBOSITY constants)
+     *
+     * @api
+     */
+    public function getVerbosity();
+
+    /**
+     * Sets the decorated flag.
+     *
+     * @param bool $decorated Whether to decorate the messages
+     *
+     * @api
+     */
+    public function setDecorated($decorated);
+
+    /**
+     * Gets the decorated flag.
+     *
+     * @return bool true if the output will decorate messages, false otherwise
+     *
+     * @api
+     */
+    public function isDecorated();
+
+    /**
+     * Sets output formatter.
+     *
+     * @param OutputFormatterInterface $formatter
+     *
+     * @api
+     */
+    public function setFormatter(OutputFormatterInterface $formatter);
+
+    /**
+     * Returns current output formatter instance.
+     *
+     * @return OutputFormatterInterface
+     *
+     * @api
+     */
+    public function getFormatter();
+}
+
+}
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Output{
+
+/**
+ * ConsoleOutputInterface is the interface implemented by ConsoleOutput class.
+ * This adds information about stderr output stream.
+ *
+ * @author Dariusz Górecki <darek.krk@gmail.com>
+ */
+interface ConsoleOutputInterface extends OutputInterface
+{
+    /**
+     * Gets the OutputInterface for errors.
+     *
+     * @return OutputInterface
+     */
+    public function getErrorOutput();
+
+    /**
+     * Sets the OutputInterface used for errors.
+     *
+     * @param OutputInterface $error
+     */
+    public function setErrorOutput(OutputInterface $error);
+}
+
+}
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Output{
+
+use Symfony\Component\Console\Formatter\OutputFormatterInterface;
+use Symfony\Component\Console\Formatter\OutputFormatter;
+
+/**
+ * Base class for output classes.
+ *
+ * There are five levels of verbosity:
+ *
+ *  * normal: no option passed (normal output)
+ *  * verbose: -v (more output)
+ *  * very verbose: -vv (highly extended output)
+ *  * debug: -vvv (all debug output)
+ *  * quiet: -q (no output)
+ *
+ * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @api
+ */
+abstract class Output implements OutputInterface
+{
+    private $verbosity;
+    private $formatter;
+
+    /**
+     * Constructor.
+     *
+     * @param int                           $verbosity The verbosity level (one of the VERBOSITY constants in OutputInterface)
+     * @param bool                          $decorated Whether to decorate messages
+     * @param OutputFormatterInterface|null $formatter Output formatter instance (null to use default OutputFormatter)
+     *
+     * @api
+     */
+    public function __construct($verbosity = self::VERBOSITY_NORMAL, $decorated = false, OutputFormatterInterface $formatter = null)
+    {
+        $this->verbosity = null === $verbosity ? self::VERBOSITY_NORMAL : $verbosity;
+        $this->formatter = $formatter ?: new OutputFormatter();
+        $this->formatter->setDecorated($decorated);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setFormatter(OutputFormatterInterface $formatter)
+    {
+        $this->formatter = $formatter;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getFormatter()
+    {
+        return $this->formatter;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setDecorated($decorated)
+    {
+        $this->formatter->setDecorated($decorated);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isDecorated()
+    {
+        return $this->formatter->isDecorated();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setVerbosity($level)
+    {
+        $this->verbosity = (int) $level;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getVerbosity()
+    {
+        return $this->verbosity;
+    }
+
+    public function isQuiet()
+    {
+        return self::VERBOSITY_QUIET === $this->verbosity;
+    }
+
+    public function isVerbose()
+    {
+        return self::VERBOSITY_VERBOSE <= $this->verbosity;
+    }
+
+    public function isVeryVerbose()
+    {
+        return self::VERBOSITY_VERY_VERBOSE <= $this->verbosity;
+    }
+
+    public function isDebug()
+    {
+        return self::VERBOSITY_DEBUG <= $this->verbosity;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function writeln($messages, $type = self::OUTPUT_NORMAL)
+    {
+        $this->write($messages, true, $type);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function write($messages, $newline = false, $type = self::OUTPUT_NORMAL)
+    {
+        if (self::VERBOSITY_QUIET === $this->verbosity) {
+            return;
+        }
+
+        $messages = (array) $messages;
+
+        foreach ($messages as $message) {
+            switch ($type) {
+                case OutputInterface::OUTPUT_NORMAL:
+                    $message = $this->formatter->format($message);
+                    break;
+                case OutputInterface::OUTPUT_RAW:
+                    break;
+                case OutputInterface::OUTPUT_PLAIN:
+                    $message = strip_tags($this->formatter->format($message));
+                    break;
+                default:
+                    throw new \InvalidArgumentException(sprintf('Unknown output type given (%s)', $type));
+            }
+
+            $this->doWrite($message, $newline);
+        }
+    }
+
+    /**
+     * Writes a message to the output.
+     *
+     * @param string $message A message to write to the output
+     * @param bool   $newline Whether to add a newline or not
+     */
+    abstract protected function doWrite($message, $newline);
+}
+
+}
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Output{
+
+use Symfony\Component\Console\Formatter\OutputFormatterInterface;
+
+/**
+ * StreamOutput writes the output to a given stream.
+ *
+ * Usage:
+ *
+ * $output = new StreamOutput(fopen('php://stdout', 'w'));
+ *
+ * As `StreamOutput` can use any stream, you can also use a file:
+ *
+ * $output = new StreamOutput(fopen('/path/to/output.log', 'a', false));
+ *
+ * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @api
+ */
+class StreamOutput extends Output
+{
+    private $stream;
+
+    /**
+     * Constructor.
+     *
+     * @param mixed                         $stream    A stream resource
+     * @param int                           $verbosity The verbosity level (one of the VERBOSITY constants in OutputInterface)
+     * @param bool|null                     $decorated Whether to decorate messages (null for auto-guessing)
+     * @param OutputFormatterInterface|null $formatter Output formatter instance (null to use default OutputFormatter)
+     *
+     * @throws \InvalidArgumentException When first argument is not a real stream
+     *
+     * @api
+     */
+    public function __construct($stream, $verbosity = self::VERBOSITY_NORMAL, $decorated = null, OutputFormatterInterface $formatter = null)
+    {
+        if (!is_resource($stream) || 'stream' !== get_resource_type($stream)) {
+            throw new \InvalidArgumentException('The StreamOutput class needs a stream as its first argument.');
+        }
+
+        $this->stream = $stream;
+
+        if (null === $decorated) {
+            $decorated = $this->hasColorSupport();
+        }
+
+        parent::__construct($verbosity, $decorated, $formatter);
+    }
+
+    /**
+     * Gets the stream attached to this StreamOutput instance.
+     *
+     * @return resource A stream resource
+     */
+    public function getStream()
+    {
+        return $this->stream;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function doWrite($message, $newline)
+    {
+        if (false === @fwrite($this->stream, $message.($newline ? PHP_EOL : ''))) {
+            // should never happen
+            throw new \RuntimeException('Unable to write output.');
+        }
+
+        fflush($this->stream);
+    }
+
+    /**
+     * Returns true if the stream supports colorization.
+     *
+     * Colorization is disabled if not supported by the stream:
+     *
+     *  -  Windows without Ansicon and ConEmu
+     *  -  non tty consoles
+     *
+     * @return bool true if the stream supports colorization, false otherwise
+     */
+    protected function hasColorSupport()
+    {
+        if (DIRECTORY_SEPARATOR == '\\') {
+            return false !== getenv('ANSICON') || 'ON' === getenv('ConEmuANSI');
+        }
+
+        return function_exists('posix_isatty') && @posix_isatty($this->stream);
+    }
+}
+
+}
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Output{
+
+use Symfony\Component\Console\Formatter\OutputFormatterInterface;
+
+/**
+ * ConsoleOutput is the default class for all CLI output. It uses STDOUT.
+ *
+ * This class is a convenient wrapper around `StreamOutput`.
+ *
+ *     $output = new ConsoleOutput();
+ *
+ * This is equivalent to:
+ *
+ *     $output = new StreamOutput(fopen('php://stdout', 'w'));
+ *
+ * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @api
+ */
+class ConsoleOutput extends StreamOutput implements ConsoleOutputInterface
+{
+    private $stderr;
+
+    /**
+     * Constructor.
+     *
+     * @param int                           $verbosity The verbosity level (one of the VERBOSITY constants in OutputInterface)
+     * @param bool|null                     $decorated Whether to decorate messages (null for auto-guessing)
+     * @param OutputFormatterInterface|null $formatter Output formatter instance (null to use default OutputFormatter)
+     *
+     * @api
+     */
+    public function __construct($verbosity = self::VERBOSITY_NORMAL, $decorated = null, OutputFormatterInterface $formatter = null)
+    {
+        $outputStream = 'php://stdout';
+        if (!$this->hasStdoutSupport()) {
+            $outputStream = 'php://output';
+        }
+
+        parent::__construct(fopen($outputStream, 'w'), $verbosity, $decorated, $formatter);
+
+        $this->stderr = new StreamOutput(fopen('php://stderr', 'w'), $verbosity, $decorated, $this->getFormatter());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setDecorated($decorated)
+    {
+        parent::setDecorated($decorated);
+        $this->stderr->setDecorated($decorated);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setFormatter(OutputFormatterInterface $formatter)
+    {
+        parent::setFormatter($formatter);
+        $this->stderr->setFormatter($formatter);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setVerbosity($level)
+    {
+        parent::setVerbosity($level);
+        $this->stderr->setVerbosity($level);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getErrorOutput()
+    {
+        return $this->stderr;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setErrorOutput(OutputInterface $error)
+    {
+        $this->stderr = $error;
+    }
+
+    /**
+     * Returns true if current environment supports writing console output to
+     * STDOUT.
+     *
+     * IBM iSeries (OS400) exhibits character-encoding issues when writing to
+     * STDOUT and doesn't properly convert ASCII to EBCDIC, resulting in garbage
+     * output.
+     *
+     * @return bool
+     */
+    protected function hasStdoutSupport()
+    {
+        return ('OS400' != php_uname('s'));
+    }
+}
+
+}
+
+	
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\Console\Helper{
+
+use Symfony\Component\Console\Output\OutputInterface;
+
+/**
+ * The ProgressBar provides helpers to display progress output.
+ *
+ * @author Fabien Potencier <fabien@symfony.com>
+ * @author Chris Jones <leeked@gmail.com>
+ */
+class ProgressBar
+{
+    // options
+    private $barWidth = 28;
+    private $barChar;
+    private $emptyBarChar = '-';
+    private $progressChar = '>';
+    private $format = null;
+    private $redrawFreq = 1;
+
+    /**
+     * @var OutputInterface
+     */
+    private $output;
+    private $step = 0;
+    private $max;
+    private $startTime;
+    private $stepWidth;
+    private $percent = 0.0;
+    private $lastMessagesLength = 0;
+    private $formatLineCount;
+    private $messages;
+    private $overwrite = true;
+
+    private static $formatters;
+    private static $formats;
+
+    /**
+     * Constructor.
+     *
+     * @param OutputInterface $output An OutputInterface instance
+     * @param int             $max    Maximum steps (0 if unknown)
+     */
+    public function __construct(OutputInterface $output, $max = 0)
+    {
+        $this->output = $output;
+        $this->setMaxSteps($max);
+
+        if (!$this->output->isDecorated()) {
+            // disable overwrite when output does not support ANSI codes.
+            $this->overwrite = false;
+
+            if ($this->max > 10) {
+                // set a reasonable redraw frequency so output isn't flooded
+                $this->setRedrawFrequency($max / 10);
+            }
+        }
+
+        $this->setFormat($this->determineBestFormat());
+
+        $this->startTime = time();
+    }
+
+    /**
+     * Sets a placeholder formatter for a given name.
+     *
+     * This method also allow you to override an existing placeholder.
+     *
+     * @param string   $name     The placeholder name (including the delimiter char like %)
+     * @param callable $callable A PHP callable
+     */
+    public static function setPlaceholderFormatterDefinition($name, $callable)
+    {
+        if (!self::$formatters) {
+            self::$formatters = self::initPlaceholderFormatters();
+        }
+
+        self::$formatters[$name] = $callable;
+    }
+
+    /**
+     * Gets the placeholder formatter for a given name.
+     *
+     * @param string $name The placeholder name (including the delimiter char like %)
+     *
+     * @return callable|null A PHP callable
+     */
+    public static function getPlaceholderFormatterDefinition($name)
+    {
+        if (!self::$formatters) {
+            self::$formatters = self::initPlaceholderFormatters();
+        }
+
+        return isset(self::$formatters[$name]) ? self::$formatters[$name] : null;
+    }
+
+    /**
+     * Sets a format for a given name.
+     *
+     * This method also allow you to override an existing format.
+     *
+     * @param string $name   The format name
+     * @param string $format A format string
+     */
+    public static function setFormatDefinition($name, $format)
+    {
+        if (!self::$formats) {
+            self::$formats = self::initFormats();
+        }
+
+        self::$formats[$name] = $format;
+    }
+
+    /**
+     * Gets the format for a given name.
+     *
+     * @param string $name The format name
+     *
+     * @return string|null A format string
+     */
+    public static function getFormatDefinition($name)
+    {
+        if (!self::$formats) {
+            self::$formats = self::initFormats();
+        }
+
+        return isset(self::$formats[$name]) ? self::$formats[$name] : null;
+    }
+
+    public function setMessage($message, $name = 'message')
+    {
+        $this->messages[$name] = $message;
+    }
+
+    public function getMessage($name = 'message')
+    {
+        return $this->messages[$name];
+    }
+
+    /**
+     * Gets the progress bar start time.
+     *
+     * @return int The progress bar start time
+     */
+    public function getStartTime()
+    {
+        return $this->startTime;
+    }
+
+    /**
+     * Gets the progress bar maximal steps.
+     *
+     * @return int The progress bar max steps
+     */
+    public function getMaxSteps()
+    {
+        return $this->max;
+    }
+
+    /**
+     * Gets the progress bar step.
+     *
+     * @deprecated since 2.6, to be removed in 3.0. Use {@link getProgress()} instead.
+     *
+     * @return int The progress bar step
+     */
+    public function getStep()
+    {
+        return $this->getProgress();
+    }
+
+    /**
+     * Gets the current step position.
+     *
+     * @return int The progress bar step
+     */
+    public function getProgress()
+    {
+        return $this->step;
+    }
+
+    /**
+     * Gets the progress bar step width.
+     *
+     * @internal This method is public for PHP 5.3 compatibility, it should not be used.
+     *
+     * @return int The progress bar step width
+     */
+    public function getStepWidth()
+    {
+        return $this->stepWidth;
+    }
+
+    /**
+     * Gets the current progress bar percent.
+     *
+     * @return float The current progress bar percent
+     */
+    public function getProgressPercent()
+    {
+        return $this->percent;
+    }
+
+    /**
+     * Sets the progress bar width.
+     *
+     * @param int $size The progress bar size
+     */
+    public function setBarWidth($size)
+    {
+        $this->barWidth = (int) $size;
+    }
+
+    /**
+     * Gets the progress bar width.
+     *
+     * @return int The progress bar size
+     */
+    public function getBarWidth()
+    {
+        return $this->barWidth;
+    }
+
+    /**
+     * Sets the bar character.
+     *
+     * @param string $char A character
+     */
+    public function setBarCharacter($char)
+    {
+        $this->barChar = $char;
+    }
+
+    /**
+     * Gets the bar character.
+     *
+     * @return string A character
+     */
+    public function getBarCharacter()
+    {
+        if (null === $this->barChar) {
+            return $this->max ? '=' : $this->emptyBarChar;
+        }
+
+        return $this->barChar;
+    }
+
+    /**
+     * Sets the empty bar character.
+     *
+     * @param string $char A character
+     */
+    public function setEmptyBarCharacter($char)
+    {
+        $this->emptyBarChar = $char;
+    }
+
+    /**
+     * Gets the empty bar character.
+     *
+     * @return string A character
+     */
+    public function getEmptyBarCharacter()
+    {
+        return $this->emptyBarChar;
+    }
+
+    /**
+     * Sets the progress bar character.
+     *
+     * @param string $char A character
+     */
+    public function setProgressCharacter($char)
+    {
+        $this->progressChar = $char;
+    }
+
+    /**
+     * Gets the progress bar character.
+     *
+     * @return string A character
+     */
+    public function getProgressCharacter()
+    {
+        return $this->progressChar;
+    }
+
+    /**
+     * Sets the progress bar format.
+     *
+     * @param string $format The format
+     */
+    public function setFormat($format)
+    {
+        // try to use the _nomax variant if available
+        if (!$this->max && null !== self::getFormatDefinition($format.'_nomax')) {
+            $this->format = self::getFormatDefinition($format.'_nomax');
+        } elseif (null !== self::getFormatDefinition($format)) {
+            $this->format = self::getFormatDefinition($format);
+        } else {
+            $this->format = $format;
+        }
+
+        $this->formatLineCount = substr_count($this->format, "\n");
+    }
+
+    /**
+     * Sets the redraw frequency.
+     *
+     * @param int $freq The frequency in steps
+     */
+    public function setRedrawFrequency($freq)
+    {
+        $this->redrawFreq = (int) $freq;
+    }
+
+    /**
+     * Starts the progress output.
+     *
+     * @param int|null $max Number of steps to complete the bar (0 if indeterminate), null to leave unchanged
+     */
+    public function start($max = null)
+    {
+        $this->startTime = time();
+        $this->step = 0;
+        $this->percent = 0.0;
+
+        if (null !== $max) {
+            $this->setMaxSteps($max);
+        }
+
+        $this->display();
+    }
+
+    /**
+     * Advances the progress output X steps.
+     *
+     * @param int $step Number of steps to advance
+     *
+     * @throws \LogicException
+     */
+    public function advance($step = 1)
+    {
+        $this->setProgress($this->step + $step);
+    }
+
+    /**
+     * Sets the current progress.
+     *
+     * @deprecated since 2.6, to be removed in 3.0. Use {@link setProgress()} instead.
+     *
+     * @param int $step The current progress
+     *
+     * @throws \LogicException
+     */
+    public function setCurrent($step)
+    {
+        $this->setProgress($step);
+    }
+
+    /**
+     * Sets whether to overwrite the progressbar, false for new line
+     *
+     * @param bool $overwrite
+     */
+    public function setOverwrite($overwrite)
+    {
+        $this->overwrite = (bool) $overwrite;
+    }
+
+    /**
+     * Sets the current progress.
+     *
+     * @param int $step The current progress
+     *
+     * @throws \LogicException
+     */
+    public function setProgress($step)
+    {
+        $step = (int) $step;
+        if ($step < $this->step) {
+            throw new \LogicException('You can\'t regress the progress bar.');
+        }
+
+        if ($this->max && $step > $this->max) {
+            $this->max = $step;
+        }
+
+        $prevPeriod = intval($this->step / $this->redrawFreq);
+        $currPeriod = intval($step / $this->redrawFreq);
+        $this->step = $step;
+        $this->percent = $this->max ? (float) $this->step / $this->max : 0;
+        if ($prevPeriod !== $currPeriod || $this->max === $step) {
+            $this->display();
+        }
+    }
+
+    /**
+     * Finishes the progress output.
+     */
+    public function finish()
+    {
+        if (!$this->max) {
+            $this->max = $this->step;
+        }
+
+        if ($this->step === $this->max && !$this->overwrite) {
+            // prevent double 100% output
+            return;
+        }
+
+        $this->setProgress($this->max);
+    }
+
+    /**
+     * Outputs the current progress string.
+     */
+    public function display()
+    {
+        if (OutputInterface::VERBOSITY_QUIET === $this->output->getVerbosity()) {
+            return;
+        }
+
+        // these 3 variables can be removed in favor of using $this in the closure when support for PHP 5.3 will be dropped.
+        $self = $this;
+        $output = $this->output;
+        $messages = $this->messages;
+        $this->overwrite(preg_replace_callback("{%([a-z\-_]+)(?:\:([^%]+))?%}i", function ($matches) use ($self, $output, $messages) {
+            if ($formatter = $self::getPlaceholderFormatterDefinition($matches[1])) {
+                $text = call_user_func($formatter, $self, $output);
+            } elseif (isset($messages[$matches[1]])) {
+                $text = $messages[$matches[1]];
+            } else {
+                return $matches[0];
+            }
+
+            if (isset($matches[2])) {
+                $text = sprintf('%'.$matches[2], $text);
+            }
+
+            return $text;
+        }, $this->format));
+    }
+
+    /**
+     * Removes the progress bar from the current line.
+     *
+     * This is useful if you wish to write some output
+     * while a progress bar is running.
+     * Call display() to show the progress bar again.
+     */
+    public function clear()
+    {
+        if (!$this->overwrite) {
+            return;
+        }
+
+        $this->overwrite(str_repeat("\n", $this->formatLineCount));
+    }
+
+    /**
+     * Sets the progress bar maximal steps.
+     *
+     * @param int     The progress bar max steps
+     */
+    private function setMaxSteps($max)
+    {
+        $this->max = max(0, (int) $max);
+        $this->stepWidth = $this->max ? Helper::strlen($this->max) : 4;
+    }
+
+    /**
+     * Overwrites a previous message to the output.
+     *
+     * @param string $message The message
+     */
+    private function overwrite($message)
+    {
+        $lines = explode("\n", $message);
+
+        // append whitespace to match the line's length
+        if (null !== $this->lastMessagesLength) {
+            foreach ($lines as $i => $line) {
+                if ($this->lastMessagesLength > Helper::strlenWithoutDecoration($this->output->getFormatter(), $line)) {
+                    $lines[$i] = str_pad($line, $this->lastMessagesLength, "\x20", STR_PAD_RIGHT);
+                }
+            }
+        }
+
+        if ($this->overwrite) {
+            // move back to the beginning of the progress bar before redrawing it
+            $this->output->write("\x0D");
+        } elseif ($this->step > 0) {
+            // move to new line
+            $this->output->writeln('');
+        }
+
+        if ($this->formatLineCount) {
+            $this->output->write(sprintf("\033[%dA", $this->formatLineCount));
+        }
+        $this->output->write(implode("\n", $lines));
+
+        $this->lastMessagesLength = 0;
+        foreach ($lines as $line) {
+            $len = Helper::strlenWithoutDecoration($this->output->getFormatter(), $line);
+            if ($len > $this->lastMessagesLength) {
+                $this->lastMessagesLength = $len;
+            }
+        }
+    }
+
+    private function determineBestFormat()
+    {
+        switch ($this->output->getVerbosity()) {
+            // OutputInterface::VERBOSITY_QUIET: display is disabled anyway
+            case OutputInterface::VERBOSITY_VERBOSE:
+                return $this->max ? 'verbose' : 'verbose_nomax';
+            case OutputInterface::VERBOSITY_VERY_VERBOSE:
+                return $this->max ? 'very_verbose' : 'very_verbose_nomax';
+            case OutputInterface::VERBOSITY_DEBUG:
+                return $this->max ? 'debug' : 'debug_nomax';
+            default:
+                return $this->max ? 'normal' : 'normal_nomax';
+        }
+    }
+
+    private static function initPlaceholderFormatters()
+    {
+        return array(
+            'bar' => function (ProgressBar $bar, OutputInterface $output) {
+                $completeBars = floor($bar->getMaxSteps() > 0 ? $bar->getProgressPercent() * $bar->getBarWidth() : $bar->getProgress() % $bar->getBarWidth());
+                $display = str_repeat($bar->getBarCharacter(), $completeBars);
+                if ($completeBars < $bar->getBarWidth()) {
+                    $emptyBars = $bar->getBarWidth() - $completeBars - Helper::strlenWithoutDecoration($output->getFormatter(), $bar->getProgressCharacter());
+                    $display .= $bar->getProgressCharacter().str_repeat($bar->getEmptyBarCharacter(), $emptyBars);
+                }
+
+                return $display;
+            },
+            'elapsed' => function (ProgressBar $bar) {
+                return Helper::formatTime(time() - $bar->getStartTime());
+            },
+            'remaining' => function (ProgressBar $bar) {
+                if (!$bar->getMaxSteps()) {
+                    throw new \LogicException('Unable to display the remaining time if the maximum number of steps is not set.');
+                }
+
+                if (!$bar->getProgress()) {
+                    $remaining = 0;
+                } else {
+                    $remaining = round((time() - $bar->getStartTime()) / $bar->getProgress() * ($bar->getMaxSteps() - $bar->getProgress()));
+                }
+
+                return Helper::formatTime($remaining);
+            },
+            'estimated' => function (ProgressBar $bar) {
+                if (!$bar->getMaxSteps()) {
+                    throw new \LogicException('Unable to display the estimated time if the maximum number of steps is not set.');
+                }
+
+                if (!$bar->getProgress()) {
+                    $estimated = 0;
+                } else {
+                    $estimated = round((time() - $bar->getStartTime()) / $bar->getProgress() * $bar->getMaxSteps());
+                }
+
+                return Helper::formatTime($estimated);
+            },
+            'memory' => function (ProgressBar $bar) {
+                return Helper::formatMemory(memory_get_usage(true));
+            },
+            'current' => function (ProgressBar $bar) {
+                return str_pad($bar->getProgress(), $bar->getStepWidth(), ' ', STR_PAD_LEFT);
+            },
+            'max' => function (ProgressBar $bar) {
+                return $bar->getMaxSteps();
+            },
+            'percent' => function (ProgressBar $bar) {
+                return floor($bar->getProgressPercent() * 100);
+            },
+        );
+    }
+
+    private static function initFormats()
+    {
+        return array(
+            'normal' => ' %current%/%max% [%bar%] %percent:3s%%',
+            'normal_nomax' => ' %current% [%bar%]',
+
+            'verbose' => ' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%',
+            'verbose_nomax' => ' %current% [%bar%] %elapsed:6s%',
+
+            'very_verbose' => ' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s%',
+            'very_verbose_nomax' => ' %current% [%bar%] %elapsed:6s%',
+
+            'debug' => ' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%',
+            'debug_nomax' => ' %current% [%bar%] %elapsed:6s% %memory:6s%',
+        );
+    }
+}
+
+}
+
+
+
+namespace {
+	$concurrent = function_exists('pcntl_fork');
+	if ($concurrent) {
+		// The MIT License (MIT)
 //
 // Copyright (c) 2014 Carlos Cirello
 //
@@ -234,12 +2318,12 @@ function select_channel(array $actions) {
 		}
 	}
 }
-;
-}
-$enableCache = false;
-if (class_exists('SQLite3')) {
-	$enableCache = true;
-	/**
+
+	}
+	$enableCache = false;
+	if (class_exists('SQLite3')) {
+		$enableCache = true;
+		/**
  * @codeCoverageIgnore
  */
 final class Cache {
@@ -315,9 +2399,9 @@ final class Cache {
 		return sprintf('%u', crc32($content));
 	}
 }
-;
-} else {
-	/**
+
+	} else {
+		/**
  * @codeCoverageIgnore
  */
 final class Cache {
@@ -329,11 +2413,11 @@ final class Cache {
 		return file_get_contents($filename);
 	}
 }
-;
-}
 
-define("VERSION", "8.7.2");;
+	}
 
+	define("VERSION", "8.7.2");
+	
 function extractFromArgv($argv, $item) {
 	return array_values(
 		array_filter($argv,
@@ -382,8 +2466,8 @@ function tabwriter(array $lines) {
 	}
 
 	return $final;
-};
-
+}
+	
 function selfupdate($argv, $inPhar) {
 	$opts = [
 		'http' => [
@@ -422,9 +2506,9 @@ function selfupdate($argv, $inPhar) {
 	}
 	fwrite(STDERR, 'Up-to-date!' . PHP_EOL);
 	exit(0);
-};
+}
 
-//Copyright (c) 2014, Carlos C
+	//Copyright (c) 2014, Carlos C
 //All rights reserved.
 //
 //Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -483,8 +2567,8 @@ if (!defined('T_COALESCE')) {
 
 define('ST_PARENTHESES_BLOCK', 'ST_PARENTHESES_BLOCK');
 define('ST_BRACKET_BLOCK', 'ST_BRACKET_BLOCK');
-define('ST_CURLY_BLOCK', 'ST_CURLY_BLOCK');;
-
+define('ST_CURLY_BLOCK', 'ST_CURLY_BLOCK');
+	
 //FormatterPass holds all data structures necessary to traverse a stream of
 //tokens, following the concept of bottom-up it works as a platform on which
 //other passes can be built on.
@@ -1327,13 +3411,13 @@ abstract class FormatterPass {
 		++$ptr;
 	}
 }
-;
-abstract class AdditionalPass extends FormatterPass {
+
+	abstract class AdditionalPass extends FormatterPass {
 	abstract public function getDescription();
 	abstract public function getExample();
 }
-;
-/**
+
+	/**
  * @codeCoverageIgnore
  */
 abstract class BaseCodeFormatter {
@@ -1542,9 +3626,9 @@ abstract class BaseCodeFormatter {
 		return $ret;
 	}
 }
-;
-if ('1' === getenv('FMTDEBUG') || 'step' === getenv('FMTDEBUG')) {
-	/**
+
+	if ('1' === getenv('FMTDEBUG') || 'step' === getenv('FMTDEBUG')) {
+		/**
  * @codeCoverageIgnore
  */
 final class CodeFormatter extends BaseCodeFormatter {
@@ -1558,17 +3642,17 @@ final class CodeFormatter extends BaseCodeFormatter {
 		}
 	}
 }
-;
-} else {
-	/**
+
+	} else {
+		/**
  * @codeCoverageIgnore
  */
 final class CodeFormatter extends BaseCodeFormatter {
 }
-;
-}
 
-final class AddMissingCurlyBraces extends FormatterPass {
+	}
+
+	final class AddMissingCurlyBraces extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -1650,8 +3734,8 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		++$this->ptr;
 	}
 }
-;
-/**
+
+	/**
  * @codeCoverageIgnore
  */
 final class AutoImportPass extends FormatterPass {
@@ -1915,8 +3999,8 @@ final class AutoImportPass extends FormatterPass {
 		}
 		return basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 	}
-};
-final class ConstructorPass extends FormatterPass {
+}
+	final class ConstructorPass extends FormatterPass {
 	const TYPE_CAMEL_CASE = 'camel';
 	const TYPE_SNAKE_CASE = 'snake';
 	const TYPE_GOLANG = 'golang';
@@ -2048,8 +4132,8 @@ final class ConstructorPass extends FormatterPass {
 		$str = '$this->Set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . ');' . $this->newLine;
 		return $str;
 	}
-};
-final class EliminateDuplicatedEmptyLines extends FormatterPass {
+}
+	final class EliminateDuplicatedEmptyLines extends FormatterPass {
 	const EMPTY_LINE = "\x2 EMPTYLINE \x3";
 
 	public function candidate($source, $foundTokens) {
@@ -2108,8 +4192,8 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 
 		return $this->code;
 	}
-};
-final class ExtraCommaInArray extends FormatterPass {
+}
+	final class ExtraCommaInArray extends FormatterPass {
 	const ST_SHORT_ARRAY_OPEN = 'SHORT_ARRAY_OPEN';
 
 	public function candidate($source, $foundTokens) {
@@ -2193,8 +4277,8 @@ final class ExtraCommaInArray extends FormatterPass {
 		}
 		return $this->renderLight();
 	}
-};
-final class LeftAlignComment extends FormatterPass {
+}
+	final class LeftAlignComment extends FormatterPass {
 	const NON_INDENTABLE_COMMENT = "/*\x2 COMMENT \x3*/";
 	public function candidate($source, $foundTokens) {
 		return true;
@@ -2252,8 +4336,8 @@ final class LeftAlignComment extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class MergeCurlyCloseAndDoWhile extends FormatterPass {
+
+	final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_WHILE])) {
 			return true;
@@ -2301,8 +4385,8 @@ final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class MergeDoubleArrowAndArray extends FormatterPass {
+
+	final class MergeDoubleArrowAndArray extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_ARRAY])) {
 			return true;
@@ -2345,8 +4429,8 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 		}
 		return $this->code;
 	}
-};
-final class MergeParenCloseWithCurlyOpen extends FormatterPass {
+}
+	final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_CURLY_OPEN]) || isset($foundTokens[T_ELSE]) || isset($foundTokens[T_ELSEIF])) {
 			return true;
@@ -2411,8 +4495,8 @@ final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class NormalizeIsNotEquals extends FormatterPass {
+
+	final class NormalizeIsNotEquals extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_IS_NOT_EQUAL])) {
 			return true;
@@ -2437,8 +4521,8 @@ final class NormalizeIsNotEquals extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class NormalizeLnAndLtrimLines extends FormatterPass {
+
+	final class NormalizeLnAndLtrimLines extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -2501,8 +4585,8 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class OrderUseClauses extends FormatterPass {
+
+	final class OrderUseClauses extends FormatterPass {
 	const SPLIT_COMMA = true;
 	const REMOVE_UNUSED = true;
 	const STRIP_BLANK_LINES = true;
@@ -2840,8 +4924,8 @@ final class OrderUseClauses extends FormatterPass {
 		return basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 	}
 }
-;
-final class Reindent extends FormatterPass {
+
+	final class Reindent extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -2941,8 +5025,8 @@ final class Reindent extends FormatterPass {
 	}
 
 }
-;
-final class ReindentColonBlocks extends FormatterPass {
+
+	final class ReindentColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DEFAULT]) || isset($foundTokens[T_CASE]) || isset($foundTokens[T_SWITCH])) {
 			return true;
@@ -3048,8 +5132,8 @@ final class ReindentColonBlocks extends FormatterPass {
 		}
 		return $this->code;
 	}
-};
-final class ReindentIfColonBlocks extends FormatterPass {
+}
+	final class ReindentIfColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_COLON])) {
 			return true;
@@ -3119,8 +5203,8 @@ final class ReindentIfColonBlocks extends FormatterPass {
 		}
 		return $this->code;
 	}
-};
-class ReindentAndAlignObjOps extends FormatterPass {
+}
+	class ReindentAndAlignObjOps extends FormatterPass {
 	const ALIGNABLE_OBJOP = "\x2 OBJOP%d.%d.%d \x3";
 
 	const ALIGN_WITH_INDENT = 1;
@@ -3507,8 +5591,8 @@ class ReindentAndAlignObjOps extends FormatterPass {
 		return false;
 	}
 }
-;
-final class ReindentLoopColonBlocks extends FormatterPass {
+
+	final class ReindentLoopColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_ENDWHILE]) || isset($foundTokens[T_ENDFOREACH]) || isset($foundTokens[T_ENDFOR])) {
 			return true;
@@ -3630,8 +5714,8 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		}
 		return $this->code;
 	}
-};
-final class ReindentObjOps extends ReindentAndAlignObjOps {
+}
+	final class ReindentObjOps extends ReindentAndAlignObjOps {
 	const ALIGN_WITH_INDENT = 1;
 
 	public function format($source) {
@@ -3793,8 +5877,8 @@ final class ReindentObjOps extends ReindentAndAlignObjOps {
 		return $this->code;
 	}
 }
-;
-final class RemoveIncludeParentheses extends FormatterPass {
+
+	final class RemoveIncludeParentheses extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_INCLUDE]) || isset($foundTokens[T_REQUIRE]) || isset($foundTokens[T_INCLUDE_ONCE]) || isset($foundTokens[T_REQUIRE_ONCE])) {
 			return true;
@@ -3850,8 +5934,8 @@ final class RemoveIncludeParentheses extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class ResizeSpaces extends FormatterPass {
+
+	final class ResizeSpaces extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -4266,8 +6350,8 @@ final class ResizeSpaces extends FormatterPass {
 
 	}
 }
-;
-final class RestoreComments extends FormatterPass {
+
+	final class RestoreComments extends FormatterPass {
 	// Injected by CodeFormatter.php
 	public $commentStack = [];
 
@@ -4296,16 +6380,16 @@ final class RestoreComments extends FormatterPass {
 		}
 		return $this->renderLight($this->tkns);
 	}
-};
-final class RTrim extends FormatterPass {
+}
+	final class RTrim extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
 	public function format($source) {
 		return preg_replace('/\h+$/mu', '', $source);
 	}
-};
-final class SettersAndGettersPass extends FormatterPass {
+}
+	final class SettersAndGettersPass extends FormatterPass {
 	const TYPE_CAMEL_CASE = 'camel';
 	const TYPE_SNAKE_CASE = 'snake';
 	const TYPE_GOLANG = 'golang';
@@ -4460,8 +6544,8 @@ final class SettersAndGettersPass extends FormatterPass {
 		}
 		each($this->tkns);
 	}
-};
-
+}
+	
 class SplitCurlyCloseAndTokens extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (!isset($foundTokens[ST_CURLY_CLOSE])) {
@@ -4581,8 +6665,8 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class StripExtraCommaInList extends FormatterPass {
+
+	final class StripExtraCommaInList extends FormatterPass {
 	const EMPTY_LIST = 'ST_EMPTY_LIST';
 
 	public function candidate($source, $foundTokens) {
@@ -4651,11 +6735,11 @@ final class StripExtraCommaInList extends FormatterPass {
 		}
 		return $this->renderLight();
 	}
-};
-final class SurrogateToken {
 }
-;
-final class TwoCommandsInSameLine extends FormatterPass {
+	final class SurrogateToken {
+}
+
+	final class TwoCommandsInSameLine extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -4714,9 +6798,9 @@ final class TwoCommandsInSameLine extends FormatterPass {
 		return $this->code;
 	}
 }
-;
 
-final class PSR1BOMMark extends FormatterPass {
+
+	final class PSR1BOMMark extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -4728,8 +6812,8 @@ final class PSR1BOMMark extends FormatterPass {
 		return $source;
 	}
 }
-;
-final class PSR1ClassConstants extends FormatterPass {
+
+	final class PSR1ClassConstants extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_CONST]) || isset($foundTokens[T_STRING])) {
 			return true;
@@ -4763,8 +6847,8 @@ final class PSR1ClassConstants extends FormatterPass {
 		}
 		return $this->code;
 	}
-};
-final class PSR1ClassNames extends FormatterPass {
+}
+	final class PSR1ClassNames extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_CLASS]) || isset($foundTokens[T_STRING])) {
 			return true;
@@ -4804,8 +6888,8 @@ final class PSR1ClassNames extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class PSR1MethodNames extends FormatterPass {
+
+	final class PSR1MethodNames extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_FUNCTION]) || isset($foundTokens[T_STRING]) || isset($foundTokens[ST_PARENTHESES_OPEN])) {
 			return true;
@@ -4870,8 +6954,8 @@ final class PSR1MethodNames extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class PSR1OpenTags extends FormatterPass {
+
+	final class PSR1OpenTags extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -4919,8 +7003,8 @@ final class PSR1OpenTags extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class PSR2AlignObjOp extends FormatterPass {
+
+	final class PSR2AlignObjOp extends FormatterPass {
 	const ALIGNABLE_TOKEN = "\x2 OBJOP%d \x3";
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_SEMI_COLON]) || isset($foundTokens[T_ARRAY]) || isset($foundTokens[T_DOUBLE_ARROW]) || isset($foundTokens[T_OBJECT_OPERATOR])) {
@@ -5002,8 +7086,8 @@ final class PSR2AlignObjOp extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class PSR2CurlyOpenNextLine extends FormatterPass {
+
+	final class PSR2CurlyOpenNextLine extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -5084,8 +7168,8 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class PSR2IndentWithSpace extends FormatterPass {
+
+	final class PSR2IndentWithSpace extends FormatterPass {
 	private $size = 4;
 
 	public function __construct($size = null) {
@@ -5116,8 +7200,8 @@ final class PSR2IndentWithSpace extends FormatterPass {
 		}
 		return $this->code;
 	}
-};
-final class PSR2KeywordsLowerCase extends FormatterPass {
+}
+	final class PSR2KeywordsLowerCase extends FormatterPass {
 	private static $reservedWords = [
 		'__halt_compiler' => 1,
 		'abstract' => 1, 'and' => 1, 'array' => 1, 'as' => 1,
@@ -5197,8 +7281,8 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 
 		return $this->code;
 	}
-};
-final class PSR2LnAfterNamespace extends FormatterPass {
+}
+	final class PSR2LnAfterNamespace extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
@@ -5246,8 +7330,8 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 
 		return $this->code;
 	}
-};
-final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
+}
+	final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -5392,8 +7476,8 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
+
+	final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -5422,8 +7506,8 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 		return rtrim($this->render()) . $this->newLine;
 	}
 }
-;
-final class PsrDecorator {
+
+	final class PsrDecorator {
 	public static function PSR1(CodeFormatter $fmt) {
 		$fmt->enablePass('PSR1OpenTags');
 		$fmt->enablePass('PSR1BOMMark');
@@ -5449,9 +7533,9 @@ final class PsrDecorator {
 		self::PSR1Naming($fmt);
 		self::PSR2($fmt);
 	}
-};
+}
 
-final class AddMissingParentheses extends AdditionalPass {
+	final class AddMissingParentheses extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NEW])) {
 			return true;
@@ -5504,8 +7588,8 @@ $a = new SomeClass();
 EOT;
 	}
 }
-;
-class AliasToMaster extends AdditionalPass {
+
+	class AliasToMaster extends AdditionalPass {
 	protected static $aliasList = [
 		'chop' => 'rtrim',
 		'close' => 'closedir',
@@ -5622,8 +7706,8 @@ EOT;
 	}
 
 }
-;
-final class AlignDoubleArrow extends AdditionalPass {
+
+	final class AlignDoubleArrow extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d.%d.%d \x3"; // level.levelentracecounter.counter
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DOUBLE_ARROW])) {
@@ -5777,8 +7861,8 @@ EOT;
 		}
 	}
 }
-;
-final class AlignDoubleSlashComments extends AdditionalPass {
+
+	final class AlignDoubleSlashComments extends AdditionalPass {
 	const ALIGNABLE_COMMENT = "\x2 COMMENT%d \x3";
 	/**
 	 * @codeCoverageIgnore
@@ -5862,8 +7946,8 @@ $ccc = 333;  // Comment 3
 ?>
 EOT;
 	}
-};
-final class AlignEquals extends AdditionalPass {
+}
+	final class AlignEquals extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
 	public function candidate($source, $foundTokens) {
 		return true;
@@ -5943,8 +8027,8 @@ $ccc = 333;
 ?>
 EOT;
 	}
-};
-final class AlignPHPCode extends AdditionalPass {
+}
+	final class AlignPHPCode extends AdditionalPass {
 	const PLACEHOLDER_STRING = "\x2 CONSTANT_STRING_%d \x3";
 
 	public function candidate($source, $foundTokens) {
@@ -6045,8 +8129,8 @@ final class AlignPHPCode extends AdditionalPass {
 EOT;
 	}
 }
-;
-final class AlignTypehint extends AdditionalPass {
+
+	final class AlignTypehint extends AdditionalPass {
 	const ALIGNABLE_TYPEHINT = "\x2 TYPEHINT%d \x3";
 
 	public function candidate($source, $foundTokens) {
@@ -6136,8 +8220,8 @@ function a(
 ?>
 EOT;
 	}
-};
-final class AllmanStyleBraces extends AdditionalPass {
+}
+	final class AllmanStyleBraces extends AdditionalPass {
 	const OTHER_BLOCK = '';
 
 	public function candidate($source, $foundTokens) {
@@ -6320,8 +8404,8 @@ if ($a)
 EOT;
 	}
 }
-;
-class AutoPreincrement extends AdditionalPass {
+
+	class AutoPreincrement extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_INC]) || isset($foundTokens[T_DEC])) {
 			return true;
@@ -6445,8 +8529,8 @@ func($a++);
 ?>
 EOT;
 	}
-};
-final class CakePHPStyle extends AdditionalPass {
+}
+	final class CakePHPStyle extends AdditionalPass {
 	private $foundTokens;
 
 	public function candidate($source, $foundTokens) {
@@ -6675,8 +8759,8 @@ class A {
 EOT;
 	}
 }
-;
-class ClassToSelf extends AdditionalPass {
+
+	class ClassToSelf extends AdditionalPass {
 	const PLACEHOLDER = 'self';
 
 	public function candidate($source, $foundTokens) {
@@ -6780,8 +8864,8 @@ class A {
 EOT;
 	}
 }
-;
-final class ClassToStatic extends ClassToSelf {
+
+	final class ClassToStatic extends ClassToSelf {
 	const PLACEHOLDER = 'static';
 
 	/**
@@ -6816,8 +8900,8 @@ class A {
 EOT;
 	}
 }
-;
-final class ConvertOpenTagWithEcho extends AdditionalPass {
+
+	final class ConvertOpenTagWithEcho extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_OPEN_TAG_WITH_ECHO])) {
 			return true;
@@ -6861,8 +8945,8 @@ final class ConvertOpenTagWithEcho extends AdditionalPass {
 EOT;
 	}
 }
-;
-// From PHP-CS-Fixer
+
+	// From PHP-CS-Fixer
 final class DocBlockToComment extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DOC_COMMENT])) {
@@ -7012,8 +9096,8 @@ final class DocBlockToComment extends AdditionalPass {
 EOT;
 	}
 
-};
-final class DoubleToSingleQuote extends AdditionalPass {
+}
+	final class DoubleToSingleQuote extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_CONSTANT_ENCAPSED_STRING])) {
 			return true;
@@ -7076,8 +9160,8 @@ EOT;
 		return $text;
 	}
 }
-;
-final class EncapsulateNamespaces extends AdditionalPass {
+
+	final class EncapsulateNamespaces extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
@@ -7147,8 +9231,8 @@ namespace NS1 {
 EOT;
 	}
 }
-;
-final class GeneratePHPDoc extends AdditionalPass {
+
+	final class GeneratePHPDoc extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_FUNCTION])) {
 			return true;
@@ -7318,8 +9402,8 @@ class A {
 EOT;
 	}
 }
-;
-final class IndentTernaryConditions extends AdditionalPass {
+
+	final class IndentTernaryConditions extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_QUESTION])) {
 			return true;
@@ -7376,8 +9460,8 @@ $a = ($b)
 ?>
 EOT;
 	}
-};
-final class JoinToImplode extends AliasToMaster {
+}
+	final class JoinToImplode extends AliasToMaster {
 	protected static $aliasList = [
 		'join' => 'implode',
 	];
@@ -7403,8 +9487,8 @@ EOT;
 	}
 
 }
-;
-final class LeftWordWrap extends AdditionalPass {
+
+	final class LeftWordWrap extends AdditionalPass {
 	const PLACEHOLDER_WORDWRAP = "\x2 WORDWRAP \x3";
 	private static $length = 80;
 	private static $tabSizeInSpace = 8;
@@ -7467,8 +9551,8 @@ final class LeftWordWrap extends AdditionalPass {
 	public function getExample() {
 		return '';
 	}
-};
-final class LongArray extends AdditionalPass {
+}
+	final class LongArray extends AdditionalPass {
 	const ST_SHORT_ARRAY_OPEN = 'SHORT_ARRAY_OPEN';
 	const EMPTY_ARRAY = 'ST_EMPTY_ARRAY';
 
@@ -7553,8 +9637,8 @@ $b = array($b, $c);
 ?>
 EOT;
 	}
-};
-/**
+}
+	/**
  * From PHP-CS-Fixer
  */
 final class MergeElseIf extends AdditionalPass {
@@ -7618,8 +9702,8 @@ if($a){
 EOT;
 	}
 }
-;
-final class MergeNamespaceWithOpenTag extends AdditionalPass {
+
+	final class MergeNamespaceWithOpenTag extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
@@ -7674,16 +9758,16 @@ namespace A;
 EOT;
 	}
 }
-;
-final class MildAutoPreincrement extends AutoPreincrement {
+
+	final class MildAutoPreincrement extends AutoPreincrement {
 	/**
 	 * @codeCoverageIgnore
 	 */
 	public function getDescription() {
 		return 'Automatically convert postincrement to preincrement. (Deprecated pass. Use AutoPreincrement instead).';
 	}
-};
-final class NoSpaceAfterPHPDocBlocks extends FormatterPass {
+}
+	final class NoSpaceAfterPHPDocBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DOC_COMMENT])) {
 			return true;
@@ -7740,8 +9824,8 @@ function a($myInt){
 ?>
 EOT;
 	}
-};
-final class OrderMethod extends AdditionalPass {
+}
+	final class OrderMethod extends AdditionalPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
 	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
 
@@ -7907,8 +9991,8 @@ class A {
 EOT;
 	}
 }
-;
-final class PrettyPrintDocBlocks extends AdditionalPass {
+
+	final class PrettyPrintDocBlocks extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DOC_COMMENT])) {
 			return true;
@@ -8173,8 +10257,8 @@ function A(array $b, LongTypeName $c) {
 ?>
 EOT;
 	}
-};
-final class PSR2EmptyFunction extends AdditionalPass {
+}
+	final class PSR2EmptyFunction extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_FUNCTION])) {
 			return true;
@@ -8234,8 +10318,8 @@ function a() {}
 EOT;
 	}
 }
-;
-final class PSR2MultilineFunctionParams extends AdditionalPass {
+
+	final class PSR2MultilineFunctionParams extends AdditionalPass {
 
 	const LINE_BREAK = "\x2 LN \x3";
 
@@ -8325,8 +10409,8 @@ function a(
 EOT;
 	}
 }
-;
-final class RemoveUseLeadingSlash extends AdditionalPass {
+
+	final class RemoveUseLeadingSlash extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE]) || isset($foundTokens[T_TRAIT]) || isset($foundTokens[T_CLASS]) || isset($foundTokens[T_FUNCTION]) || isset($foundTokens[T_NS_SEPARATOR])) {
 			return true;
@@ -8391,8 +10475,8 @@ new D();
 EOT;
 	}
 }
-;
-final class ReplaceBooleanAndOr extends AdditionalPass {
+
+	final class ReplaceBooleanAndOr extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_LOGICAL_AND]) || isset($foundTokens[T_LOGICAL_OR])) {
 			return true;
@@ -8439,8 +10523,8 @@ if ($a && $b || $c) {...}
 EOT;
 	}
 }
-;
-final class ReplaceIsNull extends AdditionalPass {
+
+	final class ReplaceIsNull extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -8489,8 +10573,8 @@ null === $a;
 EOT;
 	}
 }
-;
-final class ReturnNull extends AdditionalPass {
+
+	final class ReturnNull extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_RETURN])) {
 			return true;
@@ -8580,8 +10664,8 @@ function a(){
 EOT;
 	}
 }
-;
-/**
+
+	/**
  * From PHP-CS-Fixer
  */
 final class ShortArray extends AdditionalPass {
@@ -8651,8 +10735,8 @@ echo [];
 EOT;
 	}
 }
-;
-final class SmartLnAfterCurlyOpen extends AdditionalPass {
+
+	final class SmartLnAfterCurlyOpen extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_CURLY_OPEN])) {
 			return true;
@@ -8736,8 +10820,8 @@ if($a) {
 EOT;
 	}
 }
-;
-final class SpaceAroundControlStructures extends AdditionalPass {
+
+	final class SpaceAroundControlStructures extends AdditionalPass {
 
 	public function candidate($source, $foundTokens) {
 		if (
@@ -8831,8 +10915,8 @@ if ($b) {
 EOT;
 	}
 }
-;
-final class SpaceBetweenMethods extends AdditionalPass {
+
+	final class SpaceBetweenMethods extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_FUNCTION])) {
 			return true;
@@ -8903,8 +10987,8 @@ class A {
 EOT;
 	}
 }
-;
-/**
+
+	/**
  * From PHP-CS-Fixer
  */
 final class StrictBehavior extends AdditionalPass {
@@ -9004,8 +11088,8 @@ mb_detect_encoding($arr, 'UTF8', true);
 ?>
 EOT;
 	}
-};
-/**
+}
+	/**
  * From PHP-CS-Fixer
  */
 final class StrictComparison extends AdditionalPass {
@@ -9060,8 +11144,8 @@ if($a !== $b){}
 ?>
 EOT;
 	}
-};
-final class StripExtraCommaInArray extends AdditionalPass {
+}
+	final class StripExtraCommaInArray extends AdditionalPass {
 	const ST_SHORT_ARRAY_OPEN = 'SHORT_ARRAY_OPEN';
 	const EMPTY_ARRAY = 'ST_EMPTY_ARRAY';
 
@@ -9149,8 +11233,8 @@ $b = array($b, $c);
 ?>
 EOT;
 	}
-};
-/**
+}
+	/**
  * From PHP-CS-Fixer
  */
 final class StripNewlineAfterClassOpen extends AdditionalPass {
@@ -9216,8 +11300,8 @@ class A {
 ?>
 EOT;
 	}
-};
-final class StripNewlineAfterCurlyOpen extends AdditionalPass {
+}
+	final class StripNewlineAfterCurlyOpen extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_CURLY_OPEN])) {
 			return true;
@@ -9279,8 +11363,8 @@ for ($a = 0; $a < 10; $a++){
 ?>
 EOT;
 	}
-};
-final class StripSpaceWithinControlStructures extends AdditionalPass {
+}
+	final class StripSpaceWithinControlStructures extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 
 		if (
@@ -9396,8 +11480,8 @@ EOT;
 	}
 
 }
-;
-final class TightConcat extends AdditionalPass {
+
+	final class TightConcat extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_CONCAT])) {
 			return true;
@@ -9451,8 +11535,8 @@ $a = 'a'. 1 .'b';
 ?>
 EOT;
 	}
-};
-/*
+}
+	/*
 From PHP-CS-Fixer by Matteo Beccati
  */
 final class UpgradeToPreg extends AdditionalPass {
@@ -9602,8 +11686,8 @@ $var = preg_split("/[A-Z]/Di", $var);
 	}
 
 }
-;
-final class WordWrap extends AdditionalPass {
+
+	final class WordWrap extends AdditionalPass {
 	const ALIGNABLE_WORDWRAP = "\x2 WORDWRAP \x3";
 	private static $length = 80;
 	private static $tabSizeInSpace = 8;
@@ -9680,8 +11764,8 @@ final class WordWrap extends AdditionalPass {
 	public function getExample() {
 		return '';
 	}
-};
-final class WrongConstructorName extends AdditionalPass {
+}
+	final class WrongConstructorName extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE]) || isset($foundTokens[T_CLASS])) {
 			return true;
@@ -9781,8 +11865,8 @@ class A {
 ?>
 EOT;
 	}
-};
-final class YodaComparisons extends AdditionalPass {
+}
+	final class YodaComparisons extends AdditionalPass {
 	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
 	const CHAIN_LITERAL = 'CHAIN_LITERAL';
 	const CHAIN_FUNC = 'CHAIN_FUNC';
@@ -10016,9 +12100,9 @@ if(1 == $a){
 ?>
 EOT;
 	}
-};
+}
 
-final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
+	final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_EQUAL]) || isset($foundTokens[T_DOUBLE_ARROW])) {
 			return true;
@@ -10131,8 +12215,8 @@ final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 		return $seenBuckets;
 	}
 }
-;
-final class LaravelAllmanStyleBraces extends FormatterPass {
+
+	final class LaravelAllmanStyleBraces extends FormatterPass {
 	const OTHER_BLOCK = '';
 
 	public function candidate($source, $foundTokens) {
@@ -10288,8 +12372,8 @@ final class LaravelAllmanStyleBraces extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class LaravelDecorator {
+
+	final class LaravelDecorator {
 	public static function decorate(CodeFormatter &$fmt) {
 		$fmt->disablePass('AlignEquals');
 		$fmt->disablePass('AlignDoubleArrow');
@@ -10304,8 +12388,8 @@ final class LaravelDecorator {
 		$fmt->enablePass('AlignEqualsByConsecutiveBlocks');
 		$fmt->enablePass('EliminateDuplicatedEmptyLines');
 	}
-};
-final class NamespaceMergeWithOpenTag extends FormatterPass {
+}
+	final class NamespaceMergeWithOpenTag extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
@@ -10338,8 +12422,8 @@ final class NamespaceMergeWithOpenTag extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class NonDocBlockMinorCleanUp extends FormatterPass {
+
+	final class NonDocBlockMinorCleanUp extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_COMMENT])) {
 			return true;
@@ -10371,8 +12455,8 @@ final class NonDocBlockMinorCleanUp extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class NoSpaceBetweenFunctionAndBracket extends FormatterPass {
+
+	final class NoSpaceBetweenFunctionAndBracket extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_FUNCTION])) {
 			return true;
@@ -10404,8 +12488,8 @@ final class NoSpaceBetweenFunctionAndBracket extends FormatterPass {
 		return $this->code;
 	}
 }
-;
-final class SortUseNameSpace extends FormatterPass {
+
+	final class SortUseNameSpace extends FormatterPass {
 	private $pass = null;
 	public function __construct() {
 		$sortFunction = function ($useStack) {
@@ -10427,8 +12511,8 @@ final class SortUseNameSpace extends FormatterPass {
 		return $this->pass->format($source);
 	}
 }
-;
-final class SpaceAroundExclamationMark extends FormatterPass {
+
+	final class SpaceAroundExclamationMark extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_EXCLAMATION])) {
 			return true;
@@ -10456,13 +12540,12 @@ final class SpaceAroundExclamationMark extends FormatterPass {
 		return $this->code;
 	}
 }
-;
 
-if (!isset($inPhar)) {
-	$inPhar = false;
-}
-if (!isset($testEnv)) {
-	function showHelp($argv, $enableCache, $inPhar) {
+	if (!isset($inPhar)) {
+		$inPhar = false;
+	}
+	if (!isset($testEnv)) {
+		function showHelp($argv, $enableCache, $inPhar) {
 	echo 'Usage: ' . $argv[0] . ' [-hv] [-o=FILENAME] [--config=FILENAME] ' . ($enableCache ? '[--cache[=FILENAME]] ' : '') . '[options] <target>', PHP_EOL;
 	$options = [
 		'--cache[=FILENAME]' => 'cache file. Default: ',
@@ -10877,6 +12960,7 @@ if (isset($opts['i'])) {
 			rename($file . '-tmp', $file);
 		} elseif (is_dir($arg)) {
 			fwrite(STDERR, $arg . PHP_EOL);
+
 			$target_dir = $arg;
 			$dir = new RecursiveDirectoryIterator($target_dir);
 			$it = new RecursiveIteratorIterator($dir);
@@ -10928,7 +13012,13 @@ if (isset($opts['i'])) {
 				}
 			}
 
+			$progress = new \Symfony\Component\Console\Helper\ProgressBar(
+				new \Symfony\Component\Console\Output\StreamOutput(fopen('php://stderr', 'w')),
+				sizeof(iterator_to_array($files))
+			);
+			$progress->start();
 			foreach ($files as $file) {
+				$progress->advance();
 				$file = $file[0];
 				if (null !== $ignore_list) {
 					foreach ($ignore_list as $pattern) {
@@ -10980,6 +13070,9 @@ if (isset($opts['i'])) {
 				$chn_done->close();
 				$chn->close();
 			}
+			$progress->finish();
+			fwrite(STDERR, PHP_EOL);
+
 			continue;
 		} elseif (
 			!is_file($arg) &&
@@ -11005,7 +13098,6 @@ if (isset($opts['i'])) {
 			fwrite(STDERR, "\t - " . $file . PHP_EOL);
 		}
 	}
-
 	if ($fileNotFound) {
 		exit(255);
 	}
@@ -11013,5 +13105,7 @@ if (isset($opts['i'])) {
 	showHelp($argv, $enableCache, $inPhar);
 }
 exit(0);
-;
+
+	}
+
 }

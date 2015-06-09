@@ -235,7 +235,7 @@ function select_channel(array $actions) {
 		}
 	}
 }
-;
+
 }
 
 if (version_compare(phpversion(), '5.6.0', '<')) {

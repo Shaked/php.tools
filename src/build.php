@@ -4,9 +4,12 @@ if (ini_get('phar.readonly')) {
 	passthru($_SERVER['_'] . ' -dphar.readonly=0 build.php ' . implode(' ', $argv) . ' 2>&1');
 	exit(0);
 }
-include 'vendor/dericofilho/csp/csp.php';
-include 'Core/FormatterPass.php';
-include 'version.php';
+require 'vendor/dericofilho/csp/csp.php';
+require 'Core/constants.php';
+require 'Core/FormatterPass.php';
+require 'Additionals/AdditionalPass.php';
+require 'Additionals/EncapsulateNamespaces.php';
+require 'version.php';
 
 error_reporting(E_ALL);
 $opt = getopt('Mmp');
@@ -36,20 +39,52 @@ class Build extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$curlyStack = [];
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_NAMESPACE:
+					if ($this->rightUsefulTokenIs(T_STRING)) {
+						list($rId, $rText) = $this->rightUsefulToken();
+						if ('Extern' == $rText) {
+							$this->walkUntil(ST_CURLY_OPEN);
+							$curlyStack[] = T_NAMESPACE;
+							continue;
+						}
+					}
+					$this->appendCode($text);
+					break;
+
+				case ST_CURLY_OPEN:
+				case T_CURLY_OPEN:
+				case T_DOLLAR_OPEN_CURLY_BRACES:
+					$curlyStack[] = $id;
+					$this->appendCode($text);
+					break;
+
+				case ST_CURLY_CLOSE;
+					$foundId = array_pop($curlyStack);
+					if (T_NAMESPACE == $foundId) {
+						continue;
+					}
+					$this->appendCode($text);
+					break;
+
 				case T_REQUIRE:
 					list($id, $text) = $this->walkUntil(T_CONSTANT_ENCAPSED_STRING);
 					$fn = str_replace(['"', "'"], '', $text);
 					if (!empty($suffix)) {
 						$fn = str_replace('.php', '_' . $suffix . '.php', $fn);
 					}
-					$included = token_get_all(file_get_contents(str_replace(['"', "'"], '', $fn)));
+
+					$source = file_get_contents(str_replace(['"', "'"], '', $fn));
+					$source = (new EncapsulateNamespaces())->format($source);
+					$included = token_get_all($source);
 					if (T_OPEN_TAG == $included[0][0]) {
 						unset($included[0]);
 					}
@@ -61,6 +96,7 @@ class Build extends FormatterPass {
 						}
 						$this->appendCode($text);
 					}
+					$this->walkUntil(ST_SEMI_COLON);
 					break;
 				default:
 					$this->appendCode($text);

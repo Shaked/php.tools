@@ -414,6 +414,7 @@ if (isset($opts['i'])) {
 			rename($file . '-tmp', $file);
 		} elseif (is_dir($arg)) {
 			fwrite(STDERR, $arg . PHP_EOL);
+
 			$target_dir = $arg;
 			$dir = new RecursiveDirectoryIterator($target_dir);
 			$it = new RecursiveIteratorIterator($dir);
@@ -465,7 +466,13 @@ if (isset($opts['i'])) {
 				}
 			}
 
+			$progress = new \Symfony\Component\Console\Helper\ProgressBar(
+				new \Symfony\Component\Console\Output\StreamOutput(fopen('php://stderr', 'w')),
+				sizeof(iterator_to_array($files))
+			);
+			$progress->start();
 			foreach ($files as $file) {
+				$progress->advance();
 				$file = $file[0];
 				if (null !== $ignore_list) {
 					foreach ($ignore_list as $pattern) {
@@ -517,6 +524,9 @@ if (isset($opts['i'])) {
 				$chn_done->close();
 				$chn->close();
 			}
+			$progress->finish();
+			fwrite(STDERR, PHP_EOL);
+
 			continue;
 		} elseif (
 			!is_file($arg) &&
@@ -542,7 +552,6 @@ if (isset($opts['i'])) {
 			fwrite(STDERR, "\t - " . $file . PHP_EOL);
 		}
 	}
-
 	if ($fileNotFound) {
 		exit(255);
 	}

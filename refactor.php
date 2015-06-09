@@ -70,7 +70,7 @@ if (!defined('T_COALESCE')) {
 
 define('ST_PARENTHESES_BLOCK', 'ST_PARENTHESES_BLOCK');
 define('ST_BRACKET_BLOCK', 'ST_BRACKET_BLOCK');
-define('ST_CURLY_BLOCK', 'ST_CURLY_BLOCK');;
+define('ST_CURLY_BLOCK', 'ST_CURLY_BLOCK');
 
 //FormatterPass holds all data structures necessary to traverse a stream of
 //tokens, following the concept of bottom-up it works as a platform on which
@@ -914,7 +914,7 @@ abstract class FormatterPass {
 		++$ptr;
 	}
 }
-;
+
 final class RefactorPass extends FormatterPass {
 	private $from;
 	private $to;
@@ -1029,7 +1029,7 @@ final class RefactorPass extends FormatterPass {
 		}
 		return str_replace($fromStr, $toStr, $buffer);
 	}
-};
+}
 
 final class CodeFormatter {
 	private $passes = [];
