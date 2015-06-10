@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 if (version_compare(phpversion(), '5.6.0', '<')) {

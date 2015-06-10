@@ -160,5 +160,4 @@ namespace {
 	if (!isset($testEnv)) {
 		require 'cli.php';
 	}
-
 }
