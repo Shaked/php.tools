@@ -2416,7 +2416,7 @@ final class Cache {
 
 	}
 
-	define("VERSION", "8.8.0");
+	define("VERSION", "8.8.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
