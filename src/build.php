@@ -147,7 +147,7 @@ $chn_done->close();
 echo 'Building PHARs...';
 $phars = ['fmt', 'refactor'];
 foreach ($phars as $target) {
-	file_put_contents($target . '.stub.php', '<?php namespace {$inPhar = true;} '.str_replace('<?php', '', file_get_contents($target . '.stub.php')));
+	file_put_contents($target . '.stub.php', '<?php namespace {$inPhar = true;} ' . preg_replace('/' . preg_quote('<?php') . '/', '', file_get_contents($target . '.stub.php'), 1));
 	$phar = new Phar($target . '.phar', FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::KEY_AS_FILENAME, $target . '.phar');
 	$phar[$target . '.stub.php'] = file_get_contents($target . '.stub.php');
 	$phar->setStub('#!/usr/bin/env php' . "\n" . $phar->createDefaultStub($target . '.stub.php'));
