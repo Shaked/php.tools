@@ -2,9 +2,7 @@
 /**
  * @codeCoverageIgnore
  */
-final class Cache {
-	const DEFAULT_CACHE_FILENAME = '.php.tools.cache';
-
+final class Cache implements Cacher {
 	private $noop = false;
 
 	private $db;

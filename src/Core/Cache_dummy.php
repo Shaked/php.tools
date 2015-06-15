@@ -2,7 +2,7 @@
 /**
  * @codeCoverageIgnore
  */
-final class Cache {
+final class Cache implements Cacher {
 	public function create_db() {}
 
 	public function upsert($target, $filename, $content) {}

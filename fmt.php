@@ -2320,15 +2320,20 @@ function select_channel(array $actions) {
 }
 
 	}
+	interface Cacher {
+	const DEFAULT_CACHE_FILENAME = '.php.tools.cache';
+	public function create_db();
+	public function upsert($target, $filename, $content);
+	public function is_changed($target, $filename);
+}
+
 	$enableCache = false;
 	if (class_exists('SQLite3')) {
 		$enableCache = true;
 		/**
  * @codeCoverageIgnore
  */
-final class Cache {
-	const DEFAULT_CACHE_FILENAME = '.php.tools.cache';
-
+final class Cache implements Cacher {
 	private $noop = false;
 
 	private $db;
@@ -2404,7 +2409,7 @@ final class Cache {
 		/**
  * @codeCoverageIgnore
  */
-final class Cache {
+final class Cache implements Cacher {
 	public function create_db() {}
 
 	public function upsert($target, $filename, $content) {}
@@ -2416,7 +2421,7 @@ final class Cache {
 
 	}
 
-	define("VERSION", "8.8.2");
+	define("VERSION", "8.8.3");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -12580,10 +12585,9 @@ EOT;
 		$options['--selfupdate'] = 'self-update fmt.phar from Github';
 		$options['--version'] = 'version';
 	}
+	$options['--cache[=FILENAME]'] .= (Cacher::DEFAULT_CACHE_FILENAME);
 	if (!$enableCache) {
 		unset($options['--cache[=FILENAME]']);
-	} else {
-		$options['--cache[=FILENAME]'] .= (Cache::DEFAULT_CACHE_FILENAME);
 	}
 	ksort($options);
 	$maxLen = max(array_map(function ($v) {

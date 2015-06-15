@@ -34,10 +34,9 @@ function showHelp($argv, $enableCache, $inPhar) {
 		$options['--selfupdate'] = 'self-update fmt.phar from Github';
 		$options['--version'] = 'version';
 	}
+	$options['--cache[=FILENAME]'] .= (Cacher::DEFAULT_CACHE_FILENAME);
 	if (!$enableCache) {
 		unset($options['--cache[=FILENAME]']);
-	} else {
-		$options['--cache[=FILENAME]'] .= (Cache::DEFAULT_CACHE_FILENAME);
 	}
 	ksort($options);
 	$maxLen = max(array_map(function ($v) {

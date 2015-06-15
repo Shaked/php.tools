@@ -33,6 +33,7 @@ namespace {
 	if ($concurrent) {
 		require 'vendor/dericofilho/csp/csp.php';
 	}
+	require 'Core/Cacher.php';
 	$enableCache = false;
 	if (class_exists('SQLite3')) {
 		$enableCache = true;
