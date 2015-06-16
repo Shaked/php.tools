@@ -12,6 +12,9 @@ abstract class BaseCodeFormatter {
 	];
 
 	private $passes = [
+		'UpdateVisibility' => false,
+		'TranslateNativeCalls' => false,
+
 		'ReplaceBooleanAndOr' => false,
 		'RTrim' => false,
 		'WordWrap' => false,

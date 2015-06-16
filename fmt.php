@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "8.8.3");
+	define("VERSION", "8.8.4");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -3435,6 +3435,9 @@ abstract class BaseCodeFormatter {
 	];
 
 	private $passes = [
+		'UpdateVisibility' => false,
+		'TranslateNativeCalls' => false,
+
 		'ReplaceBooleanAndOr' => false,
 		'RTrim' => false,
 		'WordWrap' => false,
@@ -12546,6 +12549,128 @@ EOT;
 	}
 }
 
+
+	final class Php2GoDecorator {
+	public static function decorate(CodeFormatter $fmt) {
+		$fmt->enablePass('TranslateNativeCalls');
+		$fmt->enablePass('UpdateVisibility');
+	}
+}
+	class TranslateNativeCalls extends FormatterPass {
+	protected static $aliasList = [
+		'sprintf' => 'fmt::Sprintf',
+	];
+
+	private $touchedEmptyNs = false;
+
+	public function candidate($source, $foundTokens) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			$this->checkIfEmptyNS($id);
+			switch ($id) {
+				case T_STRING:
+				case T_EXIT:
+					if (isset(static::$aliasList[strtolower($text)])) {
+						prev($this->tkns);
+						return true;
+					}
+			}
+			$this->appendCode($text);
+		}
+		return false;
+	}
+
+	public function format($source) {
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			$this->checkIfEmptyNS($id);
+			if (
+				(T_STRING == $id || T_EXIT == $id) &&
+				isset(static::$aliasList[strtolower($text)]) &&
+				(
+					!(
+						$this->leftUsefulTokenIs([
+							T_NEW,
+							T_NS_SEPARATOR,
+							T_STRING,
+							T_DOUBLE_COLON,
+							T_OBJECT_OPERATOR,
+							T_FUNCTION,
+						]) ||
+						$this->rightUsefulTokenIs([
+							T_NS_SEPARATOR,
+							T_DOUBLE_COLON,
+						])
+					)
+					||
+					(
+						$this->leftUsefulTokenIs([
+							T_NS_SEPARATOR,
+						]) &&
+						$this->touchedEmptyNs
+					)
+				)
+			) {
+				$this->appendCode(static::$aliasList[strtolower($text)]);
+				continue;
+			}
+			$this->appendCode($text);
+		}
+
+		return $this->code;
+	}
+
+	private function checkIfEmptyNS($id) {
+		if (T_NS_SEPARATOR != $id) {
+			return;
+		}
+
+		$this->touchedEmptyNs = !$this->leftUsefulTokenIs(T_STRING);
+	}
+
+}
+
+	class UpdateVisibility extends FormatterPass {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_PRIVATE]) || isset($foundTokens[T_PROTECTED]) || isset($foundTokens[T_PUBLIC])) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+
+			if (T_PUBLIC == $id) {
+				$this->walkUntil(T_STRING);
+				list(, $text) = $this->inspectToken(0);
+				$this->appendCode('function ' . ucfirst($text));
+				continue;
+			} elseif (T_PROTECTED == $id || T_PRIVATE == $id) {
+				$this->walkUntil(T_STRING);
+				list(, $text) = $this->inspectToken(0);
+				$this->appendCode('function ' . lcfirst($text));
+				continue;
+			}
+
+			$this->appendCode($text);
+		}
+
+		return $this->code;
+	}
+}
+
+
 	if (!isset($inPhar)) {
 		$inPhar = false;
 	}
@@ -12618,6 +12743,7 @@ $getoptLongOptions = [
 	'no-backup',
 	'oracleDB::',
 	'passes:',
+	'php2go',
 	'profile:',
 	'psr',
 	'psr1',
@@ -12872,6 +12998,11 @@ if (isset($opts['laravel'])) {
 if (isset($opts['cakephp'])) {
 	$fmt->enablePass('CakePHPStyle');
 	$argv = extractFromArgv($argv, 'cakephp');
+}
+
+if (isset($opts['php2go'])) {
+	Php2GoDecorator::decorate($fmt);
+	$argv = extractFromArgv($argv, 'php2go');
 }
 
 if (isset($opts['exclude'])) {

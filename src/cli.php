@@ -67,6 +67,7 @@ $getoptLongOptions = [
 	'no-backup',
 	'oracleDB::',
 	'passes:',
+	'php2go',
 	'profile:',
 	'psr',
 	'psr1',
@@ -321,6 +322,11 @@ if (isset($opts['laravel'])) {
 if (isset($opts['cakephp'])) {
 	$fmt->enablePass('CakePHPStyle');
 	$argv = extractFromArgv($argv, 'cakephp');
+}
+
+if (isset($opts['php2go'])) {
+	Php2GoDecorator::decorate($fmt);
+	$argv = extractFromArgv($argv, 'php2go');
 }
 
 if (isset($opts['exclude'])) {
