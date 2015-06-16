@@ -1,0 +1,2 @@
+<?php
+fmt::Sprintf("%s", $b);
