@@ -9,4 +9,7 @@ class A {
 	function foo3() {
 
 	}
+	function Foo4() {
+
+	}
 }

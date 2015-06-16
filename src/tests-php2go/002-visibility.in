@@ -9,4 +9,7 @@ class A {
 	protected function Foo3() {
 
 	}
+	static public function foo4() {
+
+	}
 }
