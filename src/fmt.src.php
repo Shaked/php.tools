@@ -156,6 +156,7 @@ namespace {
 	require 'Laravel/SortUseNamespace.php';
 	require 'Laravel/SpaceAroundExclamationMark.php';
 
+	require 'Php2Go/ExtractMethods.php';
 	require 'Php2Go/Php2GoDecorator.php';
 	require 'Php2Go/TranslateNativeCalls.php';
 	require 'Php2Go/UpdateVisibility.php';

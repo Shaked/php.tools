@@ -12,6 +12,7 @@ abstract class BaseCodeFormatter {
 	];
 
 	private $passes = [
+		'ExtractMethods' => false,
 		'UpdateVisibility' => false,
 		'TranslateNativeCalls' => false,
 

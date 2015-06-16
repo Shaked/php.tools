@@ -4,5 +4,6 @@ final class Php2GoDecorator {
 		$fmt->enablePass('PSR2ModifierVisibilityStaticOrder');
 		$fmt->enablePass('TranslateNativeCalls');
 		$fmt->enablePass('UpdateVisibility');
+		$fmt->enablePass('ExtractMethods');
 	}
 }
