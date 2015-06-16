@@ -3,4 +3,10 @@ class A {
 	function Foo() {
 
 	}
+	function foo2() {
+
+	}
+	function foo3() {
+
+	}
 }

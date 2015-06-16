@@ -3,4 +3,10 @@ class A {
 	public function foo() {
 
 	}
+	private function Foo2() {
+
+	}
+	protected function Foo3() {
+
+	}
 }
