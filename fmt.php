@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "8.8.4");
+	define("VERSION", "8.9.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -3435,6 +3435,7 @@ abstract class BaseCodeFormatter {
 	];
 
 	private $passes = [
+		'ExtractMethods' => false,
 		'UpdateVisibility' => false,
 		'TranslateNativeCalls' => false,
 
@@ -3549,6 +3550,7 @@ abstract class BaseCodeFormatter {
 		'ClassToStatic' => false,
 		'PSR2MultilineFunctionParams' => false,
 		'SpaceAroundControlStructures' => false,
+		'AutoSemicolon' => false,
 	];
 
 	public function __construct() {
@@ -8538,6 +8540,96 @@ func($a++);
 EOT;
 	}
 }
+	final class AutoSemicolon extends AdditionalPass {
+	public function candidate($source, $foundTokens) {
+		return true;
+	}
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+				case T_WHITESPACE:
+					if (!$this->hasLn($text)) {
+						$this->appendCode($text);
+						continue;
+					}
+
+					if (
+						$this->leftUsefulTokenIs([
+							ST_PARENTHESES_OPEN,
+							ST_PARENTHESES_CLOSE,
+							ST_CURLY_OPEN,
+							ST_CURLY_CLOSE,
+							ST_BRACKET_OPEN,
+							ST_BRACKET_CLOSE,
+							ST_SEMI_COLON,
+							ST_COMMA,
+							T_OPEN_TAG,
+						]) ||
+						$this->leftTokenIs([
+							T_COMMENT,
+							T_DOC_COMMENT,
+						])
+					) {
+						$this->appendCode($text);
+						continue;
+					}
+					if (
+						$this->rightUsefulTokenIs([
+							ST_PARENTHESES_OPEN,
+							ST_PARENTHESES_CLOSE,
+							ST_CURLY_OPEN,
+							ST_BRACKET_OPEN,
+							ST_BRACKET_CLOSE,
+							ST_SEMI_COLON,
+							ST_COMMA,
+						]) ||
+						$this->rightTokenIs([
+							T_COMMENT,
+							T_DOC_COMMENT,
+						])
+					) {
+						$this->appendCode($text);
+						continue;
+					}
+					$this->appendCode(ST_SEMI_COLON . $text);
+					break;
+				default:
+					$this->appendCode($text);
+					break;
+			}
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Beta - Add semicolons in statements ends.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+// From
+$a = new SomeClass()
+
+// To
+$a = new SomeClass();
+?>
+EOT;
+	}
+}
+
 	final class CakePHPStyle extends AdditionalPass {
 	private $foundTokens;
 
@@ -12550,10 +12642,59 @@ EOT;
 }
 
 
+	class ExtractMethods extends FormatterPass {
+	private $functionStack = [];
+
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_FUNCTION])) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+
+			if (T_CLASS == $id) {
+				$this->appendCode($text);
+				$this->walkUntil(T_STRING);
+
+				list(, $className) = $this->inspectToken(0);
+				$this->appendCode(' ' . $className);
+
+				$this->walkUntil(ST_CURLY_OPEN);
+				$this->appendCode(' ' . ST_CURLY_OPEN);
+
+				$startPtr = $this->ptr;
+				$endPtr = $this->ptr;
+				$this->refWalkCurlyBlock($this->tkns, $endPtr);
+
+				// $this->extractMethodsFrom($className, $startPtr, $endPtr);
+				continue;
+			}
+
+			$this->appendCode($text);
+		}
+
+		return $this->code;
+	}
+
+	private function extractMethodsFrom($className, $startPtr, $endPtr) {
+		echo $className, ' ', $startPtr, ' <-> ', $endPtr;
+	}
+}
+
 	final class Php2GoDecorator {
 	public static function decorate(CodeFormatter $fmt) {
+		$fmt->enablePass('PSR2ModifierVisibilityStaticOrder');
 		$fmt->enablePass('TranslateNativeCalls');
 		$fmt->enablePass('UpdateVisibility');
+		$fmt->enablePass('ExtractMethods');
 	}
 }
 	class TranslateNativeCalls extends FormatterPass {
