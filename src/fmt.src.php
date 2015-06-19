@@ -107,6 +107,7 @@ namespace {
 	require 'Additionals/AlignTypehint.php';
 	require 'Additionals/AllmanStyleBraces.php';
 	require 'Additionals/AutoPreincrement.php';
+	require 'Additionals/AutoSemicolon.php';
 	require 'Additionals/CakePHPStyle.php';
 	require 'Additionals/ClassToSelf.php';
 	require 'Additionals/ClassToStatic.php';

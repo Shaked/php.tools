@@ -127,6 +127,7 @@ abstract class BaseCodeFormatter {
 		'ClassToStatic' => false,
 		'PSR2MultilineFunctionParams' => false,
 		'SpaceAroundControlStructures' => false,
+		'AutoSemicolon' => false,
 	];
 
 	public function __construct() {
