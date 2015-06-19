@@ -27,6 +27,7 @@ final class AutoSemicolon extends AdditionalPass {
 							ST_BRACKET_CLOSE,
 							ST_SEMI_COLON,
 							ST_COMMA,
+							T_OPEN_TAG,
 						]) ||
 						$this->leftTokenIs([
 							T_COMMENT,
