@@ -7,6 +7,7 @@ final class ReindentIfColonBlocks extends FormatterPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -53,6 +54,10 @@ final class ReindentIfColonBlocks extends FormatterPass {
 							break;
 						}
 					}
+					break;
+				case T_END_HEREDOC:
+					$this->code = rtrim($this->code, " \t");
+					$this->appendCode($text);
 					break;
 				default:
 					$hasLn = $this->hasLn($text);

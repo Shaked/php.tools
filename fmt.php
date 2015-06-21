@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.0.0");
+	define("VERSION", "9.0.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -5151,6 +5151,7 @@ final class AutoImportPass extends FormatterPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -5197,6 +5198,10 @@ final class AutoImportPass extends FormatterPass {
 							break;
 						}
 					}
+					break;
+				case T_END_HEREDOC:
+					$this->code = rtrim($this->code, " \t");
+					$this->appendCode($text);
 					break;
 				default:
 					$hasLn = $this->hasLn($text);
