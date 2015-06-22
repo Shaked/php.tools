@@ -55,9 +55,9 @@ final class ReindentIfColonBlocks extends FormatterPass {
 						}
 					}
 					break;
-				case T_END_HEREDOC:
-					$this->code = rtrim($this->code, " \t");
+				case T_START_HEREDOC:
 					$this->appendCode($text);
+					$this->printUntil(T_END_HEREDOC);
 					break;
 				default:
 					$hasLn = $this->hasLn($text);
