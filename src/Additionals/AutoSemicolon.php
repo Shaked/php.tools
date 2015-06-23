@@ -11,6 +11,30 @@ final class AutoSemicolon extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case ST_PARENTHESES_OPEN:
+					$this->appendCode($text);
+					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+					if ($this->rightUsefulTokenIs(ST_SEMI_COLON)) {
+						$this->printUntil(ST_SEMI_COLON);
+						break;
+					}
+					if (!$this->rightUsefulTokenIs([ST_CURLY_OPEN])) {
+						$this->appendCode(ST_SEMI_COLON);
+						$this->printUntil(T_WHITESPACE);
+					}
+					break;
+				case ST_BRACKET_OPEN:
+					$this->appendCode($text);
+					$this->printBlock(ST_BRACKET_OPEN, ST_BRACKET_CLOSE);
+					if ($this->rightUsefulTokenIs(ST_SEMI_COLON)) {
+						$this->printUntil(ST_SEMI_COLON);
+						break;
+					}
+					if (!$this->rightUsefulTokenIs([ST_CURLY_OPEN])) {
+						$this->appendCode(ST_SEMI_COLON);
+						$this->printUntil(T_WHITESPACE);
+					}
+					break;
 				case T_WHITESPACE:
 					if (!$this->hasLn($text)) {
 						$this->appendCode($text);
@@ -34,7 +58,6 @@ final class AutoSemicolon extends AdditionalPass {
 							T_ARRAY,
 							T_ARRAY_CAST,
 							T_AS,
-							T_BAD_CHARACTER,
 							T_BOOL_CAST,
 							T_BOOLEAN_AND,
 							T_BOOLEAN_OR,
