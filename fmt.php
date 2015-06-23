@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.0.2");
+	define("VERSION", "9.1.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -8571,6 +8571,7 @@ EOT;
 							ST_CURLY_CLOSE,
 							ST_BRACKET_OPEN,
 							ST_BRACKET_CLOSE,
+							ST_COLON,
 							ST_SEMI_COLON,
 							ST_COMMA,
 							T_OPEN_TAG,
@@ -8592,6 +8593,7 @@ EOT;
 							ST_BRACKET_CLOSE,
 							ST_SEMI_COLON,
 							ST_COMMA,
+							ST_COLON,
 						]) ||
 						$this->rightTokenIs([
 							T_COMMENT,
