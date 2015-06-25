@@ -2421,8 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.2.0");
-
+	define("VERSION", "9.2.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -8598,6 +8597,7 @@ EOT;
 							ST_CONCAT,
 							ST_CURLY_CLOSE,
 							ST_CURLY_OPEN,
+							ST_EQUAL,
 							ST_PARENTHESES_CLOSE,
 							ST_PARENTHESES_OPEN,
 							ST_SEMI_COLON,
