@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.2.1");
+	define("VERSION", "9.2.2");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -8558,30 +8558,6 @@ EOT;
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case ST_PARENTHESES_OPEN:
-					$this->appendCode($text);
-					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-					if ($this->rightUsefulTokenIs([ST_SEMI_COLON, ST_EQUAL])) {
-						$this->printUntilAny([ST_SEMI_COLON, ST_EQUAL]);
-						break;
-					}
-					if (!$this->rightUsefulTokenIs([ST_CURLY_OPEN])) {
-						$this->appendCode(ST_SEMI_COLON);
-						$this->printUntil(T_WHITESPACE);
-					}
-					break;
-				case ST_BRACKET_OPEN:
-					$this->appendCode($text);
-					$this->printBlock(ST_BRACKET_OPEN, ST_BRACKET_CLOSE);
-					if ($this->rightUsefulTokenIs([ST_SEMI_COLON, ST_EQUAL])) {
-						$this->printUntilAny([ST_SEMI_COLON, ST_EQUAL]);
-						break;
-					}
-					if (!$this->rightUsefulTokenIs([ST_CURLY_OPEN])) {
-						$this->appendCode(ST_SEMI_COLON);
-						$this->printUntil(T_WHITESPACE);
-					}
-					break;
 				case T_WHITESPACE:
 					if (!$this->hasLn($text)) {
 						$this->appendCode($text);
@@ -8590,7 +8566,6 @@ EOT;
 
 					if (
 						$this->leftUsefulTokenIs([
-							ST_BRACKET_CLOSE,
 							ST_BRACKET_OPEN,
 							ST_COLON,
 							ST_COMMA,
@@ -8598,7 +8573,6 @@ EOT;
 							ST_CURLY_CLOSE,
 							ST_CURLY_OPEN,
 							ST_EQUAL,
-							ST_PARENTHESES_CLOSE,
 							ST_PARENTHESES_OPEN,
 							ST_SEMI_COLON,
 							T_ABSTRACT,

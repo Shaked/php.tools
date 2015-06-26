@@ -9,3 +9,4 @@ foreach($a as $v)
 }
 
 echo [$a]
+
