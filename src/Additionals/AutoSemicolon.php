@@ -135,6 +135,7 @@ final class AutoSemicolon extends AdditionalPass {
 							ST_SEMI_COLON,
 							ST_COMMA,
 							ST_COLON,
+							ST_CONCAT,
 						]) ||
 						$this->rightTokenIs([
 							T_COMMENT,
