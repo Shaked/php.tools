@@ -1,14 +1,5 @@
 <?php
-class AlignDoubleArrow extends AdditionalPass {
-	const ALIGNABLE_EQUAL = "\x2 EQUAL%d.%d.%d \x3"; // level.levelentracecounter.counter
-	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_DOUBLE_ARROW])) {
-			return true;
-		}
-
-		return false;
-	}
-
+final class AlignGroupDoubleArrow extends AlignDoubleArrow {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -50,6 +41,23 @@ class AlignDoubleArrow extends AdditionalPass {
 					);
 					break;
 
+				case T_WHITESPACE:
+					if ($this->hasLn($text) && substr_count($text, PHP_EOL) >= 2) {
+						++$levelCounter;
+						if (!isset($levelEntranceCounter[$levelCounter])) {
+							$levelEntranceCounter[$levelCounter] = 0;
+						}
+						++$levelEntranceCounter[$levelCounter];
+						if (!isset($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
+							$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+							$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+						}
+						++$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
+						$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = max($maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]);
+					}
+					$this->appendCode($text);
+					break;
+
 				case ST_PARENTHESES_OPEN:
 				case ST_BRACKET_OPEN:
 					++$levelCounter;
@@ -87,7 +95,7 @@ class AlignDoubleArrow extends AdditionalPass {
 	 * @codeCoverageIgnore
 	 */
 	public function getDescription() {
-		return 'Vertically align T_DOUBLE_ARROW (=>).';
+		return 'Vertically align T_DOUBLE_ARROW (=>) by line groups.';
 	}
 
 	/**
@@ -99,57 +107,19 @@ class AlignDoubleArrow extends AdditionalPass {
 $a = [
 	1 => 1,
 	22 => 22,
+
 	333 => 333,
+	4444 => 4444,
 ];
 
 $a = [
-	1   => 1,
-	22  => 22,
-	333 => 333,
+	1  => 1,
+	22 => 22,
+
+	333  => 333,
+	4444 => 4444,
 ];
 ?>
 EOT;
-	}
-
-	protected function align($maxContextCounter) {
-		foreach ($maxContextCounter as $level => $entrances) {
-			foreach ($entrances as $entrance => $context) {
-				for ($j = 0; $j <= $context; ++$j) {
-					$placeholder = sprintf(self::ALIGNABLE_EQUAL, $level, $entrance, $j);
-					if (false === strpos($this->code, $placeholder)) {
-						continue;
-					}
-					if (1 === substr_count($this->code, $placeholder)) {
-						$this->code = str_replace($placeholder, '', $this->code);
-						continue;
-					}
-
-					$lines = explode($this->newLine, $this->code);
-					$linesWithObjop = [];
-
-					foreach ($lines as $idx => $line) {
-						if (false !== strpos($line, $placeholder)) {
-							$linesWithObjop[] = $idx;
-						}
-					}
-
-					$farthest = 0;
-					foreach ($linesWithObjop as $idx) {
-						$farthest = max($farthest, strpos($lines[$idx], $placeholder));
-					}
-					foreach ($linesWithObjop as $idx) {
-						$line = $lines[$idx];
-						$current = strpos($line, $placeholder);
-						$delta = abs($farthest - $current);
-						if ($delta > 0) {
-							$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
-							$lines[$idx] = $line;
-						}
-					}
-
-					$this->code = str_replace($placeholder, '', implode($this->newLine, $lines));
-				}
-			}
-		}
 	}
 }

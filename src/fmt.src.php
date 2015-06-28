@@ -103,6 +103,7 @@ namespace {
 	require 'Additionals/AlignDoubleArrow.php';
 	require 'Additionals/AlignDoubleSlashComments.php';
 	require 'Additionals/AlignEquals.php';
+	require 'Additionals/AlignGroupDoubleArrow.php';
 	require 'Additionals/AlignPHPCode.php';
 	require 'Additionals/AlignTypehint.php';
 	require 'Additionals/AllmanStyleBraces.php';

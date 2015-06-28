@@ -9,6 +9,8 @@ abstract class BaseCodeFormatter {
 		'ReindentAndAlignObjOps' => 'ReindentObjOps',
 		'ReindentObjOps' => 'ReindentAndAlignObjOps',
 		'AllmanStyleBraces' => 'PSR2CurlyOpenNextLine',
+		'AlignGroupDoubleArrow' => 'AlignDoubleArrow',
+		'AlignDoubleArrow' => 'AlignGroupDoubleArrow',
 	];
 
 	private $passes = [
@@ -81,6 +83,7 @@ abstract class BaseCodeFormatter {
 
 		'AlignDoubleSlashComments' => false,
 		'AlignTypehint' => false,
+		'AlignGroupDoubleArrow' => false,
 		'AlignDoubleArrow' => false,
 		'AlignEquals' => false,
 
