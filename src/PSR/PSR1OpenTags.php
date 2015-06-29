@@ -3,6 +3,7 @@ final class PSR1OpenTags extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -20,7 +21,7 @@ final class PSR1OpenTags extends FormatterPass {
 					break;
 
 				case T_CLOSE_TAG:
-					if (!$touchedComment && !$this->leftUsefulTokenIs([ST_SEMI_COLON, ST_COLON, ST_CURLY_CLOSE])) {
+					if (!$touchedComment && !$this->leftUsefulTokenIs([ST_SEMI_COLON, ST_COLON, ST_CURLY_CLOSE, ST_CURLY_OPEN])) {
 						$this->appendCode(ST_SEMI_COLON);
 					}
 					$touchedComment = false;

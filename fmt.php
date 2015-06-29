@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.3.0");
+	define("VERSION", "9.3.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -6978,6 +6978,7 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -6995,7 +6996,7 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 					break;
 
 				case T_CLOSE_TAG:
-					if (!$touchedComment && !$this->leftUsefulTokenIs([ST_SEMI_COLON, ST_COLON, ST_CURLY_CLOSE])) {
+					if (!$touchedComment && !$this->leftUsefulTokenIs([ST_SEMI_COLON, ST_COLON, ST_CURLY_CLOSE, ST_CURLY_OPEN])) {
 						$this->appendCode(ST_SEMI_COLON);
 					}
 					$touchedComment = false;
