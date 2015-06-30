@@ -213,6 +213,7 @@ abstract class FormatterPass {
 			T_VARIABLE,
 		]);
 	}
+
 	protected function leftToken($ignoreList = []) {
 		$i = $this->leftTokenIdx($ignoreList);
 
@@ -278,12 +279,16 @@ abstract class FormatterPass {
 			$tknids = [$tknids];
 		}
 		$tknids = array_flip($tknids);
+		$touchedLn = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
+			if (!$touchedLn && T_WHITESPACE == $id && $this->hasLn($text)) {
+				$touchedLn = true;
+			}
 			if (isset($tknids[$id])) {
-				return [$id, $text];
+				return [$id, $text, $touchedLn];
 			}
 			$this->appendCode($text);
 		}

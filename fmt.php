@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.3.6");
+	define("VERSION", "9.3.7");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -2714,6 +2714,7 @@ abstract class FormatterPass {
 			T_VARIABLE,
 		]);
 	}
+
 	protected function leftToken($ignoreList = []) {
 		$i = $this->leftTokenIdx($ignoreList);
 
@@ -2779,12 +2780,16 @@ abstract class FormatterPass {
 			$tknids = [$tknids];
 		}
 		$tknids = array_flip($tknids);
+		$touchedLn = false;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
+			if (!$touchedLn && T_WHITESPACE == $id && $this->hasLn($text)) {
+				$touchedLn = true;
+			}
 			if (isset($tknids[$id])) {
-				return [$id, $text];
+				return [$id, $text, $touchedLn];
 			}
 			$this->appendCode($text);
 		}
@@ -7581,7 +7586,7 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 			switch ($id) {
 				case T_NEW:
 					$this->appendCode($text);
-					list($foundId, $foundText) = $this->printAndStopAt([
+					list($foundId, $foundText, $touchedLn) = $this->printAndStopAt([
 						ST_PARENTHESES_OPEN,
 						ST_PARENTHESES_CLOSE,
 						T_COMMENT,
@@ -7590,7 +7595,11 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 						ST_COMMA,
 					]);
 					if (ST_PARENTHESES_OPEN != $foundId) {
-						$this->appendCode('()' . $foundText);
+						$this->rtrimAndAppendCode('()');
+						if ($touchedLn) {
+							$this->appendCode($this->newLine);
+						}
+						$this->appendCode($foundText);
 					} elseif (ST_PARENTHESES_OPEN == $foundId) {
 						$this->appendCode($foundText);
 					}
