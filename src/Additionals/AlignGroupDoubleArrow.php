@@ -42,7 +42,7 @@ final class AlignGroupDoubleArrow extends AlignDoubleArrow {
 					break;
 
 				case T_WHITESPACE:
-					if ($this->hasLn($text) && substr_count($text, PHP_EOL) >= 2) {
+					if ($this->hasLn($text) && substr_count($text, $this->newLine) >= 2) {
 						++$levelCounter;
 						if (!isset($levelEntranceCounter[$levelCounter])) {
 							$levelEntranceCounter[$levelCounter] = 0;

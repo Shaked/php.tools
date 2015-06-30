@@ -48,7 +48,7 @@ final class PSR2MultilineFunctionParams extends AdditionalPass {
 						}
 
 					}
-					$placeholderReplace = PHP_EOL;
+					$placeholderReplace = $this->newLine;
 					if (!$touchedComma) {
 						$placeholderReplace = '';
 					}

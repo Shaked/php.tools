@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.3.1");
+	define("VERSION", "9.3.2");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -8091,7 +8091,7 @@ EOT;
 					break;
 
 				case T_WHITESPACE:
-					if ($this->hasLn($text) && substr_count($text, PHP_EOL) >= 2) {
+					if ($this->hasLn($text) && substr_count($text, $this->newLine) >= 2) {
 						++$levelCounter;
 						if (!isset($levelEntranceCounter[$levelCounter])) {
 							$levelEntranceCounter[$levelCounter] = 0;
@@ -10693,7 +10693,7 @@ EOT;
 						}
 
 					}
-					$placeholderReplace = PHP_EOL;
+					$placeholderReplace = $this->newLine;
 					if (!$touchedComma) {
 						$placeholderReplace = '';
 					}
