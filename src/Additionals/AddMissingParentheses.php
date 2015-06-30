@@ -24,6 +24,7 @@ final class AddMissingParentheses extends AdditionalPass {
 						T_DOC_COMMENT,
 						ST_SEMI_COLON,
 						ST_COMMA,
+						ST_BRACKET_CLOSE,
 					]);
 					if (ST_PARENTHESES_OPEN != $foundId) {
 						$this->rtrimAndAppendCode('()');

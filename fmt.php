@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.3.7");
+	define("VERSION", "9.3.8");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -7593,6 +7593,7 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 						T_DOC_COMMENT,
 						ST_SEMI_COLON,
 						ST_COMMA,
+						ST_BRACKET_CLOSE,
 					]);
 					if (ST_PARENTHESES_OPEN != $foundId) {
 						$this->rtrimAndAppendCode('()');
