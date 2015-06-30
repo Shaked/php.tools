@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.3.2");
+	define("VERSION", "9.3.3");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -5379,7 +5379,14 @@ final class AutoImportPass extends FormatterPass {
 						$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, $this->newLine]);
 						if (ST_SEMI_COLON == $foundToken) {
 							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
-						} elseif (ST_PARENTHESES_OPEN == $foundToken || ST_PARENTHESES_CLOSE == $foundToken) {
+						} elseif (ST_PARENTHESES_OPEN == $foundToken) {
+							if (!$this->hasLnInBlock($this->tkns, $this->ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE)) {
+								$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+								break;
+							}
+							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+							$this->injectPlaceholderParenthesesContent($placeholder);
+						} elseif (ST_PARENTHESES_CLOSE == $foundToken) {
 							$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 							$this->injectPlaceholderParenthesesContent($placeholder);
 						}
@@ -5467,6 +5474,7 @@ final class AutoImportPass extends FormatterPass {
 					break;
 			}
 		}
+
 		foreach ($maxContextCounter as $level => $entrances) {
 			foreach ($entrances as $entrance => $context) {
 				for ($j = 0; $j <= $context; ++$j) {
