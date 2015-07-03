@@ -136,6 +136,18 @@ final class AutoSemicolon extends AdditionalPass {
 							ST_COMMA,
 							ST_COLON,
 							ST_CONCAT,
+
+							T_BOOLEAN_AND,
+							T_BOOLEAN_OR,
+							T_IS_EQUAL,
+							T_IS_GREATER_OR_EQUAL,
+							T_IS_IDENTICAL,
+							T_IS_NOT_EQUAL,
+							T_IS_NOT_IDENTICAL,
+							T_IS_SMALLER_OR_EQUAL,
+							T_LOGICAL_AND,
+							T_LOGICAL_OR,
+							T_LOGICAL_XOR,
 							T_OBJECT_OPERATOR,
 						]) ||
 						$this->rightTokenIs([
