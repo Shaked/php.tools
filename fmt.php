@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.4.0");
+	define("VERSION", "9.4.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -13499,13 +13499,13 @@ if (isset($opts['i'])) {
 			$argv[1] = dirname(Phar::running(false)) . DIRECTORY_SEPARATOR . $argv[1];
 		}
 	}
-	if ('-' == $opts['o']) {
-		echo $fmt->formatCode(file_get_contents($argv[1]));
-		exit(0);
-	}
 	if (!is_file($argv[1])) {
 		fwrite(STDERR, 'File not found: ' . $argv[1] . PHP_EOL);
 		exit(255);
+	}
+	if ('-' == $opts['o']) {
+		echo $fmt->formatCode(file_get_contents($argv[1]));
+		exit(0);
 	}
 	$argv = array_values($argv);
 	file_put_contents($opts['o'], $fmt->formatCode(file_get_contents($argv[1])));
