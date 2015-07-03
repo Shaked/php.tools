@@ -19,7 +19,7 @@ if ($a) {
 }
 
 if ($a) {
-	for ($i;false; $i++) {$a;}
+	for ($i; false; $i++) {$a;}
 }
 
 if ($a) {
