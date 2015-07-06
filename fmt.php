@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.4.1");
+	define("VERSION", "9.4.2");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -8708,10 +8708,31 @@ EOT;
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$parenStack = [];
+		$lastParen = null;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_IF:
+				case T_SWITCH:
+				case T_FOR:
+				case T_FOREACH:
+					$parenStack[] = $id;
+					$this->appendCode($text);
+					$this->printUntil(ST_PARENTHESES_OPEN);
+					break;
+
+				case ST_PARENTHESES_OPEN:
+					$parenStack[] = $id;
+					$this->appendCode($text);
+					break;
+
+				case ST_PARENTHESES_CLOSE:
+					$lastParen = array_pop($parenStack);
+					$this->appendCode($text);
+					break;
+
 				case T_WHITESPACE:
 					if (!$this->hasLn($text)) {
 						$this->appendCode($text);
@@ -8859,6 +8880,15 @@ EOT;
 						$this->appendCode($text);
 						continue;
 					}
+
+					if (
+						$this->leftUsefulTokenIs(ST_PARENTHESES_CLOSE) &&
+						ST_PARENTHESES_OPEN != $lastParen
+					) {
+						$this->appendCode($text);
+						continue;
+					}
+
 					$this->appendCode(ST_SEMI_COLON . $text);
 					break;
 				default:

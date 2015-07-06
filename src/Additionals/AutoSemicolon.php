@@ -7,10 +7,31 @@ final class AutoSemicolon extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$parenStack = [];
+		$lastParen = null;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+				case T_IF:
+				case T_SWITCH:
+				case T_FOR:
+				case T_FOREACH:
+					$parenStack[] = $id;
+					$this->appendCode($text);
+					$this->printUntil(ST_PARENTHESES_OPEN);
+					break;
+
+				case ST_PARENTHESES_OPEN:
+					$parenStack[] = $id;
+					$this->appendCode($text);
+					break;
+
+				case ST_PARENTHESES_CLOSE:
+					$lastParen = array_pop($parenStack);
+					$this->appendCode($text);
+					break;
+
 				case T_WHITESPACE:
 					if (!$this->hasLn($text)) {
 						$this->appendCode($text);
@@ -158,6 +179,15 @@ final class AutoSemicolon extends AdditionalPass {
 						$this->appendCode($text);
 						continue;
 					}
+
+					if (
+						$this->leftUsefulTokenIs(ST_PARENTHESES_CLOSE) &&
+						ST_PARENTHESES_OPEN != $lastParen
+					) {
+						$this->appendCode($text);
+						continue;
+					}
+
 					$this->appendCode(ST_SEMI_COLON . $text);
 					break;
 				default:
