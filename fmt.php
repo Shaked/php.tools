@@ -13182,6 +13182,7 @@ EOT;
 		'--constructor=type' => 'analyse classes for attributes and generate constructor - camel, snake, golang',
 		'--enable_auto_align' => 'disable auto align of ST_EQUAL and T_DOUBLE_ARROW',
 		'--exclude=pass1,passN,...' => 'disable specific passes',
+		'--help-pass' => 'show specific information for one pass',
 		'--ignore=PATTERN-1,PATTERN-N,...' => 'ignore file names whose names contain any PATTERN-N',
 		'--indent_with_space=SIZE' => 'use spaces instead of tabs for indentation. Default 4',
 		'--laravel' => 'Apply Laravel coding style (deprecated)',
