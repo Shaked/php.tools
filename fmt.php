@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.4.3");
+	define("VERSION", "9.4.4");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -7793,14 +7793,18 @@ EOT;
 					break;
 
 				case T_DOUBLE_ARROW:
-					$this->appendCode(
-						sprintf(
-							self::ALIGNABLE_EQUAL,
-							$levelCounter,
-							$levelEntranceCounter[$levelCounter],
-							$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
-						) . $text
-					);
+					if (isset($levelEntranceCounter[$levelCounter], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
+						$this->appendCode(
+							sprintf(
+								self::ALIGNABLE_EQUAL,
+								$levelCounter,
+								$levelEntranceCounter[$levelCounter],
+								$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
+							)
+						);
+					}
+
+					$this->appendCode($text);
 					break;
 
 				case ST_PARENTHESES_OPEN:
@@ -7831,6 +7835,7 @@ EOT;
 					break;
 			}
 		}
+
 		$this->align($maxContextCounter);
 
 		return $this->code;

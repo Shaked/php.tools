@@ -40,14 +40,18 @@ class AlignDoubleArrow extends AdditionalPass {
 					break;
 
 				case T_DOUBLE_ARROW:
-					$this->appendCode(
-						sprintf(
-							self::ALIGNABLE_EQUAL,
-							$levelCounter,
-							$levelEntranceCounter[$levelCounter],
-							$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
-						) . $text
-					);
+					if (isset($levelEntranceCounter[$levelCounter], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
+						$this->appendCode(
+							sprintf(
+								self::ALIGNABLE_EQUAL,
+								$levelCounter,
+								$levelEntranceCounter[$levelCounter],
+								$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
+							)
+						);
+					}
+
+					$this->appendCode($text);
 					break;
 
 				case ST_PARENTHESES_OPEN:
@@ -78,6 +82,7 @@ class AlignDoubleArrow extends AdditionalPass {
 					break;
 			}
 		}
+
 		$this->align($maxContextCounter);
 
 		return $this->code;
