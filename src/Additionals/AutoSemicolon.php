@@ -46,9 +46,14 @@ final class AutoSemicolon extends AdditionalPass {
 							ST_CONCAT,
 							ST_CURLY_CLOSE,
 							ST_CURLY_OPEN,
+							ST_DIVIDE,
 							ST_EQUAL,
+							ST_MINUS,
 							ST_PARENTHESES_OPEN,
+							ST_PLUS,
 							ST_SEMI_COLON,
+							ST_TIMES,
+
 							T_ABSTRACT,
 							T_AND_EQUAL,
 							T_ARRAY,
@@ -148,15 +153,19 @@ final class AutoSemicolon extends AdditionalPass {
 					}
 					if (
 						$this->rightUsefulTokenIs([
-							ST_PARENTHESES_OPEN,
-							ST_PARENTHESES_CLOSE,
-							ST_CURLY_OPEN,
-							ST_BRACKET_OPEN,
 							ST_BRACKET_CLOSE,
-							ST_SEMI_COLON,
-							ST_COMMA,
+							ST_BRACKET_OPEN,
 							ST_COLON,
+							ST_COMMA,
 							ST_CONCAT,
+							ST_CURLY_OPEN,
+							ST_DIVIDE,
+							ST_MINUS,
+							ST_PARENTHESES_CLOSE,
+							ST_PARENTHESES_OPEN,
+							ST_PLUS,
+							ST_SEMI_COLON,
+							ST_TIMES,
 
 							T_BOOLEAN_AND,
 							T_BOOLEAN_OR,
@@ -170,6 +179,7 @@ final class AutoSemicolon extends AdditionalPass {
 							T_LOGICAL_OR,
 							T_LOGICAL_XOR,
 							T_OBJECT_OPERATOR,
+							T_POW,
 						]) ||
 						$this->rightTokenIs([
 							T_COMMENT,
