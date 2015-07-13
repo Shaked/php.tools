@@ -79,12 +79,8 @@ final class AllmanStyleBraces extends AdditionalPass {
 
 				case T_DOLLAR_OPEN_CURLY_BRACES:
 				case T_CURLY_OPEN:
-					$indentToken = [
-						'id' => $id,
-						'implicit' => true,
-					];
 					$this->appendCode($text);
-					$foundStack[] = $indentToken;
+					$this->printCurlyBlock();
 					break;
 
 				case ST_BRACKET_OPEN:

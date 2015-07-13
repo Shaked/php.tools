@@ -2421,7 +2421,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.4.4");
+	define("VERSION", "9.5.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -8476,12 +8476,8 @@ EOT;
 
 				case T_DOLLAR_OPEN_CURLY_BRACES:
 				case T_CURLY_OPEN:
-					$indentToken = [
-						'id' => $id,
-						'implicit' => true,
-					];
 					$this->appendCode($text);
-					$foundStack[] = $indentToken;
+					$this->printCurlyBlock();
 					break;
 
 				case ST_BRACKET_OPEN:
