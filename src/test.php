@@ -33,16 +33,16 @@ if ($isCoverage) {
 	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Report/Clover.php';
 	require 'vendor/phpunit/php-token-stream/src/Token/Stream.php';
 	require 'vendor/sebastian/version/src/Version.php';
-	require 'vendor/symfony/yaml/Symfony/Component/Yaml/Yaml.php';
-	require 'vendor/phpunit/php-text-template/Text/Template.php';
+	require 'vendor/symfony/yaml/Yaml.php';
+	require 'vendor/phpunit/php-text-template/src/Template.php';
 	require 'vendor/phpunit/php-token-stream/src/Token.php';
 	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Driver.php';
 	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Driver/Xdebug.php';
 	require 'vendor/sebastian/environment/src/Runtime.php';
 	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage.php';
-	require 'vendor/phpunit/php-file-iterator/File/Iterator.php';
-	require 'vendor/phpunit/php-file-iterator/File/Iterator/Factory.php';
-	require 'vendor/phpunit/php-file-iterator/File/Iterator/Facade.php';
+	require 'vendor/phpunit/php-file-iterator/src/Iterator.php';
+	require 'vendor/phpunit/php-file-iterator/src/Factory.php';
+	require 'vendor/phpunit/php-file-iterator/src/Facade.php';
 	require 'vendor/phpunit/php-code-coverage/src/CodeCoverage/Filter.php';
 
 	$filter = new PHP_CodeCoverage_Filter();

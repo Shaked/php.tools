@@ -13,19 +13,19 @@
 //THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Extern {
-	require 'vendor/symfony/console/Symfony/Component/Console/Formatter/OutputFormatterInterface.php';
-	require 'vendor/symfony/console/Symfony/Component/Console/Helper/HelperInterface.php';
-	require 'vendor/symfony/console/Symfony/Component/Console/Helper/Helper.php';
-	require 'vendor/symfony/console/Symfony/Component/Console/Formatter/OutputFormatterStyleStack.php';
-	require 'vendor/symfony/console/Symfony/Component/Console/Formatter/OutputFormatterStyleInterface.php';
-	require 'vendor/symfony/console/Symfony/Component/Console/Formatter/OutputFormatterStyle.php';
-	require 'vendor/symfony/console/Symfony/Component/Console/Formatter/OutputFormatter.php';
-	require 'vendor/symfony/console/Symfony/Component/Console/Output/OutputInterface.php';
-	require 'vendor/symfony/console/Symfony/Component/Console/Output/ConsoleOutputInterface.php';
-	require 'vendor/symfony/console/Symfony/Component/Console/Output/Output.php';
-	require 'vendor/symfony/console/Symfony/Component/Console/Output/StreamOutput.php';
-	require 'vendor/symfony/console/Symfony/Component/Console/Output/ConsoleOutput.php';
-	require 'vendor/symfony/console/Symfony/Component/Console/Helper/ProgressBar.php';
+	require 'vendor/symfony/console/Formatter/OutputFormatterInterface.php';
+	require 'vendor/symfony/console/Helper/HelperInterface.php';
+	require 'vendor/symfony/console/Helper/Helper.php';
+	require 'vendor/symfony/console/Formatter/OutputFormatterStyleStack.php';
+	require 'vendor/symfony/console/Formatter/OutputFormatterStyleInterface.php';
+	require 'vendor/symfony/console/Formatter/OutputFormatterStyle.php';
+	require 'vendor/symfony/console/Formatter/OutputFormatter.php';
+	require 'vendor/symfony/console/Output/OutputInterface.php';
+	require 'vendor/symfony/console/Output/ConsoleOutputInterface.php';
+	require 'vendor/symfony/console/Output/Output.php';
+	require 'vendor/symfony/console/Output/StreamOutput.php';
+	require 'vendor/symfony/console/Output/ConsoleOutput.php';
+	require 'vendor/symfony/console/Helper/ProgressBar.php';
 }
 
 namespace {

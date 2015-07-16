@@ -369,7 +369,7 @@ class OutputFormatterStyleStack
             return $this->emptyStyle;
         }
 
-        return $this->styles[count($this->styles)-1];
+        return $this->styles[count($this->styles) - 1];
     }
 
     /**
@@ -499,6 +499,7 @@ class OutputFormatterStyle implements OutputFormatterStyleInterface
         'magenta' => array('set' => 35, 'unset' => 39),
         'cyan' => array('set' => 36, 'unset' => 39),
         'white' => array('set' => 37, 'unset' => 39),
+        'default' => array('set' => 39, 'unset' => 39),
     );
     private static $availableBackgroundColors = array(
         'black' => array('set' => 40, 'unset' => 49),
@@ -509,6 +510,7 @@ class OutputFormatterStyle implements OutputFormatterStyleInterface
         'magenta' => array('set' => 45, 'unset' => 49),
         'cyan' => array('set' => 46, 'unset' => 49),
         'white' => array('set' => 47, 'unset' => 49),
+        'default' => array('set' => 49, 'unset' => 49),
     );
     private static $availableOptions = array(
         'bold' => array('set' => 1, 'unset' => 22),
@@ -732,7 +734,7 @@ class OutputFormatter implements OutputFormatterInterface
      */
     public static function escape($text)
     {
-        return preg_replace('/([^\\\\]?)</is', '$1\\<', $text);
+        return preg_replace('/([^\\\\]?)</', '$1\\<', $text);
     }
 
     /**
@@ -841,10 +843,11 @@ class OutputFormatter implements OutputFormatterInterface
      */
     public function format($message)
     {
+        $message = (string) $message;
         $offset = 0;
         $output = '';
         $tagRegex = '[a-z][a-z0-9_=;-]*';
-        preg_match_all("#<(($tagRegex) | /($tagRegex)?)>#isx", $message, $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all("#<(($tagRegex) | /($tagRegex)?)>#ix", $message, $matches, PREG_OFFSET_CAPTURE);
         foreach ($matches[0] as $i => $match) {
             $pos = $match[1];
             $text = $match[0];
@@ -1355,7 +1358,7 @@ class StreamOutput extends Output
      */
     protected function hasColorSupport()
     {
-        if (DIRECTORY_SEPARATOR == '\\') {
+        if (DIRECTORY_SEPARATOR === '\\') {
             return false !== getenv('ANSICON') || 'ON' === getenv('ConEmuANSI');
         }
 
@@ -1396,6 +1399,9 @@ use Symfony\Component\Console\Formatter\OutputFormatterInterface;
  */
 class ConsoleOutput extends StreamOutput implements ConsoleOutputInterface
 {
+    /**
+     * @var StreamOutput
+     */
     private $stderr;
 
     /**
@@ -1409,14 +1415,12 @@ class ConsoleOutput extends StreamOutput implements ConsoleOutputInterface
      */
     public function __construct($verbosity = self::VERBOSITY_NORMAL, $decorated = null, OutputFormatterInterface $formatter = null)
     {
-        $outputStream = 'php://stdout';
-        if (!$this->hasStdoutSupport()) {
-            $outputStream = 'php://output';
-        }
+        $outputStream = $this->hasStdoutSupport() ? 'php://stdout' : 'php://output';
+        $errorStream = $this->hasStderrSupport() ? 'php://stderr' : 'php://output';
 
         parent::__construct(fopen($outputStream, 'w'), $verbosity, $decorated, $formatter);
 
-        $this->stderr = new StreamOutput(fopen('php://stderr', 'w'), $verbosity, $decorated, $this->getFormatter());
+        $this->stderr = new StreamOutput(fopen($errorStream, 'w'), $verbosity, $decorated, $this->getFormatter());
     }
 
     /**
@@ -1466,15 +1470,33 @@ class ConsoleOutput extends StreamOutput implements ConsoleOutputInterface
      * Returns true if current environment supports writing console output to
      * STDOUT.
      *
-     * IBM iSeries (OS400) exhibits character-encoding issues when writing to
-     * STDOUT and doesn't properly convert ASCII to EBCDIC, resulting in garbage
-     * output.
-     *
      * @return bool
      */
     protected function hasStdoutSupport()
     {
-        return ('OS400' != php_uname('s'));
+        return false === $this->isRunningOS400();
+    }
+
+    /**
+     * Returns true if current environment supports writing console output to
+     * STDERR.
+     *
+     * @return bool
+     */
+    protected function hasStderrSupport()
+    {
+        return false === $this->isRunningOS400();
+    }
+
+    /**
+     * Checks if current executing environment is IBM iSeries (OS400), which
+     * doesn't properly convert character-encodings between ASCII to EBCDIC.
+     *
+     * @return bool
+     */
+    private function isRunningOS400()
+    {
+        return 'OS400' === php_uname('s');
     }
 }
 
@@ -1652,12 +1674,14 @@ class ProgressBar
     /**
      * Gets the progress bar step.
      *
-     * @deprecated since 2.6, to be removed in 3.0. Use {@link getProgress()} instead.
+     * @deprecated since version 2.6, to be removed in 3.0. Use {@link getProgress()} instead.
      *
      * @return int The progress bar step
      */
     public function getStep()
     {
+        @trigger_error('The '.__METHOD__.' method is deprecated since version 2.6 and will be removed in 3.0. Use the getProgress() method instead.', E_USER_DEPRECATED);
+
         return $this->getProgress();
     }
 
@@ -1839,7 +1863,7 @@ class ProgressBar
     /**
      * Sets the current progress.
      *
-     * @deprecated since 2.6, to be removed in 3.0. Use {@link setProgress()} instead.
+     * @deprecated since version 2.6, to be removed in 3.0. Use {@link setProgress()} instead.
      *
      * @param int $step The current progress
      *
@@ -1847,11 +1871,13 @@ class ProgressBar
      */
     public function setCurrent($step)
     {
+        @trigger_error('The '.__METHOD__.' method is deprecated since version 2.6 and will be removed in 3.0. Use the setProgress() method instead.', E_USER_DEPRECATED);
+
         $this->setProgress($step);
     }
 
     /**
-     * Sets whether to overwrite the progressbar, false for new line
+     * Sets whether to overwrite the progressbar, false for new line.
      *
      * @param bool $overwrite
      */
@@ -1878,8 +1904,8 @@ class ProgressBar
             $this->max = $step;
         }
 
-        $prevPeriod = intval($this->step / $this->redrawFreq);
-        $currPeriod = intval($step / $this->redrawFreq);
+        $prevPeriod = (int) ($this->step / $this->redrawFreq);
+        $currPeriod = (int) ($step / $this->redrawFreq);
         $this->step = $step;
         $this->percent = $this->max ? (float) $this->step / $this->max : 0;
         if ($prevPeriod !== $currPeriod || $this->max === $step) {
@@ -2421,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.5.0");
+	define("VERSION", "9.5.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
