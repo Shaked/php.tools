@@ -58,29 +58,9 @@ final class ResizeSpaces extends FormatterPass {
 				case '*':
 					list($prevId) = $this->inspectToken(-1);
 					list($nextId, $nextText) = $this->inspectToken(+1);
-					if (
-						T_WHITESPACE === $prevId &&
-						T_WHITESPACE !== $nextId
-					) {
-						$this->appendCode($text . $this->getSpace());
-						break;
-
-					} elseif (
-						T_WHITESPACE !== $prevId &&
-						T_WHITESPACE === $nextId
-					) {
-						$this->appendCode($this->getSpace() . $text);
-						break;
-
-					} elseif (
-						T_WHITESPACE !== $prevId &&
-						T_WHITESPACE !== $nextId
-					) {
-						$this->appendCode($this->getSpace() . $text . $this->getSpace());
-						break;
-					}
-
+					$this->appendCode($this->getSpace(T_WHITESPACE !== $prevId));
 					$this->appendCode($text);
+					$this->appendCode($this->getSpace(T_WHITESPACE !== $nextId));
 					break;
 
 				case '%':
