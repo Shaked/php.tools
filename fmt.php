@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.6.1");
+	define("VERSION", "9.6.2");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -2614,6 +2614,31 @@ abstract class FormatterPass {
 
 	protected $useCache = false;
 	protected $cache = [];
+
+	private $memo = [null, null];
+	private $memoUseful = [null, null];
+
+	protected function memoPtr() {
+		$t = $this->tkns[$this->ptr][0];
+
+		if (T_WHITESPACE !== $t) {
+			$this->memo[0] = $this->memo[1];
+			$this->memo[1] = $t;
+		}
+
+		if (T_WHITESPACE !== $t && T_COMMENT !== $t && T_DOC_COMMENT !== $t) {
+			$this->memoUseful[0] = $this->memoUseful[1];
+			$this->memoUseful[1] = $t;
+		}
+	}
+
+	protected function leftMemoUsefulTokenIs($token, $debug = false) {
+		return $this->resolveFoundToken($this->memoUseful[0], $token);
+	}
+
+	protected function leftMemoTokenIs($token) {
+		return $this->resolveFoundToken($this->memo[0], $token);
+	}
 
 	protected function alignPlaceholders($origPlaceholder, $contextCounter) {
 		for ($j = 0; $j <= $contextCounter; ++$j) {
@@ -2984,6 +3009,10 @@ abstract class FormatterPass {
 		}
 
 		$foundToken = $tkns[$idx];
+		return $this->resolveFoundToken($foundToken, $token);
+	}
+
+	private function resolveFoundToken($foundToken, $token) {
 		if ($foundToken === $token) {
 			return true;
 		} elseif (is_array($token) && isset($foundToken[1]) && in_array($foundToken[0], $token)) {
@@ -3042,6 +3071,10 @@ abstract class FormatterPass {
 
 	protected function rtrimAndAppendCode($code = '') {
 		$this->code = rtrim($this->code) . $code;
+	}
+
+	protected function rtrimLnAndAppendCode($code = '') {
+		$this->code = rtrim($this->code, "\t ") . $code;
 	}
 
 	protected function scanAndReplace(&$tkns, &$ptr, $start, $end, $call, $lookFor) {
@@ -3200,14 +3233,14 @@ abstract class FormatterPass {
 
 	private function walkLeft($tkns, $idx, $ignoreList) {
 		$i = $idx;
-		while (--$i >= 0 && isset($tkns[$i][1]) && isset($ignoreList[$tkns[$i][0]]));
+		while (--$i >= 0 && isset($ignoreList[$tkns[$i][0]]));
 		return $i;
 	}
 
 	private function walkRight($tkns, $idx, $ignoreList) {
 		$i = $idx;
 		$tknsSize = sizeof($tkns) - 1;
-		while (++$i < $tknsSize && isset($tkns[$i][1]) && isset($ignoreList[$tkns[$i][0]]));
+		while (++$i < $tknsSize && isset($ignoreList[$tkns[$i][0]]));
 		return $i;
 	}
 
@@ -6072,7 +6105,9 @@ final class AutoImportPass extends FormatterPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
+			$this->memoPtr();
 			$this->cache = [];
+
 			switch ($id) {
 				case T_START_HEREDOC:
 					$this->appendCode($text);
@@ -6080,41 +6115,39 @@ final class AutoImportPass extends FormatterPass {
 					break;
 
 				case T_CALLABLE:
-					$this->appendCode($text . $this->getSpace());
+					$this->appendCode($text . ' ');
 					break;
 
 				case '+':
 				case '-':
 					if (
-						$this->leftUsefulTokenIs([T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
+						$this->leftMemoUsefulTokenIs([T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
 						&&
 						$this->rightUsefulTokenIs([T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
 					) {
-						$this->appendCode($this->getSpace() . $text . $this->getSpace());
+						$this->appendCode(' ' . $text . ' ');
 						break;
 					}
 					$this->appendCode($text);
 					break;
+
 				case '*':
-					list($prevId) = $this->inspectToken(-1);
-					list($nextId, $nextText) = $this->inspectToken(+1);
-					$this->appendCode($this->getSpace(T_WHITESPACE !== $prevId));
-					$this->appendCode($text);
-					$this->appendCode($this->getSpace(T_WHITESPACE !== $nextId));
+					$this->rtrimLnAndappendCode(' ' . $text);
+					$this->appendCode(' ');
 					break;
 
 				case '%':
 				case '/':
 				case T_POW:
-
 				case ST_QUESTION:
 				case ST_CONCAT:
 					if (ST_QUESTION == $id) {
 						++$inTernaryOperator;
 						$shortTernaryOperator = $this->rightTokenIs(ST_COLON);
 					}
+
 					list($prevId) = $this->inspectToken(-1);
-					list($nextId, $nextText) = $this->inspectToken(+1);
+					list($nextId) = $this->inspectToken(+1);
 					if (
 						T_WHITESPACE === $prevId &&
 						T_WHITESPACE !== $nextId
@@ -6125,35 +6158,28 @@ final class AutoImportPass extends FormatterPass {
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE === $nextId
 					) {
-						$this->appendCode($this->getSpace() . $text);
+						$this->appendCode(' ' . $text);
 						break;
 					} elseif (
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE !== $nextId
 					) {
-						$this->appendCode($this->getSpace() . $text . $this->getSpace(!$this->rightTokenIs(ST_COLON)));
+						$this->appendCode(' ' . $text . $this->getSpace(!$this->rightTokenIs(ST_COLON)));
 						break;
 					}
+					$this->appendCode($text);
+					break;
+
 				case ST_COLON:
 					list($prevId) = $this->inspectToken(-1);
 					list($nextId, $nextText) = $this->inspectToken(+1);
 
 					if (
-						(
-							T_WHITESPACE != $nextId
-							||
-							(T_WHITESPACE == $nextId && !$this->hasLn($nextText))
-						)
-						&& $this->rightUsefulTokenIs(T_CLOSE_TAG)
-					) {
-						$this->appendCode($text . $this->getSpace());
-						break;
-					} elseif (
 						$inTernaryOperator > 0 &&
 						T_WHITESPACE === $prevId &&
 						T_WHITESPACE !== $nextId
 					) {
-						$this->appendCode($text . $this->getSpace());
+						$this->appendCode($text . ' ');
 						--$inTernaryOperator;
 						break;
 					} elseif (
@@ -6169,11 +6195,21 @@ final class AutoImportPass extends FormatterPass {
 						T_WHITESPACE !== $prevId &&
 						T_WHITESPACE !== $nextId
 					) {
-						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text . $this->getSpace());
+						$this->appendCode($this->getSpace(!$shortTernaryOperator) . $text . ' ');
 						--$inTernaryOperator;
 						break;
-					} elseif (0 == $inTernaryOperator && $this->leftUsefulTokenIs(ST_PARENTHESES_CLOSE)) {
-						$this->appendCode($text . $this->getSpace());
+					} elseif (0 == $inTernaryOperator && $this->leftMemoUsefulTokenIs(ST_PARENTHESES_CLOSE)) {
+						$this->appendCode($text . ' ');
+						break;
+					} elseif (
+						(
+							T_WHITESPACE != $nextId
+							||
+							(T_WHITESPACE == $nextId && !$this->hasLn($nextText))
+						)
+						&& $this->rightUsefulTokenIs(T_CLOSE_TAG)
+					) {
+						$this->appendCode($text . ' ');
 						break;
 					}
 					$this->appendCode($text);
@@ -6183,42 +6219,34 @@ final class AutoImportPass extends FormatterPass {
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_PARENTHESES_OPEN])));
 					break;
 
-				case T_ARRAY:
-					if ($this->rightTokenIs([T_VARIABLE, ST_REFERENCE])) {
-						$this->appendCode($text . $this->getSpace());
-						break;
-					} elseif ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
-						$this->appendCode($text);
-						break;
-					}
-				case T_STRING:
-					if ($this->rightTokenIs([T_VARIABLE, T_DOUBLE_ARROW])) {
-						$this->appendCode($text . $this->getSpace());
-						break;
+				case T_VARIABLE:
+					if ($this->leftMemoUsefulTokenIs([T_ARRAY, T_STRING])) {
+						$this->appendCode(' ');
 					}
 					$this->appendCode($text);
 					break;
+
 				case ST_CURLY_OPEN:
 					$touchedFunction = false;
-					if (!$touchedUse && $this->leftUsefulTokenIs([T_VARIABLE, T_STRING]) && $this->rightUsefulTokenIs([T_VARIABLE, T_STRING])) {
+					if (!$touchedUse && $this->leftMemoUsefulTokenIs([T_VARIABLE, T_STRING]) && $this->rightUsefulTokenIs([T_VARIABLE, T_STRING])) {
 						$this->appendCode($text);
 						break;
-					} elseif (!$this->hasLnLeftToken() && $this->leftUsefulTokenIs([T_STRING, T_DO, T_FINALLY, ST_PARENTHESES_CLOSE])) {
+					} elseif ($this->leftMemoUsefulTokenIs([T_STRING, T_DO, T_FINALLY, ST_PARENTHESES_CLOSE]) && !$this->hasLnLeftToken()) {
 						$this->rtrimAndAppendCode(
-							$this->getSpace() .
+							' ' .
 							$text .
 							$this->getSpace($this->rightTokenIs(T_COMMENT))
 						);
 						break;
-					} elseif ($this->rightTokenIs(ST_CURLY_CLOSE) || ($this->rightTokenIs([T_VARIABLE]) && $this->leftTokenIs([T_OBJECT_OPERATOR, ST_DOLLAR]))) {
+					} elseif ($this->rightTokenIs(ST_CURLY_CLOSE) || ($this->leftMemoTokenIs([T_OBJECT_OPERATOR, ST_DOLLAR]) && $this->rightTokenIs([T_VARIABLE]))) {
 						$this->appendCode($text);
 						break;
-					} elseif ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC, T_COMMENT]) && !$this->leftTokenIs(T_DOUBLE_COLON)) {
-						$this->appendCode($text . $this->getSpace());
+					} elseif (!$this->leftMemoTokenIs(T_DOUBLE_COLON) && $this->rightTokenIs([T_VARIABLE, T_INC, T_DEC, T_COMMENT])) {
+						$this->appendCode($text . ' ');
 						break;
-					} elseif ($this->leftUsefulTokenIs(T_NS_SEPARATOR)) {
+					} elseif ($this->leftMemoUsefulTokenIs(T_NS_SEPARATOR)) {
 						$touchedGroupedUse = true;
-						$this->appendCode($text . $this->getSpace());
+						$this->appendCode($text . ' ');
 						break;
 					}
 					$this->appendCode($text);
@@ -6227,32 +6255,34 @@ final class AutoImportPass extends FormatterPass {
 				case ST_SEMI_COLON:
 					$touchedUse = false;
 					if ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_COMMENT, T_DOC_COMMENT, T_STRING])) {
-						$this->appendCode($text . $this->getSpace());
+						$this->appendCode($text . ' ');
 						break;
 					}
+					$this->appendCode($text);
+					$this->appendCode($this->getSpace($this->rightTokenIs(T_COMMENT) && !$this->hasLnAfter()));
+					break;
+
 				case ST_PARENTHESES_OPEN:
-					if (!$this->hasLnLeftToken() && $this->leftUsefulTokenIs([T_WHILE, T_CATCH])) {
-						$this->rtrimAndAppendCode($this->getSpace());
+					if ($this->leftMemoUsefulTokenIs([T_WHILE, T_CATCH]) && !$this->hasLnLeftToken()) {
+						$this->rtrimAndAppendCode(' ');
 					}
 					$this->appendCode($text);
-					if (!$this->hasLnAfter() && $this->rightTokenIs(T_COMMENT)) {
-						$this->appendCode($this->getSpace());
-					}
+					$this->appendCode($this->getSpace($this->rightTokenIs(T_COMMENT) && !$this->hasLnAfter()));
 					break;
+
 				case ST_PARENTHESES_CLOSE:
 					$this->appendCode($text . $this->getSpace($this->rightTokenIs([T_COMMENT, T_DOC_COMMENT])));
 					break;
+
 				case T_USE:
 					$touchedUse = true;
-					if ($this->leftTokenIs(ST_PARENTHESES_CLOSE)) {
-						$this->appendCode($this->getSpace() . $text . $this->getSpace());
-						break;
-					}
-					$this->appendCode($text . $this->getSpace());
+					$this->appendCode($this->getSpace($this->leftMemoTokenIs(ST_PARENTHESES_CLOSE)) . $text . ' ');
 					break;
+
 				case T_NAMESPACE:
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_SEMI_COLON, T_NS_SEPARATOR, T_DOUBLE_COLON])));
 					break;
+
 				case T_RETURN:
 				case T_YIELD:
 				case T_ECHO:
@@ -6264,23 +6294,26 @@ final class AutoImportPass extends FormatterPass {
 				case T_BREAK:
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_SEMI_COLON)));
 					break;
+
 				case T_WHILE:
-					if ($this->leftTokenIs(ST_CURLY_CLOSE) && !$this->hasLnBefore()) {
-						$this->appendCode($this->getSpace() . $text . $this->getSpace());
+					if ($this->leftMemoTokenIs(ST_CURLY_CLOSE) && !$this->hasLnBefore()) {
+						$this->appendCode(' ' . $text . ' ');
 						break;
 					}
 				case T_DOUBLE_ARROW:
-					if (T_DOUBLE_ARROW == $id && $this->leftTokenIs([T_CONSTANT_ENCAPSED_STRING, T_STRING, T_VARIABLE, T_LNUMBER, T_DNUMBER, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE, ST_CURLY_CLOSE, ST_QUOTE])) {
-						$this->rtrimAndAppendCode($this->getSpace() . $text . $this->getSpace());
+					if (T_DOUBLE_ARROW == $id && $this->leftMemoTokenIs([T_CONSTANT_ENCAPSED_STRING, T_STRING, T_VARIABLE, T_LNUMBER, T_DNUMBER, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE, ST_CURLY_CLOSE, ST_QUOTE])) {
+						$this->rtrimAndAppendCode(' ' . $text . ' ');
 						break;
 					}
 				case T_STATIC:
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs([ST_SEMI_COLON, T_DOUBLE_COLON, ST_PARENTHESES_OPEN])));
 					break;
+
 				case T_FUNCTION:
 					$touchedFunction = true;
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_SEMI_COLON)));
 					break;
+
 				case T_PUBLIC:
 				case T_PRIVATE:
 				case T_PROTECTED:
@@ -6304,24 +6337,27 @@ final class AutoImportPass extends FormatterPass {
 				case T_CONTINUE:
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_SEMI_COLON)));
 					break;
+
 				case T_CLASS:
 					$this->appendCode(
 						$text .
 						$this->getSpace(
-							!($this->rightTokenIs([ST_PARENTHESES_OPEN, T_EXTENDS, T_IMPLEMENTS]) && $this->leftUsefulTokenIs(T_NEW))
+							!($this->rightTokenIs([ST_PARENTHESES_OPEN, T_EXTENDS, T_IMPLEMENTS]) && $this->leftMemoUsefulTokenIs(T_NEW))
 							&&
-							(!$this->rightTokenIs(ST_SEMI_COLON) && !$this->leftTokenIs([T_DOUBLE_COLON]))
+							(!$this->rightTokenIs(ST_SEMI_COLON) && !$this->leftMemoTokenIs([T_DOUBLE_COLON]))
 						)
 					);
 					break;
+
 				case T_EXTENDS:
 				case T_IMPLEMENTS:
 				case T_INSTANCEOF:
 				case T_INSTEADOF:
 				case T_AS:
 				case T_COALESCE:
-					$this->appendCode($this->getSpace() . $text . $this->getSpace());
+					$this->appendCode(' ' . $text . ' ');
 					break;
+
 				case T_LOGICAL_AND:
 				case T_LOGICAL_OR:
 				case T_LOGICAL_XOR:
@@ -6350,30 +6386,34 @@ final class AutoImportPass extends FormatterPass {
 				case ST_IS_GREATER:
 				case ST_IS_SMALLER:
 				case ST_EQUAL:
-					$this->appendCode($this->getSpace(!$this->hasLnBefore()) . $text . $this->getSpace());
+					$this->appendCode($this->getSpace(!$this->hasLnBefore()) . $text . ' ');
 					break;
+
 				case T_CATCH:
 				case T_FINALLY:
 					if ($this->hasLnLeftToken()) {
-						$this->appendCode($this->getSpace() . $text . $this->getSpace());
+						$this->appendCode(' ' . $text . ' ');
 						break;
 					}
-					$this->rtrimAndAppendCode($this->getSpace() . $text . $this->getSpace());
+					$this->rtrimAndAppendCode(' ' . $text . ' ');
 					break;
+
 				case T_ELSEIF:
-					if (!$this->leftTokenIs(ST_CURLY_CLOSE)) {
-						$this->appendCode($text . $this->getSpace());
+					if (!$this->leftMemoTokenIs(ST_CURLY_CLOSE)) {
+						$this->appendCode($text . ' ');
 						break;
 					}
-					$this->appendCode($this->getSpace() . $text . $this->getSpace());
+					$this->appendCode(' ' . $text . ' ');
 					break;
+
 				case T_ELSE:
-					if (!$this->leftUsefulTokenIs(ST_CURLY_CLOSE)) {
+					if (!$this->leftMemoUsefulTokenIs(ST_CURLY_CLOSE)) {
 						$this->appendCode($text);
 						break;
 					}
-					$this->appendCode($this->getSpace(!$this->leftTokenIs([T_COMMENT, T_DOC_COMMENT])) . $text . $this->getSpace());
+					$this->appendCode($this->getSpace(!$this->leftMemoTokenIs([T_COMMENT, T_DOC_COMMENT])) . $text . ' ');
 					break;
+
 				case T_ARRAY_CAST:
 				case T_BOOL_CAST:
 				case T_DOUBLE_CAST:
@@ -6382,26 +6422,27 @@ final class AutoImportPass extends FormatterPass {
 				case T_STRING_CAST:
 				case T_UNSET_CAST:
 				case T_GOTO:
-					$this->appendCode(str_replace([' ', "\t"], '', $text) . $this->getSpace());
+					$this->appendCode(str_replace([' ', "\t"], '', $text) . ' ');
 					break;
+
 				case ST_REFERENCE:
-					$spaceBefore = !$this->leftUsefulTokenIs([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]) && !$this->leftUsefulTokenIs([T_ARRAY, T_FUNCTION]);
-					$spaceAfter = !$touchedFunction && !$this->leftUsefulTokenIs([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]);
+					$spaceBefore = !$this->leftMemoUsefulTokenIs([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]) && !$this->leftMemoUsefulTokenIs([T_FUNCTION]);
+					$spaceAfter = !$touchedFunction && !$this->leftMemoUsefulTokenIs([ST_EQUAL, ST_PARENTHESES_OPEN, T_AS, T_DOUBLE_ARROW, ST_COMMA]);
 					$this->appendCode($this->getSpace($spaceBefore) . $text . $this->getSpace($spaceAfter));
 					break;
 
 				case ST_BITWISE_OR:
 				case ST_BITWISE_XOR:
-					$this->appendCode($this->getSpace() . $text . $this->getSpace());
+					$this->appendCode(' ' . $text . ' ');
 					break;
 
 				case T_COMMENT:
-					if (substr($text, 0, 2) == '//') {
+					if (substr($text, 0, 2) === '//') {
 						list($leftId) = $this->inspectToken(-1);
 						$this->appendCode($this->getSpace(T_VARIABLE == $leftId) . $text);
 						break;
 					} elseif (!$this->hasLn($text) && !$this->hasLnBefore() && !$this->hasLnAfter() && $this->leftUsefulTokenIs(ST_COMMA) && $this->rightUsefulTokenIs(T_VARIABLE)) {
-						$this->appendCode($text . $this->getSpace());
+						$this->appendCode($text . ' ');
 						break;
 					}
 					$this->appendCode($text);
@@ -6413,17 +6454,14 @@ final class AutoImportPass extends FormatterPass {
 						$this->appendCode($this->getSpace(!$this->hasLnBefore()));
 					}
 					$this->appendCode($text);
-					if (!$this->hasLnAfter() && $this->rightTokenIs(T_COMMENT)) {
-						$this->appendCode($this->getSpace());
-					}
+					$this->appendCode($this->getSpace($this->rightTokenIs(T_COMMENT) && !$this->hasLnAfter()));
 					break;
 
 				case T_CONSTANT_ENCAPSED_STRING:
 					$this->appendCode($text);
-					if (!$this->hasLnAfter() && $this->rightTokenIs(T_COMMENT)) {
-						$this->appendCode($this->getSpace());
-					}
+					$this->appendCode($this->getSpace($this->rightTokenIs(T_COMMENT) && !$this->hasLnAfter()));
 					break;
+
 				default:
 					$this->appendCode($text);
 					break;
@@ -6827,6 +6865,7 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -6852,7 +6891,7 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 				case T_BREAK:
 				case T_ECHO:
 				case T_PRINT:
-					if (!$this->hasLnBefore() && $touchedSemicolon) {
+					if ($touchedSemicolon && !$this->hasLnBefore()) {
 						$touchedSemicolon = false;
 						$this->appendCode($this->newLine);
 					}
@@ -9521,19 +9560,16 @@ final class DocBlockToComment extends AdditionalPass {
 		return array_unique($variableList);
 	}
 
-	protected function walkUntil($tknid) {
-		$id = null;
-		$text = null;
+	protected function walkAndNormalizeUntil($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
-			$this->tkns[$this->ptr] = [$id, $text];
-			if ($id == $tknid) {
-				break;
+			if ($token[0] == $tknid) {
+				$t = &$this->tkns[$this->ptr];
+				$t = $this->getToken($token);
+				return $t;
 			}
 		}
-		return [$id, $text];
 	}
 
 	private function isStructuralElement() {
@@ -9558,7 +9594,7 @@ final class DocBlockToComment extends AdditionalPass {
 	}
 
 	private function updateCommentAgainstParenthesesBlock($commentTokenText) {
-		$this->walkUntil(ST_PARENTHESES_OPEN);
+		$this->walkAndNormalizeUntil(ST_PARENTHESES_OPEN);
 		$variables = $this->variableListFromParenthesesBlock($this->tkns, $this->ptr);
 
 		$foundVar = false;

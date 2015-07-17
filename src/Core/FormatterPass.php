@@ -15,6 +15,31 @@ abstract class FormatterPass {
 	protected $useCache = false;
 	protected $cache = [];
 
+	private $memo = [null, null];
+	private $memoUseful = [null, null];
+
+	protected function memoPtr() {
+		$t = $this->tkns[$this->ptr][0];
+
+		if (T_WHITESPACE !== $t) {
+			$this->memo[0] = $this->memo[1];
+			$this->memo[1] = $t;
+		}
+
+		if (T_WHITESPACE !== $t && T_COMMENT !== $t && T_DOC_COMMENT !== $t) {
+			$this->memoUseful[0] = $this->memoUseful[1];
+			$this->memoUseful[1] = $t;
+		}
+	}
+
+	protected function leftMemoUsefulTokenIs($token, $debug = false) {
+		return $this->resolveFoundToken($this->memoUseful[0], $token);
+	}
+
+	protected function leftMemoTokenIs($token) {
+		return $this->resolveFoundToken($this->memo[0], $token);
+	}
+
 	protected function alignPlaceholders($origPlaceholder, $contextCounter) {
 		for ($j = 0; $j <= $contextCounter; ++$j) {
 			$placeholder = sprintf($origPlaceholder, $j);
@@ -384,6 +409,10 @@ abstract class FormatterPass {
 		}
 
 		$foundToken = $tkns[$idx];
+		return $this->resolveFoundToken($foundToken, $token);
+	}
+
+	private function resolveFoundToken($foundToken, $token) {
 		if ($foundToken === $token) {
 			return true;
 		} elseif (is_array($token) && isset($foundToken[1]) && in_array($foundToken[0], $token)) {
@@ -442,6 +471,10 @@ abstract class FormatterPass {
 
 	protected function rtrimAndAppendCode($code = '') {
 		$this->code = rtrim($this->code) . $code;
+	}
+
+	protected function rtrimLnAndAppendCode($code = '') {
+		$this->code = rtrim($this->code, "\t ") . $code;
 	}
 
 	protected function scanAndReplace(&$tkns, &$ptr, $start, $end, $call, $lookFor) {
@@ -600,14 +633,14 @@ abstract class FormatterPass {
 
 	private function walkLeft($tkns, $idx, $ignoreList) {
 		$i = $idx;
-		while (--$i >= 0 && isset($tkns[$i][1]) && isset($ignoreList[$tkns[$i][0]]));
+		while (--$i >= 0 && isset($ignoreList[$tkns[$i][0]]));
 		return $i;
 	}
 
 	private function walkRight($tkns, $idx, $ignoreList) {
 		$i = $idx;
 		$tknsSize = sizeof($tkns) - 1;
-		while (++$i < $tknsSize && isset($tkns[$i][1]) && isset($ignoreList[$tkns[$i][0]]));
+		while (++$i < $tknsSize && isset($ignoreList[$tkns[$i][0]]));
 		return $i;
 	}
 

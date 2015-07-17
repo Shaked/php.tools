@@ -3,6 +3,7 @@ final class TwoCommandsInSameLine extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -28,7 +29,7 @@ final class TwoCommandsInSameLine extends FormatterPass {
 				case T_BREAK:
 				case T_ECHO:
 				case T_PRINT:
-					if (!$this->hasLnBefore() && $touchedSemicolon) {
+					if ($touchedSemicolon && !$this->hasLnBefore()) {
 						$touchedSemicolon = false;
 						$this->appendCode($this->newLine);
 					}

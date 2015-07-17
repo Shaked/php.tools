@@ -81,19 +81,16 @@ final class DocBlockToComment extends AdditionalPass {
 		return array_unique($variableList);
 	}
 
-	protected function walkUntil($tknid) {
-		$id = null;
-		$text = null;
+	protected function walkAndNormalizeUntil($tknid) {
 		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			$this->cache = [];
-			$this->tkns[$this->ptr] = [$id, $text];
-			if ($id == $tknid) {
-				break;
+			if ($token[0] == $tknid) {
+				$t = &$this->tkns[$this->ptr];
+				$t = $this->getToken($token);
+				return $t;
 			}
 		}
-		return [$id, $text];
 	}
 
 	private function isStructuralElement() {
@@ -118,7 +115,7 @@ final class DocBlockToComment extends AdditionalPass {
 	}
 
 	private function updateCommentAgainstParenthesesBlock($commentTokenText) {
-		$this->walkUntil(ST_PARENTHESES_OPEN);
+		$this->walkAndNormalizeUntil(ST_PARENTHESES_OPEN);
 		$variables = $this->variableListFromParenthesesBlock($this->tkns, $this->ptr);
 
 		$foundVar = false;
