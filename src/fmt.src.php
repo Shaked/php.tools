@@ -52,6 +52,8 @@ namespace {
 	require 'Core/BaseCodeFormatter.php';
 	if ('1' === getenv('FMTDEBUG') || 'step' === getenv('FMTDEBUG')) {
 		require 'Core/CodeFormatter_debug.php';
+	} elseif ('profile' === getenv('FMTDEBUG')) {
+		require 'Core/CodeFormatter_profile.php';
 	} else {
 		require 'Core/CodeFormatter.php';
 	}

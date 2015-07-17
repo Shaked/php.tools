@@ -3457,7 +3457,9 @@ abstract class FormatterPass {
  * @codeCoverageIgnore
  */
 abstract class BaseCodeFormatter {
-	private $hasAfterPass = false;
+	private $hasAfterExecutedPass = false;
+	private $hasAfterFormat = false;
+	private $hasBeforePass = false;
 
 	private $shortcircuit = [
 		'ReindentAndAlignObjOps' => 'ReindentObjOps',
@@ -3610,7 +3612,9 @@ abstract class BaseCodeFormatter {
 		$this->passes['SplitCurlyCloseAndTokens'] = new SplitCurlyCloseAndTokens();
 		$this->passes['StripExtraCommaInList'] = new StripExtraCommaInList();
 		$this->passes['TwoCommandsInSameLine'] = new TwoCommandsInSameLine();
-		$this->hasAfterPass = method_exists($this, 'afterPass');
+		$this->hasAfterExecutedPass = method_exists($this, 'afterExecutedPass');
+		$this->hasAfterFormat = method_exists($this, 'afterFormat');
+		$this->hasBeforePass = method_exists($this, 'beforePass');
 	}
 
 	public function enablePass($pass) {
@@ -3652,14 +3656,16 @@ abstract class BaseCodeFormatter {
 			}
 		}
 		while (($pass = array_pop($passes))) {
+			$this->hasBeforePass && $this->beforePass($source, $pass);
 			if ($pass->candidate($source, $foundTokens)) {
 				if (isset($pass->commentStack)) {
 					$pass->commentStack = $commentStack;
 				}
 				$source = $pass->format($source);
-				$this->hasAfterPass && $this->afterPass($source, $pass);
+				$this->hasAfterExecutedPass && $this->afterExecutedPass($source, $pass);
 			}
 		}
+		$this->hasAfterFormat && $this->afterFormat($source);
 		return $source;
 	}
 
@@ -3677,14 +3683,45 @@ abstract class BaseCodeFormatter {
  * @codeCoverageIgnore
  */
 final class CodeFormatter extends BaseCodeFormatter {
-	public function afterPass($source, $className) {
-		echo get_class($className), PHP_EOL;
+	public function afterExecutedPass($source, $className) {
+		$cn = get_class($className);
+		echo $cn, PHP_EOL;
 		echo $source, PHP_EOL;
-		echo get_class($className), PHP_EOL;
+		echo $cn, PHP_EOL;
 		echo '----', PHP_EOL;
 		if ('step' == getenv('FMTDEBUG')) {
 			readline();
 		}
+	}
+}
+
+	} elseif ('profile' === getenv('FMTDEBUG')) {
+		/**
+ * @codeCoverageIgnore
+ */
+final class CodeFormatter extends BaseCodeFormatter {
+	private $timings = [];
+
+	private $currentTiming = null;
+
+	public function beforePass($source, $className) {
+		$this->currentTiming = microtime(true);
+	}
+
+	public function afterExecutedPass($source, $className) {
+		$cn = get_class($className);
+		$this->timings[$cn] = microtime(true) - $this->currentTiming;
+	}
+
+	public function afterFormat($source) {
+		asort($this->timings, SORT_NUMERIC);
+		$total = array_sum($this->timings);
+
+		$lines = [];
+		foreach ($this->timings as $pass => $timing) {
+			$lines[] = [$pass, $timing, str_pad(round($timing / $total * 100, 3) . '%', 8, ' ', STR_PAD_LEFT)];
+		}
+		echo tabwriter($lines);
 	}
 }
 

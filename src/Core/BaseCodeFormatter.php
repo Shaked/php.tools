@@ -3,7 +3,9 @@
  * @codeCoverageIgnore
  */
 abstract class BaseCodeFormatter {
-	private $hasAfterPass = false;
+	private $hasAfterExecutedPass = false;
+	private $hasAfterFormat = false;
+	private $hasBeforePass = false;
 
 	private $shortcircuit = [
 		'ReindentAndAlignObjOps' => 'ReindentObjOps',
@@ -156,7 +158,9 @@ abstract class BaseCodeFormatter {
 		$this->passes['SplitCurlyCloseAndTokens'] = new SplitCurlyCloseAndTokens();
 		$this->passes['StripExtraCommaInList'] = new StripExtraCommaInList();
 		$this->passes['TwoCommandsInSameLine'] = new TwoCommandsInSameLine();
-		$this->hasAfterPass = method_exists($this, 'afterPass');
+		$this->hasAfterExecutedPass = method_exists($this, 'afterExecutedPass');
+		$this->hasAfterFormat = method_exists($this, 'afterFormat');
+		$this->hasBeforePass = method_exists($this, 'beforePass');
 	}
 
 	public function enablePass($pass) {
@@ -198,14 +202,16 @@ abstract class BaseCodeFormatter {
 			}
 		}
 		while (($pass = array_pop($passes))) {
+			$this->hasBeforePass && $this->beforePass($source, $pass);
 			if ($pass->candidate($source, $foundTokens)) {
 				if (isset($pass->commentStack)) {
 					$pass->commentStack = $commentStack;
 				}
 				$source = $pass->format($source);
-				$this->hasAfterPass && $this->afterPass($source, $pass);
+				$this->hasAfterExecutedPass && $this->afterExecutedPass($source, $pass);
 			}
 		}
+		$this->hasAfterFormat && $this->afterFormat($source);
 		return $source;
 	}
 

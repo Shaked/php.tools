@@ -187,6 +187,7 @@ foreach ($cases as $caseIn) {
 	} else {
 		echo '.';
 	}
+	stopAtStep();
 	$isCoverage && $coverage->stop();
 }
 
@@ -287,6 +288,7 @@ if (!$bailOut) {
 		} else {
 			echo '.';
 		}
+		stopAtStep();
 		$isCoverage && $coverage->stop();
 	}
 }
@@ -362,6 +364,7 @@ if (!$bailOut) {
 		} else {
 			echo '.';
 		}
+		stopAtStep();
 		$isCoverage && $coverage->stop();
 	}
 }
@@ -463,6 +466,7 @@ if (!$bailOut) {
 		} else {
 			echo '.';
 		}
+		stopAtStep();
 		$isCoverage && $coverage->stop();
 	}
 }
@@ -526,4 +530,10 @@ function bogomips() {
 
 function delay($loops) {
 	for ($i = 0; $i < $loops; $i++);
+}
+
+function stopAtStep() {
+	if ('1' === getenv('FMTDEBUG') || 'profile' === getenv('FMTDEBUG')) {
+		readline();
+	}
 }
