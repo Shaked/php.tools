@@ -193,7 +193,7 @@ final class ResizeSpaces extends FormatterPass {
 					} elseif ($this->rightTokenIs(ST_CURLY_CLOSE) || ($this->rightTokenIs([T_VARIABLE]) && $this->leftTokenIs([T_OBJECT_OPERATOR, ST_DOLLAR]))) {
 						$this->appendCode($text);
 						break;
-					} elseif ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC, T_COMMENT])) {
+					} elseif ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC, T_COMMENT]) && !$this->leftTokenIs(T_DOUBLE_COLON)) {
 						$this->appendCode($text . $this->getSpace());
 						break;
 					} elseif ($this->leftUsefulTokenIs(T_NS_SEPARATOR)) {
