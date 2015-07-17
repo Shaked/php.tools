@@ -225,7 +225,11 @@ final class AutoSemicolon extends AdditionalPass {
 
 					if (
 						$this->leftUsefulTokenIs(ST_CURLY_CLOSE) &&
-						ST_CURLY_OPEN == $lastCurly
+						(
+							ST_CURLY_OPEN == $lastCurly
+							||
+							T_FUNCTION == $lastCurly
+						)
 					) {
 						$this->appendCode($text);
 						continue;
