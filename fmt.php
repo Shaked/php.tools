@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.5.1");
+	define("VERSION", "9.6.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -8728,6 +8728,8 @@ EOT;
 	}
 }
 	final class AutoSemicolon extends AdditionalPass {
+	const ST_CLOSURE = 'CLOSURE';
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -8736,7 +8738,9 @@ EOT;
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$parenStack = [];
+		$curlyStack = [];
 		$lastParen = null;
+		$lastCurly = null;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -8760,6 +8764,28 @@ EOT;
 					$this->appendCode($text);
 					break;
 
+				case T_FUNCTION:
+					$foundId = $id;
+					if ($this->rightUsefulTokenIs(ST_PARENTHESES_OPEN)) {
+						$foundId = self::ST_CLOSURE;
+					}
+					$curlyStack[] = $foundId;
+					$this->appendCode($text);
+					$this->printUntil(ST_CURLY_OPEN);
+					break;
+
+				case T_CURLY_OPEN:
+				case T_DOLLAR_OPEN_CURLY_BRACES:
+				case ST_CURLY_OPEN:
+					$curlyStack[] = $id;
+					$this->appendCode($text);
+					break;
+
+				case ST_CURLY_CLOSE:
+					$lastCurly = array_pop($curlyStack);
+					$this->appendCode($text);
+					break;
+
 				case T_WHITESPACE:
 					if (!$this->hasLn($text)) {
 						$this->appendCode($text);
@@ -8772,7 +8798,6 @@ EOT;
 							ST_COLON,
 							ST_COMMA,
 							ST_CONCAT,
-							ST_CURLY_CLOSE,
 							ST_CURLY_OPEN,
 							ST_DIVIDE,
 							ST_EQUAL,
@@ -8926,6 +8951,14 @@ EOT;
 						continue;
 					}
 
+					if (
+						$this->leftUsefulTokenIs(ST_CURLY_CLOSE) &&
+						ST_CURLY_OPEN == $lastCurly
+					) {
+						$this->appendCode($text);
+						continue;
+					}
+
 					$this->appendCode(ST_SEMI_COLON . $text);
 					break;
 				default:
@@ -8941,7 +8974,7 @@ EOT;
 	 * @codeCoverageIgnore
 	 */
 	public function getDescription() {
-		return 'Beta - Add semicolons in statements ends.';
+		return 'Add semicolons in statements ends.';
 	}
 
 	/**

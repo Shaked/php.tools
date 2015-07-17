@@ -1,5 +1,7 @@
 <?php
 final class AutoSemicolon extends AdditionalPass {
+	const ST_CLOSURE = 'CLOSURE';
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -8,7 +10,9 @@ final class AutoSemicolon extends AdditionalPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		$parenStack = [];
+		$curlyStack = [];
 		$lastParen = null;
+		$lastCurly = null;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -32,6 +36,28 @@ final class AutoSemicolon extends AdditionalPass {
 					$this->appendCode($text);
 					break;
 
+				case T_FUNCTION:
+					$foundId = $id;
+					if ($this->rightUsefulTokenIs(ST_PARENTHESES_OPEN)) {
+						$foundId = self::ST_CLOSURE;
+					}
+					$curlyStack[] = $foundId;
+					$this->appendCode($text);
+					$this->printUntil(ST_CURLY_OPEN);
+					break;
+
+				case T_CURLY_OPEN:
+				case T_DOLLAR_OPEN_CURLY_BRACES:
+				case ST_CURLY_OPEN:
+					$curlyStack[] = $id;
+					$this->appendCode($text);
+					break;
+
+				case ST_CURLY_CLOSE:
+					$lastCurly = array_pop($curlyStack);
+					$this->appendCode($text);
+					break;
+
 				case T_WHITESPACE:
 					if (!$this->hasLn($text)) {
 						$this->appendCode($text);
@@ -44,7 +70,6 @@ final class AutoSemicolon extends AdditionalPass {
 							ST_COLON,
 							ST_COMMA,
 							ST_CONCAT,
-							ST_CURLY_CLOSE,
 							ST_CURLY_OPEN,
 							ST_DIVIDE,
 							ST_EQUAL,
@@ -198,6 +223,14 @@ final class AutoSemicolon extends AdditionalPass {
 						continue;
 					}
 
+					if (
+						$this->leftUsefulTokenIs(ST_CURLY_CLOSE) &&
+						ST_CURLY_OPEN == $lastCurly
+					) {
+						$this->appendCode($text);
+						continue;
+					}
+
 					$this->appendCode(ST_SEMI_COLON . $text);
 					break;
 				default:
@@ -213,7 +246,7 @@ final class AutoSemicolon extends AdditionalPass {
 	 * @codeCoverageIgnore
 	 */
 	public function getDescription() {
-		return 'Beta - Add semicolons in statements ends.';
+		return 'Add semicolons in statements ends.';
 	}
 
 	/**
