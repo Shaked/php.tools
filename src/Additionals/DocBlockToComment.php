@@ -8,6 +8,7 @@ final class DocBlockToComment extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -17,8 +18,8 @@ final class DocBlockToComment extends AdditionalPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			$this->cache = [];
 			$this->tkns[$this->ptr] = [$id, $text];
+			$this->cache = [];
 
 			if (T_DOC_COMMENT != $id) {
 				continue;
@@ -86,6 +87,7 @@ final class DocBlockToComment extends AdditionalPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
+			$this->cache = [];
 			$this->tkns[$this->ptr] = [$id, $text];
 			if ($id == $tknid) {
 				break;
@@ -107,6 +109,7 @@ final class DocBlockToComment extends AdditionalPass {
 	private function updateCommentAgainstVariable($commentTokenText) {
 		list(, $nextText) = $this->rightUsefulToken();
 		$this->ptr = $this->rightUsefulTokenIdx();
+		$this->cache = [];
 		if (!$this->rightUsefulTokenIs(ST_EQUAL) ||
 			false === strpos($commentTokenText, $nextText)) {
 			$commentTokenText = $this->updateComment($commentTokenText);
@@ -134,6 +137,7 @@ final class DocBlockToComment extends AdditionalPass {
 	private function updateComment($commentTokenText) {
 		return preg_replace('/\/\*\*/', '/*', $commentTokenText, 1);
 	}
+
 	/**
 	 * @codeCoverageIgnore
 	 */

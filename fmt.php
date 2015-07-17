@@ -2663,8 +2663,8 @@ abstract class FormatterPass {
 		$this->code .= $code;
 	}
 
-	private function calculateCacheKey($direction, $ignoreList, $token) {
-		return $direction . "\x2" . implode('', $ignoreList) . "\x2" . (is_array($token) ? implode("\x2", $token) : $token);
+	private function calculateCacheKey($direction, $ignoreList) {
+		return $direction . "\x2" . implode('', $ignoreList);
 	}
 
 	abstract public function candidate($source, $foundTokens);
@@ -2760,11 +2760,16 @@ abstract class FormatterPass {
 	}
 
 	protected function leftTokenSubsetIsAtIdx($tkns, $idx, $token, $ignoreList = []) {
-		$ignoreList = $this->resolveIgnoreList($ignoreList);
-
-		$idx = $this->walkLeft($tkns, $idx, $ignoreList);
+		$idx = $this->leftTokenSubsetAtIdx($tkns, $idx, $ignoreList);
 
 		return $this->resolveTokenMatch($tkns, $idx, $token);
+	}
+
+	protected function leftTokenSubsetAtIdx($tkns, $idx, $ignoreList = []) {
+		$ignoreList = $this->resolveIgnoreList($ignoreList);
+		$idx = $this->walkLeft($tkns, $idx, $ignoreList);
+
+		return $idx;
 	}
 
 	protected function leftUsefulToken() {
@@ -3011,11 +3016,16 @@ abstract class FormatterPass {
 	}
 
 	protected function rightTokenSubsetIsAtIdx($tkns, $idx, $token, $ignoreList = []) {
-		$ignoreList = $this->resolveIgnoreList($ignoreList);
-
-		$idx = $this->walkRight($tkns, $idx, $ignoreList);
+		$idx = $this->rightTokenSubsetAtIdx($tkns, $idx, $ignoreList);
 
 		return $this->resolveTokenMatch($tkns, $idx, $token);
+	}
+
+	protected function rightTokenSubsetAtIdx($tkns, $idx, $ignoreList = []) {
+		$ignoreList = $this->resolveIgnoreList($ignoreList);
+		$idx = $this->walkRight($tkns, $idx, $ignoreList);
+
+		return $idx;
 	}
 
 	protected function rightUsefulToken() {
@@ -3135,15 +3145,14 @@ abstract class FormatterPass {
 			return $this->{$direction . 'tokenSubsetIsAtIdx'}($this->tkns, $this->ptr, $token, $ignoreList);
 		}
 
-		$key = $this->calculateCacheKey($direction, $ignoreList, $token);
+		$key = $this->calculateCacheKey($direction, $ignoreList);
 		if (isset($this->cache[$key])) {
-			return $this->cache[$key];
+			return $this->resolveTokenMatch($this->tkns, $this->cache[$key], $token);
 		}
 
-		$ret = $this->{$direction . 'tokenSubsetIsAtIdx'}($this->tkns, $this->ptr, $token, $ignoreList);
-		$this->cache[$key] = $ret;
+		$this->cache[$key] = $this->{$direction . 'tokenSubsetAtIdx'}($this->tkns, $this->ptr, $ignoreList);
 
-		return $ret;
+		return $this->resolveTokenMatch($this->tkns, $this->cache[$key], $token);
 	}
 
 	protected function walkAndAccumulateStopAt(&$tkns, $tknid) {
@@ -9459,6 +9468,7 @@ final class DocBlockToComment extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -9468,8 +9478,8 @@ final class DocBlockToComment extends AdditionalPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			$this->cache = [];
 			$this->tkns[$this->ptr] = [$id, $text];
+			$this->cache = [];
 
 			if (T_DOC_COMMENT != $id) {
 				continue;
@@ -9537,6 +9547,7 @@ final class DocBlockToComment extends AdditionalPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
+			$this->cache = [];
 			$this->tkns[$this->ptr] = [$id, $text];
 			if ($id == $tknid) {
 				break;
@@ -9558,6 +9569,7 @@ final class DocBlockToComment extends AdditionalPass {
 	private function updateCommentAgainstVariable($commentTokenText) {
 		list(, $nextText) = $this->rightUsefulToken();
 		$this->ptr = $this->rightUsefulTokenIdx();
+		$this->cache = [];
 		if (!$this->rightUsefulTokenIs(ST_EQUAL) ||
 			false === strpos($commentTokenText, $nextText)) {
 			$commentTokenText = $this->updateComment($commentTokenText);
@@ -9585,6 +9597,7 @@ final class DocBlockToComment extends AdditionalPass {
 	private function updateComment($commentTokenText) {
 		return preg_replace('/\/\*\*/', '/*', $commentTokenText, 1);
 	}
+
 	/**
 	 * @codeCoverageIgnore
 	 */

@@ -63,8 +63,8 @@ abstract class FormatterPass {
 		$this->code .= $code;
 	}
 
-	private function calculateCacheKey($direction, $ignoreList, $token) {
-		return $direction . "\x2" . implode('', $ignoreList) . "\x2" . (is_array($token) ? implode("\x2", $token) : $token);
+	private function calculateCacheKey($direction, $ignoreList) {
+		return $direction . "\x2" . implode('', $ignoreList);
 	}
 
 	abstract public function candidate($source, $foundTokens);
@@ -160,11 +160,16 @@ abstract class FormatterPass {
 	}
 
 	protected function leftTokenSubsetIsAtIdx($tkns, $idx, $token, $ignoreList = []) {
-		$ignoreList = $this->resolveIgnoreList($ignoreList);
-
-		$idx = $this->walkLeft($tkns, $idx, $ignoreList);
+		$idx = $this->leftTokenSubsetAtIdx($tkns, $idx, $ignoreList);
 
 		return $this->resolveTokenMatch($tkns, $idx, $token);
+	}
+
+	protected function leftTokenSubsetAtIdx($tkns, $idx, $ignoreList = []) {
+		$ignoreList = $this->resolveIgnoreList($ignoreList);
+		$idx = $this->walkLeft($tkns, $idx, $ignoreList);
+
+		return $idx;
 	}
 
 	protected function leftUsefulToken() {
@@ -411,11 +416,16 @@ abstract class FormatterPass {
 	}
 
 	protected function rightTokenSubsetIsAtIdx($tkns, $idx, $token, $ignoreList = []) {
-		$ignoreList = $this->resolveIgnoreList($ignoreList);
-
-		$idx = $this->walkRight($tkns, $idx, $ignoreList);
+		$idx = $this->rightTokenSubsetAtIdx($tkns, $idx, $ignoreList);
 
 		return $this->resolveTokenMatch($tkns, $idx, $token);
+	}
+
+	protected function rightTokenSubsetAtIdx($tkns, $idx, $ignoreList = []) {
+		$ignoreList = $this->resolveIgnoreList($ignoreList);
+		$idx = $this->walkRight($tkns, $idx, $ignoreList);
+
+		return $idx;
 	}
 
 	protected function rightUsefulToken() {
@@ -535,15 +545,14 @@ abstract class FormatterPass {
 			return $this->{$direction . 'tokenSubsetIsAtIdx'}($this->tkns, $this->ptr, $token, $ignoreList);
 		}
 
-		$key = $this->calculateCacheKey($direction, $ignoreList, $token);
+		$key = $this->calculateCacheKey($direction, $ignoreList);
 		if (isset($this->cache[$key])) {
-			return $this->cache[$key];
+			return $this->resolveTokenMatch($this->tkns, $this->cache[$key], $token);
 		}
 
-		$ret = $this->{$direction . 'tokenSubsetIsAtIdx'}($this->tkns, $this->ptr, $token, $ignoreList);
-		$this->cache[$key] = $ret;
+		$this->cache[$key] = $this->{$direction . 'tokenSubsetAtIdx'}($this->tkns, $this->ptr, $ignoreList);
 
-		return $ret;
+		return $this->resolveTokenMatch($this->tkns, $this->cache[$key], $token);
 	}
 
 	protected function walkAndAccumulateStopAt(&$tkns, $tknid) {
