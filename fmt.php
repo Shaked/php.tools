@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.6.2");
+	define("VERSION", "9.6.3");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -6333,6 +6333,9 @@ final class AutoImportPass extends FormatterPass {
 				case T_SWITCH:
 				case T_TRY:
 				case ST_COMMA:
+					$this->appendCode($text . ' ');
+					break;
+
 				case T_CLONE:
 				case T_CONTINUE:
 					$this->appendCode($text . $this->getSpace(!$this->rightTokenIs(ST_SEMI_COLON)));
@@ -6342,9 +6345,9 @@ final class AutoImportPass extends FormatterPass {
 					$this->appendCode(
 						$text .
 						$this->getSpace(
-							!($this->rightTokenIs([ST_PARENTHESES_OPEN, T_EXTENDS, T_IMPLEMENTS]) && $this->leftMemoUsefulTokenIs(T_NEW))
-							&&
-							(!$this->rightTokenIs(ST_SEMI_COLON) && !$this->leftMemoTokenIs([T_DOUBLE_COLON]))
+							!($this->leftMemoUsefulTokenIs(T_NEW) && $this->rightTokenIs([ST_PARENTHESES_OPEN, T_EXTENDS, T_IMPLEMENTS])) &&
+							!$this->leftMemoTokenIs(T_DOUBLE_COLON) &&
+							!$this->rightTokenIs(ST_SEMI_COLON)
 						)
 					);
 					break;
