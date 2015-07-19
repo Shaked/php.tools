@@ -47,18 +47,9 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 					$this->appendCode($text);
 					$this->printUntil(ST_PARENTHESES_OPEN);
 					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
-						$this->appendCode($text);
-						if (ST_CURLY_OPEN === $id || ST_SEMI_COLON == $id) {
-							break;
-						} elseif (ST_COLON === $id && !$this->rightTokenIs([T_CLOSE_TAG])) {
-							$this->setIndent(+1);
-							break;
-						} elseif (ST_COLON === $id) {
-							break;
-						}
+					$foundId = $this->printUntilAny([ST_CURLY_OPEN, ST_SEMI_COLON, ST_COLON]);
+					if (ST_COLON === $foundId && !$this->rightTokenIs([T_CLOSE_TAG])) {
+						$this->setIndent(+1);
 					}
 					break;
 				default:
@@ -85,45 +76,6 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 	}
 
 	private function formatWhileBlocks($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-				case T_ENDWHILE:
-					$this->setIndent(-1);
-					$this->appendCode($text);
-					break;
-				case T_WHILE:
-					$this->appendCode($text);
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
-						$this->appendCode($text);
-						if (ST_CURLY_OPEN === $id) {
-							break;
-						} elseif (ST_SEMI_COLON === $id) {
-							break;
-						} elseif (ST_COLON === $id) {
-							$this->setIndent(+1);
-							break;
-						}
-					}
-					break;
-				default:
-					if ($this->hasLn($text) && !$this->rightTokenIs([T_ENDWHILE])) {
-						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
-					} elseif ($this->hasLn($text) && $this->rightTokenIs([T_ENDWHILE])) {
-						$this->setIndent(-1);
-						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
-						$this->setIndent(+1);
-					}
-					$this->appendCode($text);
-					break;
-			}
-		}
-		return $this->code;
+		return $this->formatBlocks($source, T_WHILE, T_ENDWHILE);
 	}
 }
