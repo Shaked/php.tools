@@ -3778,14 +3778,21 @@ final class CodeFormatter extends BaseCodeFormatter {
 
 	final class AddMissingCurlyBraces extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (
+			isset($foundTokens[T_ELSE]) ||
+			isset($foundTokens[T_WHILE]) ||
+			isset($foundTokens[T_FOR]) ||
+			isset($foundTokens[T_FOREACH]) ||
+			isset($foundTokens[T_ELSEIF]) ||
+			isset($foundTokens[T_IF])
+		) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function format($source) {
-		return $this->addBraces($source);
-	}
-
-	private function addBraces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		// Scans from the end to the beginning looking for close curly
@@ -4405,8 +4412,16 @@ final class AutoImportPass extends FormatterPass {
 	final class LeftAlignComment extends FormatterPass {
 	const NON_INDENTABLE_COMMENT = "/*\x2 COMMENT \x3*/";
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (
+			isset($foundTokens[T_COMMENT]) ||
+			isset($foundTokens[T_DOC_COMMENT])
+		) {
+			return true;
+		}
+
+		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -4463,12 +4478,13 @@ final class AutoImportPass extends FormatterPass {
 
 	final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_WHILE])) {
+		if (isset($foundTokens[T_WHILE], $foundTokens[T_DO])) {
 			return true;
 		}
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -4512,12 +4528,13 @@ final class AutoImportPass extends FormatterPass {
 
 	final class MergeDoubleArrowAndArray extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_ARRAY])) {
+		if (isset($foundTokens[T_ARRAY], $foundTokens[T_DOUBLE_ARROW])) {
 			return true;
 		}
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -5051,8 +5068,17 @@ final class AutoImportPass extends FormatterPass {
 
 	final class Reindent extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (
+			isset($foundTokens[ST_CURLY_OPEN]) ||
+			isset($foundTokens[ST_PARENTHESES_OPEN]) ||
+			isset($foundTokens[ST_BRACKET_OPEN])
+		) {
+			return true;
+		}
+
+		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -5152,12 +5178,13 @@ final class AutoImportPass extends FormatterPass {
 
 	final class ReindentColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_DEFAULT]) || isset($foundTokens[T_CASE]) || isset($foundTokens[T_SWITCH])) {
+		if (isset($foundTokens[ST_COLON]) && (isset($foundTokens[T_DEFAULT]) || isset($foundTokens[T_CASE]) || isset($foundTokens[T_SWITCH]))) {
 			return true;
 		}
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->useCache = true;
@@ -5259,7 +5286,7 @@ final class AutoImportPass extends FormatterPass {
 }
 	final class ReindentIfColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[ST_COLON])) {
+		if (isset($foundTokens[ST_COLON], $foundTokens[T_ENDIF])) {
 			return true;
 		}
 
@@ -6074,25 +6101,20 @@ final class AutoImportPass extends FormatterPass {
 
 	final class ResizeSpaces extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		return true;
-	}
-
-	private function filterWhitespaces($source) {
 		$tkns = token_get_all($source);
 
-		$newTkns = [];
+		$this->tkns = [];
 		foreach ($tkns as $token) {
 			if (T_WHITESPACE === $token[0] && !$this->hasLn($token[1])) {
 				continue;
 			}
-			$newTkns[] = $token;
+			$this->tkns[] = $token;
 		}
 
-		return $newTkns;
+		return true;
 	}
 
 	public function format($source) {
-		$this->tkns = $this->filterWhitespaces($source);
 		$this->code = '';
 		$this->useCache = true;
 
@@ -6927,15 +6949,13 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 
 
 	final class PSR1BOMMark extends FormatterPass {
+	const BOM = "\xef\xbb\xbf";
 	public function candidate($source, $foundTokens) {
-		return true;
+		return substr($source, 0, 3) === self::BOM;
 	}
+
 	public function format($source) {
-		$bom = "\xef\xbb\xbf";
-		if (substr($source, 0, 3) === $bom) {
-			return substr($source, 3);
-		}
-		return $source;
+		return substr($source, 3);
 	}
 }
 
@@ -7460,8 +7480,19 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 }
 	final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		return true;
+
+		return isset($foundTokens[T_VAR]) ||
+		isset($foundTokens[T_PUBLIC]) ||
+		isset($foundTokens[T_PRIVATE]) ||
+		isset($foundTokens[T_PROTECTED]) ||
+		isset($foundTokens[T_FINAL]) ||
+		isset($foundTokens[T_ABSTRACT]) ||
+		isset($foundTokens[T_STATIC]) ||
+		isset($foundTokens[T_CLASS])
+		;
+
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -7608,6 +7639,7 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$tokenCount = count($this->tkns) - 1;
@@ -8494,7 +8526,11 @@ EOT;
 	const OTHER_BLOCK = '';
 
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[ST_CURLY_OPEN])) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function format($source) {
@@ -12458,11 +12494,22 @@ EOT;
 	const CHAIN_STRING = 'CHAIN_STRING';
 	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (
+			isset($foundTokens[T_IS_EQUAL]) ||
+			isset($foundTokens[T_IS_IDENTICAL]) ||
+			isset($foundTokens[T_IS_NOT_EQUAL]) ||
+			isset($foundTokens[T_IS_NOT_IDENTICAL])
+		) {
+			return true;
+		}
+
+		return false;
 	}
+
 	public function format($source) {
 		return $this->yodise($source);
 	}
+
 	protected function yodise($source) {
 		$tkns = $this->aggregateVariables($source);
 		while (list($ptr, $token) = each($tkns)) {
@@ -12535,6 +12582,7 @@ EOT;
 	private function isPureVariable($id) {
 		return self::CHAIN_VARIABLE == $id || T_VARIABLE == $id || T_INC == $id || T_DEC == $id || ST_EXCLAMATION == $id || T_COMMENT == $id || T_DOC_COMMENT == $id || T_WHITESPACE == $id;
 	}
+
 	private function isLowerPrecedence($id) {
 		switch ($id) {
 			case ST_REFERENCE:

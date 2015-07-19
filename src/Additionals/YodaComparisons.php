@@ -6,11 +6,22 @@ final class YodaComparisons extends AdditionalPass {
 	const CHAIN_STRING = 'CHAIN_STRING';
 	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (
+			isset($foundTokens[T_IS_EQUAL]) ||
+			isset($foundTokens[T_IS_IDENTICAL]) ||
+			isset($foundTokens[T_IS_NOT_EQUAL]) ||
+			isset($foundTokens[T_IS_NOT_IDENTICAL])
+		) {
+			return true;
+		}
+
+		return false;
 	}
+
 	public function format($source) {
 		return $this->yodise($source);
 	}
+
 	protected function yodise($source) {
 		$tkns = $this->aggregateVariables($source);
 		while (list($ptr, $token) = each($tkns)) {
@@ -83,6 +94,7 @@ final class YodaComparisons extends AdditionalPass {
 	private function isPureVariable($id) {
 		return self::CHAIN_VARIABLE == $id || T_VARIABLE == $id || T_INC == $id || T_DEC == $id || ST_EXCLAMATION == $id || T_COMMENT == $id || T_DOC_COMMENT == $id || T_WHITESPACE == $id;
 	}
+
 	private function isLowerPrecedence($id) {
 		switch ($id) {
 			case ST_REFERENCE:

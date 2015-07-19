@@ -1,14 +1,21 @@
 <?php
 final class AddMissingCurlyBraces extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (
+			isset($foundTokens[T_ELSE]) ||
+			isset($foundTokens[T_WHILE]) ||
+			isset($foundTokens[T_FOR]) ||
+			isset($foundTokens[T_FOREACH]) ||
+			isset($foundTokens[T_ELSEIF]) ||
+			isset($foundTokens[T_IF])
+		) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function format($source) {
-		return $this->addBraces($source);
-	}
-
-	private function addBraces($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 		// Scans from the end to the beginning looking for close curly

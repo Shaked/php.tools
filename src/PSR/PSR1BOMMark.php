@@ -1,13 +1,11 @@
 <?php
 final class PSR1BOMMark extends FormatterPass {
+	const BOM = "\xef\xbb\xbf";
 	public function candidate($source, $foundTokens) {
-		return true;
+		return substr($source, 0, 3) === self::BOM;
 	}
+
 	public function format($source) {
-		$bom = "\xef\xbb\xbf";
-		if (substr($source, 0, 3) === $bom) {
-			return substr($source, 3);
-		}
-		return $source;
+		return substr($source, 3);
 	}
 }

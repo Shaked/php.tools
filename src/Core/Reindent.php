@@ -1,8 +1,17 @@
 <?php
 final class Reindent extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (
+			isset($foundTokens[ST_CURLY_OPEN]) ||
+			isset($foundTokens[ST_PARENTHESES_OPEN]) ||
+			isset($foundTokens[ST_BRACKET_OPEN])
+		) {
+			return true;
+		}
+
+		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';

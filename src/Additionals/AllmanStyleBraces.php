@@ -3,7 +3,11 @@ final class AllmanStyleBraces extends AdditionalPass {
 	const OTHER_BLOCK = '';
 
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[ST_CURLY_OPEN])) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function format($source) {

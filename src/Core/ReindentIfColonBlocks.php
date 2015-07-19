@@ -1,7 +1,7 @@
 <?php
 final class ReindentIfColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[ST_COLON])) {
+		if (isset($foundTokens[ST_COLON], $foundTokens[T_ENDIF])) {
 			return true;
 		}
 
