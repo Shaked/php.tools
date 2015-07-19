@@ -5757,8 +5757,15 @@ final class AutoImportPass extends FormatterPass {
 }
 
 	final class ReindentLoopColonBlocks extends FormatterPass {
+	private $hasEndWhile = false;
+	private $hasEndForeach = false;
+	private $hasEndFor = false;
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_ENDWHILE]) || isset($foundTokens[T_ENDFOREACH]) || isset($foundTokens[T_ENDFOR])) {
+			$this->hasEndWhile = isset($foundTokens[T_ENDWHILE]);
+			$this->hasEndForeach = isset($foundTokens[T_ENDFOREACH]);
+			$this->hasEndFor = isset($foundTokens[T_ENDFOR]);
 			return true;
 		}
 
@@ -5766,25 +5773,18 @@ final class AutoImportPass extends FormatterPass {
 	}
 
 	public function format($source) {
-		$tkns = token_get_all($source);
-		$foundEndwhile = false;
-		$foundEndforeach = false;
-		$foundEndfor = false;
-		foreach ($tkns as $token) {
-			list($id) = $this->getToken($token);
-			if (!$foundEndwhile && T_ENDWHILE == $id) {
-				$source = $this->formatWhileBlocks($source);
-				$foundEndwhile = true;
-			} elseif (!$foundEndforeach && T_ENDFOREACH == $id) {
-				$source = $this->formatForeachBlocks($source);
-				$foundEndforeach = true;
-			} elseif (!$foundEndfor && T_ENDFOR == $id) {
-				$source = $this->formatForBlocks($source);
-				$foundEndfor = true;
-			} elseif ($foundEndwhile && $foundEndforeach && $foundEndfor) {
-				break;
-			}
+		if ($this->hasEndWhile) {
+			$source = $this->formatWhileBlocks($source);
 		}
+
+		if ($this->hasEndForeach) {
+			$source = $this->formatForeachBlocks($source);
+		}
+
+		if ($this->hasEndFor) {
+			$source = $this->formatForBlocks($source);
+		}
+
 		return $source;
 	}
 
