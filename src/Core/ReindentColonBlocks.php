@@ -13,15 +13,6 @@ final class ReindentColonBlocks extends FormatterPass {
 		$this->useCache = true;
 		$this->code = '';
 
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			if (T_DEFAULT == $id || T_CASE == $id || T_SWITCH == $id) {
-				break;
-			}
-			$this->appendCode($text);
-		}
-
-		prev($this->tkns);
 		$switchLevel = 0;
 		$switchCurlyCount = [];
 		$switchCurlyCount[$switchLevel] = 0;

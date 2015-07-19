@@ -74,7 +74,6 @@ namespace {
 	require 'Core/ReindentColonBlocks.php';
 	require 'Core/ReindentIfColonBlocks.php';
 	require 'Core/ReindentAndAlignObjOps.php';
-	require 'Core/ReindentLoopColonBlocks.php';
 	require 'Core/ReindentObjOps.php';
 	require 'Core/RemoveIncludeParentheses.php';
 	require 'Core/ResizeSpaces.php';

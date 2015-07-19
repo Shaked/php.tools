@@ -132,7 +132,6 @@ foreach ($cases as $caseIn) {
 						$fmt->enablePass('MergeDoubleArrowAndArray');
 						$fmt->enablePass('ResizeSpaces');
 						$fmt->enablePass('ReindentColonBlocks');
-						$fmt->enablePass('ReindentLoopColonBlocks');
 						$fmt->enablePass('ReindentIfColonBlocks');
 						$fmt->enablePass('AlignEquals');
 						$fmt->enablePass('AlignDoubleArrow');
@@ -161,7 +160,6 @@ foreach ($cases as $caseIn) {
 		$fmt->enablePass('MergeDoubleArrowAndArray');
 		$fmt->enablePass('ResizeSpaces');
 		$fmt->enablePass('ReindentColonBlocks');
-		$fmt->enablePass('ReindentLoopColonBlocks');
 		$fmt->enablePass('ReindentIfColonBlocks');
 		$fmt->enablePass('AlignEquals');
 		$fmt->enablePass('AlignDoubleArrow');
@@ -230,7 +228,6 @@ if (!$bailOut) {
 						$fmt->enablePass('MergeDoubleArrowAndArray');
 						$fmt->enablePass('ResizeSpaces');
 						$fmt->enablePass('ReindentColonBlocks');
-						$fmt->enablePass('ReindentLoopColonBlocks');
 						$fmt->enablePass('ReindentIfColonBlocks');
 						$fmt->enablePass('AlignEquals');
 						$fmt->enablePass('AlignDoubleArrow');
@@ -260,7 +257,6 @@ if (!$bailOut) {
 			$fmt->enablePass('MergeDoubleArrowAndArray');
 			$fmt->enablePass('ResizeSpaces');
 			$fmt->enablePass('ReindentColonBlocks');
-			$fmt->enablePass('ReindentLoopColonBlocks');
 			$fmt->enablePass('ReindentIfColonBlocks');
 			$fmt->enablePass('AlignEquals');
 			$fmt->enablePass('AlignDoubleArrow');
@@ -336,7 +332,6 @@ if (!$bailOut) {
 			$fmt->enablePass('MergeDoubleArrowAndArray');
 			$fmt->enablePass('ResizeSpaces');
 			$fmt->enablePass('ReindentColonBlocks');
-			$fmt->enablePass('ReindentLoopColonBlocks');
 			$fmt->enablePass('ReindentIfColonBlocks');
 			$fmt->enablePass('AlignEquals');
 			$fmt->enablePass('AlignDoubleArrow');
@@ -408,7 +403,6 @@ if (!$bailOut) {
 						$fmt->enablePass('MergeDoubleArrowAndArray');
 						$fmt->enablePass('ResizeSpaces');
 						$fmt->enablePass('ReindentColonBlocks');
-						$fmt->enablePass('ReindentLoopColonBlocks');
 						$fmt->enablePass('ReindentIfColonBlocks');
 						$fmt->enablePass('AlignEquals');
 						$fmt->enablePass('AlignDoubleArrow');
@@ -438,7 +432,6 @@ if (!$bailOut) {
 			$fmt->enablePass('MergeDoubleArrowAndArray');
 			$fmt->enablePass('ResizeSpaces');
 			$fmt->enablePass('ReindentColonBlocks');
-			$fmt->enablePass('ReindentLoopColonBlocks');
 			$fmt->enablePass('ReindentIfColonBlocks');
 			$fmt->enablePass('AlignEquals');
 			$fmt->enablePass('AlignDoubleArrow');

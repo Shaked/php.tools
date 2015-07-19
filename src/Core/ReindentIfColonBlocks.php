@@ -1,7 +1,7 @@
 <?php
 final class ReindentIfColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[ST_COLON], $foundTokens[T_ENDIF])) {
+		if (isset($foundTokens[T_ENDIF]) || isset($foundTokens[T_ENDWHILE]) || isset($foundTokens[T_ENDFOREACH]) || isset($foundTokens[T_ENDFOR])) {
 			return true;
 		}
 
@@ -15,63 +15,66 @@ final class ReindentIfColonBlocks extends FormatterPass {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
+
+			if (
+				T_ENDIF == $id || T_ELSEIF == $id ||
+				T_ENDFOR == $id || T_ENDFOREACH == $id || T_ENDWHILE == $id ||
+				(T_ELSE == $id && !$this->rightUsefulTokenIs(ST_CURLY_OPEN))
+			) {
+				$this->setIndent(-1);
+			}
 			switch ($id) {
+
+				case T_ENDFOR:
+				case T_ENDFOREACH:
+				case T_ENDWHILE:
 				case T_ENDIF:
-					$this->setIndent(-1);
 					$this->appendCode($text);
 					break;
+
 				case T_ELSE:
+					$this->appendCode($text);
+					$this->indentBlock();
+					break;
+
+				case T_FOR:
+				case T_FOREACH:
+				case T_WHILE:
 				case T_ELSEIF:
-					$this->setIndent(-1);
 				case T_IF:
 					$this->appendCode($text);
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
-						$this->appendCode($text);
-						if (ST_PARENTHESES_OPEN === $id) {
-							$parenCount = 1;
-							while (list($index, $token) = each($this->tkns)) {
-								list($id, $text) = $this->getToken($token);
-								$this->ptr = $index;
-								$this->appendCode($text);
-								if (ST_PARENTHESES_OPEN === $id) {
-									++$parenCount;
-								}
-								if (ST_PARENTHESES_CLOSE === $id) {
-									--$parenCount;
-								}
-								if (0 == $parenCount) {
-									break;
-								}
-							}
-						} elseif (ST_CURLY_OPEN === $id) {
-							break;
-						} elseif (ST_COLON === $id && !$this->rightTokenIs([T_CLOSE_TAG])) {
-							$this->setIndent(+1);
-							break;
-						} elseif (ST_COLON === $id) {
-							break;
-						}
-					}
+					$this->printUntil(ST_PARENTHESES_OPEN);
+					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+					$this->indentBlock();
 					break;
+
 				case T_START_HEREDOC:
 					$this->appendCode($text);
 					$this->printUntil(T_END_HEREDOC);
 					break;
+
 				default:
 					$hasLn = $this->hasLn($text);
-					if ($hasLn && !$this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF])) {
-						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
-					} elseif ($hasLn && $this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF])) {
-						$this->setIndent(-1);
-						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
-						$this->setIndent(+1);
+					if ($hasLn) {
+						if ($this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF, T_ENDFOR, T_ENDFOREACH, T_ENDWHILE])) {
+							$this->setIndent(-1);
+							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
+							$this->setIndent(+1);
+						} else {
+							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
+						}
 					}
 					$this->appendCode($text);
 					break;
 			}
 		}
 		return $this->code;
+	}
+
+	private function indentBlock() {
+		$foundId = $this->printUntilAny([ST_COLON, ST_SEMI_COLON, ST_CURLY_OPEN]);
+		if (ST_COLON === $foundId && !$this->rightTokenIs([T_CLOSE_TAG])) {
+			$this->setIndent(+1);
+		}
 	}
 }

@@ -90,7 +90,6 @@ abstract class BaseCodeFormatter {
 		'AlignEquals' => false,
 
 		'ReindentIfColonBlocks' => false,
-		'ReindentLoopColonBlocks' => false,
 		'ReindentColonBlocks' => false,
 
 		'SplitCurlyCloseAndTokens' => false,
@@ -150,7 +149,6 @@ abstract class BaseCodeFormatter {
 		$this->passes['Reindent'] = new Reindent();
 		$this->passes['ReindentColonBlocks'] = new ReindentColonBlocks();
 		$this->passes['ReindentIfColonBlocks'] = new ReindentIfColonBlocks();
-		$this->passes['ReindentLoopColonBlocks'] = new ReindentLoopColonBlocks();
 		$this->passes['ReindentAndAlignObjOps'] = new ReindentAndAlignObjOps();
 		$this->passes['RemoveIncludeParentheses'] = new RemoveIncludeParentheses();
 		$this->passes['ResizeSpaces'] = new ResizeSpaces();
