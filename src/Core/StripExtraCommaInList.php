@@ -21,23 +21,11 @@ final class StripExtraCommaInList extends FormatterPass {
 			$this->ptr = $index;
 			switch ($id) {
 				case T_STRING:
-					$touchedListArrayString = true;
-					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
-						$contextStack[] = T_STRING;
-					}
-					break;
-
 				case T_ARRAY:
-					$touchedListArrayString = true;
-					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
-						$contextStack[] = T_ARRAY;
-					}
-					break;
-
 				case T_LIST:
 					$touchedListArrayString = true;
 					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
-						$contextStack[] = T_LIST;
+						$contextStack[] = $id;
 					}
 					break;
 
