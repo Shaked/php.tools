@@ -45,11 +45,13 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 					break;
 				case $openToken:
 					$this->appendCode($text);
+					$this->printUntil(ST_PARENTHESES_OPEN);
+					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 						$this->appendCode($text);
-						if (ST_CURLY_OPEN === $id) {
+						if (ST_CURLY_OPEN === $id || ST_SEMI_COLON == $id) {
 							break;
 						} elseif (ST_COLON === $id && !$this->rightTokenIs([T_CLOSE_TAG])) {
 							$this->setIndent(+1);
@@ -73,12 +75,15 @@ final class ReindentLoopColonBlocks extends FormatterPass {
 		}
 		return $this->code;
 	}
+
 	private function formatForBlocks($source) {
 		return $this->formatBlocks($source, T_FOR, T_ENDFOR);
 	}
+
 	private function formatForeachBlocks($source) {
 		return $this->formatBlocks($source, T_FOREACH, T_ENDFOREACH);
 	}
+
 	private function formatWhileBlocks($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
