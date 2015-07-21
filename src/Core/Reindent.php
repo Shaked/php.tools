@@ -97,6 +97,7 @@ final class Reindent extends FormatterPass {
 				case T_COMMENT:
 				case T_WHITESPACE:
 					if (
+						$this->hasLn($text) &&
 						$this->rightTokenIs([T_COMMENT, T_DOC_COMMENT]) &&
 						$this->rightUsefulTokenIs([T_CASE, T_DEFAULT])
 					) {
