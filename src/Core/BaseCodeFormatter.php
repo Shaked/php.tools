@@ -35,6 +35,7 @@ abstract class BaseCodeFormatter {
 		'StripExtraCommaInArray' => false,
 		'NoSpaceAfterPHPDocBlocks' => false,
 		'RemoveUseLeadingSlash' => false,
+		'OrderMethodAndVisibility' => false,
 		'OrderMethod' => false,
 		'ShortArray' => false,
 		'MergeElseIf' => false,

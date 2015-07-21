@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "10.0.2");
+	define("VERSION", "10.0.3");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -3531,6 +3531,7 @@ abstract class BaseCodeFormatter {
 		'StripExtraCommaInArray' => false,
 		'NoSpaceAfterPHPDocBlocks' => false,
 		'RemoveUseLeadingSlash' => false,
+		'OrderMethodAndVisibility' => false,
 		'OrderMethod' => false,
 		'ShortArray' => false,
 		'MergeElseIf' => false,
@@ -10187,7 +10188,7 @@ function a($myInt){
 EOT;
 	}
 }
-	final class OrderMethod extends AdditionalPass {
+	class OrderMethod extends AdditionalPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
 	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
 
@@ -10311,7 +10312,7 @@ EOT;
 				$return .= str_replace(
 					self::OPENER_PLACEHOLDER,
 					'',
-					$this->orderMethods(self::OPENER_PLACEHOLDER . $classBlock)
+					static::orderMethods(self::OPENER_PLACEHOLDER . $classBlock)
 				);
 				$this->appendCode($return);
 				break;
@@ -10348,6 +10349,120 @@ class A {
 	function a(){}
 	function b(){}
 	function c(){}
+}
+?>
+EOT;
+	}
+}
+
+	final class OrderMethodAndVisibility extends OrderMethod {
+	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
+	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
+
+	public function orderMethods($source) {
+		$tokens = token_get_all($source);
+
+		// It takes classes' body, and looks for methods and sorts them
+		$return = '';
+		$functionList = [];
+		$curlyCount = null;
+		$touchedMethod = false;
+		$functionName = '';
+
+		while (list($index, $token) = each($tokens)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+			case T_ABSTRACT:
+			case T_STATIC:
+			case T_PRIVATE:
+			case T_PROTECTED:
+			case T_PUBLIC:
+				$stack = $text;
+				$curlyCount = null;
+				$touchedMethod = false;
+				$functionName = '';
+				$visibilityLevel = 0;
+				if (T_PROTECTED == $id) {
+					$visibilityLevel = 1;
+				} elseif (T_PRIVATE == $id) {
+					$visibilityLevel = 2;
+				}
+				while (list($index, $token) = each($tokens)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
+
+					$stack .= $text;
+					if (T_FUNCTION == $id) {
+						$touchedMethod = true;
+					}
+					if (T_VARIABLE == $id && !$touchedMethod) {
+						break;
+					}
+					if (T_STRING == $id && $touchedMethod && empty($functionName)) {
+						$functionName = $text;
+					}
+
+					if (null === $curlyCount && ST_SEMI_COLON == $id) {
+						break;
+					}
+
+					if (ST_CURLY_OPEN == $id) {
+						++$curlyCount;
+					}
+					if (ST_CURLY_CLOSE == $id) {
+						--$curlyCount;
+					}
+					if (0 === $curlyCount) {
+						break;
+					}
+				}
+				$appendWith = $stack;
+				if ($touchedMethod) {
+					$functionList[$visibilityLevel . ':' . $functionName] = $stack;
+					$appendWith = self::METHOD_REPLACEMENT_PLACEHOLDER;
+				}
+				$return .= $appendWith;
+				break;
+			default:
+				$return .= $text;
+				break;
+			}
+		}
+		ksort($functionList);
+		foreach ($functionList as $functionBody) {
+			$return = preg_replace('/' . self::METHOD_REPLACEMENT_PLACEHOLDER . '/', $functionBody, $return, 1);
+		}
+		return $return;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Sort methods within class in alphabetic and visibility order .';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+class A {
+	public function d(){}
+	protected function b(){}
+	private function c(){}
+	public function a(){}
+}
+?>
+to
+<?php
+class A {
+	public function a(){}
+	public function d(){}
+	protected function b(){}
+	private function c(){}
 }
 ?>
 EOT;

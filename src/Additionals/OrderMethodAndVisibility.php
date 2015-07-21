@@ -1,5 +1,5 @@
 <?php
-class OrderMethod extends AdditionalPass {
+final class OrderMethodAndVisibility extends OrderMethod {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
 	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
 
@@ -26,6 +26,12 @@ class OrderMethod extends AdditionalPass {
 				$curlyCount = null;
 				$touchedMethod = false;
 				$functionName = '';
+				$visibilityLevel = 0;
+				if (T_PROTECTED == $id) {
+					$visibilityLevel = 1;
+				} elseif (T_PRIVATE == $id) {
+					$visibilityLevel = 2;
+				}
 				while (list($index, $token) = each($tokens)) {
 					list($id, $text) = $this->getToken($token);
 					$this->ptr = $index;
@@ -57,7 +63,7 @@ class OrderMethod extends AdditionalPass {
 				}
 				$appendWith = $stack;
 				if ($touchedMethod) {
-					$functionList[$functionName] = $stack;
+					$functionList[$visibilityLevel . ':' . $functionName] = $stack;
 					$appendWith = self::METHOD_REPLACEMENT_PLACEHOLDER;
 				}
 				$return .= $appendWith;
@@ -74,72 +80,11 @@ class OrderMethod extends AdditionalPass {
 		return $return;
 	}
 
-	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_CLASS], $foundTokens[T_FUNCTION])) {
-			return true;
-		}
-
-		return false;
-	}
-
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-
-		// It scans for classes body and organizes functions internally.
-		$return = '';
-		$classBlock = '';
-		$curlyCount = 0;
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-			case T_CLASS:
-				$return .= $text;
-				while (list($index, $token) = each($this->tkns)) {
-					list($id, $text) = $this->getToken($token);
-					$this->ptr = $index;
-					$return .= $text;
-					if (ST_CURLY_OPEN == $id) {
-						break;
-					}
-				}
-				$classBlock = '';
-				$curlyCount = 1;
-				while (list($index, $token) = each($this->tkns)) {
-					list($id, $text) = $this->getToken($token);
-					$this->ptr = $index;
-					$classBlock .= $text;
-					if (ST_CURLY_OPEN == $id) {
-						++$curlyCount;
-					} elseif (ST_CURLY_CLOSE == $id) {
-						--$curlyCount;
-					}
-
-					if (0 == $curlyCount) {
-						break;
-					}
-				}
-				$return .= str_replace(
-					self::OPENER_PLACEHOLDER,
-					'',
-					static::orderMethods(self::OPENER_PLACEHOLDER . $classBlock)
-				);
-				$this->appendCode($return);
-				break;
-			default:
-				$this->appendCode($text);
-				break;
-			}
-		}
-		return $this->code;
-	}
-
 	/**
 	 * @codeCoverageIgnore
 	 */
 	public function getDescription() {
-		return 'Sort methods within class in alphabetic order.';
+		return 'Sort methods within class in alphabetic and visibility order .';
 	}
 
 	/**
@@ -149,17 +94,19 @@ class OrderMethod extends AdditionalPass {
 		return <<<'EOT'
 <?php
 class A {
-	function b(){}
-	function c(){}
-	function a(){}
+	public function d(){}
+	protected function b(){}
+	private function c(){}
+	public function a(){}
 }
 ?>
 to
 <?php
 class A {
-	function a(){}
-	function b(){}
-	function c(){}
+	public function a(){}
+	public function d(){}
+	protected function b(){}
+	private function c(){}
 }
 ?>
 EOT;
