@@ -6240,7 +6240,7 @@ final class AutoImportPass extends FormatterPass {
 			case T_COMMENT:
 				if (substr($text, 0, 2) === '//') {
 					list($leftId) = $this->inspectToken(-1);
-					$this->appendCode($this->getSpace(T_VARIABLE == $leftId) . $text);
+					$this->appendCode($this->getSpace(T_VARIABLE == $leftId || ST_BRACKET_OPEN == $leftId) . $text);
 					break;
 				} elseif (!$this->hasLn($text) && !$this->hasLnBefore() && !$this->hasLnAfter() && $this->leftUsefulTokenIs(ST_COMMA) && $this->rightUsefulTokenIs(T_VARIABLE)) {
 					$this->appendCode($text . ' ');
