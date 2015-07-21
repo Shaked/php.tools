@@ -272,7 +272,8 @@ final class ResizeSpaces extends FormatterPass {
 					$this->getSpace(
 						!($this->leftMemoUsefulTokenIs(T_NEW) && $this->rightTokenIs([ST_PARENTHESES_OPEN, T_EXTENDS, T_IMPLEMENTS])) &&
 						!$this->leftMemoTokenIs(T_DOUBLE_COLON) &&
-						!$this->rightTokenIs(ST_SEMI_COLON)
+						!$this->rightTokenIs(ST_SEMI_COLON) ||
+						$this->rightTokenIs(T_DOUBLE_ARROW)
 					)
 				);
 				break;
