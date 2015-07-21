@@ -3585,7 +3585,7 @@ abstract class BaseCodeFormatter {
 		'AlignDoubleArrow' => false,
 		'AlignEquals' => false,
 
-		'ReindentIfColonBlocks' => false,
+		'ReindentSwitchBlocks' => false,
 		'ReindentColonBlocks' => false,
 
 		'SplitCurlyCloseAndTokens' => false,
@@ -3644,7 +3644,7 @@ abstract class BaseCodeFormatter {
 		$this->passes['OrderUseClauses'] = new OrderUseClauses();
 		$this->passes['Reindent'] = new Reindent();
 		$this->passes['ReindentColonBlocks'] = new ReindentColonBlocks();
-		$this->passes['ReindentIfColonBlocks'] = new ReindentIfColonBlocks();
+		$this->passes['ReindentSwitchBlocks'] = new ReindentSwitchBlocks();
 		$this->passes['ReindentAndAlignObjOps'] = new ReindentAndAlignObjOps();
 		$this->passes['RemoveIncludeParentheses'] = new RemoveIncludeParentheses();
 		$this->passes['ResizeSpaces'] = new ResizeSpaces();
@@ -5109,20 +5109,24 @@ final class AutoImportPass extends FormatterPass {
 					$this->appendCode($text);
 					$this->printUntilTheEndOfString();
 					break;
+
 				case T_CLOSE_TAG:
 					$this->appendCode($text);
 					$this->printUntil(T_OPEN_TAG);
 					break;
+
 				case T_START_HEREDOC:
 					$this->appendCode($text);
 					$this->printUntil(T_END_HEREDOC);
 					break;
+
 				case T_CONSTANT_ENCAPSED_STRING:
 				case T_ENCAPSED_AND_WHITESPACE:
 				case T_STRING_VARNAME:
 				case T_NUM_STRING:
 					$this->appendCode($text);
 					break;
+
 				case T_DOLLAR_OPEN_CURLY_BRACES:
 				case T_CURLY_OPEN:
 				case ST_CURLY_OPEN:
@@ -5139,6 +5143,7 @@ final class AutoImportPass extends FormatterPass {
 					}
 					$foundStack[] = $indentToken;
 					break;
+
 				case ST_CURLY_CLOSE:
 				case ST_PARENTHESES_CLOSE:
 				case ST_BRACKET_CLOSE:
@@ -5153,10 +5158,23 @@ final class AutoImportPass extends FormatterPass {
 					$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 					$this->appendCode($text);
 					break;
+
+				case T_COMMENT:
+				case T_WHITESPACE:
+					if (
+						$this->rightTokenIs([T_COMMENT, T_DOC_COMMENT]) &&
+						$this->rightUsefulTokenIs([T_CASE, T_DEFAULT])
+					) {
+						$this->setIndent(-1);
+						$this->appendCode(str_replace($this->newLine, $this->newLine . $this->getIndent(), $text));
+						$this->setIndent(+1);
+						break;
+					}
+
 				default:
 					$hasLn = ($this->hasLn($text));
 					if ($hasLn) {
-						$isNextCurlyParenBracketClose = $this->rightTokenIs([ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE]);
+						$isNextCurlyParenBracketClose = $this->rightTokenIs([T_CASE, T_DEFAULT, ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE]);
 						if (!$isNextCurlyParenBracketClose) {
 							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 						} elseif ($isNextCurlyParenBracketClose) {
@@ -5175,105 +5193,6 @@ final class AutoImportPass extends FormatterPass {
 }
 
 	final class ReindentColonBlocks extends FormatterPass {
-	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[ST_COLON]) && (isset($foundTokens[T_DEFAULT]) || isset($foundTokens[T_CASE]) || isset($foundTokens[T_SWITCH]))) {
-			return true;
-		}
-
-		return false;
-	}
-
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->useCache = true;
-		$this->code = '';
-
-		$switchLevel = 0;
-		$switchCurlyCount = [];
-		$switchCurlyCount[$switchLevel] = 0;
-		$touchedColon = false;
-		$touchedVariableObjOpDollar = false;
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			$this->cache = [];
-			switch ($id) {
-				case T_VARIABLE:
-				case T_OBJECT_OPERATOR:
-				case ST_DOLLAR:
-					$touchedVariableObjOpDollar = true;
-					$this->appendCode($text);
-					break;
-
-				case ST_QUOTE:
-					$this->appendCode($text);
-					$this->printUntilTheEndOfString();
-					break;
-
-				case T_SWITCH:
-					++$switchLevel;
-					$switchCurlyCount[$switchLevel] = 0;
-					$touchedColon = false;
-					$this->appendCode($text);
-					break;
-
-				case ST_CURLY_OPEN:
-					$this->appendCode($text);
-					if ($touchedVariableObjOpDollar) {
-						$touchedVariableObjOpDollar = false;
-						$this->printCurlyBlock();
-						break;
-					}
-					++$switchCurlyCount[$switchLevel];
-					break;
-
-				case ST_CURLY_CLOSE:
-					--$switchCurlyCount[$switchLevel];
-					if (0 === $switchCurlyCount[$switchLevel] && $switchLevel > 0) {
-						--$switchLevel;
-					}
-					$this->appendCode($this->getIndent($switchLevel) . $text);
-					break;
-
-				case T_DEFAULT:
-				case T_CASE:
-					$touchedColon = false;
-					$this->appendCode($text);
-					break;
-
-				case ST_COLON:
-					$touchedColon = true;
-					$this->appendCode($text);
-					break;
-
-				default:
-					$touchedVariableObjOpDollar = false;
-					$hasLn = $this->hasLn($text);
-					if ($hasLn) {
-						$isNextCaseOrDefault = $this->rightUsefulTokenIs([T_CASE, T_DEFAULT]);
-						if ($touchedColon && T_COMMENT == $id && $isNextCaseOrDefault) {
-							$this->appendCode($text);
-							break;
-						} elseif ($touchedColon && T_COMMENT == $id && !$isNextCaseOrDefault) {
-							$this->appendCode($this->getIndent($switchLevel) . $text);
-							if (!$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
-								$this->appendCode($this->getIndent($switchLevel));
-							}
-							break;
-						} elseif (!$isNextCaseOrDefault && !$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
-							$this->appendCode($text . $this->getIndent($switchLevel));
-							break;
-						}
-					}
-					$this->appendCode($text);
-					break;
-			}
-		}
-		return $this->code;
-	}
-}
-	final class ReindentIfColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_ENDIF]) || isset($foundTokens[T_ENDWHILE]) || isset($foundTokens[T_ENDFOREACH]) || isset($foundTokens[T_ENDFOR])) {
 			return true;
@@ -7562,15 +7481,15 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 						ST_COMMA,
 						ST_BRACKET_CLOSE,
 					]);
-					if (ST_PARENTHESES_OPEN != $foundId) {
-						$this->rtrimAndAppendCode('()');
-						if ($touchedLn) {
-							$this->appendCode($this->newLine);
-						}
+					if (ST_PARENTHESES_OPEN == $foundId) {
 						$this->appendCode($foundText);
-					} elseif (ST_PARENTHESES_OPEN == $foundId) {
-						$this->appendCode($foundText);
+						break;
 					}
+					$this->rtrimAndAppendCode('()');
+					if ($touchedLn) {
+						$this->appendCode($this->newLine);
+					}
+					$this->appendCode($foundText);
 					break;
 				default:
 					$this->appendCode($text);
@@ -10062,6 +9981,7 @@ final class MergeElseIf extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -10077,7 +9997,7 @@ final class MergeElseIf extends AdditionalPass {
 					$this->appendCode($text);
 					break;
 				case T_ELSEIF:
-					$this->appendCode(str_replace(' ', '', $text));
+					$this->appendCode('elseif');
 					break;
 				default:
 					$this->appendCode($text);
@@ -10087,6 +10007,7 @@ final class MergeElseIf extends AdditionalPass {
 
 		return $this->code;
 	}
+
 	/**
 	 * @codeCoverageIgnore
 	 */
@@ -10823,6 +10744,103 @@ EOT;
 	}
 }
 
+	final class ReindentSwitchBlocks extends AdditionalPass {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_SWITCH])) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+
+		$touchedSwitch = false;
+		$foundStack = [];
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+
+			switch ($id) {
+				case T_SWITCH:
+					$touchedSwitch = true;
+					$this->appendCode($text);
+					break;
+
+				case T_DOLLAR_OPEN_CURLY_BRACES:
+				case T_CURLY_OPEN:
+				case ST_CURLY_OPEN:
+					$indentToken = $id;
+					$this->appendCode($text);
+					if ($touchedSwitch) {
+						$touchedSwitch = false;
+						$indentToken = T_SWITCH;
+						$this->setIndent(+1);
+					}
+					$foundStack[] = $indentToken;
+					break;
+
+				case ST_CURLY_CLOSE:
+					$poppedID = array_pop($foundStack);
+					if (T_SWITCH === $poppedID) {
+						$this->setIndent(-1);
+					}
+					$this->appendCode($text);
+					break;
+
+				default:
+					$hasLn = $this->hasLn($text);
+					if ($hasLn) {
+						$poppedID = end($foundStack);
+						if (
+							T_SWITCH == $poppedID &&
+							$this->rightTokenIs(ST_CURLY_CLOSE)
+						) {
+							$this->setIndent(-1);
+							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
+							$this->setIndent(+1);
+						} else {
+							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
+						}
+					}
+					$this->appendCode($text);
+					break;
+			}
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Reindent one level deeper the content of switch blocks.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<EOT
+<?php
+// From
+switch ($a) {
+case 1:
+	echo 'a';
+}
+
+// To
+switch ($a) {
+	case 1:
+		echo 'a';
+}
+EOT;
+	}
+}
 	final class RemoveUseLeadingSlash extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE]) || isset($foundTokens[T_TRAIT]) || isset($foundTokens[T_CLASS]) || isset($foundTokens[T_FUNCTION]) || isset($foundTokens[T_NS_SEPARATOR])) {
@@ -11777,6 +11795,55 @@ for ($a = 0; $a < 10; $a++){
 EOT;
 	}
 }
+	final class StripSpaces extends AdditionalPass {
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_WHITESPACE]) || isset($foundTokens[T_COMMENT])) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+
+			if (T_WHITESPACE == $id || T_COMMENT == $id) {
+				continue;
+			}
+
+			$this->appendCode($text);
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Remove all empty spaces';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+// From
+$a = [$a, $b];
+$b = array($b, $c);
+
+// To
+$a=[$a,$b];$b=array($b,$c);
+?>
+EOT;
+	}
+}
 	final class StripSpaceWithinControlStructures extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 
@@ -11894,55 +11961,6 @@ EOT;
 
 }
 
-	final class StripSpaces extends AdditionalPass {
-	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_WHITESPACE]) || isset($foundTokens[T_COMMENT])) {
-			return true;
-		}
-
-		return false;
-	}
-
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-
-			if (T_WHITESPACE == $id || T_COMMENT == $id) {
-				continue;
-			}
-
-			$this->appendCode($text);
-		}
-
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Remove all empty spaces';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-// From
-$a = [$a, $b];
-$b = array($b, $c);
-
-// To
-$a=[$a,$b];$b=array($b,$c);
-?>
-EOT;
-	}
-}
 	final class TightConcat extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_CONCAT])) {

@@ -143,7 +143,7 @@ switch ($a) {
 	default:
 		$a;
 		$b;
-		if ($a) {$a;	} elseif ($b) {$b;	} else { $c;
-			break;	}
+		if ($a) {$a;} elseif ($b) {$b;} else { $c;
+			break;}
 		break;
 }

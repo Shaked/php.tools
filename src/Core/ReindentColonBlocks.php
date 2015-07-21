@@ -1,7 +1,7 @@
 <?php
 final class ReindentColonBlocks extends FormatterPass {
 	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[ST_COLON]) && (isset($foundTokens[T_DEFAULT]) || isset($foundTokens[T_CASE]) || isset($foundTokens[T_SWITCH]))) {
+		if (isset($foundTokens[T_ENDIF]) || isset($foundTokens[T_ENDWHILE]) || isset($foundTokens[T_ENDFOREACH]) || isset($foundTokens[T_ENDFOR])) {
 			return true;
 		}
 
@@ -10,85 +10,58 @@ final class ReindentColonBlocks extends FormatterPass {
 
 	public function format($source) {
 		$this->tkns = token_get_all($source);
-		$this->useCache = true;
 		$this->code = '';
-
-		$switchLevel = 0;
-		$switchCurlyCount = [];
-		$switchCurlyCount[$switchLevel] = 0;
-		$touchedColon = false;
-		$touchedVariableObjOpDollar = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			$this->cache = [];
+
+			if (
+				T_ENDIF == $id || T_ELSEIF == $id ||
+				T_ENDFOR == $id || T_ENDFOREACH == $id || T_ENDWHILE == $id ||
+				(T_ELSE == $id && !$this->rightUsefulTokenIs(ST_CURLY_OPEN))
+			) {
+				$this->setIndent(-1);
+			}
 			switch ($id) {
-				case T_VARIABLE:
-				case T_OBJECT_OPERATOR:
-				case ST_DOLLAR:
-					$touchedVariableObjOpDollar = true;
+
+				case T_ENDFOR:
+				case T_ENDFOREACH:
+				case T_ENDWHILE:
+				case T_ENDIF:
 					$this->appendCode($text);
 					break;
 
-				case ST_QUOTE:
+				case T_ELSE:
 					$this->appendCode($text);
-					$this->printUntilTheEndOfString();
+					$this->indentBlock();
 					break;
 
-				case T_SWITCH:
-					++$switchLevel;
-					$switchCurlyCount[$switchLevel] = 0;
-					$touchedColon = false;
+				case T_FOR:
+				case T_FOREACH:
+				case T_WHILE:
+				case T_ELSEIF:
+				case T_IF:
 					$this->appendCode($text);
+					$this->printUntil(ST_PARENTHESES_OPEN);
+					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+					$this->indentBlock();
 					break;
 
-				case ST_CURLY_OPEN:
+				case T_START_HEREDOC:
 					$this->appendCode($text);
-					if ($touchedVariableObjOpDollar) {
-						$touchedVariableObjOpDollar = false;
-						$this->printCurlyBlock();
-						break;
-					}
-					++$switchCurlyCount[$switchLevel];
-					break;
-
-				case ST_CURLY_CLOSE:
-					--$switchCurlyCount[$switchLevel];
-					if (0 === $switchCurlyCount[$switchLevel] && $switchLevel > 0) {
-						--$switchLevel;
-					}
-					$this->appendCode($this->getIndent($switchLevel) . $text);
-					break;
-
-				case T_DEFAULT:
-				case T_CASE:
-					$touchedColon = false;
-					$this->appendCode($text);
-					break;
-
-				case ST_COLON:
-					$touchedColon = true;
-					$this->appendCode($text);
+					$this->printUntil(T_END_HEREDOC);
 					break;
 
 				default:
-					$touchedVariableObjOpDollar = false;
 					$hasLn = $this->hasLn($text);
 					if ($hasLn) {
-						$isNextCaseOrDefault = $this->rightUsefulTokenIs([T_CASE, T_DEFAULT]);
-						if ($touchedColon && T_COMMENT == $id && $isNextCaseOrDefault) {
-							$this->appendCode($text);
-							break;
-						} elseif ($touchedColon && T_COMMENT == $id && !$isNextCaseOrDefault) {
-							$this->appendCode($this->getIndent($switchLevel) . $text);
-							if (!$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
-								$this->appendCode($this->getIndent($switchLevel));
-							}
-							break;
-						} elseif (!$isNextCaseOrDefault && !$this->rightTokenIs([ST_CURLY_CLOSE, T_COMMENT, T_DOC_COMMENT])) {
-							$this->appendCode($text . $this->getIndent($switchLevel));
-							break;
+						if ($this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF, T_ENDFOR, T_ENDFOREACH, T_ENDWHILE])) {
+							$this->setIndent(-1);
+							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
+							$this->setIndent(+1);
+						} else {
+							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 						}
 					}
 					$this->appendCode($text);
@@ -96,5 +69,12 @@ final class ReindentColonBlocks extends FormatterPass {
 			}
 		}
 		return $this->code;
+	}
+
+	private function indentBlock() {
+		$foundId = $this->printUntilAny([ST_COLON, ST_SEMI_COLON, ST_CURLY_OPEN]);
+		if (ST_COLON === $foundId && !$this->rightTokenIs([T_CLOSE_TAG])) {
+			$this->setIndent(+1);
+		}
 	}
 }

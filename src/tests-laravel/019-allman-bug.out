@@ -6,12 +6,12 @@ function A()
 		case 1:
 			if ($con)
 			{
-			 	//when there is a '{',all format will be wrong
+			 //when there is a '{',all format will be wrong
 				//do ...
 			}
 			if ($con)
 			{
-			 	//when there is a '{',all format will be wrong
+			 //when there is a '{',all format will be wrong
 				//do ...
 			}
 			break;

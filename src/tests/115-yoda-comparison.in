@@ -1,5 +1,5 @@
 <?php
-//passes: TwoCommandsInSameLine, AddMissingCurlyBraces, NormalizeLnAndLtrimLines, MergeParenCloseWithCurlyOpen, MergeCurlyCloseAndDoWhile, MergeDoubleArrowAndArray, ExtraCommaInArray, YodaComparisons, ResizeSpaces, Reindent, ReindentColonBlocks,  ReindentIfColonBlocks, ReindentObjOps, OrderUseClauses, EliminateDuplicatedEmptyLines, AlignEquals, AlignDoubleArrow, LeftAlignComment, RTrim
+//passes: TwoCommandsInSameLine, AddMissingCurlyBraces, NormalizeLnAndLtrimLines, MergeParenCloseWithCurlyOpen, MergeCurlyCloseAndDoWhile, MergeDoubleArrowAndArray, ExtraCommaInArray, YodaComparisons, ResizeSpaces, Reindent, ReindentColonBlocks,   ReindentObjOps, OrderUseClauses, EliminateDuplicatedEmptyLines, AlignEquals, AlignDoubleArrow, LeftAlignComment, RTrim
 if($a == 10){}
 if($a === 10){}
 if($a === func()){}

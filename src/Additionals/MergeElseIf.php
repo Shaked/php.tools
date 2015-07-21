@@ -10,6 +10,7 @@ final class MergeElseIf extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -25,7 +26,7 @@ final class MergeElseIf extends AdditionalPass {
 					$this->appendCode($text);
 					break;
 				case T_ELSEIF:
-					$this->appendCode(str_replace(' ', '', $text));
+					$this->appendCode('elseif');
 					break;
 				default:
 					$this->appendCode($text);
@@ -35,6 +36,7 @@ final class MergeElseIf extends AdditionalPass {
 
 		return $this->code;
 	}
+
 	/**
 	 * @codeCoverageIgnore
 	 */

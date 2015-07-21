@@ -26,15 +26,15 @@ final class AddMissingParentheses extends AdditionalPass {
 						ST_COMMA,
 						ST_BRACKET_CLOSE,
 					]);
-					if (ST_PARENTHESES_OPEN != $foundId) {
-						$this->rtrimAndAppendCode('()');
-						if ($touchedLn) {
-							$this->appendCode($this->newLine);
-						}
+					if (ST_PARENTHESES_OPEN == $foundId) {
 						$this->appendCode($foundText);
-					} elseif (ST_PARENTHESES_OPEN == $foundId) {
-						$this->appendCode($foundText);
+						break;
 					}
+					$this->rtrimAndAppendCode('()');
+					if ($touchedLn) {
+						$this->appendCode($this->newLine);
+					}
+					$this->appendCode($foundText);
 					break;
 				default:
 					$this->appendCode($text);
