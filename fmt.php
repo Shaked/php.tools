@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "10.0.1");
+	define("VERSION", "10.0.2");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -4325,7 +4325,11 @@ final class AutoImportPass extends FormatterPass {
 	const ST_SHORT_ARRAY_OPEN = 'SHORT_ARRAY_OPEN';
 
 	public function candidate($source, $foundTokens) {
-		return true;
+		if (isset($foundTokens[T_ARRAY]) || isset($foundTokens[ST_BRACKET_OPEN])) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function format($source) {
