@@ -25,8 +25,8 @@ final class Tree extends FormatterPass {
 					rtrim($block) .
 					(
 						("\t" == substr($block, -1) || ' ' == substr($block, -1))
-							? "\n"
-							: ''
+						? "\n"
+						: ''
 					) .
 					$close
 				);

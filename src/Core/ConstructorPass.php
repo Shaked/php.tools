@@ -40,65 +40,65 @@ final class ConstructorPass extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_CLASS:
-					$classAttributes = [];
-					$functionList = [];
-					$touchedVisibility = false;
-					$touchedFunction = false;
-					$curlyCount = null;
+			case T_CLASS:
+				$classAttributes = [];
+				$functionList = [];
+				$touchedVisibility = false;
+				$touchedFunction = false;
+				$curlyCount = null;
+				$this->appendCode($text);
+				while (list($index, $token) = each($this->tkns)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
+					if (ST_CURLY_OPEN == $id) {
+						++$curlyCount;
+					}
+					if (ST_CURLY_CLOSE == $id) {
+						--$curlyCount;
+					}
+					if (0 === $curlyCount) {
+						break;
+					}
 					$this->appendCode($text);
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
-						if (ST_CURLY_OPEN == $id) {
-							++$curlyCount;
-						}
-						if (ST_CURLY_CLOSE == $id) {
-							--$curlyCount;
-						}
-						if (0 === $curlyCount) {
-							break;
-						}
-						$this->appendCode($text);
-						if (T_PUBLIC == $id) {
-							$touchedVisibility = T_PUBLIC;
-						} elseif (T_PRIVATE == $id) {
-							$touchedVisibility = T_PRIVATE;
-						} elseif (T_PROTECTED == $id) {
-							$touchedVisibility = T_PROTECTED;
-						}
-						if (
-							T_VARIABLE == $id &&
-							(
-								T_PUBLIC == $touchedVisibility ||
-								T_PRIVATE == $touchedVisibility ||
-								T_PROTECTED == $touchedVisibility
-							)
-						) {
-							$classAttributes[] = $text;
-							$touchedVisibility = null;
-						} elseif (T_FUNCTION == $id) {
-							$touchedFunction = true;
-						} elseif ($touchedFunction && T_STRING == $id) {
-							$functionList[] = $text;
-							$touchedVisibility = null;
-							$touchedFunction = false;
-						}
+					if (T_PUBLIC == $id) {
+						$touchedVisibility = T_PUBLIC;
+					} elseif (T_PRIVATE == $id) {
+						$touchedVisibility = T_PRIVATE;
+					} elseif (T_PROTECTED == $id) {
+						$touchedVisibility = T_PROTECTED;
 					}
-					$functionList = array_combine($functionList, $functionList);
-					if (!isset($functionList['__construct'])) {
-						$this->appendCode('function __construct(' . implode(', ', $classAttributes) . '){' . $this->newLine);
-						foreach ($classAttributes as $var) {
-							$this->appendCode($this->generate($var));
-						}
-						$this->appendCode('}' . $this->newLine);
+					if (
+						T_VARIABLE == $id &&
+						(
+							T_PUBLIC == $touchedVisibility ||
+							T_PRIVATE == $touchedVisibility ||
+							T_PROTECTED == $touchedVisibility
+						)
+					) {
+						$classAttributes[] = $text;
+						$touchedVisibility = null;
+					} elseif (T_FUNCTION == $id) {
+						$touchedFunction = true;
+					} elseif ($touchedFunction && T_STRING == $id) {
+						$functionList[] = $text;
+						$touchedVisibility = null;
+						$touchedFunction = false;
 					}
+				}
+				$functionList = array_combine($functionList, $functionList);
+				if (!isset($functionList['__construct'])) {
+					$this->appendCode('function __construct(' . implode(', ', $classAttributes) . '){' . $this->newLine);
+					foreach ($classAttributes as $var) {
+						$this->appendCode($this->generate($var));
+					}
+					$this->appendCode('}' . $this->newLine);
+				}
 
-					$this->appendCode($text);
-					break;
-				default:
-					$this->appendCode($text);
-					break;
+				$this->appendCode($text);
+				break;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 		return $this->code;
@@ -106,16 +106,16 @@ final class ConstructorPass extends FormatterPass {
 
 	private function generate($var) {
 		switch ($this->type) {
-			case self::TYPE_SNAKE_CASE:
-				$ret = $this->generateSnakeCase($var);
-				break;
-			case self::TYPE_GOLANG:
-				$ret = $this->generateGolang($var);
-				break;
-			case self::TYPE_CAMEL_CASE:
-			default:
-				$ret = $this->generateCamelCase($var);
-				break;
+		case self::TYPE_SNAKE_CASE:
+			$ret = $this->generateSnakeCase($var);
+			break;
+		case self::TYPE_GOLANG:
+			$ret = $this->generateGolang($var);
+			break;
+		case self::TYPE_CAMEL_CASE:
+		default:
+			$ret = $this->generateCamelCase($var);
+			break;
 		}
 		return $ret;
 	}

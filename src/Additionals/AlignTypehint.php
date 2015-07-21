@@ -19,28 +19,28 @@ final class AlignTypehint extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_FUNCTION:
-					$this->appendCode($text);
-					$this->printUntil(ST_PARENTHESES_OPEN);
-					do {
-						list($id, $text) = $this->printAndStopAt([T_VARIABLE, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE]);
-						if (ST_PARENTHESES_OPEN == $id) {
-							$this->appendCode($text);
-							$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-							continue;
-						}
-						if (ST_PARENTHESES_CLOSE == $id) {
-							$this->appendCode($text);
-							break;
-						}
-						$this->appendCode(sprintf(self::ALIGNABLE_TYPEHINT, $contextCounter) . $text);
-					} while (true);
-					++$contextCounter;
-					break;
+			case T_FUNCTION:
+				$this->appendCode($text);
+				$this->printUntil(ST_PARENTHESES_OPEN);
+				do {
+					list($id, $text) = $this->printAndStopAt([T_VARIABLE, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE]);
+					if (ST_PARENTHESES_OPEN == $id) {
+						$this->appendCode($text);
+						$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+						continue;
+					}
+					if (ST_PARENTHESES_CLOSE == $id) {
+						$this->appendCode($text);
+						break;
+					}
+					$this->appendCode(sprintf(self::ALIGNABLE_TYPEHINT, $contextCounter) . $text);
+				} while (true);
+				++$contextCounter;
+				break;
 
-				default:
-					$this->appendCode($text);
-					break;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 

@@ -214,43 +214,43 @@ final class AutoImportPass extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_NAMESPACE:
+			case T_NAMESPACE:
+				$return .= $text;
+				if ($this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+					break;
+				}
+				while (list($index, $token) = each($tokens)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
 					$return .= $text;
-					if ($this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+					if (ST_CURLY_OPEN == $id) {
 						break;
 					}
-					while (list($index, $token) = each($tokens)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
-						$return .= $text;
-						if (ST_CURLY_OPEN == $id) {
-							break;
-						}
+				}
+				$namespaceBlock = '';
+				$curlyCount = 1;
+				while (list($index, $token) = each($tokens)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
+					$namespaceBlock .= $text;
+					if (ST_CURLY_OPEN == $id) {
+						++$curlyCount;
+					} elseif (ST_CURLY_CLOSE == $id) {
+						--$curlyCount;
 					}
-					$namespaceBlock = '';
-					$curlyCount = 1;
-					while (list($index, $token) = each($tokens)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
-						$namespaceBlock .= $text;
-						if (ST_CURLY_OPEN == $id) {
-							++$curlyCount;
-						} elseif (ST_CURLY_CLOSE == $id) {
-							--$curlyCount;
-						}
 
-						if (0 == $curlyCount) {
-							break;
-						}
+					if (0 == $curlyCount) {
+						break;
 					}
-					$return .= str_replace(
-						self::OPENER_PLACEHOLDER,
-						'',
-						$this->singleNamespace(self::OPENER_PLACEHOLDER . $namespaceBlock)
-					);
-					break;
-				default:
-					$return .= $text;
+				}
+				$return .= str_replace(
+					self::OPENER_PLACEHOLDER,
+					'',
+					$this->singleNamespace(self::OPENER_PLACEHOLDER . $namespaceBlock)
+				);
+				break;
+			default:
+				$return .= $text;
 			}
 		}
 

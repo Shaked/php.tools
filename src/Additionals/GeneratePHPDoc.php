@@ -17,100 +17,100 @@ final class GeneratePHPDoc extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_DOC_COMMENT:
-					$touchedDocComment = true;
+			case T_DOC_COMMENT:
+				$touchedDocComment = true;
+				break;
+			case T_FINAL:
+			case T_ABSTRACT:
+			case T_PUBLIC:
+			case T_PROTECTED:
+			case T_PRIVATE:
+			case T_STATIC:
+				if (!$this->leftTokenIs([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
+					$touchedVisibility = true;
+					$visibilityIdx = $this->ptr;
+				}
+				break;
+			case T_FUNCTION:
+				if ($touchedDocComment) {
+					$touchedDocComment = false;
 					break;
-				case T_FINAL:
-				case T_ABSTRACT:
-				case T_PUBLIC:
-				case T_PROTECTED:
-				case T_PRIVATE:
-				case T_STATIC:
-					if (!$this->leftTokenIs([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
-						$touchedVisibility = true;
-						$visibilityIdx = $this->ptr;
+				}
+				$origIdx = $visibilityIdx;
+				if (!$touchedVisibility) {
+					$origIdx = $this->ptr;
+				}
+				list($ntId) = $this->getToken($this->rightToken());
+				if (T_STRING != $ntId) {
+					$this->appendCode($text);
+					break;
+				}
+				$this->walkUntil(ST_PARENTHESES_OPEN);
+				$paramStack = [];
+				$tmp = ['type' => '', 'name' => ''];
+				$count = 1;
+				while (list($index, $token) = each($this->tkns)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
+
+					if (ST_PARENTHESES_OPEN == $id) {
+						++$count;
 					}
-					break;
-				case T_FUNCTION:
-					if ($touchedDocComment) {
-						$touchedDocComment = false;
+					if (ST_PARENTHESES_CLOSE == $id) {
+						--$count;
+					}
+					if (0 == $count) {
 						break;
 					}
-					$origIdx = $visibilityIdx;
-					if (!$touchedVisibility) {
-						$origIdx = $this->ptr;
+					if (T_STRING == $id || T_NS_SEPARATOR == $id) {
+						$tmp['type'] .= $text;
+						continue;
 					}
-					list($ntId) = $this->getToken($this->rightToken());
-					if (T_STRING != $ntId) {
-						$this->appendCode($text);
-						break;
+					if (T_VARIABLE == $id) {
+						if ($this->rightTokenIs([ST_EQUAL]) && $this->walkUntil(ST_EQUAL) && $this->rightTokenIs([T_ARRAY])) {
+							$tmp['type'] = 'array';
+						}
+						$tmp['name'] = $text;
+						$paramStack[] = $tmp;
+						$tmp = ['type' => '', 'name' => ''];
+						continue;
 					}
-					$this->walkUntil(ST_PARENTHESES_OPEN);
-					$paramStack = [];
-					$tmp = ['type' => '', 'name' => ''];
+				}
+
+				$returnStack = '';
+				if (!$this->leftUsefulTokenIs(ST_SEMI_COLON)) {
+					$this->walkUntil(ST_CURLY_OPEN);
 					$count = 1;
 					while (list($index, $token) = each($this->tkns)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
 
-						if (ST_PARENTHESES_OPEN == $id) {
+						if (ST_CURLY_OPEN == $id) {
 							++$count;
 						}
-						if (ST_PARENTHESES_CLOSE == $id) {
+						if (ST_CURLY_CLOSE == $id) {
 							--$count;
 						}
 						if (0 == $count) {
 							break;
 						}
-						if (T_STRING == $id || T_NS_SEPARATOR == $id) {
-							$tmp['type'] .= $text;
-							continue;
-						}
-						if (T_VARIABLE == $id) {
-							if ($this->rightTokenIs([ST_EQUAL]) && $this->walkUntil(ST_EQUAL) && $this->rightTokenIs([T_ARRAY])) {
-								$tmp['type'] = 'array';
-							}
-							$tmp['name'] = $text;
-							$paramStack[] = $tmp;
-							$tmp = ['type' => '', 'name' => ''];
-							continue;
-						}
-					}
-
-					$returnStack = '';
-					if (!$this->leftUsefulTokenIs(ST_SEMI_COLON)) {
-						$this->walkUntil(ST_CURLY_OPEN);
-						$count = 1;
-						while (list($index, $token) = each($this->tkns)) {
-							list($id, $text) = $this->getToken($token);
-							$this->ptr = $index;
-
-							if (ST_CURLY_OPEN == $id) {
-								++$count;
-							}
-							if (ST_CURLY_CLOSE == $id) {
-								--$count;
-							}
-							if (0 == $count) {
-								break;
-							}
-							if (T_RETURN == $id) {
-								if ($this->rightTokenIs([T_DNUMBER])) {
-									$returnStack = 'float';
-								} elseif ($this->rightTokenIs([T_LNUMBER])) {
-									$returnStack = 'int';
-								} elseif ($this->rightTokenIs([T_VARIABLE])) {
-									$returnStack = 'mixed';
-								} elseif ($this->rightTokenIs([ST_SEMI_COLON])) {
-									$returnStack = 'null';
-								}
+						if (T_RETURN == $id) {
+							if ($this->rightTokenIs([T_DNUMBER])) {
+								$returnStack = 'float';
+							} elseif ($this->rightTokenIs([T_LNUMBER])) {
+								$returnStack = 'int';
+							} elseif ($this->rightTokenIs([T_VARIABLE])) {
+								$returnStack = 'mixed';
+							} elseif ($this->rightTokenIs([ST_SEMI_COLON])) {
+								$returnStack = 'null';
 							}
 						}
 					}
+				}
 
-					$funcToken = &$this->tkns[$origIdx];
-					$funcToken[1] = $this->renderDocBlock($paramStack, $returnStack) . $funcToken[1];
-					$touchedVisibility = false;
+				$funcToken = &$this->tkns[$origIdx];
+				$funcToken[1] = $this->renderDocBlock($paramStack, $returnStack) . $funcToken[1];
+				$touchedVisibility = false;
 			}
 		}
 

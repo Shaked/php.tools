@@ -18,14 +18,14 @@ final class PSR2IndentWithSpace extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_COMMENT:
-				case T_DOC_COMMENT:
-				case T_WHITESPACE:
-					$this->appendCode(str_replace($this->indentChar, $spaces, $text));
-					break;
-				default:
-					$this->appendCode($text);
-					break;
+			case T_COMMENT:
+			case T_DOC_COMMENT:
+			case T_WHITESPACE:
+				$this->appendCode(str_replace($this->indentChar, $spaces, $text));
+				break;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 		return $this->code;

@@ -16,15 +16,15 @@ final class NoSpaceBetweenFunctionAndBracket extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case ST_PARENTHESES_OPEN:
-					if ($this->leftUsefulTokenIs(T_FUNCTION)) {
-						$this->rtrimAndAppendCode($text);
-						break;
-					}
-
-				default:
-					$this->appendCode($text);
+			case ST_PARENTHESES_OPEN:
+				if ($this->leftUsefulTokenIs(T_FUNCTION)) {
+					$this->rtrimAndAppendCode($text);
 					break;
+				}
+
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 

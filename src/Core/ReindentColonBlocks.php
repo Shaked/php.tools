@@ -25,47 +25,47 @@ final class ReindentColonBlocks extends FormatterPass {
 			}
 			switch ($id) {
 
-				case T_ENDFOR:
-				case T_ENDFOREACH:
-				case T_ENDWHILE:
-				case T_ENDIF:
-					$this->appendCode($text);
-					break;
+			case T_ENDFOR:
+			case T_ENDFOREACH:
+			case T_ENDWHILE:
+			case T_ENDIF:
+				$this->appendCode($text);
+				break;
 
-				case T_ELSE:
-					$this->appendCode($text);
-					$this->indentBlock();
-					break;
+			case T_ELSE:
+				$this->appendCode($text);
+				$this->indentBlock();
+				break;
 
-				case T_FOR:
-				case T_FOREACH:
-				case T_WHILE:
-				case T_ELSEIF:
-				case T_IF:
-					$this->appendCode($text);
-					$this->printUntil(ST_PARENTHESES_OPEN);
-					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-					$this->indentBlock();
-					break;
+			case T_FOR:
+			case T_FOREACH:
+			case T_WHILE:
+			case T_ELSEIF:
+			case T_IF:
+				$this->appendCode($text);
+				$this->printUntil(ST_PARENTHESES_OPEN);
+				$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				$this->indentBlock();
+				break;
 
-				case T_START_HEREDOC:
-					$this->appendCode($text);
-					$this->printUntil(T_END_HEREDOC);
-					break;
+			case T_START_HEREDOC:
+				$this->appendCode($text);
+				$this->printUntil(T_END_HEREDOC);
+				break;
 
-				default:
-					$hasLn = $this->hasLn($text);
-					if ($hasLn) {
-						if ($this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF, T_ENDFOR, T_ENDFOREACH, T_ENDWHILE])) {
-							$this->setIndent(-1);
-							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
-							$this->setIndent(+1);
-						} else {
-							$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
-						}
+			default:
+				$hasLn = $this->hasLn($text);
+				if ($hasLn) {
+					if ($this->rightTokenIs([T_ENDIF, T_ELSE, T_ELSEIF, T_ENDFOR, T_ENDFOREACH, T_ENDWHILE])) {
+						$this->setIndent(-1);
+						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
+						$this->setIndent(+1);
+					} else {
+						$text = str_replace($this->newLine, $this->newLine . $this->getIndent(), $text);
 					}
-					$this->appendCode($text);
-					break;
+				}
+				$this->appendCode($text);
+				break;
 			}
 		}
 		return $this->code;

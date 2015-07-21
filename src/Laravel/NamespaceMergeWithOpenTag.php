@@ -16,13 +16,13 @@ final class NamespaceMergeWithOpenTag extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_NAMESPACE:
-					if ($this->leftTokenIs(T_OPEN_TAG) && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
-						$this->rtrimAndAppendCode($this->getSpace() . $text);
-						break 2;
-					}
-				default:
-					$this->appendCode($text);
+			case T_NAMESPACE:
+				if ($this->leftTokenIs(T_OPEN_TAG) && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+					$this->rtrimAndAppendCode($this->getSpace() . $text);
+					break 2;
+				}
+			default:
+				$this->appendCode($text);
 			}
 		}
 		while (list(, $token) = each($this->tkns)) {

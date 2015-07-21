@@ -17,24 +17,24 @@ final class StripNewlineAfterClassOpen extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_TRAIT:
-				case T_CLASS:
-					if ($this->leftUsefulTokenIs(T_DOUBLE_COLON)) {
-						$this->appendCode($text);
-						break;
-					}
-					$this->appendCode($text);
-					$this->printUntil(ST_CURLY_OPEN);
-					list(, $text) = $this->printAndStopAt(T_WHITESPACE);
-					if ($this->hasLn($text)) {
-						$text = substr(strrchr($text, 10), 0);
-					}
+			case T_TRAIT:
+			case T_CLASS:
+				if ($this->leftUsefulTokenIs(T_DOUBLE_COLON)) {
 					$this->appendCode($text);
 					break;
+				}
+				$this->appendCode($text);
+				$this->printUntil(ST_CURLY_OPEN);
+				list(, $text) = $this->printAndStopAt(T_WHITESPACE);
+				if ($this->hasLn($text)) {
+					$text = substr(strrchr($text, 10), 0);
+				}
+				$this->appendCode($text);
+				break;
 
-				default:
-					$this->appendCode($text);
-					break;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 		return $this->code;

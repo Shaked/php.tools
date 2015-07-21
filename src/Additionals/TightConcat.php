@@ -15,17 +15,17 @@ final class TightConcat extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case ST_CONCAT:
-					if (!$this->leftUsefulTokenIs([T_LNUMBER, T_DNUMBER])) {
-						$this->code = rtrim($this->code, $whitespaces);
-					}
-					list($nextId) = $this->inspectToken(+1);
-					if (T_WHITESPACE == $nextId && !$this->rightUsefulTokenIs([T_LNUMBER, T_DNUMBER])) {
-						each($this->tkns);
-					}
-				default:
-					$this->appendCode($text);
-					break;
+			case ST_CONCAT:
+				if (!$this->leftUsefulTokenIs([T_LNUMBER, T_DNUMBER])) {
+					$this->code = rtrim($this->code, $whitespaces);
+				}
+				list($nextId) = $this->inspectToken(+1);
+				if (T_WHITESPACE == $nextId && !$this->rightUsefulTokenIs([T_LNUMBER, T_DNUMBER])) {
+					each($this->tkns);
+				}
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 		return $this->code;

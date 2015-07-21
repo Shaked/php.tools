@@ -23,32 +23,32 @@ final class AlignDoubleSlashComments extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_COMMENT:
-					if (LeftAlignComment::NON_INDENTABLE_COMMENT == $text) {
-						$touchedNonAlignableComment = true;
-						$this->appendCode($text);
-						continue;
-					}
-
-					$prefix = '';
-					if (substr($text, 0, 2) == '//' && !$touchedNonAlignableComment) {
-						$prefix = sprintf(self::ALIGNABLE_COMMENT, $contextCounter);
-					}
-					$this->appendCode($prefix . $text);
-
-					break;
-
-				case T_WHITESPACE:
-					if ($this->hasLn($text)) {
-						++$contextCounter;
-					}
+			case T_COMMENT:
+				if (LeftAlignComment::NON_INDENTABLE_COMMENT == $text) {
+					$touchedNonAlignableComment = true;
 					$this->appendCode($text);
-					break;
+					continue;
+				}
 
-				default:
-					$touchedNonAlignableComment = false;
-					$this->appendCode($text);
-					break;
+				$prefix = '';
+				if (substr($text, 0, 2) == '//' && !$touchedNonAlignableComment) {
+					$prefix = sprintf(self::ALIGNABLE_COMMENT, $contextCounter);
+				}
+				$this->appendCode($prefix . $text);
+
+				break;
+
+			case T_WHITESPACE:
+				if ($this->hasLn($text)) {
+					++$contextCounter;
+				}
+				$this->appendCode($text);
+				break;
+
+			default:
+				$touchedNonAlignableComment = false;
+				$this->appendCode($text);
+				break;
 			}
 		}
 

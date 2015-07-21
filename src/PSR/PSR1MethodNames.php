@@ -16,30 +16,30 @@ final class PSR1MethodNames extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_FUNCTION:
-					$foundMethod = true;
-					$this->appendCode($text);
-					break;
-				case T_STRING:
-					if ($foundMethod) {
-						$count = 0;
-						$origText = $text;
-						$tmp = ucwords(str_replace(['-', '_'], ' ', strtolower($text), $count));
-						if ($count > 0 && '' !== trim($tmp) && '_' !== substr($text, 0, 1)) {
-							$text = lcfirst(str_replace(' ', '', $tmp));
-						}
-
-						$methodReplaceList[$origText] = $text;
-						$this->appendCode($text);
-
-						$foundMethod = false;
-						break;
+			case T_FUNCTION:
+				$foundMethod = true;
+				$this->appendCode($text);
+				break;
+			case T_STRING:
+				if ($foundMethod) {
+					$count = 0;
+					$origText = $text;
+					$tmp = ucwords(str_replace(['-', '_'], ' ', strtolower($text), $count));
+					if ($count > 0 && '' !== trim($tmp) && '_' !== substr($text, 0, 1)) {
+						$text = lcfirst(str_replace(' ', '', $tmp));
 					}
-				case ST_PARENTHESES_OPEN:
-					$foundMethod = false;
-				default:
+
+					$methodReplaceList[$origText] = $text;
 					$this->appendCode($text);
+
+					$foundMethod = false;
 					break;
+				}
+			case ST_PARENTHESES_OPEN:
+				$foundMethod = false;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 
@@ -49,16 +49,16 @@ final class PSR1MethodNames extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_STRING:
-					if (isset($methodReplaceList[$text]) && $this->rightUsefulTokenIs(ST_PARENTHESES_OPEN)) {
+			case T_STRING:
+				if (isset($methodReplaceList[$text]) && $this->rightUsefulTokenIs(ST_PARENTHESES_OPEN)) {
 
-						$this->appendCode($methodReplaceList[$text]);
-						break;
-					}
-
-				default:
-					$this->appendCode($text);
+					$this->appendCode($methodReplaceList[$text]);
 					break;
+				}
+
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 		return $this->code;

@@ -18,35 +18,35 @@ final class AlignEquals extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_FUNCTION:
-					++$contextCounter;
-					$this->appendCode($text);
+			case T_FUNCTION:
+				++$contextCounter;
+				$this->appendCode($text);
+				break;
+			case ST_PARENTHESES_OPEN:
+				++$parenCount;
+				$this->appendCode($text);
+				break;
+			case ST_PARENTHESES_CLOSE:
+				--$parenCount;
+				$this->appendCode($text);
+				break;
+			case ST_BRACKET_OPEN:
+				++$bracketCount;
+				$this->appendCode($text);
+				break;
+			case ST_BRACKET_CLOSE:
+				--$bracketCount;
+				$this->appendCode($text);
+				break;
+			case ST_EQUAL:
+				if (!$parenCount && !$bracketCount) {
+					$this->appendCode(sprintf(self::ALIGNABLE_EQUAL, $contextCounter) . $text);
 					break;
-				case ST_PARENTHESES_OPEN:
-					++$parenCount;
-					$this->appendCode($text);
-					break;
-				case ST_PARENTHESES_CLOSE:
-					--$parenCount;
-					$this->appendCode($text);
-					break;
-				case ST_BRACKET_OPEN:
-					++$bracketCount;
-					$this->appendCode($text);
-					break;
-				case ST_BRACKET_CLOSE:
-					--$bracketCount;
-					$this->appendCode($text);
-					break;
-				case ST_EQUAL:
-					if (!$parenCount && !$bracketCount) {
-						$this->appendCode(sprintf(self::ALIGNABLE_EQUAL, $contextCounter) . $text);
-						break;
-					}
+				}
 
-				default:
-					$this->appendCode($text);
-					break;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 

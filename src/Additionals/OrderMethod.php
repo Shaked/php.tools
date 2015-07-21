@@ -17,54 +17,54 @@ final class OrderMethod extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_ABSTRACT:
-				case T_STATIC:
-				case T_PRIVATE:
-				case T_PROTECTED:
-				case T_PUBLIC:
-					$stack = $text;
-					$curlyCount = null;
-					$touchedMethod = false;
-					$functionName = '';
-					while (list($index, $token) = each($tokens)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
+			case T_ABSTRACT:
+			case T_STATIC:
+			case T_PRIVATE:
+			case T_PROTECTED:
+			case T_PUBLIC:
+				$stack = $text;
+				$curlyCount = null;
+				$touchedMethod = false;
+				$functionName = '';
+				while (list($index, $token) = each($tokens)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
 
-						$stack .= $text;
-						if (T_FUNCTION == $id) {
-							$touchedMethod = true;
-						}
-						if (T_VARIABLE == $id && !$touchedMethod) {
-							break;
-						}
-						if (T_STRING == $id && $touchedMethod && empty($functionName)) {
-							$functionName = $text;
-						}
-
-						if (null === $curlyCount && ST_SEMI_COLON == $id) {
-							break;
-						}
-
-						if (ST_CURLY_OPEN == $id) {
-							++$curlyCount;
-						}
-						if (ST_CURLY_CLOSE == $id) {
-							--$curlyCount;
-						}
-						if (0 === $curlyCount) {
-							break;
-						}
+					$stack .= $text;
+					if (T_FUNCTION == $id) {
+						$touchedMethod = true;
 					}
-					$appendWith = $stack;
-					if ($touchedMethod) {
-						$functionList[$functionName] = $stack;
-						$appendWith = self::METHOD_REPLACEMENT_PLACEHOLDER;
+					if (T_VARIABLE == $id && !$touchedMethod) {
+						break;
 					}
-					$return .= $appendWith;
-					break;
-				default:
-					$return .= $text;
-					break;
+					if (T_STRING == $id && $touchedMethod && empty($functionName)) {
+						$functionName = $text;
+					}
+
+					if (null === $curlyCount && ST_SEMI_COLON == $id) {
+						break;
+					}
+
+					if (ST_CURLY_OPEN == $id) {
+						++$curlyCount;
+					}
+					if (ST_CURLY_CLOSE == $id) {
+						--$curlyCount;
+					}
+					if (0 === $curlyCount) {
+						break;
+					}
+				}
+				$appendWith = $stack;
+				if ($touchedMethod) {
+					$functionList[$functionName] = $stack;
+					$appendWith = self::METHOD_REPLACEMENT_PLACEHOLDER;
+				}
+				$return .= $appendWith;
+				break;
+			default:
+				$return .= $text;
+				break;
 			}
 		}
 		ksort($functionList);
@@ -94,42 +94,42 @@ final class OrderMethod extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_CLASS:
+			case T_CLASS:
+				$return .= $text;
+				while (list($index, $token) = each($this->tkns)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
 					$return .= $text;
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
-						$return .= $text;
-						if (ST_CURLY_OPEN == $id) {
-							break;
-						}
+					if (ST_CURLY_OPEN == $id) {
+						break;
 					}
-					$classBlock = '';
-					$curlyCount = 1;
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
-						$classBlock .= $text;
-						if (ST_CURLY_OPEN == $id) {
-							++$curlyCount;
-						} elseif (ST_CURLY_CLOSE == $id) {
-							--$curlyCount;
-						}
+				}
+				$classBlock = '';
+				$curlyCount = 1;
+				while (list($index, $token) = each($this->tkns)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
+					$classBlock .= $text;
+					if (ST_CURLY_OPEN == $id) {
+						++$curlyCount;
+					} elseif (ST_CURLY_CLOSE == $id) {
+						--$curlyCount;
+					}
 
-						if (0 == $curlyCount) {
-							break;
-						}
+					if (0 == $curlyCount) {
+						break;
 					}
-					$return .= str_replace(
-						self::OPENER_PLACEHOLDER,
-						'',
-						$this->orderMethods(self::OPENER_PLACEHOLDER . $classBlock)
-					);
-					$this->appendCode($return);
-					break;
-				default:
-					$this->appendCode($text);
-					break;
+				}
+				$return .= str_replace(
+					self::OPENER_PLACEHOLDER,
+					'',
+					$this->orderMethods(self::OPENER_PLACEHOLDER . $classBlock)
+				);
+				$this->appendCode($return);
+				break;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 		return $this->code;

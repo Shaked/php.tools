@@ -15,55 +15,55 @@ final class WrongConstructorName extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_NAMESPACE:
-					if (!$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
-						$touchedNamespace = true;
-					}
-					$this->appendCode($text);
+			case T_NAMESPACE:
+				if (!$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+					$touchedNamespace = true;
+				}
+				$this->appendCode($text);
+				break;
+			case T_CLASS:
+				$this->appendCode($text);
+				if ($this->leftUsefulTokenIs([T_DOUBLE_COLON])) {
 					break;
-				case T_CLASS:
+				}
+				if ($touchedNamespace) {
+					break;
+				}
+				$classLocalName = '';
+				while (list($index, $token) = each($this->tkns)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
 					$this->appendCode($text);
-					if ($this->leftUsefulTokenIs([T_DOUBLE_COLON])) {
+					if (T_STRING == $id) {
+						$classLocalName = strtolower($text);
+					}
+					if (T_EXTENDS == $id || T_IMPLEMENTS == $id || ST_CURLY_OPEN == $id) {
 						break;
 					}
-					if ($touchedNamespace) {
+				}
+				$count = 1;
+				while (list($index, $token) = each($this->tkns)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
+
+					if (T_STRING == $id && $this->leftUsefulTokenIs([T_FUNCTION]) && strtolower($text) == $classLocalName) {
+						$text = '__construct';
+					}
+					$this->appendCode($text);
+
+					if (ST_CURLY_OPEN == $id) {
+						++$count;
+					}
+					if (ST_CURLY_CLOSE == $id) {
+						--$count;
+					}
+					if (0 == $count) {
 						break;
 					}
-					$classLocalName = '';
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
-						$this->appendCode($text);
-						if (T_STRING == $id) {
-							$classLocalName = strtolower($text);
-						}
-						if (T_EXTENDS == $id || T_IMPLEMENTS == $id || ST_CURLY_OPEN == $id) {
-							break;
-						}
-					}
-					$count = 1;
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
-
-						if (T_STRING == $id && $this->leftUsefulTokenIs([T_FUNCTION]) && strtolower($text) == $classLocalName) {
-							$text = '__construct';
-						}
-						$this->appendCode($text);
-
-						if (ST_CURLY_OPEN == $id) {
-							++$count;
-						}
-						if (ST_CURLY_CLOSE == $id) {
-							--$count;
-						}
-						if (0 == $count) {
-							break;
-						}
-					}
-					break;
-				default:
-					$this->appendCode($text);
+				}
+				break;
+			default:
+				$this->appendCode($text);
 			}
 		}
 

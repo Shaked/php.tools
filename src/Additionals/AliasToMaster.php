@@ -33,12 +33,12 @@ class AliasToMaster extends AdditionalPass {
 			$this->ptr = $index;
 			$this->checkIfEmptyNS($id);
 			switch ($id) {
-				case T_STRING:
-				case T_EXIT:
-					if (isset(static::$aliasList[strtolower($text)])) {
-						prev($this->tkns);
-						return true;
-					}
+			case T_STRING:
+			case T_EXIT:
+				if (isset(static::$aliasList[strtolower($text)])) {
+					prev($this->tkns);
+					return true;
+				}
 			}
 			$this->appendCode($text);
 		}

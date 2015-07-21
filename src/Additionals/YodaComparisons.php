@@ -30,62 +30,62 @@ final class YodaComparisons extends AdditionalPass {
 			}
 			list($id) = $this->getToken($token);
 			switch ($id) {
-				case T_IS_EQUAL:
-				case T_IS_IDENTICAL:
-				case T_IS_NOT_EQUAL:
-				case T_IS_NOT_IDENTICAL:
-					list($left, $right) = $this->siblings($tkns, $ptr);
-					list($leftId) = $tkns[$left];
-					list($rightId) = $tkns[$right];
-					if ($leftId == $rightId) {
-						continue;
+			case T_IS_EQUAL:
+			case T_IS_IDENTICAL:
+			case T_IS_NOT_EQUAL:
+			case T_IS_NOT_IDENTICAL:
+				list($left, $right) = $this->siblings($tkns, $ptr);
+				list($leftId) = $tkns[$left];
+				list($rightId) = $tkns[$right];
+				if ($leftId == $rightId) {
+					continue;
+				}
+
+				$leftPureVariable = $this->isPureVariable($leftId);
+				for ($leftmost = $left; $leftmost >= 0; --$leftmost) {
+					list($leftScanId) = $this->getToken($tkns[$leftmost]);
+					if ($this->isLowerPrecedence($leftScanId)) {
+						++$leftmost;
+						break;
 					}
+					$leftPureVariable &= $this->isPureVariable($leftScanId);
+				}
 
-					$leftPureVariable = $this->isPureVariable($leftId);
-					for ($leftmost = $left; $leftmost >= 0; --$leftmost) {
-						list($leftScanId) = $this->getToken($tkns[$leftmost]);
-						if ($this->isLowerPrecedence($leftScanId)) {
-							++$leftmost;
-							break;
-						}
-						$leftPureVariable &= $this->isPureVariable($leftScanId);
+				$rightPureVariable = $this->isPureVariable($rightId);
+				for ($rightmost = $right; $rightmost < sizeof($tkns) - 1; ++$rightmost) {
+					list($rightScanId) = $this->getToken($tkns[$rightmost]);
+					if ($this->isLowerPrecedence($rightScanId)) {
+						--$rightmost;
+						break;
 					}
+					$rightPureVariable &= $this->isPureVariable($rightScanId);
+				}
 
-					$rightPureVariable = $this->isPureVariable($rightId);
-					for ($rightmost = $right; $rightmost < sizeof($tkns) - 1; ++$rightmost) {
-						list($rightScanId) = $this->getToken($tkns[$rightmost]);
-						if ($this->isLowerPrecedence($rightScanId)) {
-							--$rightmost;
-							break;
-						}
-						$rightPureVariable &= $this->isPureVariable($rightScanId);
-					}
+				if ($leftPureVariable && !$rightPureVariable) {
+					$origLeftTokens = $leftTokens = implode('', array_map(function ($token) {
+						return isset($token[1]) ? $token[1] : $token;
+					}, array_slice($tkns, $leftmost, $left - $leftmost + 1)));
+					$origRightTokens = $rightTokens = implode('', array_map(function ($token) {
+						return isset($token[1]) ? $token[1] : $token;
+					}, array_slice($tkns, $right, $rightmost - $right + 1)));
 
-					if ($leftPureVariable && !$rightPureVariable) {
-						$origLeftTokens = $leftTokens = implode('', array_map(function ($token) {
-							return isset($token[1]) ? $token[1] : $token;
-						}, array_slice($tkns, $leftmost, $left - $leftmost + 1)));
-						$origRightTokens = $rightTokens = implode('', array_map(function ($token) {
-							return isset($token[1]) ? $token[1] : $token;
-						}, array_slice($tkns, $right, $rightmost - $right + 1)));
+					$leftTokens = (substr($origRightTokens, 0, 1) == ' ' ? ' ' : '') . trim($leftTokens) . (substr($origRightTokens, -1, 1) == ' ' ? ' ' : '');
+					$rightTokens = (substr($origLeftTokens, 0, 1) == ' ' ? ' ' : '') . trim($rightTokens) . (substr($origLeftTokens, -1, 1) == ' ' ? ' ' : '');
 
-						$leftTokens = (substr($origRightTokens, 0, 1) == ' ' ? ' ' : '') . trim($leftTokens) . (substr($origRightTokens, -1, 1) == ' ' ? ' ' : '');
-						$rightTokens = (substr($origLeftTokens, 0, 1) == ' ' ? ' ' : '') . trim($rightTokens) . (substr($origLeftTokens, -1, 1) == ' ' ? ' ' : '');
+					$tkns[$leftmost] = ['REPLACED', $rightTokens];
+					$tkns[$right] = ['REPLACED', $leftTokens];
 
-						$tkns[$leftmost] = ['REPLACED', $rightTokens];
-						$tkns[$right] = ['REPLACED', $leftTokens];
-
-						if ($leftmost != $left) {
-							for ($i = $leftmost + 1; $i <= $left; ++$i) {
-								$tkns[$i] = null;
-							}
-						}
-						if ($rightmost != $right) {
-							for ($i = $right + 1; $i <= $rightmost; ++$i) {
-								$tkns[$i] = null;
-							}
+					if ($leftmost != $left) {
+						for ($i = $leftmost + 1; $i <= $left; ++$i) {
+							$tkns[$i] = null;
 						}
 					}
+					if ($rightmost != $right) {
+						for ($i = $right + 1; $i <= $rightmost; ++$i) {
+							$tkns[$i] = null;
+						}
+					}
+				}
 			}
 		}
 		return $this->render($tkns);
@@ -97,40 +97,40 @@ final class YodaComparisons extends AdditionalPass {
 
 	private function isLowerPrecedence($id) {
 		switch ($id) {
-			case ST_REFERENCE:
-			case ST_BITWISE_XOR:
-			case ST_BITWISE_OR:
-			case T_BOOLEAN_AND:
-			case T_BOOLEAN_OR:
-			case ST_QUESTION:
-			case ST_COLON:
-			case ST_EQUAL:
-			case T_PLUS_EQUAL:
-			case T_MINUS_EQUAL:
-			case T_MUL_EQUAL:
-			case T_POW_EQUAL:
-			case T_DIV_EQUAL:
-			case T_CONCAT_EQUAL:
-			case T_MOD_EQUAL:
-			case T_AND_EQUAL:
-			case T_OR_EQUAL:
-			case T_XOR_EQUAL:
-			case T_SL_EQUAL:
-			case T_SR_EQUAL:
-			case T_DOUBLE_ARROW:
-			case T_LOGICAL_AND:
-			case T_LOGICAL_XOR:
-			case T_LOGICAL_OR:
-			case ST_COMMA:
-			case ST_SEMI_COLON:
-			case T_RETURN:
-			case T_THROW:
-			case T_GOTO:
-			case T_CASE:
-			case T_COMMENT:
-			case T_DOC_COMMENT:
-			case T_OPEN_TAG:
-				return true;
+		case ST_REFERENCE:
+		case ST_BITWISE_XOR:
+		case ST_BITWISE_OR:
+		case T_BOOLEAN_AND:
+		case T_BOOLEAN_OR:
+		case ST_QUESTION:
+		case ST_COLON:
+		case ST_EQUAL:
+		case T_PLUS_EQUAL:
+		case T_MINUS_EQUAL:
+		case T_MUL_EQUAL:
+		case T_POW_EQUAL:
+		case T_DIV_EQUAL:
+		case T_CONCAT_EQUAL:
+		case T_MOD_EQUAL:
+		case T_AND_EQUAL:
+		case T_OR_EQUAL:
+		case T_XOR_EQUAL:
+		case T_SL_EQUAL:
+		case T_SR_EQUAL:
+		case T_DOUBLE_ARROW:
+		case T_LOGICAL_AND:
+		case T_LOGICAL_XOR:
+		case T_LOGICAL_OR:
+		case ST_COMMA:
+		case ST_SEMI_COLON:
+		case T_RETURN:
+		case T_THROW:
+		case T_GOTO:
+		case T_CASE:
+		case T_COMMENT:
+		case T_DOC_COMMENT:
+		case T_OPEN_TAG:
+			return true;
 		}
 		return false;
 	}

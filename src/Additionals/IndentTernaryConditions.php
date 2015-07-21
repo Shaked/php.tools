@@ -14,15 +14,15 @@ final class IndentTernaryConditions extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case ST_COLON:
-				case ST_QUESTION:
-					if ($this->hasLnBefore()) {
-						$this->appendCode($this->getIndent(+1));
-					}
-					$this->appendCode($text);
-					break;
-				default:
-					$this->appendCode($text);
+			case ST_COLON:
+			case ST_QUESTION:
+				if ($this->hasLnBefore()) {
+					$this->appendCode($this->getIndent(+1));
+				}
+				$this->appendCode($text);
+				break;
+			default:
+				$this->appendCode($text);
 			}
 		}
 

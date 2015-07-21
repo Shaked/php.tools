@@ -14,18 +14,18 @@ final class StripNewlineAfterCurlyOpen extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case ST_CURLY_OPEN:
-					$this->appendCode($text);
-					list(, $text) = $this->printAndStopAt(T_WHITESPACE);
-					if ($this->hasLn($text)) {
-						$text = substr(strrchr($text, 10), 0);
-					}
-					$this->appendCode($text);
-					break;
+			case ST_CURLY_OPEN:
+				$this->appendCode($text);
+				list(, $text) = $this->printAndStopAt(T_WHITESPACE);
+				if ($this->hasLn($text)) {
+					$text = substr(strrchr($text, 10), 0);
+				}
+				$this->appendCode($text);
+				break;
 
-				default:
-					$this->appendCode($text);
-					break;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 		return $this->code;

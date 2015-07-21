@@ -14,15 +14,15 @@ final class MergeNamespaceWithOpenTag extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_NAMESPACE:
-					if ($this->leftTokenIs(T_OPEN_TAG) && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
-						$this->rtrimAndAppendCode($this->newLine . $text);
-						break 2;
-					}
+			case T_NAMESPACE:
+				if ($this->leftTokenIs(T_OPEN_TAG) && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+					$this->rtrimAndAppendCode($this->newLine . $text);
+					break 2;
+				}
 
-				default:
-					$this->appendCode($text);
-					break;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 		while (list(, $token) = each($this->tkns)) {

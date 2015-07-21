@@ -15,17 +15,17 @@ final class RemoveUseLeadingSlash extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_NAMESPACE:
-				case T_TRAIT:
-				case T_CLASS:
-				case T_FUNCTION:
-					$lastTouchedToken = $id;
-				case T_NS_SEPARATOR:
-					if (T_NAMESPACE == $lastTouchedToken && $this->leftTokenIs([T_USE])) {
-						continue;
-					}
-				default:
-					$this->appendCode($text);
+			case T_NAMESPACE:
+			case T_TRAIT:
+			case T_CLASS:
+			case T_FUNCTION:
+				$lastTouchedToken = $id;
+			case T_NS_SEPARATOR:
+				if (T_NAMESPACE == $lastTouchedToken && $this->leftTokenIs([T_USE])) {
+					continue;
+				}
+			default:
+				$this->appendCode($text);
 			}
 		}
 

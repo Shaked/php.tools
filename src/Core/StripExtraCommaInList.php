@@ -20,37 +20,37 @@ final class StripExtraCommaInList extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_STRING:
-				case T_ARRAY:
-				case T_LIST:
-					$touchedListArrayString = true;
-					if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
-						$contextStack[] = $id;
-					}
-					break;
+			case T_STRING:
+			case T_ARRAY:
+			case T_LIST:
+				$touchedListArrayString = true;
+				if ($this->rightTokenIs(ST_PARENTHESES_OPEN)) {
+					$contextStack[] = $id;
+				}
+				break;
 
-				case ST_PARENTHESES_OPEN:
-					if (isset($contextStack[0]) && T_LIST == end($contextStack) && $this->rightTokenIs(ST_PARENTHESES_CLOSE)) {
-						array_pop($contextStack);
-						$contextStack[] = self::EMPTY_LIST;
-					} elseif (!$touchedListArrayString) {
-						$contextStack[] = ST_PARENTHESES_OPEN;
-					}
-					break;
+			case ST_PARENTHESES_OPEN:
+				if (isset($contextStack[0]) && T_LIST == end($contextStack) && $this->rightTokenIs(ST_PARENTHESES_CLOSE)) {
+					array_pop($contextStack);
+					$contextStack[] = self::EMPTY_LIST;
+				} elseif (!$touchedListArrayString) {
+					$contextStack[] = ST_PARENTHESES_OPEN;
+				}
+				break;
 
-				case ST_PARENTHESES_CLOSE:
-					if (isset($contextStack[0])) {
-						if (T_LIST == end($contextStack) && $this->leftUsefulTokenIs(ST_COMMA)) {
-							$prevTokenIdx = $this->leftUsefulTokenIdx();
-							$this->tkns[$prevTokenIdx] = null;
-						}
-						array_pop($contextStack);
+			case ST_PARENTHESES_CLOSE:
+				if (isset($contextStack[0])) {
+					if (T_LIST == end($contextStack) && $this->leftUsefulTokenIs(ST_COMMA)) {
+						$prevTokenIdx = $this->leftUsefulTokenIdx();
+						$this->tkns[$prevTokenIdx] = null;
 					}
-					break;
+					array_pop($contextStack);
+				}
+				break;
 
-				default:
-					$touchedListArrayString = false;
-					break;
+			default:
+				$touchedListArrayString = false;
+				break;
 			}
 			$this->tkns[$this->ptr] = [$id, $text];
 		}

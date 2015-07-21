@@ -22,64 +22,64 @@ class AlignDoubleArrow extends AdditionalPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case ST_COMMA:
-					if (!$this->hasLnAfter() && !$this->hasLnRightToken()) {
-						if (!isset($levelEntranceCounter[$levelCounter])) {
-							$levelEntranceCounter[$levelCounter] = 0;
-						}
-						if (!isset($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
-							$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
-							$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
-						}
-						++$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
-						$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = max($maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]);
-					} elseif ($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] > 1) {
-						$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 1;
-					}
-					$this->appendCode($text);
-					break;
-
-				case T_DOUBLE_ARROW:
-					if (isset($levelEntranceCounter[$levelCounter], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
-						$this->appendCode(
-							sprintf(
-								self::ALIGNABLE_EQUAL,
-								$levelCounter,
-								$levelEntranceCounter[$levelCounter],
-								$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
-							)
-						);
-					}
-
-					$this->appendCode($text);
-					break;
-
-				case ST_PARENTHESES_OPEN:
-				case ST_BRACKET_OPEN:
-					++$levelCounter;
+			case ST_COMMA:
+				if (!$this->hasLnAfter() && !$this->hasLnRightToken()) {
 					if (!isset($levelEntranceCounter[$levelCounter])) {
 						$levelEntranceCounter[$levelCounter] = 0;
 					}
-					++$levelEntranceCounter[$levelCounter];
 					if (!isset($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
 						$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
 						$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
 					}
 					++$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
 					$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = max($maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]);
+				} elseif ($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] > 1) {
+					$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 1;
+				}
+				$this->appendCode($text);
+				break;
 
-					$this->appendCode($text);
-					break;
+			case T_DOUBLE_ARROW:
+				if (isset($levelEntranceCounter[$levelCounter], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
+					$this->appendCode(
+						sprintf(
+							self::ALIGNABLE_EQUAL,
+							$levelCounter,
+							$levelEntranceCounter[$levelCounter],
+							$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
+						)
+					);
+				}
 
-				case ST_PARENTHESES_CLOSE:
-				case ST_BRACKET_CLOSE:
-					--$levelCounter;
-					$this->appendCode($text);
-					break;
+				$this->appendCode($text);
+				break;
 
-				default:
-					$this->appendCode($text);
-					break;
+			case ST_PARENTHESES_OPEN:
+			case ST_BRACKET_OPEN:
+				++$levelCounter;
+				if (!isset($levelEntranceCounter[$levelCounter])) {
+					$levelEntranceCounter[$levelCounter] = 0;
+				}
+				++$levelEntranceCounter[$levelCounter];
+				if (!isset($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
+					$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+					$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+				}
+				++$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
+				$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = max($maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]);
+
+				$this->appendCode($text);
+				break;
+
+			case ST_PARENTHESES_CLOSE:
+			case ST_BRACKET_CLOSE:
+				--$levelCounter;
+				$this->appendCode($text);
+				break;
+
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 

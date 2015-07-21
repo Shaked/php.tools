@@ -21,13 +21,13 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_WHITESPACE:
-					$text = str_replace($this->newLine, self::EMPTY_LINE . $this->newLine, $text);
-					$this->appendCode($text);
-					break;
-				default:
-					$this->appendCode($text);
-					break;
+			case T_WHITESPACE:
+				$text = str_replace($this->newLine, self::EMPTY_LINE . $this->newLine, $text);
+				$this->appendCode($text);
+				break;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 

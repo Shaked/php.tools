@@ -31,82 +31,82 @@ final class SettersAndGettersPass extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_CLASS:
-					$attributes = [
-						'private' => [],
-						'public' => [],
-						'protected' => [],
-					];
-					$functionList = [];
-					$touchedVisibility = false;
-					$touchedFunction = false;
-					$curlyCount = null;
+			case T_CLASS:
+				$attributes = [
+					'private' => [],
+					'public' => [],
+					'protected' => [],
+				];
+				$functionList = [];
+				$touchedVisibility = false;
+				$touchedFunction = false;
+				$curlyCount = null;
+				$this->appendCode($text);
+				while (list($index, $token) = each($this->tkns)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
+					if (ST_CURLY_OPEN == $id) {
+						++$curlyCount;
+					}
+					if (ST_CURLY_CLOSE == $id) {
+						--$curlyCount;
+					}
+					if (0 === $curlyCount) {
+						break;
+					}
 					$this->appendCode($text);
-					while (list($index, $token) = each($this->tkns)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
-						if (ST_CURLY_OPEN == $id) {
-							++$curlyCount;
-						}
-						if (ST_CURLY_CLOSE == $id) {
-							--$curlyCount;
-						}
-						if (0 === $curlyCount) {
-							break;
-						}
-						$this->appendCode($text);
-						if (T_PUBLIC == $id) {
-							$touchedVisibility = T_PUBLIC;
-						} elseif (T_PRIVATE == $id) {
-							$touchedVisibility = T_PRIVATE;
-						} elseif (T_PROTECTED == $id) {
-							$touchedVisibility = T_PROTECTED;
-						}
-						if (T_VARIABLE == $id && T_PUBLIC == $touchedVisibility) {
-							$attributes['public'][] = $text;
-							$touchedVisibility = null;
-							$this->printPlaceholder($text);
-						} elseif (T_VARIABLE == $id && T_PRIVATE == $touchedVisibility) {
-							$attributes['private'][] = $text;
-							$touchedVisibility = null;
-							$this->printPlaceholder($text);
-						} elseif (T_VARIABLE == $id && T_PROTECTED == $touchedVisibility) {
-							$attributes['protected'][] = $text;
-							$touchedVisibility = null;
-							$this->printPlaceholder($text);
-						} elseif (T_FUNCTION == $id) {
-							$touchedFunction = true;
-						} elseif ($touchedFunction && T_STRING == $id) {
-							$functionList[] = $text;
-							$touchedVisibility = null;
-							$touchedFunction = false;
-						}
+					if (T_PUBLIC == $id) {
+						$touchedVisibility = T_PUBLIC;
+					} elseif (T_PRIVATE == $id) {
+						$touchedVisibility = T_PRIVATE;
+					} elseif (T_PROTECTED == $id) {
+						$touchedVisibility = T_PROTECTED;
 					}
-					$functionList = array_combine($functionList, $functionList);
-					$append = false;
-					foreach ($attributes as $visibility => $variables) {
-						foreach ($variables as $var) {
-							$str = $this->generate($visibility, $var);
-							foreach ($functionList as $k => $v) {
-								if (false !== stripos($str, $v)) {
-									unset($functionList[$k]);
-									$append = true;
-									continue 2;
-								}
-							}
-							if ($append) {
-								$this->appendCode($str);
-								continue;
-							}
-							$this->code = str_replace(sprintf(self::PLACEHOLDER, $var), $str, $this->code);
-						}
+					if (T_VARIABLE == $id && T_PUBLIC == $touchedVisibility) {
+						$attributes['public'][] = $text;
+						$touchedVisibility = null;
+						$this->printPlaceholder($text);
+					} elseif (T_VARIABLE == $id && T_PRIVATE == $touchedVisibility) {
+						$attributes['private'][] = $text;
+						$touchedVisibility = null;
+						$this->printPlaceholder($text);
+					} elseif (T_VARIABLE == $id && T_PROTECTED == $touchedVisibility) {
+						$attributes['protected'][] = $text;
+						$touchedVisibility = null;
+						$this->printPlaceholder($text);
+					} elseif (T_FUNCTION == $id) {
+						$touchedFunction = true;
+					} elseif ($touchedFunction && T_STRING == $id) {
+						$functionList[] = $text;
+						$touchedVisibility = null;
+						$touchedFunction = false;
 					}
+				}
+				$functionList = array_combine($functionList, $functionList);
+				$append = false;
+				foreach ($attributes as $visibility => $variables) {
+					foreach ($variables as $var) {
+						$str = $this->generate($visibility, $var);
+						foreach ($functionList as $k => $v) {
+							if (false !== stripos($str, $v)) {
+								unset($functionList[$k]);
+								$append = true;
+								continue 2;
+							}
+						}
+						if ($append) {
+							$this->appendCode($str);
+							continue;
+						}
+						$this->code = str_replace(sprintf(self::PLACEHOLDER, $var), $str, $this->code);
+					}
+				}
 
-					$this->appendCode($text);
-					break;
-				default:
-					$this->appendCode($text);
-					break;
+				$this->appendCode($text);
+				break;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 		$this->code = preg_replace(self::PLACEHOLDER_REGEX, ';', $this->code);
@@ -115,16 +115,16 @@ final class SettersAndGettersPass extends FormatterPass {
 
 	private function generate($visibility, $var) {
 		switch ($this->type) {
-			case self::TYPE_SNAKE_CASE:
-				$ret = $this->generateSnakeCase($visibility, $var);
-				break;
-			case self::TYPE_GOLANG:
-				$ret = $this->generateGolang($visibility, $var);
-				break;
-			case self::TYPE_CAMEL_CASE:
-			default:
-				$ret = $this->generateCamelCase($visibility, $var);
-				break;
+		case self::TYPE_SNAKE_CASE:
+			$ret = $this->generateSnakeCase($visibility, $var);
+			break;
+		case self::TYPE_GOLANG:
+			$ret = $this->generateGolang($visibility, $var);
+			break;
+		case self::TYPE_CAMEL_CASE:
+		default:
+			$ret = $this->generateCamelCase($visibility, $var);
+			break;
 		}
 		return $ret;
 	}

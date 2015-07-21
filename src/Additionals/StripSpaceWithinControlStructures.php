@@ -25,14 +25,31 @@ final class StripSpaceWithinControlStructures extends AdditionalPass {
 			$this->ptr = $index;
 
 			switch ($id) {
-				case T_IF:
-				case T_DO:
-				case T_FOR:
-				case T_FOREACH:
-				case T_SWITCH:
-					$this->appendCode($text);
-					$this->printUntil(ST_PARENTHESES_OPEN);
-					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+			case T_IF:
+			case T_DO:
+			case T_FOR:
+			case T_FOREACH:
+			case T_SWITCH:
+				$this->appendCode($text);
+				$this->printUntil(ST_PARENTHESES_OPEN);
+				$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				$this->printUntil(ST_CURLY_OPEN);
+
+				if ($this->hasLnAfter()) {
+					each($this->tkns);
+					$this->appendCode($this->newLine);
+					continue;
+				}
+
+				break;
+
+			case T_WHILE:
+				$this->appendCode($this->newLine);
+				$this->appendCode($text);
+				$this->printUntil(ST_PARENTHESES_OPEN);
+				$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+
+				if ($this->rightUsefulTokenIs(ST_CURLY_OPEN)) {
 					$this->printUntil(ST_CURLY_OPEN);
 
 					if ($this->hasLnAfter()) {
@@ -41,40 +58,23 @@ final class StripSpaceWithinControlStructures extends AdditionalPass {
 						continue;
 					}
 
-					break;
+				}
 
-				case T_WHILE:
-					$this->appendCode($this->newLine);
-					$this->appendCode($text);
-					$this->printUntil(ST_PARENTHESES_OPEN);
-					$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				break;
 
-					if ($this->rightUsefulTokenIs(ST_CURLY_OPEN)) {
-						$this->printUntil(ST_CURLY_OPEN);
+			case ST_CURLY_CLOSE:
 
-						if ($this->hasLnAfter()) {
-							each($this->tkns);
-							$this->appendCode($this->newLine);
-							continue;
-						}
+				if ($this->hasLnBefore()) {
+					$this->rtrimAndAppendCode($this->newLine . $text);
+					continue;
+				}
 
-					}
+				$this->appendCode($text);
+				break;
 
-					break;
-
-				case ST_CURLY_CLOSE:
-
-					if ($this->hasLnBefore()) {
-						$this->rtrimAndAppendCode($this->newLine . $text);
-						continue;
-					}
-
-					$this->appendCode($text);
-					break;
-
-				default:
-					$this->appendCode($text);
-					break;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 
 		}

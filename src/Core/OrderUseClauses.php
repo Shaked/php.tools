@@ -194,48 +194,48 @@ final class OrderUseClauses extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_TRAIT:
-				case T_CLASS:
-					$return .= $text;
-					$touchedTUse = false;
-					$return .= $this->walkAndAccumulateStopAt($tokens, ST_CURLY_OPEN);
+			case T_TRAIT:
+			case T_CLASS:
+				$return .= $text;
+				$touchedTUse = false;
+				$return .= $this->walkAndAccumulateStopAt($tokens, ST_CURLY_OPEN);
 
-					$classBlock = '';
-					$curlyCount = 0;
-					while (list($index, $token) = each($tokens)) {
-						list($id, $text) = $this->getToken($token);
-						$this->ptr = $index;
-						$classBlock .= $text;
+				$classBlock = '';
+				$curlyCount = 0;
+				while (list($index, $token) = each($tokens)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
+					$classBlock .= $text;
 
-						if (T_USE === $id) {
-							$touchedTUse = true;
-						}
-
-						if (ST_CURLY_OPEN == $id || T_CURLY_OPEN == $id || T_DOLLAR_OPEN_CURLY_BRACES == $id) {
-							++$curlyCount;
-						} elseif (ST_CURLY_CLOSE == $id) {
-							--$curlyCount;
-						}
-
-						if (0 == $curlyCount) {
-							break;
-						}
+					if (T_USE === $id) {
+						$touchedTUse = true;
 					}
 
-					if (!$touchedTUse) {
-						$return .= $classBlock;
+					if (ST_CURLY_OPEN == $id || T_CURLY_OPEN == $id || T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+						++$curlyCount;
+					} elseif (ST_CURLY_CLOSE == $id) {
+						--$curlyCount;
+					}
+
+					if (0 == $curlyCount) {
 						break;
 					}
+				}
 
-					$return .= str_replace(
-						self::OPENER_PLACEHOLDER,
-						'',
-						$this->sortUseClauses(self::OPENER_PLACEHOLDER . $classBlock, !self::SPLIT_COMMA, !self::REMOVE_UNUSED, !self::STRIP_BLANK_LINES, !self::BLANK_LINE_AFTER_USE_BLOCK)
-					);
-
+				if (!$touchedTUse) {
+					$return .= $classBlock;
 					break;
-				default:
-					$return .= $text;
+				}
+
+				$return .= str_replace(
+					self::OPENER_PLACEHOLDER,
+					'',
+					$this->sortUseClauses(self::OPENER_PLACEHOLDER . $classBlock, !self::SPLIT_COMMA, !self::REMOVE_UNUSED, !self::STRIP_BLANK_LINES, !self::BLANK_LINE_AFTER_USE_BLOCK)
+				);
+
+				break;
+			default:
+				$return .= $text;
 			}
 		}
 
@@ -273,57 +273,57 @@ final class OrderUseClauses extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_NAMESPACE:
+			case T_NAMESPACE:
+				$return .= $text;
+				while (list($index, $token) = each($tokens)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
 					$return .= $text;
+					if (ST_CURLY_OPEN == $id || ST_SEMI_COLON == $id) {
+						break;
+					}
+				}
+				$namespaceBlock = '';
+				if (ST_CURLY_OPEN === $id) {
+					$curlyCount = 1;
 					while (list($index, $token) = each($tokens)) {
 						list($id, $text) = $this->getToken($token);
 						$this->ptr = $index;
-						$return .= $text;
-						if (ST_CURLY_OPEN == $id || ST_SEMI_COLON == $id) {
+						$namespaceBlock .= $text;
+
+						if (ST_CURLY_OPEN == $id) {
+							++$curlyCount;
+						} elseif (ST_CURLY_CLOSE == $id) {
+							--$curlyCount;
+						}
+
+						if (0 == $curlyCount) {
 							break;
 						}
 					}
-					$namespaceBlock = '';
-					if (ST_CURLY_OPEN === $id) {
-						$curlyCount = 1;
-						while (list($index, $token) = each($tokens)) {
-							list($id, $text) = $this->getToken($token);
-							$this->ptr = $index;
-							$namespaceBlock .= $text;
+				} elseif (ST_SEMI_COLON === $id) {
+					while (list($index, $token) = each($tokens)) {
+						list($id, $text) = $this->getToken($token);
+						$this->ptr = $index;
 
-							if (ST_CURLY_OPEN == $id) {
-								++$curlyCount;
-							} elseif (ST_CURLY_CLOSE == $id) {
-								--$curlyCount;
-							}
-
-							if (0 == $curlyCount) {
-								break;
-							}
+						if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+							prev($tokens);
+							break;
 						}
-					} elseif (ST_SEMI_COLON === $id) {
-						while (list($index, $token) = each($tokens)) {
-							list($id, $text) = $this->getToken($token);
-							$this->ptr = $index;
 
-							if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
-								prev($tokens);
-								break;
-							}
-
-							$namespaceBlock .= $text;
-						}
+						$namespaceBlock .= $text;
 					}
+				}
 
-					$return .= str_replace(
-						self::OPENER_PLACEHOLDER,
-						'',
-						$this->sortUseClauses(self::OPENER_PLACEHOLDER . $namespaceBlock, self::SPLIT_COMMA, self::REMOVE_UNUSED, self::STRIP_BLANK_LINES, self::BLANK_LINE_AFTER_USE_BLOCK)
-					);
+				$return .= str_replace(
+					self::OPENER_PLACEHOLDER,
+					'',
+					$this->sortUseClauses(self::OPENER_PLACEHOLDER . $namespaceBlock, self::SPLIT_COMMA, self::REMOVE_UNUSED, self::STRIP_BLANK_LINES, self::BLANK_LINE_AFTER_USE_BLOCK)
+				);
 
-					break;
-				default:
-					$return .= $text;
+				break;
+			default:
+				$return .= $text;
 			}
 		}
 

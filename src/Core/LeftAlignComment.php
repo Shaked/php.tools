@@ -25,41 +25,41 @@ final class LeftAlignComment extends FormatterPass {
 				continue;
 			}
 			switch ($id) {
-				case T_COMMENT:
-				case T_DOC_COMMENT:
-					if ($touchedNonIndentableComment) {
-						$touchedNonIndentableComment = false;
-						$lines = explode($this->newLine, $text);
-						$lines = array_map(function ($v) {
-							$v = ltrim($v);
-							if ('*' === substr($v, 0, 1)) {
-								$v = ' ' . $v;
-							}
-							return $v;
-						}, $lines);
-						$this->appendCode(implode($this->newLine, $lines));
-						break;
-					}
-					$this->appendCode($text);
+			case T_COMMENT:
+			case T_DOC_COMMENT:
+				if ($touchedNonIndentableComment) {
+					$touchedNonIndentableComment = false;
+					$lines = explode($this->newLine, $text);
+					$lines = array_map(function ($v) {
+						$v = ltrim($v);
+						if ('*' === substr($v, 0, 1)) {
+							$v = ' ' . $v;
+						}
+						return $v;
+					}, $lines);
+					$this->appendCode(implode($this->newLine, $lines));
 					break;
+				}
+				$this->appendCode($text);
+				break;
 
-				case T_WHITESPACE:
-					list(, $nextText) = $this->inspectToken(1);
-					if (self::NON_INDENTABLE_COMMENT === $nextText && substr_count($text, "\n") >= 2) {
-						$text = substr($text, 0, strrpos($text, "\n") + 1);
-						$this->appendCode($text);
-						break;
-					} elseif (self::NON_INDENTABLE_COMMENT === $nextText && substr_count($text, "\n") === 1) {
-						$text = substr($text, 0, strrpos($text, "\n") + 1);
-						$this->appendCode($text);
-						break;
-					}
+			case T_WHITESPACE:
+				list(, $nextText) = $this->inspectToken(1);
+				if (self::NON_INDENTABLE_COMMENT === $nextText && substr_count($text, "\n") >= 2) {
+					$text = substr($text, 0, strrpos($text, "\n") + 1);
 					$this->appendCode($text);
 					break;
+				} elseif (self::NON_INDENTABLE_COMMENT === $nextText && substr_count($text, "\n") === 1) {
+					$text = substr($text, 0, strrpos($text, "\n") + 1);
+					$this->appendCode($text);
+					break;
+				}
+				$this->appendCode($text);
+				break;
 
-				default:
-					$this->appendCode($text);
-					break;
+			default:
+				$this->appendCode($text);
+				break;
 			}
 		}
 		return $this->code;
