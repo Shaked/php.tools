@@ -8356,7 +8356,11 @@ EOT;
 						$indentToken['implicit'] = false;
 						$this->setIndent(+1);
 					}
-					if (!$this->hasLnAfter() && !$this->leftUsefulTokenIs([T_OBJECT_OPERATOR, T_DOUBLE_COLON])) {
+					if (
+						!$this->hasLnAfter() &&
+						!$this->leftUsefulTokenIs([T_OBJECT_OPERATOR, T_DOUBLE_COLON]) &&
+						!$this->rightTokenIs([T_COMMENT, T_DOC_COMMENT])
+					) {
 						$this->setIndent(+1);
 						$this->appendCode($this->getCrlfIndent());
 						$this->setIndent(-1);
