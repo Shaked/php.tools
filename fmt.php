@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "9.6.3");
+	define("VERSION", "10.0.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -5173,7 +5173,7 @@ final class AutoImportPass extends FormatterPass {
 					}
 
 				default:
-					$hasLn = ($this->hasLn($text));
+					$hasLn = $this->hasLn($text);
 					if ($hasLn) {
 						$isNextCurlyParenBracketClose = $this->rightTokenIs([T_CASE, T_DEFAULT, ST_CURLY_CLOSE, ST_PARENTHESES_CLOSE, ST_BRACKET_CLOSE]);
 						if (!$isNextCurlyParenBracketClose) {
