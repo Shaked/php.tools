@@ -10393,6 +10393,12 @@ EOT;
 					$this->ptr = $index;
 
 					$stack .= $text;
+					if (T_PROTECTED == $id) {
+						$visibilityLevel = 1;
+					} elseif (T_PRIVATE == $id) {
+						$visibilityLevel = 2;
+					}
+
 					if (T_FUNCTION == $id) {
 						$touchedMethod = true;
 					}
