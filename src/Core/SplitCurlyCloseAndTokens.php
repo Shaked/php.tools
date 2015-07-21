@@ -84,7 +84,6 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 					$poppedBlock = array_pop($blockStack);
 					if (
 						($this->ptr + 1) < $sizeofTkns &&
-						!$this->hasLnAfter() &&
 						(
 							T_ELSE == $poppedBlock ||
 							T_ELSEIF == $poppedBlock ||
@@ -93,6 +92,7 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 							T_IF == $poppedBlock ||
 							T_WHILE == $poppedBlock
 						) &&
+						!$this->hasLnAfter() &&
 						!$this->rightTokenIs([
 							ST_BRACKET_OPEN,
 							ST_CURLY_CLOSE,
