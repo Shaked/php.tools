@@ -139,6 +139,7 @@ foreach ($cases as $caseIn) {
 						$fmt->enablePass('EliminateDuplicatedEmptyLines');
 						$fmt->enablePass('LeftAlignComment');
 						$fmt->enablePass('RTrim');
+						$fmt->enablePass('ReindentSwitchBlocks');
 					} else {
 						$fmt->enablePass($pass);
 					}
@@ -166,6 +167,7 @@ foreach ($cases as $caseIn) {
 		$fmt->enablePass('EliminateDuplicatedEmptyLines');
 		$fmt->enablePass('LeftAlignComment');
 		$fmt->enablePass('RTrim');
+		$fmt->enablePass('ReindentSwitchBlocks');
 	}
 
 	$got = $fmt->formatCode($content);
@@ -234,6 +236,7 @@ if (!$bailOut) {
 						$fmt->enablePass('PSR2AlignObjOp');
 						$fmt->enablePass('LeftAlignComment');
 						$fmt->enablePass('RTrim');
+						$fmt->enablePass('ReindentSwitchBlocks');
 						PsrDecorator::decorate($fmt);
 					} else {
 						$fmt->enablePass($pass);
@@ -262,6 +265,7 @@ if (!$bailOut) {
 			$fmt->enablePass('PSR2AlignObjOp');
 			$fmt->enablePass('LeftAlignComment');
 			$fmt->enablePass('RTrim');
+			$fmt->enablePass('ReindentSwitchBlocks');
 			PsrDecorator::decorate($fmt);
 		}
 
@@ -336,6 +340,7 @@ if (!$bailOut) {
 			$fmt->enablePass('PSR2AlignObjOp');
 			$fmt->enablePass('LeftAlignComment');
 			$fmt->enablePass('RTrim');
+			$fmt->enablePass('ReindentSwitchBlocks');
 			LaravelDecorator::decorate($fmt);
 		}
 
@@ -406,6 +411,7 @@ if (!$bailOut) {
 						$fmt->enablePass('PSR2AlignObjOp');
 						$fmt->enablePass('LeftAlignComment');
 						$fmt->enablePass('RTrim');
+						$fmt->enablePass('ReindentSwitchBlocks');
 						Php2GoDecorator::decorate($fmt);
 					} else {
 						$fmt->enablePass($pass);
@@ -434,6 +440,7 @@ if (!$bailOut) {
 			$fmt->enablePass('PSR2AlignObjOp');
 			$fmt->enablePass('LeftAlignComment');
 			$fmt->enablePass('RTrim');
+			$fmt->enablePass('ReindentSwitchBlocks');
 			Php2GoDecorator::decorate($fmt);
 		}
 

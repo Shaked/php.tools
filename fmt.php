@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "10.0.0");
+	define("VERSION", "10.0.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -3644,7 +3644,6 @@ abstract class BaseCodeFormatter {
 		$this->passes['OrderUseClauses'] = new OrderUseClauses();
 		$this->passes['Reindent'] = new Reindent();
 		$this->passes['ReindentColonBlocks'] = new ReindentColonBlocks();
-		$this->passes['ReindentSwitchBlocks'] = new ReindentSwitchBlocks();
 		$this->passes['ReindentAndAlignObjOps'] = new ReindentAndAlignObjOps();
 		$this->passes['RemoveIncludeParentheses'] = new RemoveIncludeParentheses();
 		$this->passes['ResizeSpaces'] = new ResizeSpaces();
