@@ -7644,6 +7644,17 @@ EOT;
 
 	class AlignDoubleArrow extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d.%d.%d \x3"; // level.levelentracecounter.counter
+
+	public function __construct() {
+		$this->strposFunc = 'strpos';
+		$this->substrCountFunc = 'substr_count';
+
+		if (function_exists('mb_strpos')) {
+			$this->strposFunc = 'mb_strpos';
+			$this->substrCountFunc = 'mb_substr_count';
+		}
+	}
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DOUBLE_ARROW])) {
 			return true;
@@ -7764,10 +7775,10 @@ EOT;
 			foreach ($entrances as $entrance => $context) {
 				for ($j = 0; $j <= $context; ++$j) {
 					$placeholder = sprintf(self::ALIGNABLE_EQUAL, $level, $entrance, $j);
-					if (false === strpos($this->code, $placeholder)) {
+					if (false === $this->strpos($this->code, $placeholder)) {
 						continue;
 					}
-					if (1 === substr_count($this->code, $placeholder)) {
+					if (1 === $this->substrCount($this->code, $placeholder)) {
 						$this->code = str_replace($placeholder, '', $this->code);
 						continue;
 					}
@@ -7776,18 +7787,18 @@ EOT;
 					$linesWithObjop = [];
 
 					foreach ($lines as $idx => $line) {
-						if (false !== strpos($line, $placeholder)) {
+						if (false !== $this->strpos($line, $placeholder)) {
 							$linesWithObjop[] = $idx;
 						}
 					}
 
 					$farthest = 0;
 					foreach ($linesWithObjop as $idx) {
-						$farthest = max($farthest, strpos($lines[$idx], $placeholder));
+						$farthest = max($farthest, $this->strpos($lines[$idx], $placeholder));
 					}
 					foreach ($linesWithObjop as $idx) {
 						$line = $lines[$idx];
-						$current = strpos($line, $placeholder);
+						$current = $this->strpos($line, $placeholder);
 						$delta = abs($farthest - $current);
 						if ($delta > 0) {
 							$line = str_replace($placeholder, str_repeat(' ', $delta) . $placeholder, $line);
@@ -7800,6 +7811,15 @@ EOT;
 			}
 		}
 	}
+
+	private function strpos($code, $placeholder) {
+		return call_user_func($this->strposFunc, $code, $placeholder);
+	}
+
+	private function substrCount($code, $placeholder) {
+		return call_user_func($this->substrCountFunc, $code, $placeholder);
+	}
+
 }
 
 	final class AlignDoubleSlashComments extends AdditionalPass {
