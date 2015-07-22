@@ -3542,6 +3542,8 @@ abstract class BaseCodeFormatter {
 		'TranslateNativeCalls' => false,
 
 		'ReplaceBooleanAndOr' => false,
+		'EliminateDuplicatedEmptyLines' => false,
+
 		'RTrim' => false,
 		'WordWrap' => false,
 
@@ -3566,7 +3568,7 @@ abstract class BaseCodeFormatter {
 
 		'StripNewlineAfterClassOpen' => false,
 		'StripNewlineAfterCurlyOpen' => false,
-		'EliminateDuplicatedEmptyLines' => false,
+
 		'AlignEqualsByConsecutiveBlocks' => false,
 		'SortUseNameSpace' => false,
 		'NonDocBlockMinorCleanUp' => false,
@@ -4297,19 +4299,17 @@ final class AutoImportPass extends FormatterPass {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
 
-		// It scans for T_WHITESPACE with linebreaks and inserts a
-		// placeholder that later is used to check whether the line is
-		// actually empty.
-		$lines = [];
-		$emptyLines = [];
-		$blockCount = 0;
-
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
 			case T_WHITESPACE:
-				$text = str_replace($this->newLine, self::EMPTY_LINE . $this->newLine, $text);
+			case T_COMMENT:
+			case T_OPEN_TAG:
+				if ($this->hasLn($text) || (T_COMMENT == $id && '//' == substr($text, 0, 2))) {
+					$text = str_replace($this->newLine, self::EMPTY_LINE . $this->newLine, $text);
+				}
+
 				$this->appendCode($text);
 				break;
 			default:
@@ -4318,32 +4318,25 @@ final class AutoImportPass extends FormatterPass {
 			}
 		}
 
-		$lines = explode($this->newLine, $this->code);
+		$ret = $this->code;
+		$count = 0;
+		do {
+			$ret = str_replace(
+				self::EMPTY_LINE . $this->newLine . self::EMPTY_LINE . $this->newLine . self::EMPTY_LINE . $this->newLine,
+				self::EMPTY_LINE . $this->newLine . self::EMPTY_LINE . $this->newLine,
+				$ret,
+				$count
+			);
+		} while ($count > 0);
+		$ret = str_replace(self::EMPTY_LINE, '', $ret);
 
-		foreach ($lines as $idx => $line) {
-			if (trim($line) === self::EMPTY_LINE) {
-				$emptyLines[$blockCount][] = $idx;
-				continue;
-			}
-			++$blockCount;
-			$emptyLines[$blockCount] = [];
+		list($id) = $this->getToken(array_pop($this->tkns));
+		if (T_WHITESPACE === $id) {
+			$ret = rtrim($ret) . $this->newLine;
 		}
 
-		foreach ($emptyLines as $group) {
-			array_pop($group);
-			foreach ($group as $lineNumber) {
-				unset($lines[$lineNumber]);
-			}
-		}
+		return $ret;
 
-		$this->code = str_replace(self::EMPTY_LINE, '', implode($this->newLine, $lines));
-
-		list($id, $text) = $this->getToken(array_pop($this->tkns));
-		if (T_WHITESPACE === $id && '' === trim($text)) {
-			$this->code = rtrim($this->code) . $this->newLine;
-		}
-
-		return $this->code;
 	}
 }
 	final class ExtraCommaInArray extends FormatterPass {

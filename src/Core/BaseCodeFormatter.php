@@ -22,6 +22,8 @@ abstract class BaseCodeFormatter {
 		'TranslateNativeCalls' => false,
 
 		'ReplaceBooleanAndOr' => false,
+		'EliminateDuplicatedEmptyLines' => false,
+
 		'RTrim' => false,
 		'WordWrap' => false,
 
@@ -46,7 +48,7 @@ abstract class BaseCodeFormatter {
 
 		'StripNewlineAfterClassOpen' => false,
 		'StripNewlineAfterCurlyOpen' => false,
-		'EliminateDuplicatedEmptyLines' => false,
+
 		'AlignEqualsByConsecutiveBlocks' => false,
 		'SortUseNameSpace' => false,
 		'NonDocBlockMinorCleanUp' => false,
