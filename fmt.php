@@ -3188,6 +3188,33 @@ abstract class FormatterPass {
 		return $this->resolveTokenMatch($this->tkns, $this->cache[$key], $token);
 	}
 
+	protected function walkAndAccummulateCurlyBlock() {
+		$count = 1;
+		$ret = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			$ret .= $text;
+
+			if (ST_CURLY_OPEN == $id) {
+				++$count;
+			}
+			if (T_CURLY_OPEN == $id) {
+				++$count;
+			}
+			if (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+				++$count;
+			}
+			if (ST_CURLY_CLOSE == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+		return $ret;
+	}
+
 	protected function walkAndAccumulateStopAt(&$tkns, $tknid) {
 		$ret = '';
 		while (list($index, $token) = each($tkns)) {
@@ -10288,31 +10315,9 @@ EOT;
 			$this->ptr = $index;
 			switch ($id) {
 			case T_CLASS:
-				$return .= $text;
-				while (list($index, $token) = each($this->tkns)) {
-					list($id, $text) = $this->getToken($token);
-					$this->ptr = $index;
-					$return .= $text;
-					if (ST_CURLY_OPEN == $id) {
-						break;
-					}
-				}
-				$classBlock = '';
-				$curlyCount = 1;
-				while (list($index, $token) = each($this->tkns)) {
-					list($id, $text) = $this->getToken($token);
-					$this->ptr = $index;
-					$classBlock .= $text;
-					if (ST_CURLY_OPEN == $id) {
-						++$curlyCount;
-					} elseif (ST_CURLY_CLOSE == $id) {
-						--$curlyCount;
-					}
-
-					if (0 == $curlyCount) {
-						break;
-					}
-				}
+				$return = $text;
+				$return .= $this->walkAndAccumulateUntil($this->tkns, ST_CURLY_OPEN);
+				$classBlock = $this->walkAndAccummulateCurlyBlock();
 				$return .= str_replace(
 					self::OPENER_PLACEHOLDER,
 					'',

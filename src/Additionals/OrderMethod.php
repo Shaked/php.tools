@@ -95,31 +95,9 @@ class OrderMethod extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 			case T_CLASS:
-				$return .= $text;
-				while (list($index, $token) = each($this->tkns)) {
-					list($id, $text) = $this->getToken($token);
-					$this->ptr = $index;
-					$return .= $text;
-					if (ST_CURLY_OPEN == $id) {
-						break;
-					}
-				}
-				$classBlock = '';
-				$curlyCount = 1;
-				while (list($index, $token) = each($this->tkns)) {
-					list($id, $text) = $this->getToken($token);
-					$this->ptr = $index;
-					$classBlock .= $text;
-					if (ST_CURLY_OPEN == $id) {
-						++$curlyCount;
-					} elseif (ST_CURLY_CLOSE == $id) {
-						--$curlyCount;
-					}
-
-					if (0 == $curlyCount) {
-						break;
-					}
-				}
+				$return = $text;
+				$return .= $this->walkAndAccumulateUntil($this->tkns, ST_CURLY_OPEN);
+				$classBlock = $this->walkAndAccummulateCurlyBlock();
 				$return .= str_replace(
 					self::OPENER_PLACEHOLDER,
 					'',
