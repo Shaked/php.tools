@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "10.0.5");
+	define("VERSION", "10.0.6");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
