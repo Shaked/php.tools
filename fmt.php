@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "10.0.6");
+	define("VERSION", "10.0.7");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -3188,12 +3188,11 @@ abstract class FormatterPass {
 		return $this->resolveTokenMatch($this->tkns, $this->cache[$key], $token);
 	}
 
-	protected function walkAndAccummulateCurlyBlock() {
+	protected function walkAndAccummulateCurlyBlock(&$tkns) {
 		$count = 1;
 		$ret = '';
-		while (list($index, $token) = each($this->tkns)) {
+		while (list($index, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
 			$ret .= $text;
 
 			if (ST_CURLY_OPEN == $id) {
@@ -3219,7 +3218,6 @@ abstract class FormatterPass {
 		$ret = '';
 		while (list($index, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
 			if ($tknid == $id) {
 				prev($tkns);
 				break;
@@ -3233,7 +3231,6 @@ abstract class FormatterPass {
 		$ret = '';
 		while (list($index, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
 			$ret .= $text;
 			if ($tknid == $id) {
 				break;
@@ -10317,7 +10314,7 @@ EOT;
 			case T_CLASS:
 				$return = $text;
 				$return .= $this->walkAndAccumulateUntil($this->tkns, ST_CURLY_OPEN);
-				$classBlock = $this->walkAndAccummulateCurlyBlock();
+				$classBlock = $this->walkAndAccummulateCurlyBlock($this->tkns);
 				$return .= str_replace(
 					self::OPENER_PLACEHOLDER,
 					'',
@@ -11333,6 +11330,7 @@ EOT;
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';

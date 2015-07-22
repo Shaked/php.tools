@@ -661,12 +661,11 @@ abstract class FormatterPass {
 		return $this->resolveTokenMatch($this->tkns, $this->cache[$key], $token);
 	}
 
-	protected function walkAndAccummulateCurlyBlock() {
+	protected function walkAndAccummulateCurlyBlock(&$tkns) {
 		$count = 1;
 		$ret = '';
-		while (list($index, $token) = each($this->tkns)) {
+		while (list($index, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
 			$ret .= $text;
 
 			if (ST_CURLY_OPEN == $id) {
@@ -692,7 +691,6 @@ abstract class FormatterPass {
 		$ret = '';
 		while (list($index, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
 			if ($tknid == $id) {
 				prev($tkns);
 				break;
@@ -706,7 +704,6 @@ abstract class FormatterPass {
 		$ret = '';
 		while (list($index, $token) = each($tkns)) {
 			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
 			$ret .= $text;
 			if ($tknid == $id) {
 				break;

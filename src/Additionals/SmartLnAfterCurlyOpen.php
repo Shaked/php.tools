@@ -7,6 +7,7 @@ final class SmartLnAfterCurlyOpen extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
