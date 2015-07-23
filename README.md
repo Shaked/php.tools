@@ -2,9 +2,9 @@ php.tools
 =========
 
 ## Build statuses
-- Master: [![Build Status](https://travis-ci.org/dericofilho/php.tools.svg?branch=master)](https://travis-ci.org/dericofilho/php.tools)
+- Master: [![Build Status](https://travis-ci.org/phpfmt/php.tools.svg?branch=master)](https://travis-ci.org/phpfmt/php.tools)
 
-[![Throughput Graph](https://graphs.waffle.io/dericofilho/php.tools/throughput.svg)](https://waffle.io/dericofilho/php.tools/metrics)
+[![Throughput Graph](https://graphs.waffle.io/phpfmt/php.tools/throughput.svg)](https://waffle.io/phpfmt/php.tools/metrics)
 
 ## Requirements
 - Git
@@ -13,9 +13,9 @@ php.tools
 
 ## Plugins
 
-* [Sublime Text 2/3](https://github.com/dericofilho/sublime-phpfmt)
-* [Vim](https://github.com/dericofilho/vim-phpfmt)
-* [PHPStorm](https://github.com/dericofilho/php.tools/blob/master/PHPStorm.md)
+* [Sublime Text 2/3](https://github.com/phpfmt/sublime-phpfmt)
+* [Vim](https://github.com/phpfmt/vim-phpfmt)
+* [PHPStorm](https://github.com/phpfmt/php.tools/blob/master/PHPStorm.md)
 * [Atom](https://github.com/Dgame/atom-php-fmt)
 
 ## Usage
