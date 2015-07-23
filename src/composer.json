@@ -4,7 +4,6 @@
     "description": "A script to automatically fix K&R and PSR-1/2 Coding Standard.",
     "license": "BSD-3-Clause",
     "keywords": ["language syntax", "formatter", "formatting", "psr1", "psr2", "coding", "style"],
-    "homepage": "http://www.cirello.org/php.tools/",
     "bin": ["fmt.php","refactor.php","php.tools"],
     "authors": [
         {
@@ -13,8 +12,8 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/dericofilho/php.tools/issues",
-        "source": "https://github.com/dericofilho/php.tools"
+        "issues": "https://github.com/phpfmt/php.tools/issues",
+        "source": "https://github.com/phpfmt/php.tools"
     },
     "require":{
         "php": ">=5.4.0",
