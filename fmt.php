@@ -2448,6 +2448,7 @@ final class Cache implements Cacher {
 	}
 
 	define("VERSION", "10.0.7");
+
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -5413,6 +5414,9 @@ final class AutoImportPass extends FormatterPass {
 				break;
 
 			case T_OBJECT_OPERATOR:
+				if ($levelCounter < 0) {
+					$levelCounter = 0;
+				}
 				if (!isset($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
 					$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
 					$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
@@ -5446,8 +5450,8 @@ final class AutoImportPass extends FormatterPass {
 						$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
 					);
 					$this->appendCode($placeholder . $text);
-					$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, $this->newLine]);
-					if (ST_SEMI_COLON == $foundToken) {
+					$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, ST_EQUAL, $this->newLine]);
+					if (ST_SEMI_COLON == $foundToken || ST_EQUAL == $foundToken) {
 						$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 					} elseif (ST_PARENTHESES_OPEN == $foundToken) {
 						if (!$this->hasLnInBlock($this->tkns, $this->ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE)) {
@@ -5527,6 +5531,7 @@ final class AutoImportPass extends FormatterPass {
 
 			case ST_COMMA:
 			case ST_SEMI_COLON:
+			case ST_EQUAL:
 				if (!isset($levelEntranceCounter[$levelCounter])) {
 					$levelEntranceCounter[$levelCounter] = 0;
 				}
