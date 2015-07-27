@@ -12,17 +12,41 @@ final class OrderMethodAndVisibility extends OrderMethod {
 		$curlyCount = null;
 		$touchedMethod = false;
 		$functionName = '';
+		$touchedDocComment = false;
+		$docCommentStack = '';
 
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+			case T_DOC_COMMENT:
+				if (!$touchedDocComment) {
+					$touchedDocComment = true;
+					$docCommentStack = '';
+				}
+				$docCommentStack .= $text;
+				break;
+
+			case T_VARIABLE:
+			case T_STRING:
+				if ($touchedDocComment) {
+					$touchedDocComment = false;
+					$return .= $docCommentStack;
+				}
+				$return .= $text;
+				break;
+
 			case T_ABSTRACT:
 			case T_STATIC:
 			case T_PRIVATE:
 			case T_PROTECTED:
 			case T_PUBLIC:
-				$stack = $text;
+				$stack = '';
+				if ($touchedDocComment) {
+					$touchedDocComment = false;
+					$stack .= $docCommentStack;
+				}
+				$stack .= $text;
 				$curlyCount = null;
 				$touchedMethod = false;
 				$functionName = '';
@@ -75,6 +99,10 @@ final class OrderMethodAndVisibility extends OrderMethod {
 				$return .= $appendWith;
 				break;
 			default:
+				if ($touchedDocComment) {
+					$docCommentStack .= $text;
+					break;
+				}
 				$return .= $text;
 				break;
 			}
