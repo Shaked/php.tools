@@ -7,6 +7,7 @@ final class TightConcat extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -16,11 +17,11 @@ final class TightConcat extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 			case ST_CONCAT:
-				if (!$this->leftUsefulTokenIs([T_LNUMBER, T_DNUMBER])) {
+				if (!$this->leftUsefulTokenIs([T_LNUMBER, T_DNUMBER]) && !$this->hasLnBefore()) {
 					$this->code = rtrim($this->code, $whitespaces);
 				}
-				list($nextId) = $this->inspectToken(+1);
-				if (T_WHITESPACE == $nextId && !$this->rightUsefulTokenIs([T_LNUMBER, T_DNUMBER])) {
+				list($nextId, $nextText) = $this->inspectToken(+1);
+				if (T_WHITESPACE == $nextId && !$this->hasln($nextText) && !$this->rightUsefulTokenIs([T_LNUMBER, T_DNUMBER])) {
 					each($this->tkns);
 				}
 			default:
