@@ -6,7 +6,7 @@ Configuration for PHPStorm
 * Git
 
 ```
-git clone https://github.com/dericofilho/php.tools.git
+git clone https://github.com/phpfmt/php.tools.git
 ```
 
 * Composer
@@ -17,7 +17,7 @@ php composer.phar global require dericofilho/fmt
 
 2 - Add php.tools as an External tool in PhpStorm : Open Settings (or “Preferences” on OS X) > External Tools and setup a new tool :
 
-![phpstorm-configuration](https://raw.githubusercontent.com/dericofilho/php.tools/master/phpstorm-configuration.png)
+![phpstorm-configuration](https://raw.githubusercontent.com/phpfmt/php.tools/master/phpstorm-configuration.png)
 
 Fill the fields with the following:
 
