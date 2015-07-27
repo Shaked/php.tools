@@ -8,7 +8,7 @@ class A {
 	 * @param $b
 	 * @param $c
 	 */
-	function b($b, $c){
+	public function b($b, $c){
 
 	}
 
@@ -19,7 +19,7 @@ class A {
 	 * @param $a
 	 * @param $b
 	 */
-	function a($a, $b){
+	public function a($a, $b){
 
 	}
 
