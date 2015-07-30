@@ -1,0 +1,69 @@
+<?php
+//passes:OrganizeClass
+
+class A {
+	/* comment 3 */
+	// comment 1
+	// comment 2
+
+	/**
+	 * something about this other constant
+	 */
+	const OTHERCONST = "b";
+
+	/**
+	 * something about this constant
+	 */
+	const SOMECONST = "a";
+
+	/**
+	 * some other attribute
+	 */
+	public $b = '';
+
+	/**
+	 * some other attribute
+	 */
+	private $a = '';
+
+	/**
+	 * some attribute
+	 */
+	private $z = '';
+
+	function b() {
+
+	}
+
+	/**
+	 * j func
+	 */
+	static public function j() {
+		$a = function ($a) {
+
+		};
+		$b = function ($a) {
+
+		};
+	}
+
+	/**
+	 * z func
+	 */
+	function z() {
+		$a = function ($a) {
+
+		};
+		$b = function ($a) {
+
+		};
+	}
+
+	/**
+	 * some func
+	 */
+	private function a() {
+
+	}
+
+}

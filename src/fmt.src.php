@@ -127,6 +127,7 @@ namespace {
 	require 'Additionals/NoSpaceAfterPHPDocBlocks.php';
 	require 'Additionals/OrderMethod.php';
 	require 'Additionals/OrderMethodAndVisibility.php';
+	require 'Additionals/OrganizeClass.php';
 	require 'Additionals/PrettyPrintDocBlocks.php';
 	require 'Additionals/PSR2EmptyFunction.php';
 	require 'Additionals/PSR2MultilineFunctionParams.php';

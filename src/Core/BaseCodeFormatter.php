@@ -136,6 +136,8 @@ abstract class BaseCodeFormatter {
 		'PSR2MultilineFunctionParams' => false,
 		'SpaceAroundControlStructures' => false,
 		'AutoSemicolon' => false,
+
+		'OrganizeClass' => false,
 	];
 
 	public function __construct() {

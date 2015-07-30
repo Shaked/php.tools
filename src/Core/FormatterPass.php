@@ -639,6 +639,19 @@ abstract class FormatterPass {
 		return $ret;
 	}
 
+	protected function walkAndAccumulateUntilAny(&$tkns, $tknids) {
+		$tknids = array_flip($tknids);
+		$ret = '';
+		while (list(, $token) = each($tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$ret .= $text;
+			if (isset($tknids[$id])) {
+				break;
+			}
+		}
+		return [$ret, $id];
+	}
+
 	protected function walkAndAccumulateStopAtAny(&$tkns, $tknids) {
 		$tknids = array_flip($tknids);
 		$ret = '';
