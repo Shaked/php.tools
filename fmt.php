@@ -3188,7 +3188,7 @@ abstract class FormatterPass {
 		return $this->resolveTokenMatch($this->tkns, $this->cache[$key], $token);
 	}
 
-	protected function walkAndAccummulateCurlyBlock(&$tkns) {
+	protected function walkAndAccumulateCurlyBlock(&$tkns) {
 		$count = 1;
 		$ret = '';
 		while (list($index, $token) = each($tkns)) {
@@ -10354,7 +10354,7 @@ EOT;
 			case T_CLASS:
 				$return = $text;
 				$return .= $this->walkAndAccumulateUntil($this->tkns, ST_CURLY_OPEN);
-				$classBlock = $this->walkAndAccummulateCurlyBlock($this->tkns);
+				$classBlock = $this->walkAndAccumulateCurlyBlock($this->tkns);
 				$return .= str_replace(
 					self::OPENER_PLACEHOLDER,
 					'',
@@ -10642,7 +10642,7 @@ EOT;
 
 				if ($touchedMethod) {
 					$stack .= $this->walkAndAccumulateUntil($tokens, ST_CURLY_OPEN);
-					$stack .= $this->walkAndAccummulateCurlyBlock($tokens);
+					$stack .= $this->walkAndAccumulateCurlyBlock($tokens);
 					$functionList[$visibilityLevel . ':' . $functionName] = $stack;
 				} elseif ($touchedAttribute) {
 					$stack .= $this->walkAndAccumulateUntil($tokens, ST_SEMI_COLON);

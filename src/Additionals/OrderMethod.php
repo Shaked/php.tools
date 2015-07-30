@@ -125,7 +125,7 @@ class OrderMethod extends AdditionalPass {
 			case T_CLASS:
 				$return = $text;
 				$return .= $this->walkAndAccumulateUntil($this->tkns, ST_CURLY_OPEN);
-				$classBlock = $this->walkAndAccummulateCurlyBlock($this->tkns);
+				$classBlock = $this->walkAndAccumulateCurlyBlock($this->tkns);
 				$return .= str_replace(
 					self::OPENER_PLACEHOLDER,
 					'',

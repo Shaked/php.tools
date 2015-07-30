@@ -92,7 +92,7 @@ final class OrganizeClass extends OrderMethod {
 
 				if ($touchedMethod) {
 					$stack .= $this->walkAndAccumulateUntil($tokens, ST_CURLY_OPEN);
-					$stack .= $this->walkAndAccummulateCurlyBlock($tokens);
+					$stack .= $this->walkAndAccumulateCurlyBlock($tokens);
 					$functionList[$visibilityLevel . ':' . $functionName] = $stack;
 				} elseif ($touchedAttribute) {
 					$stack .= $this->walkAndAccumulateUntil($tokens, ST_SEMI_COLON);

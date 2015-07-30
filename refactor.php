@@ -661,7 +661,7 @@ abstract class FormatterPass {
 		return $this->resolveTokenMatch($this->tkns, $this->cache[$key], $token);
 	}
 
-	protected function walkAndAccummulateCurlyBlock(&$tkns) {
+	protected function walkAndAccumulateCurlyBlock(&$tkns) {
 		$count = 1;
 		$ret = '';
 		while (list($index, $token) = each($tkns)) {
