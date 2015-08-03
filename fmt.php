@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "10.2.1");
+	define("VERSION", "11.0.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -5869,56 +5869,6 @@ final class AutoImportPass extends FormatterPass {
 		}
 		return $this->code;
 	}
-}
-
-	final class RemoveIncludeParentheses extends FormatterPass {
-
-	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_INCLUDE]) || isset($foundTokens[T_REQUIRE]) || isset($foundTokens[T_INCLUDE_ONCE]) || isset($foundTokens[T_REQUIRE_ONCE])) {
-			return true;
-		}
-
-		return false;
-	}
-
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		$parenCount = 0;
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-			case ST_PARENTHESES_OPEN:
-				$this->appendCode($text);
-				$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-				break;
-			case ST_PARENTHESES_CLOSE:
-				$parenCount--;
-				if ($parenCount > 0) {
-					$this->appendCode($text);
-				}
-				break;
-			case T_INCLUDE:
-			case T_REQUIRE:
-			case T_INCLUDE_ONCE:
-			case T_REQUIRE_ONCE:
-				$this->appendCode($text . $this->getSpace());
-				if (!$this->rightTokenIs(ST_PARENTHESES_OPEN)) {
-					break;
-				}
-				$parenCount++;
-				$this->walkUntil(ST_PARENTHESES_OPEN);
-				break;
-			default:
-				$this->appendCode($text);
-				break;
-			}
-		}
-
-		return $this->code;
-	}
-
 }
 
 	final class ResizeSpaces extends FormatterPass {
@@ -11260,6 +11210,78 @@ switch ($a) {
 EOT;
 	}
 }
+	final class RemoveIncludeParentheses extends AdditionalPass {
+
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_INCLUDE]) || isset($foundTokens[T_REQUIRE]) || isset($foundTokens[T_INCLUDE_ONCE]) || isset($foundTokens[T_REQUIRE_ONCE])) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		$parenCount = 0;
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+			case ST_PARENTHESES_OPEN:
+				$this->appendCode($text);
+				$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				break;
+			case ST_PARENTHESES_CLOSE:
+				$parenCount--;
+				if ($parenCount > 0) {
+					$this->appendCode($text);
+				}
+				break;
+			case T_INCLUDE:
+			case T_REQUIRE:
+			case T_INCLUDE_ONCE:
+			case T_REQUIRE_ONCE:
+				$this->appendCode($text . $this->getSpace());
+				if (!$this->rightTokenIs(ST_PARENTHESES_OPEN)) {
+					break;
+				}
+				$parenCount++;
+				$this->walkUntil(ST_PARENTHESES_OPEN);
+				break;
+			default:
+				$this->appendCode($text);
+				break;
+			}
+		}
+
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Remove parentheses from include declarations.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+// From:
+require_once("file.php");
+
+// To:
+require_once "file.php";
+?>
+EOT;
+	}
+
+}
+
 	final class RemoveUseLeadingSlash extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE]) || isset($foundTokens[T_TRAIT]) || isset($foundTokens[T_CLASS]) || isset($foundTokens[T_FUNCTION]) || isset($foundTokens[T_NS_SEPARATOR])) {

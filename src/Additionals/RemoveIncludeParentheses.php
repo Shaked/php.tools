@@ -1,5 +1,5 @@
 <?php
-final class RemoveIncludeParentheses extends FormatterPass {
+final class RemoveIncludeParentheses extends AdditionalPass {
 
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_INCLUDE]) || isset($foundTokens[T_REQUIRE]) || isset($foundTokens[T_INCLUDE_ONCE]) || isset($foundTokens[T_REQUIRE_ONCE])) {
@@ -45,6 +45,28 @@ final class RemoveIncludeParentheses extends FormatterPass {
 		}
 
 		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Remove parentheses from include declarations.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+// From:
+require_once("file.php");
+
+// To:
+require_once "file.php";
+?>
+EOT;
 	}
 
 }
