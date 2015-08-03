@@ -1,5 +1,6 @@
 <?php
 final class RemoveIncludeParentheses extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_INCLUDE]) || isset($foundTokens[T_REQUIRE]) || isset($foundTokens[T_INCLUDE_ONCE]) || isset($foundTokens[T_REQUIRE_ONCE])) {
 			return true;
@@ -11,6 +12,7 @@ final class RemoveIncludeParentheses extends FormatterPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
+		$parenCount = 0;
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
@@ -18,6 +20,12 @@ final class RemoveIncludeParentheses extends FormatterPass {
 			case ST_PARENTHESES_OPEN:
 				$this->appendCode($text);
 				$this->printBlock(ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				break;
+			case ST_PARENTHESES_CLOSE:
+				$parenCount--;
+				if ($parenCount > 0) {
+					$this->appendCode($text);
+				}
 				break;
 			case T_INCLUDE:
 			case T_REQUIRE:
@@ -27,8 +35,8 @@ final class RemoveIncludeParentheses extends FormatterPass {
 				if (!$this->rightTokenIs(ST_PARENTHESES_OPEN)) {
 					break;
 				}
+				$parenCount++;
 				$this->walkUntil(ST_PARENTHESES_OPEN);
-				$this->printAndStopAt(ST_PARENTHESES_CLOSE);
 				break;
 			default:
 				$this->appendCode($text);
@@ -38,4 +46,5 @@ final class RemoveIncludeParentheses extends FormatterPass {
 
 		return $this->code;
 	}
+
 }
