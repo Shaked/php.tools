@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "12.0.2");
+	define("VERSION", "12.0.3");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -10333,8 +10333,11 @@ EOT;
 				} while (empty($functionName) && empty($attributeName));
 
 				if ($touchedMethod) {
-					$stack .= $this->walkAndAccumulateUntil($tokens, ST_CURLY_OPEN);
-					$stack .= $this->walkAndAccumulateCurlyBlock($tokens);
+					list($foundText, $foundId) = $this->walkAndAccumulateUntilAny($tokens, [ST_CURLY_OPEN, ST_SEMI_COLON]);
+					$stack .= $foundText;
+					if (ST_CURLY_OPEN == $foundId) {
+						$stack .= $this->walkAndAccumulateCurlyBlock($tokens);
+					}
 					$functionList[$visibilityLevel . ':' . $functionName] = $stack;
 				} elseif ($touchedAttribute) {
 					$stack .= $this->walkAndAccumulateUntil($tokens, ST_SEMI_COLON);
