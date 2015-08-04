@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "12.0.1");
+	define("VERSION", "12.0.2");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -10245,6 +10245,21 @@ EOT;
 			switch ($id) {
 			case T_COMMENT:
 				if (strpos($text, "\x2") === false) {
+					if ($this->rightTokenSubsetIsAtIdx($tokens, $this->ptr, [
+						T_ABSTRACT,
+						T_FUNCTION,
+						T_PRIVATE,
+						T_PROTECTED,
+						T_PUBLIC,
+						T_STATIC,
+					], $this->ignoreFutileTokens)) {
+						if (!$touchedDocComment) {
+							$touchedDocComment = true;
+							$docCommentStack = ' ';
+						}
+						$docCommentStack .= $text;
+						break;
+					}
 					$commentStack[] = $text;
 				}
 				break;

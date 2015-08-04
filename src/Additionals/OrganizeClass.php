@@ -18,6 +18,21 @@ final class OrganizeClass extends OrderMethod {
 			switch ($id) {
 			case T_COMMENT:
 				if (strpos($text, "\x2") === false) {
+					if ($this->rightTokenSubsetIsAtIdx($tokens, $this->ptr, [
+						T_ABSTRACT,
+						T_FUNCTION,
+						T_PRIVATE,
+						T_PROTECTED,
+						T_PUBLIC,
+						T_STATIC,
+					], $this->ignoreFutileTokens)) {
+						if (!$touchedDocComment) {
+							$touchedDocComment = true;
+							$docCommentStack = ' ';
+						}
+						$docCommentStack .= $text;
+						break;
+					}
 					$commentStack[] = $text;
 				}
 				break;
