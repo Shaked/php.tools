@@ -2,9 +2,6 @@
 //passes:OrganizeClass
 
 class A {
-	/* comment 3 */
-	// comment 1
-	// comment 2
 
 	/**
 	 * something about this other constant
@@ -20,6 +17,8 @@ class A {
 	 * some other attribute
 	 */
 	public $b = '';
+
+	// comment 1
 
 	/**
 	 * some other attribute
@@ -46,6 +45,8 @@ class A {
 
 		};
 	}
+
+	// comment 2
 
 	/**
 	 * z func
