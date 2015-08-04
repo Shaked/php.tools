@@ -1,5 +1,6 @@
 <?php
 final class ResizeSpaces extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		$tkns = token_get_all($source);
 
@@ -179,7 +180,7 @@ final class ResizeSpaces extends FormatterPass {
 
 			case ST_SEMI_COLON:
 				$touchedUse = false;
-				if ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_COMMENT, T_DOC_COMMENT, T_STRING])) {
+				if ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_COMMENT, T_DOC_COMMENT, T_STRING, ST_PARENTHESES_OPEN])) {
 					$this->appendCode($text . ' ');
 					break;
 				}
@@ -400,4 +401,5 @@ final class ResizeSpaces extends FormatterPass {
 		return $this->code;
 
 	}
+
 }

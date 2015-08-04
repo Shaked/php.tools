@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "11.0.0");
+	define("VERSION", "11.0.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -5872,6 +5872,7 @@ final class AutoImportPass extends FormatterPass {
 }
 
 	final class ResizeSpaces extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		$tkns = token_get_all($source);
 
@@ -6051,7 +6052,7 @@ final class AutoImportPass extends FormatterPass {
 
 			case ST_SEMI_COLON:
 				$touchedUse = false;
-				if ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_COMMENT, T_DOC_COMMENT, T_STRING])) {
+				if ($this->rightTokenIs([T_VARIABLE, T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_COMMENT, T_DOC_COMMENT, T_STRING, ST_PARENTHESES_OPEN])) {
 					$this->appendCode($text . ' ');
 					break;
 				}
@@ -6272,6 +6273,7 @@ final class AutoImportPass extends FormatterPass {
 		return $this->code;
 
 	}
+
 }
 
 	final class RestoreComments extends FormatterPass {
