@@ -119,7 +119,7 @@ final class OrderUseClauses extends FormatterPass {
 
 					$foundComma = false;
 
-				} elseif ($splitComma && ST_COMMA == $foundToken) {
+				} elseif (ST_COMMA == $foundToken) {
 					$useStack[$groupCount][] = 'use ' . ltrim($useTokens) . ';';
 					$newTokens[] = new SurrogateToken();
 					$newTokens[] = [T_WHITESPACE, $this->newLine . $this->newLine];
@@ -127,10 +127,13 @@ final class OrderUseClauses extends FormatterPass {
 					$foundComma = true;
 
 				} elseif (ST_CURLY_OPEN == $foundToken) {
-					$newTokens[] = $foundToken;
+					next($tokens);
+					$tmp = 'use ' . ltrim($useTokens) . $foundToken . $this->walkAndAccumulateCurlyBlock($tokens);
+
+					$useStack[$groupCount][] = $tmp;
+					$newTokens[] = new SurrogateToken();
 
 					$foundComma = false;
-
 				}
 				continue;
 			}

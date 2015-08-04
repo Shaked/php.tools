@@ -2451,7 +2451,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "12.0.3");
+	define("VERSION", "12.1.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -4942,7 +4942,7 @@ final class AutoImportPass extends FormatterPass {
 
 					$foundComma = false;
 
-				} elseif ($splitComma && ST_COMMA == $foundToken) {
+				} elseif (ST_COMMA == $foundToken) {
 					$useStack[$groupCount][] = 'use ' . ltrim($useTokens) . ';';
 					$newTokens[] = new SurrogateToken();
 					$newTokens[] = [T_WHITESPACE, $this->newLine . $this->newLine];
@@ -4950,10 +4950,13 @@ final class AutoImportPass extends FormatterPass {
 					$foundComma = true;
 
 				} elseif (ST_CURLY_OPEN == $foundToken) {
-					$newTokens[] = $foundToken;
+					next($tokens);
+					$tmp = 'use ' . ltrim($useTokens) . $foundToken . $this->walkAndAccumulateCurlyBlock($tokens);
+
+					$useStack[$groupCount][] = $tmp;
+					$newTokens[] = new SurrogateToken();
 
 					$foundComma = false;
-
 				}
 				continue;
 			}
@@ -10126,7 +10129,6 @@ EOT;
 		// It scans for classes body and organizes functions internally.
 		$return = '';
 		$classBlock = '';
-		$curlyCount = 0;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -10148,6 +10150,7 @@ EOT;
 				break;
 			}
 		}
+
 		return $this->code;
 	}
 
@@ -10493,11 +10496,26 @@ EOT;
 		$docCommentStack = '';
 		$functionList = [];
 		$touchedDocComment = false;
+		$useStack = '';
 
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+			case T_USE:
+				if ($touchedDocComment) {
+					$touchedDocComment = false;
+					$useStack .= $docCommentStack;
+				}
+				$useStack .= $text;
+				list($foundText, $foundId) = $this->walkAndAccumulateUntilAny($tokens, [ST_CURLY_OPEN, ST_SEMI_COLON]);
+				$useStack .= $foundText;
+				if (ST_CURLY_OPEN == $foundId) {
+					$useStack .= $this->walkAndAccumulateCurlyBlock($tokens);
+				}
+				$useStack .= $this->newLine;
+				break;
+
 			case T_COMMENT:
 				if (strpos($text, "\x2") === false) {
 					if ($this->rightTokenSubsetIsAtIdx($tokens, $this->ptr, [
@@ -10613,6 +10631,10 @@ EOT;
 		ksort($functionList);
 
 		$final = $this->newLine;
+		if (!empty($useStack)) {
+			$final .= $useStack . $this->newLine;
+		}
+
 		foreach ($commentStack as $text) {
 			$final .= ' ' . $text;
 			if ($this->substrCountTrailing($text, "\n") === 0) {

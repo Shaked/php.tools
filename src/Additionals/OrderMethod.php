@@ -19,7 +19,6 @@ class OrderMethod extends AdditionalPass {
 		// It scans for classes body and organizes functions internally.
 		$return = '';
 		$classBlock = '';
-		$curlyCount = 0;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -41,6 +40,7 @@ class OrderMethod extends AdditionalPass {
 				break;
 			}
 		}
+
 		return $this->code;
 	}
 

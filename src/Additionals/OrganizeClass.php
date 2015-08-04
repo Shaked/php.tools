@@ -59,11 +59,26 @@ EOT;
 		$docCommentStack = '';
 		$functionList = [];
 		$touchedDocComment = false;
+		$useStack = '';
 
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+			case T_USE:
+				if ($touchedDocComment) {
+					$touchedDocComment = false;
+					$useStack .= $docCommentStack;
+				}
+				$useStack .= $text;
+				list($foundText, $foundId) = $this->walkAndAccumulateUntilAny($tokens, [ST_CURLY_OPEN, ST_SEMI_COLON]);
+				$useStack .= $foundText;
+				if (ST_CURLY_OPEN == $foundId) {
+					$useStack .= $this->walkAndAccumulateCurlyBlock($tokens);
+				}
+				$useStack .= $this->newLine;
+				break;
+
 			case T_COMMENT:
 				if (strpos($text, "\x2") === false) {
 					if ($this->rightTokenSubsetIsAtIdx($tokens, $this->ptr, [
@@ -179,6 +194,10 @@ EOT;
 		ksort($functionList);
 
 		$final = $this->newLine;
+		if (!empty($useStack)) {
+			$final .= $useStack . $this->newLine;
+		}
+
 		foreach ($commentStack as $text) {
 			$final .= ' ' . $text;
 			if ($this->substrCountTrailing($text, "\n") === 0) {
