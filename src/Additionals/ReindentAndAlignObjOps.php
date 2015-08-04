@@ -1,8 +1,10 @@
 <?php
-class ReindentAndAlignObjOps extends FormatterPass {
+class ReindentAndAlignObjOps extends AdditionalPass {
+
 	const ALIGNABLE_OBJOP = "\x2 OBJOP%d.%d.%d \x3";
 
 	const ALIGN_WITH_INDENT = 1;
+
 	const ALIGN_WITH_SPACES = 2;
 
 	public function candidate($source, $foundTokens) {
@@ -302,6 +304,56 @@ class ReindentAndAlignObjOps extends FormatterPass {
 		return $this->code;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Align object operators.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+// From:
+$aaaaa->b
+->c;
+
+// To:
+$aaaaa->b
+      ->c;
+?>
+EOT;
+	}
+
+	protected function incrementCounters(
+		&$levelCounter,
+		&$levelEntranceCounter,
+		&$contextCounter,
+		&$maxContextCounter,
+		&$touchCounter,
+		&$alignType,
+		&$printedPlaceholder
+	) {
+		++$levelCounter;
+		if (!isset($levelEntranceCounter[$levelCounter])) {
+			$levelEntranceCounter[$levelCounter] = 0;
+		}
+		++$levelEntranceCounter[$levelCounter];
+		if (!isset($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
+			$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+			$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+			$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+			$alignType[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
+			$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]] = 0;
+		}
+		++$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
+		$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = max($maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]);
+
+	}
+
 	protected function indentParenthesesContent() {
 		$count = 0;
 		$sizeofTokens = sizeof($this->tkns);
@@ -350,32 +402,6 @@ class ReindentAndAlignObjOps extends FormatterPass {
 		}
 	}
 
-	protected function incrementCounters(
-		&$levelCounter,
-		&$levelEntranceCounter,
-		&$contextCounter,
-		&$maxContextCounter,
-		&$touchCounter,
-		&$alignType,
-		&$printedPlaceholder
-	) {
-		++$levelCounter;
-		if (!isset($levelEntranceCounter[$levelCounter])) {
-			$levelEntranceCounter[$levelCounter] = 0;
-		}
-		++$levelEntranceCounter[$levelCounter];
-		if (!isset($contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]])) {
-			$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
-			$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
-			$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
-			$alignType[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
-			$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]] = 0;
-		}
-		++$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]];
-		$maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = max($maxContextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]], $contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]);
-
-	}
-
 	private function hasLnInBlock($tkns, $ptr, $start, $end) {
 		$sizeOfTkns = sizeof($tkns);
 		$count = 0;
@@ -397,4 +423,5 @@ class ReindentAndAlignObjOps extends FormatterPass {
 		}
 		return false;
 	}
+
 }

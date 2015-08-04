@@ -3,17 +3,12 @@
  * @codeCoverageIgnore
  */
 abstract class BaseCodeFormatter {
-	private $hasAfterExecutedPass = false;
-	private $hasAfterFormat = false;
-	private $hasBeforePass = false;
 
-	private $shortcircuit = [
-		'ReindentAndAlignObjOps' => 'ReindentObjOps',
-		'ReindentObjOps' => 'ReindentAndAlignObjOps',
-		'AllmanStyleBraces' => 'PSR2CurlyOpenNextLine',
-		'AlignGroupDoubleArrow' => 'AlignDoubleArrow',
-		'AlignDoubleArrow' => 'AlignGroupDoubleArrow',
-	];
+	private $hasAfterExecutedPass = false;
+
+	private $hasAfterFormat = false;
+
+	private $hasBeforePass = false;
 
 	private $passes = [
 		'StripSpaces' => false,
@@ -140,6 +135,14 @@ abstract class BaseCodeFormatter {
 		'OrganizeClass' => false,
 	];
 
+	private $shortcircuit = [
+		'ReindentAndAlignObjOps' => 'ReindentObjOps',
+		'ReindentObjOps' => 'ReindentAndAlignObjOps',
+		'AllmanStyleBraces' => 'PSR2CurlyOpenNextLine',
+		'AlignGroupDoubleArrow' => 'AlignDoubleArrow',
+		'AlignDoubleArrow' => 'AlignGroupDoubleArrow',
+	];
+
 	public function __construct() {
 		$this->passes['AddMissingCurlyBraces'] = new AddMissingCurlyBraces();
 		$this->passes['EliminateDuplicatedEmptyLines'] = new EliminateDuplicatedEmptyLines();
@@ -153,7 +156,7 @@ abstract class BaseCodeFormatter {
 		$this->passes['OrderUseClauses'] = new OrderUseClauses();
 		$this->passes['Reindent'] = new Reindent();
 		$this->passes['ReindentColonBlocks'] = new ReindentColonBlocks();
-		$this->passes['ReindentAndAlignObjOps'] = new ReindentAndAlignObjOps();
+		$this->passes['ReindentObjOps'] = new ReindentObjOps();
 		$this->passes['RemoveIncludeParentheses'] = new RemoveIncludeParentheses();
 		$this->passes['ResizeSpaces'] = new ResizeSpaces();
 		$this->passes['RTrim'] = new RTrim();
@@ -163,6 +166,10 @@ abstract class BaseCodeFormatter {
 		$this->hasAfterExecutedPass = method_exists($this, 'afterExecutedPass');
 		$this->hasAfterFormat = method_exists($this, 'afterFormat');
 		$this->hasBeforePass = method_exists($this, 'beforePass');
+	}
+
+	public function disablePass($pass) {
+		$this->passes[$pass] = null;
 	}
 
 	public function enablePass($pass) {
@@ -176,14 +183,6 @@ abstract class BaseCodeFormatter {
 		if (isset($scPass)) {
 			$this->disablePass($scPass);
 		}
-	}
-
-	public function disablePass($pass) {
-		$this->passes[$pass] = null;
-	}
-
-	public function getPassesNames() {
-		return array_keys(array_filter($this->passes));
 	}
 
 	public function formatCode($source = '') {
@@ -217,6 +216,10 @@ abstract class BaseCodeFormatter {
 		return $source;
 	}
 
+	public function getPassesNames() {
+		return array_keys(array_filter($this->passes));
+	}
+
 	protected function getToken($token) {
 		$ret = [$token, $token];
 		if (isset($token[1])) {
@@ -224,4 +227,5 @@ abstract class BaseCodeFormatter {
 		}
 		return $ret;
 	}
+
 }

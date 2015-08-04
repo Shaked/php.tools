@@ -72,7 +72,6 @@ namespace {
 	require 'Core/OrderUseClauses.php';
 	require 'Core/Reindent.php';
 	require 'Core/ReindentColonBlocks.php';
-	require 'Core/ReindentAndAlignObjOps.php';
 	require 'Core/ReindentObjOps.php';
 	require 'Core/ResizeSpaces.php';
 	require 'Core/RestoreComments.php';
@@ -130,6 +129,7 @@ namespace {
 	require 'Additionals/PrettyPrintDocBlocks.php';
 	require 'Additionals/PSR2EmptyFunction.php';
 	require 'Additionals/PSR2MultilineFunctionParams.php';
+	require 'Additionals/ReindentAndAlignObjOps.php';
 	require 'Additionals/ReindentSwitchBlocks.php';
 	require 'Additionals/RemoveIncludeParentheses.php';
 	require 'Additionals/RemoveUseLeadingSlash.php';
