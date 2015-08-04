@@ -1,5 +1,6 @@
 <?php
 final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_EQUAL]) || isset($foundTokens[T_DOUBLE_ARROW])) {
 			return true;
@@ -30,29 +31,6 @@ final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 		$source = $this->generateConsecutiveFromArray($seenDoubleArrows, $source);
 
 		return $source;
-	}
-
-	private function tokensInLine($source) {
-		$tokens = token_get_all($source);
-		$processed = [];
-		$seen = 1;
-		$tokensLine = '';
-		foreach ($tokens as $token) {
-			if (!isset($token[2])) {
-				$tokensLine .= $token . ' ';
-				continue;
-			}
-			$currLine = $token[2];
-			if ($seen == $currLine) {
-				$tokensLine .= token_name($token[0]) . ' ';
-				continue;
-			}
-			$processed[($seen - 1)] = $tokensLine;
-			$tokensLine = token_name($token[0]) . ' ';
-			$seen = $currLine;
-		}
-		$processed[($seen - 1)] = $tokensLine;
-		return $processed;
 	}
 
 	private function generateConsecutiveFromArray($seenArray, $source) {
@@ -111,4 +89,28 @@ final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 		}
 		return $seenBuckets;
 	}
+
+	private function tokensInLine($source) {
+		$tokens = token_get_all($source);
+		$processed = [];
+		$seen = 1;
+		$tokensLine = '';
+		foreach ($tokens as $token) {
+			if (!isset($token[2])) {
+				$tokensLine .= $token . ' ';
+				continue;
+			}
+			$currLine = $token[2];
+			if ($seen == $currLine) {
+				$tokensLine .= token_name($token[0]) . ' ';
+				continue;
+			}
+			$processed[($seen - 1)] = $tokensLine;
+			$tokensLine = token_name($token[0]) . ' ';
+			$seen = $currLine;
+		}
+		$processed[($seen - 1)] = $tokensLine;
+		return $processed;
+	}
+
 }

@@ -1,5 +1,6 @@
 <?php
 final class AddMissingCurlyBraces extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		if (
 			isset($foundTokens[T_ELSE]) ||
@@ -70,6 +71,13 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		return $this->render($this->tkns);
 	}
 
+	private function addSemicolon() {
+		if (T_CLOSE_TAG == $this->tkns[$this->ptr][0]) {
+			return $this->refInsert($this->tkns, $this->ptr, [ST_SEMI_COLON, ST_SEMI_COLON]);
+		}
+		++$this->ptr;
+	}
+
 	private function insertCurlyBraces() {
 		$this->refSkipIfTokenIsAny($this->tkns, $this->ptr, [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT]);
 		$this->refInsert($this->tkns, $this->ptr, [ST_CURLY_OPEN, ST_CURLY_OPEN]);
@@ -81,10 +89,4 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		$this->refInsert($this->tkns, $this->ptr, [T_WHITESPACE, $this->newLine]);
 	}
 
-	private function addSemicolon() {
-		if (T_CLOSE_TAG == $this->tkns[$this->ptr][0]) {
-			return $this->refInsert($this->tkns, $this->ptr, [ST_SEMI_COLON, ST_SEMI_COLON]);
-		}
-		++$this->ptr;
-	}
 }

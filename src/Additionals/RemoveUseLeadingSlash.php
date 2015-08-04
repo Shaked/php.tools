@@ -1,5 +1,6 @@
 <?php
 final class RemoveUseLeadingSlash extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE]) || isset($foundTokens[T_TRAIT]) || isset($foundTokens[T_CLASS]) || isset($foundTokens[T_FUNCTION]) || isset($foundTokens[T_NS_SEPARATOR])) {
 			return true;
@@ -7,6 +8,7 @@ final class RemoveUseLeadingSlash extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -63,4 +65,5 @@ new D();
 ?>
 EOT;
 	}
+
 }

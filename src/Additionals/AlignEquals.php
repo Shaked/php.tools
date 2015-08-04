@@ -1,9 +1,12 @@
 <?php
 final class AlignEquals extends AdditionalPass {
+
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -79,4 +82,5 @@ $ccc = 333;
 ?>
 EOT;
 	}
+
 }

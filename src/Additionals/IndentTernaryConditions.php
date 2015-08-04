@@ -1,5 +1,6 @@
 <?php
 final class IndentTernaryConditions extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_QUESTION])) {
 			return true;
@@ -7,6 +8,7 @@ final class IndentTernaryConditions extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -56,4 +58,5 @@ $a = ($b)
 ?>
 EOT;
 	}
+
 }

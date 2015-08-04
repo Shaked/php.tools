@@ -1,7 +1,10 @@
 <?php
 final class LeftWordWrap extends AdditionalPass {
+
 	const PLACEHOLDER_WORDWRAP = "\x2 WORDWRAP \x3";
+
 	private static $length = 80;
+
 	private static $tabSizeInSpace = 8;
 
 	public function candidate($source, $foundTokens) {
@@ -62,4 +65,5 @@ final class LeftWordWrap extends AdditionalPass {
 	public function getExample() {
 		return '';
 	}
+
 }

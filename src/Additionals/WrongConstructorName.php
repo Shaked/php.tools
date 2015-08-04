@@ -1,5 +1,6 @@
 <?php
 final class WrongConstructorName extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE]) || isset($foundTokens[T_CLASS])) {
 			return true;
@@ -7,6 +8,7 @@ final class WrongConstructorName extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -99,4 +101,5 @@ class A {
 ?>
 EOT;
 	}
+
 }

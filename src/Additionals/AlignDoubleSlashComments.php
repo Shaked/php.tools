@@ -1,6 +1,8 @@
 <?php
 final class AlignDoubleSlashComments extends AdditionalPass {
+
 	const ALIGNABLE_COMMENT = "\x2 COMMENT%d \x3";
+
 	/**
 	 * @codeCoverageIgnore
 	 */
@@ -10,6 +12,7 @@ final class AlignDoubleSlashComments extends AdditionalPass {
 		}
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -83,4 +86,5 @@ $ccc = 333;  // Comment 3
 ?>
 EOT;
 	}
+
 }

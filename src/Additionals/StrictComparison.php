@@ -3,6 +3,7 @@
  * From PHP-CS-Fixer
  */
 final class StrictComparison extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_IS_EQUAL]) || isset($foundTokens[T_IS_NOT_EQUAL])) {
 			return true;
@@ -54,4 +55,5 @@ if($a !== $b){}
 ?>
 EOT;
 	}
+
 }

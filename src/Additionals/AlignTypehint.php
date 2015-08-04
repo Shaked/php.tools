@@ -1,5 +1,6 @@
 <?php
 final class AlignTypehint extends AdditionalPass {
+
 	const ALIGNABLE_TYPEHINT = "\x2 TYPEHINT%d \x3";
 
 	public function candidate($source, $foundTokens) {
@@ -89,4 +90,5 @@ function a(
 ?>
 EOT;
 	}
+
 }

@@ -1,5 +1,6 @@
 <?php
 class AliasToMaster extends AdditionalPass {
+
 	protected static $aliasList = [
 		'chop' => 'rtrim',
 		'close' => 'closedir',
@@ -44,6 +45,7 @@ class AliasToMaster extends AdditionalPass {
 		}
 		return false;
 	}
+
 	public function format($source) {
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -85,14 +87,6 @@ class AliasToMaster extends AdditionalPass {
 		return $this->code;
 	}
 
-	private function checkIfEmptyNS($id) {
-		if (T_NS_SEPARATOR != $id) {
-			return;
-		}
-
-		$this->touchedEmptyNs = !$this->leftUsefulTokenIs(T_STRING);
-	}
-
 	/**
 	 * @codeCoverageIgnore
 	 */
@@ -113,6 +107,14 @@ $a = implode(',', $arr);
 exit("done");
 ?>
 EOT;
+	}
+
+	private function checkIfEmptyNS($id) {
+		if (T_NS_SEPARATOR != $id) {
+			return;
+		}
+
+		$this->touchedEmptyNs = !$this->leftUsefulTokenIs(T_STRING);
 	}
 
 }

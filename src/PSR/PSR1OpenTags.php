@@ -1,5 +1,6 @@
 <?php
 final class PSR1OpenTags extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -47,4 +48,5 @@ final class PSR1OpenTags extends FormatterPass {
 		}
 		return $this->code;
 	}
+
 }

@@ -1,5 +1,6 @@
 <?php
 final class PrettyPrintDocBlocks extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DOC_COMMENT])) {
 			return true;
@@ -7,6 +8,7 @@ final class PrettyPrintDocBlocks extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -20,6 +22,45 @@ final class PrettyPrintDocBlocks extends AdditionalPass {
 		}
 
 		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Prettify Doc Blocks';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+/**
+ * some description.
+ * @param array $b
+ * @param LongTypeName $c
+ */
+function A(array $b, LongTypeName $c) {
+}
+?>
+
+to
+<?php
+/**
+ * some description.
+ * @param array        $b
+ * @param LongTypeName $c
+ */
+function A(array $b, LongTypeName $c) {
+}
+?>
+EOT;
+	}
+
+	private function isUTF8($usStr) {
+		return (utf8_encode(utf8_decode($usStr)) == $usStr);
 	}
 
 	private function prettify($docBlock) {
@@ -226,42 +267,4 @@ final class PrettyPrintDocBlocks extends AdditionalPass {
 		return $docBlock;
 	}
 
-	private function isUTF8($usStr) {
-		return (utf8_encode(utf8_decode($usStr)) == $usStr);
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Prettify Doc Blocks';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-/**
- * some description.
- * @param array $b
- * @param LongTypeName $c
- */
-function A(array $b, LongTypeName $c) {
-}
-?>
-
-to
-<?php
-/**
- * some description.
- * @param array        $b
- * @param LongTypeName $c
- */
-function A(array $b, LongTypeName $c) {
-}
-?>
-EOT;
-	}
 }

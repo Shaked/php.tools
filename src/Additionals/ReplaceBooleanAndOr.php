@@ -1,5 +1,6 @@
 <?php
 final class ReplaceBooleanAndOr extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_LOGICAL_AND]) || isset($foundTokens[T_LOGICAL_OR])) {
 			return true;
@@ -45,4 +46,5 @@ if ($a and $b or $c) {...}
 if ($a && $b || $c) {...}
 EOT;
 	}
+
 }

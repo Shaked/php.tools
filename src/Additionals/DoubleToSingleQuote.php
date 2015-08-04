@@ -1,5 +1,6 @@
 <?php
 final class DoubleToSingleQuote extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_CONSTANT_ENCAPSED_STRING])) {
 			return true;
@@ -45,6 +46,14 @@ $a = '';
 EOT;
 	}
 
+	private function convertToSingleQuote($text) {
+		$text[0] = '\'';
+		$lastByte = strlen($text) - 1;
+		$text[$lastByte] = '\'';
+		$text = str_replace('\"', '"', $text);
+		return $text;
+	}
+
 	private function hasDoubleQuote($id, $text) {
 		return (
 			T_CONSTANT_ENCAPSED_STRING == $id &&
@@ -54,11 +63,4 @@ EOT;
 		);
 	}
 
-	private function convertToSingleQuote($text) {
-		$text[0] = '\'';
-		$lastByte = strlen($text) - 1;
-		$text[$lastByte] = '\'';
-		$text = str_replace('\"', '"', $text);
-		return $text;
-	}
 }

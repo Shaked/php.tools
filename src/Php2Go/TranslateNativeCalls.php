@@ -1,5 +1,6 @@
 <?php
 class TranslateNativeCalls extends FormatterPass {
+
 	protected static $aliasList = [
 		'sprintf' => 'fmt::Sprintf',
 	];
@@ -15,12 +16,12 @@ class TranslateNativeCalls extends FormatterPass {
 			$this->ptr = $index;
 			$this->checkIfEmptyNS($id);
 			switch ($id) {
-				case T_STRING:
-				case T_EXIT:
-					if (isset(static::$aliasList[strtolower($text)])) {
-						prev($this->tkns);
-						return true;
-					}
+			case T_STRING:
+			case T_EXIT:
+				if (isset(static::$aliasList[strtolower($text)])) {
+					prev($this->tkns);
+					return true;
+				}
 			}
 			$this->appendCode($text);
 		}

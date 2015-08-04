@@ -1,5 +1,6 @@
 <?php
 class UpdateVisibility extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_PRIVATE]) || isset($foundTokens[T_PROTECTED]) || isset($foundTokens[T_PUBLIC])) {
 			return true;
@@ -32,4 +33,5 @@ class UpdateVisibility extends FormatterPass {
 
 		return $this->code;
 	}
+
 }

@@ -3,6 +3,7 @@
  * From PHP-CS-Fixer
  */
 final class StripNewlineAfterClassOpen extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_CLASS]) || isset($foundTokens[T_TRAIT])) {
 			return true;
@@ -10,6 +11,7 @@ final class StripNewlineAfterClassOpen extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -65,4 +67,5 @@ class A {
 ?>
 EOT;
 	}
+
 }

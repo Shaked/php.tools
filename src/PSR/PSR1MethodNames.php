@@ -1,5 +1,6 @@
 <?php
 final class PSR1MethodNames extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_FUNCTION]) || isset($foundTokens[T_STRING]) || isset($foundTokens[ST_PARENTHESES_OPEN])) {
 			return true;
@@ -7,6 +8,7 @@ final class PSR1MethodNames extends FormatterPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -63,4 +65,5 @@ final class PSR1MethodNames extends FormatterPass {
 		}
 		return $this->code;
 	}
+
 }

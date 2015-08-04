@@ -1,5 +1,6 @@
 <?php
 final class MergeDoubleArrowAndArray extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_ARRAY], $foundTokens[T_DOUBLE_ARROW])) {
 			return true;
@@ -43,4 +44,5 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 		}
 		return $this->code;
 	}
+
 }

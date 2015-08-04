@@ -1,5 +1,6 @@
 <?php
 final class PSR2KeywordsLowerCase extends FormatterPass {
+
 	private static $reservedWords = [
 		'__halt_compiler' => 1,
 		'abstract' => 1, 'and' => 1, 'array' => 1, 'as' => 1,
@@ -20,9 +21,11 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 		'unset' => 1, 'use' => 1, 'var' => 1,
 		'while' => 1, 'xor' => 1,
 	];
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -79,4 +82,5 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 
 		return $this->code;
 	}
+
 }

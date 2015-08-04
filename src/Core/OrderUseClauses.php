@@ -1,11 +1,17 @@
 <?php
 final class OrderUseClauses extends FormatterPass {
-	const SPLIT_COMMA = true;
-	const REMOVE_UNUSED = true;
-	const STRIP_BLANK_LINES = true;
+
 	const BLANK_LINE_AFTER_USE_BLOCK = true;
-	const TRAIT_BLOCK_OPEN = 'TRAIT_BLOCK_OPEN';
+
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERBY \x3*/";
+
+	const REMOVE_UNUSED = true;
+
+	const SPLIT_COMMA = true;
+
+	const STRIP_BLANK_LINES = true;
+
+	const TRAIT_BLOCK_OPEN = 'TRAIT_BLOCK_OPEN';
 
 	private $sortFunction = null;
 
@@ -25,6 +31,20 @@ final class OrderUseClauses extends FormatterPass {
 		}
 
 		return false;
+	}
+
+	public function format($source = '') {
+		$source = $this->sortWithinNamespaces($source);
+		$source = $this->sortWithinClasses($source);
+
+		return $source;
+	}
+
+	private function calculateAlias($use) {
+		if (false !== stripos($use, ' as ')) {
+			return substr(strstr($use, ' as '), strlen(' as '), -1);
+		}
+		return basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 	}
 
 	private function sortUseClauses($source, $splitComma, $removeUnused, $stripBlankLines, $blanklineAfterUseBlock) {
@@ -180,12 +200,6 @@ final class OrderUseClauses extends FormatterPass {
 
 		return $return;
 	}
-	public function format($source = '') {
-		$source = $this->sortWithinNamespaces($source);
-		$source = $this->sortWithinClasses($source);
-
-		return $source;
-	}
 
 	private function sortWithinClasses($source) {
 		$tokens = token_get_all($source);
@@ -330,10 +344,4 @@ final class OrderUseClauses extends FormatterPass {
 		return $return;
 	}
 
-	private function calculateAlias($use) {
-		if (false !== stripos($use, ' as ')) {
-			return substr(strstr($use, ' as '), strlen(' as '), -1);
-		}
-		return basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
-	}
 }

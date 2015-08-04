@@ -1,5 +1,6 @@
 <?php
 final class PSR2IndentWithSpace extends FormatterPass {
+
 	private $size = 4;
 
 	public function __construct($size = null) {
@@ -7,9 +8,11 @@ final class PSR2IndentWithSpace extends FormatterPass {
 			$this->size = $size;
 		}
 	}
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
 		$spaces = str_repeat(' ', (int) $this->size);
 		$this->tkns = token_get_all($source);
@@ -30,4 +33,5 @@ final class PSR2IndentWithSpace extends FormatterPass {
 		}
 		return $this->code;
 	}
+
 }

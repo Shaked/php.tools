@@ -1,7 +1,41 @@
 <?php
 final class OrderMethodAndVisibility extends OrderMethod {
-	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
+
 	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
+
+	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Sort methods within class in alphabetic and visibility order .';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+class A {
+	public function d(){}
+	protected function b(){}
+	private function c(){}
+	public function a(){}
+}
+?>
+to
+<?php
+class A {
+	public function a(){}
+	public function d(){}
+	protected function b(){}
+	private function c(){}
+}
+?>
+EOT;
+	}
 
 	public function orderMethods($source) {
 		$tokens = token_get_all($source);
@@ -114,35 +148,4 @@ final class OrderMethodAndVisibility extends OrderMethod {
 		return $return;
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Sort methods within class in alphabetic and visibility order .';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-class A {
-	public function d(){}
-	protected function b(){}
-	private function c(){}
-	public function a(){}
-}
-?>
-to
-<?php
-class A {
-	public function a(){}
-	public function d(){}
-	protected function b(){}
-	private function c(){}
-}
-?>
-EOT;
-	}
 }

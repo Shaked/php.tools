@@ -1,6 +1,7 @@
 <?php
 // From PHP-CS-Fixer
 final class DocBlockToComment extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DOC_COMMENT])) {
 			return true;
@@ -57,28 +58,19 @@ final class DocBlockToComment extends AdditionalPass {
 		return $this->renderLight($this->tkns);
 	}
 
-	private function variableListFromParenthesesBlock($tkns, $ptr) {
-		$sizeOfTkns = sizeof($tkns);
-		$variableList = [];
-		$count = 0;
-		for ($i = $ptr; $i < $sizeOfTkns; ++$i) {
-			$token = $tkns[$i];
-			list($id, $text) = $this->getToken($token);
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Replace docblocks with regular comments when used in non structural elements.';
+	}
 
-			if (T_VARIABLE == $id) {
-				$variableList[] = $text;
-			}
-			if (ST_PARENTHESES_OPEN == $id) {
-				++$count;
-			}
-			if (ST_PARENTHESES_CLOSE == $id) {
-				--$count;
-			}
-			if (0 == $count) {
-				break;
-			}
-		}
-		return array_unique($variableList);
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+EOT;
 	}
 
 	protected function walkAndNormalizeUntil($tknid) {
@@ -103,15 +95,8 @@ final class DocBlockToComment extends AdditionalPass {
 		]);
 	}
 
-	private function updateCommentAgainstVariable($commentTokenText) {
-		list(, $nextText) = $this->rightUsefulToken();
-		$this->ptr = $this->rightUsefulTokenIdx();
-		$this->cache = [];
-		if (!$this->rightUsefulTokenIs(ST_EQUAL) ||
-			false === strpos($commentTokenText, $nextText)) {
-			$commentTokenText = $this->updateComment($commentTokenText);
-		}
-		return $commentTokenText;
+	private function updateComment($commentTokenText) {
+		return preg_replace('/\/\*\*/', '/*', $commentTokenText, 1);
 	}
 
 	private function updateCommentAgainstParenthesesBlock($commentTokenText) {
@@ -131,23 +116,39 @@ final class DocBlockToComment extends AdditionalPass {
 		return $commentTokenText;
 	}
 
-	private function updateComment($commentTokenText) {
-		return preg_replace('/\/\*\*/', '/*', $commentTokenText, 1);
+	private function updateCommentAgainstVariable($commentTokenText) {
+		list(, $nextText) = $this->rightUsefulToken();
+		$this->ptr = $this->rightUsefulTokenIdx();
+		$this->cache = [];
+		if (!$this->rightUsefulTokenIs(ST_EQUAL) ||
+			false === strpos($commentTokenText, $nextText)) {
+			$commentTokenText = $this->updateComment($commentTokenText);
+		}
+		return $commentTokenText;
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Replace docblocks with regular comments when used in non structural elements.';
-	}
+	private function variableListFromParenthesesBlock($tkns, $ptr) {
+		$sizeOfTkns = sizeof($tkns);
+		$variableList = [];
+		$count = 0;
+		for ($i = $ptr; $i < $sizeOfTkns; ++$i) {
+			$token = $tkns[$i];
+			list($id, $text) = $this->getToken($token);
 
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-EOT;
+			if (T_VARIABLE == $id) {
+				$variableList[] = $text;
+			}
+			if (ST_PARENTHESES_OPEN == $id) {
+				++$count;
+			}
+			if (ST_PARENTHESES_CLOSE == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+		return array_unique($variableList);
 	}
 
 }

@@ -3,8 +3,11 @@
  * @codeCoverageIgnore
  */
 final class AutoImportPass extends FormatterPass {
-	const OPENER_PLACEHOLDER = "<?php /*\x2 AUTOIMPORTNS \x3*/";
+
 	const AUTOIMPORT_PLACEHOLDER = "/*\x2 AUTOIMPORT \x3*/";
+
+	const OPENER_PLACEHOLDER = "<?php /*\x2 AUTOIMPORTNS \x3*/";
+
 	private $oracle = null;
 
 	public function __construct($oracleFn) {
@@ -15,87 +18,73 @@ final class AutoImportPass extends FormatterPass {
 		return true;
 	}
 
-	private function usedAliasList($source) {
+	public function format($source = '') {
+		$namespaceCount = 0;
 		$tokens = token_get_all($source);
-		$useStack = [];
-		$newTokens = [];
-		$nextTokens = [];
-		$touchedNamespace = false;
-		while (list(, $popToken) = each($tokens)) {
-			$nextTokens[] = $popToken;
-			while (($token = array_shift($nextTokens))) {
-				list($id, $text) = $this->getToken($token);
-				if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
-					$touchedNamespace = true;
-				}
-				if (T_USE === $id) {
-					$useItem = $text;
-					while (list(, $token) = each($tokens)) {
-						list($id, $text) = $this->getToken($token);
-						if (ST_SEMI_COLON === $id) {
-							$useItem .= $text;
-							break;
-						} elseif (ST_COMMA === $id) {
-							$useItem .= ST_SEMI_COLON . $this->newLine;
-							$nextTokens[] = [T_USE, 'use'];
-							break;
-						}
-						$useItem .= $text;
-					}
-					$useStack[] = $useItem;
-					$token = new SurrogateToken();
-				}
-				if (T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id || T_TRAIT === $id || T_VARIABLE === $id) {
-					if (sizeof($useStack) > 0) {
-						$newTokens[] = $this->newLine;
-						$newTokens[] = $this->newLine;
-					}
-					$newTokens[] = $token;
-					break 2;
-				} elseif ($touchedNamespace && (T_DOC_COMMENT === $id || T_COMMENT === $id)) {
-					if (sizeof($useStack) > 0) {
-						$newTokens[] = $this->newLine;
-					}
-					$newTokens[] = $token;
-					break 2;
-				}
-				$newTokens[] = $token;
+		while (list(, $token) = each($tokens)) {
+			list($id, $text) = $this->getToken($token);
+			if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+				++$namespaceCount;
 			}
 		}
-
-		natcasesort($useStack);
-		$aliasList = [];
-		$aliasCount = [];
-		foreach ($useStack as $use) {
-			$alias = $this->calculateAlias($use);
-			$alias = strtolower($alias);
-			$aliasList[$alias] = strtolower($use);
-			$aliasCount[$alias] = 0;
-		}
-		foreach ($newTokens as $token) {
-			if (!($token instanceof SurrogateToken)) {
-				list($id, $text) = $this->getToken($token);
-				$lowerText = strtolower($text);
-				if (T_STRING === $id && isset($aliasList[$lowerText])) {
-					++$aliasCount[$lowerText];
-				}
-			}
+		if ($namespaceCount <= 1) {
+			return $this->singleNamespace($source);
 		}
 
+		$return = '';
+		reset($tokens);
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
-			$lowerText = strtolower($text);
-			if (T_STRING === $id && isset($aliasList[$lowerText]) && ($this->leftTokenSubsetIsAtIdx($tokens, $index, T_NEW) || $this->rightTokenSubsetIsAtIdx($tokens, $index, T_DOUBLE_COLON))) {
-				++$aliasCount[$lowerText];
-			} elseif (T_DOC_COMMENT === $id) {
-				foreach ($aliasList as $alias => $use) {
-					if (false !== stripos($text, $alias)) {
-						++$aliasCount[$alias];
+			$this->ptr = $index;
+			switch ($id) {
+			case T_NAMESPACE:
+				$return .= $text;
+				if ($this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+					break;
+				}
+				while (list($index, $token) = each($tokens)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
+					$return .= $text;
+					if (ST_CURLY_OPEN == $id) {
+						break;
 					}
 				}
+				$namespaceBlock = '';
+				$curlyCount = 1;
+				while (list($index, $token) = each($tokens)) {
+					list($id, $text) = $this->getToken($token);
+					$this->ptr = $index;
+					$namespaceBlock .= $text;
+					if (ST_CURLY_OPEN == $id) {
+						++$curlyCount;
+					} elseif (ST_CURLY_CLOSE == $id) {
+						--$curlyCount;
+					}
+
+					if (0 == $curlyCount) {
+						break;
+					}
+				}
+				$return .= str_replace(
+					self::OPENER_PLACEHOLDER,
+					'',
+					$this->singleNamespace(self::OPENER_PLACEHOLDER . $namespaceBlock)
+				);
+				break;
+			default:
+				$return .= $text;
 			}
 		}
-		return $aliasCount;
+
+		return $return;
+	}
+
+	private function calculateAlias($use) {
+		if (false !== stripos($use, ' as ')) {
+			return substr(strstr($use, ' as '), strlen(' as '), -1);
+		}
+		return basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 	}
 
 	private function singleNamespace($source) {
@@ -195,72 +184,88 @@ final class AutoImportPass extends FormatterPass {
 		$return = str_replace(self::AUTOIMPORT_PLACEHOLDER . $this->newLine, $replacement, $return);
 		return $return;
 	}
-	public function format($source = '') {
-		$namespaceCount = 0;
+
+	private function usedAliasList($source) {
 		$tokens = token_get_all($source);
-		while (list(, $token) = each($tokens)) {
-			list($id, $text) = $this->getToken($token);
-			if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
-				++$namespaceCount;
+		$useStack = [];
+		$newTokens = [];
+		$nextTokens = [];
+		$touchedNamespace = false;
+		while (list(, $popToken) = each($tokens)) {
+			$nextTokens[] = $popToken;
+			while (($token = array_shift($nextTokens))) {
+				list($id, $text) = $this->getToken($token);
+				if (T_NAMESPACE == $id && !$this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
+					$touchedNamespace = true;
+				}
+				if (T_USE === $id) {
+					$useItem = $text;
+					while (list(, $token) = each($tokens)) {
+						list($id, $text) = $this->getToken($token);
+						if (ST_SEMI_COLON === $id) {
+							$useItem .= $text;
+							break;
+						} elseif (ST_COMMA === $id) {
+							$useItem .= ST_SEMI_COLON . $this->newLine;
+							$nextTokens[] = [T_USE, 'use'];
+							break;
+						}
+						$useItem .= $text;
+					}
+					$useStack[] = $useItem;
+					$token = new SurrogateToken();
+				}
+				if (T_FINAL === $id || T_ABSTRACT === $id || T_INTERFACE === $id || T_CLASS === $id || T_FUNCTION === $id || T_TRAIT === $id || T_VARIABLE === $id) {
+					if (sizeof($useStack) > 0) {
+						$newTokens[] = $this->newLine;
+						$newTokens[] = $this->newLine;
+					}
+					$newTokens[] = $token;
+					break 2;
+				} elseif ($touchedNamespace && (T_DOC_COMMENT === $id || T_COMMENT === $id)) {
+					if (sizeof($useStack) > 0) {
+						$newTokens[] = $this->newLine;
+					}
+					$newTokens[] = $token;
+					break 2;
+				}
+				$newTokens[] = $token;
 			}
 		}
-		if ($namespaceCount <= 1) {
-			return $this->singleNamespace($source);
+
+		natcasesort($useStack);
+		$aliasList = [];
+		$aliasCount = [];
+		foreach ($useStack as $use) {
+			$alias = $this->calculateAlias($use);
+			$alias = strtolower($alias);
+			$aliasList[$alias] = strtolower($use);
+			$aliasCount[$alias] = 0;
+		}
+		foreach ($newTokens as $token) {
+			if (!($token instanceof SurrogateToken)) {
+				list($id, $text) = $this->getToken($token);
+				$lowerText = strtolower($text);
+				if (T_STRING === $id && isset($aliasList[$lowerText])) {
+					++$aliasCount[$lowerText];
+				}
+			}
 		}
 
-		$return = '';
-		reset($tokens);
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-			case T_NAMESPACE:
-				$return .= $text;
-				if ($this->rightUsefulTokenIs(T_NS_SEPARATOR)) {
-					break;
-				}
-				while (list($index, $token) = each($tokens)) {
-					list($id, $text) = $this->getToken($token);
-					$this->ptr = $index;
-					$return .= $text;
-					if (ST_CURLY_OPEN == $id) {
-						break;
+			$lowerText = strtolower($text);
+			if (T_STRING === $id && isset($aliasList[$lowerText]) && ($this->leftTokenSubsetIsAtIdx($tokens, $index, T_NEW) || $this->rightTokenSubsetIsAtIdx($tokens, $index, T_DOUBLE_COLON))) {
+				++$aliasCount[$lowerText];
+			} elseif (T_DOC_COMMENT === $id) {
+				foreach ($aliasList as $alias => $use) {
+					if (false !== stripos($text, $alias)) {
+						++$aliasCount[$alias];
 					}
 				}
-				$namespaceBlock = '';
-				$curlyCount = 1;
-				while (list($index, $token) = each($tokens)) {
-					list($id, $text) = $this->getToken($token);
-					$this->ptr = $index;
-					$namespaceBlock .= $text;
-					if (ST_CURLY_OPEN == $id) {
-						++$curlyCount;
-					} elseif (ST_CURLY_CLOSE == $id) {
-						--$curlyCount;
-					}
-
-					if (0 == $curlyCount) {
-						break;
-					}
-				}
-				$return .= str_replace(
-					self::OPENER_PLACEHOLDER,
-					'',
-					$this->singleNamespace(self::OPENER_PLACEHOLDER . $namespaceBlock)
-				);
-				break;
-			default:
-				$return .= $text;
 			}
 		}
-
-		return $return;
+		return $aliasCount;
 	}
 
-	private function calculateAlias($use) {
-		if (false !== stripos($use, ' as ')) {
-			return substr(strstr($use, ' as '), strlen(' as '), -1);
-		}
-		return basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
-	}
 }

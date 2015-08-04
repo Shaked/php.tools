@@ -1,5 +1,6 @@
 <?php
 final class StripExtraCommaInList extends FormatterPass {
+
 	const EMPTY_LIST = 'ST_EMPTY_LIST';
 
 	public function candidate($source, $foundTokens) {
@@ -56,4 +57,5 @@ final class StripExtraCommaInList extends FormatterPass {
 		}
 		return $this->renderLight();
 	}
+
 }

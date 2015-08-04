@@ -1,5 +1,6 @@
 <?php
 final class Reindent extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		if (
 			isset($foundTokens[ST_CURLY_OPEN]) ||

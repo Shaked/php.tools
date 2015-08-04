@@ -1,5 +1,6 @@
 <?php
 final class GeneratePHPDoc extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_FUNCTION])) {
 			return true;
@@ -7,6 +8,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -120,21 +122,6 @@ final class GeneratePHPDoc extends AdditionalPass {
 		}, $this->tkns));
 	}
 
-	private function renderDocBlock(array $paramStack, $returnStack) {
-		if (empty($paramStack) && empty($returnStack)) {
-			return '';
-		}
-		$str = '/**' . $this->newLine;
-		foreach ($paramStack as $param) {
-			$str .= rtrim(' * @param ' . $param['type']) . ' ' . $param['name'] . $this->newLine;
-		}
-		if (!empty($returnStack)) {
-			$str .= ' * @return ' . $returnStack . $this->newLine;
-		}
-		$str .= ' */' . $this->newLine;
-		return $str;
-	}
-
 	/**
 	 * @codeCoverageIgnore
 	 */
@@ -168,4 +155,20 @@ class A {
 ?>
 EOT;
 	}
+
+	private function renderDocBlock(array $paramStack, $returnStack) {
+		if (empty($paramStack) && empty($returnStack)) {
+			return '';
+		}
+		$str = '/**' . $this->newLine;
+		foreach ($paramStack as $param) {
+			$str .= rtrim(' * @param ' . $param['type']) . ' ' . $param['name'] . $this->newLine;
+		}
+		if (!empty($returnStack)) {
+			$str .= ' * @return ' . $returnStack . $this->newLine;
+		}
+		$str .= ' */' . $this->newLine;
+		return $str;
+	}
+
 }

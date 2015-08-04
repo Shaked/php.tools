@@ -1,5 +1,6 @@
 <?php
 final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -28,4 +29,5 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 
 		return rtrim($this->render()) . $this->newLine;
 	}
+
 }

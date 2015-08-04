@@ -1,7 +1,9 @@
 <?php
 final class StripExtraCommaInArray extends AdditionalPass {
-	const ST_SHORT_ARRAY_OPEN = 'SHORT_ARRAY_OPEN';
+
 	const EMPTY_ARRAY = 'ST_EMPTY_ARRAY';
+
+	const ST_SHORT_ARRAY_OPEN = 'SHORT_ARRAY_OPEN';
 
 	public function candidate($source, $foundTokens) {
 		return true;
@@ -87,4 +89,5 @@ $b = array($b, $c);
 ?>
 EOT;
 	}
+
 }

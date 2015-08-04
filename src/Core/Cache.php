@@ -3,9 +3,10 @@
  * @codeCoverageIgnore
  */
 final class Cache implements Cacher {
-	private $noop = false;
 
 	private $db;
+
+	private $noop = false;
 
 	public function __construct($filename) {
 		if (empty($filename)) {
@@ -42,14 +43,6 @@ final class Cache implements Cacher {
 		$this->db->exec('CREATE TABLE cache (target TEXT, filename TEXT, hash TEXT, unique(target, filename));');
 	}
 
-	public function upsert($target, $filename, $content) {
-		if ($this->noop) {
-			return;
-		}
-		$hash = $this->calculateHash($content);
-		$this->db->exec('REPLACE INTO cache VALUES ("' . SQLite3::escapeString($target) . '","' . SQLite3::escapeString($filename) . '", "' . SQLite3::escapeString($hash) . '")');
-	}
-
 	public function is_changed($target, $filename) {
 		$content = file_get_contents($filename);
 		if ($this->noop) {
@@ -65,11 +58,20 @@ final class Cache implements Cacher {
 		return false;
 	}
 
-	private function setDb($db) {
-		$this->db = $db;
+	public function upsert($target, $filename, $content) {
+		if ($this->noop) {
+			return;
+		}
+		$hash = $this->calculateHash($content);
+		$this->db->exec('REPLACE INTO cache VALUES ("' . SQLite3::escapeString($target) . '","' . SQLite3::escapeString($filename) . '", "' . SQLite3::escapeString($hash) . '")');
 	}
 
 	private function calculateHash($content) {
 		return sprintf('%u', crc32($content));
 	}
+
+	private function setDb($db) {
+		$this->db = $db;
+	}
+
 }

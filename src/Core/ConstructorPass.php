@@ -1,8 +1,11 @@
 <?php
 final class ConstructorPass extends FormatterPass {
+
 	const TYPE_CAMEL_CASE = 'camel';
-	const TYPE_SNAKE_CASE = 'snake';
+
 	const TYPE_GOLANG = 'golang';
+
+	const TYPE_SNAKE_CASE = 'snake';
 
 	/**
 	 * @var string
@@ -119,16 +122,20 @@ final class ConstructorPass extends FormatterPass {
 		}
 		return $ret;
 	}
+
 	private function generateCamelCase($var) {
 		$str = '$this->set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . ');' . $this->newLine;
 		return $str;
 	}
-	private function generateSnakeCase($var) {
-		$str = '$this->set_' . (str_replace('$', '', $var)) . '(' . $var . ');' . $this->newLine;
-		return $str;
-	}
+
 	private function generateGolang($var) {
 		$str = '$this->Set' . ucfirst(str_replace('$', '', $var)) . '(' . $var . ');' . $this->newLine;
 		return $str;
 	}
+
+	private function generateSnakeCase($var) {
+		$str = '$this->set_' . (str_replace('$', '', $var)) . '(' . $var . ');' . $this->newLine;
+		return $str;
+	}
+
 }

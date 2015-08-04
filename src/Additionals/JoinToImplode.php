@@ -1,5 +1,6 @@
 <?php
 final class JoinToImplode extends AliasToMaster {
+
 	protected static $aliasList = [
 		'join' => 'implode',
 	];

@@ -1,5 +1,6 @@
 <?php
 final class EncapsulateNamespaces extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
@@ -7,6 +8,7 @@ final class EncapsulateNamespaces extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -68,4 +70,5 @@ namespace NS1 {
 ?>
 EOT;
 	}
+
 }

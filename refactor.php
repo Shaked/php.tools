@@ -77,41 +77,34 @@ define('ST_CURLY_BLOCK', 'ST_CURLY_BLOCK');
 //tokens, following the concept of bottom-up it works as a platform on which
 //other passes can be built on.
 abstract class FormatterPass {
-	protected $indentChar = "\t";
-	protected $newLine = "\n";
-	protected $indent = 0;
-	protected $code = ''; // holds the final outputed code
-	protected $ptr = 0;
-	protected $tkns = []; // stream of tokens
-	protected $ignoreFutileTokens = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
 
-	protected $useCache = false;
 	protected $cache = [];
 
+	protected $code = '';
+
+	// stream of tokens
+	protected $ignoreFutileTokens = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
+
+	protected $indent = 0;
+
+	protected $indentChar = "\t";
+
+	protected $newLine = "\n";
+
+	// holds the final outputed code
+	protected $ptr = 0;
+
+	protected $tkns = [];
+
+	protected $useCache = false;
+
 	private $memo = [null, null];
+
 	private $memoUseful = [null, null];
 
-	protected function memoPtr() {
-		$t = $this->tkns[$this->ptr][0];
+	abstract public function candidate($source, $foundTokens);
 
-		if (T_WHITESPACE !== $t) {
-			$this->memo[0] = $this->memo[1];
-			$this->memo[1] = $t;
-		}
-
-		if (T_WHITESPACE !== $t && T_COMMENT !== $t && T_DOC_COMMENT !== $t) {
-			$this->memoUseful[0] = $this->memoUseful[1];
-			$this->memoUseful[1] = $t;
-		}
-	}
-
-	protected function leftMemoUsefulTokenIs($token, $debug = false) {
-		return $this->resolveFoundToken($this->memoUseful[0], $token);
-	}
-
-	protected function leftMemoTokenIs($token) {
-		return $this->resolveFoundToken($this->memo[0], $token);
-	}
+	abstract public function format($source);
 
 	protected function alignPlaceholders($origPlaceholder, $contextCounter) {
 		for ($j = 0; $j <= $contextCounter; ++$j) {
@@ -161,21 +154,6 @@ abstract class FormatterPass {
 		$this->code .= $code;
 	}
 
-	private function calculateCacheKey($direction, $ignoreList) {
-		return $direction . "\x2" . implode('', $ignoreList);
-	}
-
-	abstract public function candidate($source, $foundTokens);
-	abstract public function format($source);
-
-	protected function getToken($token) {
-		$ret = [$token, $token];
-		if (isset($token[1])) {
-			$ret = $token;
-		}
-		return $ret;
-	}
-
 	protected function getCrlf() {
 		return $this->newLine;
 	}
@@ -190,6 +168,14 @@ abstract class FormatterPass {
 
 	protected function getSpace($true = true) {
 		return $true ? ' ' : '';
+	}
+
+	protected function getToken($token) {
+		$ret = [$token, $token];
+		if (isset($token[1])) {
+			$ret = $token;
+		}
+		return $ret;
 	}
 
 	protected function hasLn($text) {
@@ -239,6 +225,14 @@ abstract class FormatterPass {
 		]);
 	}
 
+	protected function leftMemoTokenIs($token) {
+		return $this->resolveFoundToken($this->memo[0], $token);
+	}
+
+	protected function leftMemoUsefulTokenIs($token, $debug = false) {
+		return $this->resolveFoundToken($this->memoUseful[0], $token);
+	}
+
 	protected function leftToken($ignoreList = []) {
 		$i = $this->leftTokenIdx($ignoreList);
 
@@ -257,17 +251,17 @@ abstract class FormatterPass {
 		return $this->tokenIs('left', $token, $ignoreList);
 	}
 
-	protected function leftTokenSubsetIsAtIdx($tkns, $idx, $token, $ignoreList = []) {
-		$idx = $this->leftTokenSubsetAtIdx($tkns, $idx, $ignoreList);
-
-		return $this->resolveTokenMatch($tkns, $idx, $token);
-	}
-
 	protected function leftTokenSubsetAtIdx($tkns, $idx, $ignoreList = []) {
 		$ignoreList = $this->resolveIgnoreList($ignoreList);
 		$idx = $this->walkLeft($tkns, $idx, $ignoreList);
 
 		return $idx;
+	}
+
+	protected function leftTokenSubsetIsAtIdx($tkns, $idx, $token, $ignoreList = []) {
+		$idx = $this->leftTokenSubsetAtIdx($tkns, $idx, $ignoreList);
+
+		return $this->resolveTokenMatch($tkns, $idx, $token);
 	}
 
 	protected function leftUsefulToken() {
@@ -280,6 +274,20 @@ abstract class FormatterPass {
 
 	protected function leftUsefulTokenIs($token) {
 		return $this->leftTokenIs($token, $this->ignoreFutileTokens);
+	}
+
+	protected function memoPtr() {
+		$t = $this->tkns[$this->ptr][0];
+
+		if (T_WHITESPACE !== $t) {
+			$this->memo[0] = $this->memo[1];
+			$this->memo[1] = $t;
+		}
+
+		if (T_WHITESPACE !== $t && T_COMMENT !== $t && T_DOC_COMMENT !== $t) {
+			$this->memoUseful[0] = $this->memoUseful[1];
+			$this->memoUseful[1] = $t;
+		}
 	}
 
 	protected function peekAndCountUntilAny($tkns, $ptr, $tknids) {
@@ -444,6 +452,241 @@ abstract class FormatterPass {
 		$this->printUntil(ST_QUOTE);
 	}
 
+	protected function refInsert(&$tkns, &$ptr, $item) {
+		array_splice($tkns, $ptr, 0, [$item]);
+		++$ptr;
+	}
+
+	protected function refSkipBlocks($tkns, &$ptr) {
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
+			$id = $tkns[$ptr][0];
+
+			if (T_CLOSE_TAG == $id) {
+				return;
+			}
+
+			if (T_DO == $id) {
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+				$this->refWalkCurlyBlock($tkns, $ptr);
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
+				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				continue;
+			}
+
+			if (T_WHILE == $id) {
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
+				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				if ($this->rightTokenSubsetIsAtIdx(
+					$tkns,
+					$ptr,
+					ST_CURLY_OPEN,
+					$this->ignoreFutileTokens
+				)) {
+					$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+					$this->refWalkCurlyBlock($tkns, $ptr);
+					return;
+				}
+			}
+
+			if (T_FOR == $id || T_FOREACH == $id || T_SWITCH == $id) {
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
+				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+				$this->refWalkCurlyBlock($tkns, $ptr);
+				return;
+			}
+
+			if (T_TRY == $id) {
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+				$this->refWalkCurlyBlock($tkns, $ptr);
+				while (
+					$this->rightTokenSubsetIsAtIdx(
+						$tkns,
+						$ptr,
+						T_CATCH,
+						$this->ignoreFutileTokens
+					)
+				) {
+					$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
+					$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+					$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+					$this->refWalkCurlyBlock($tkns, $ptr);
+				}
+				if ($this->rightTokenSubsetIsAtIdx(
+					$tkns,
+					$ptr,
+					T_FINALLY,
+					$this->ignoreFutileTokens
+				)) {
+					$this->refWalkUsefulUntil($tkns, $ptr, T_FINALLY);
+					$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+					$this->refWalkCurlyBlock($tkns, $ptr);
+				}
+				return;
+			}
+
+			if (T_IF == $id) {
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
+				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+				$this->refWalkCurlyBlock($tkns, $ptr);
+				while (true) {
+					if (
+						$this->rightTokenSubsetIsAtIdx(
+							$tkns,
+							$ptr,
+							T_ELSEIF,
+							$this->ignoreFutileTokens
+						)
+					) {
+						$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
+						$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+						$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+						$this->refWalkCurlyBlock($tkns, $ptr);
+						continue;
+					} elseif (
+						$this->rightTokenSubsetIsAtIdx(
+							$tkns,
+							$ptr,
+							T_ELSE,
+							$this->ignoreFutileTokens
+						)
+					) {
+						$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
+						$this->refWalkCurlyBlock($tkns, $ptr);
+						break;
+					}
+					break;
+				}
+				return;
+			}
+
+			if (
+				ST_CURLY_OPEN == $id ||
+				T_CURLY_OPEN == $id ||
+				T_DOLLAR_OPEN_CURLY_BRACES == $id
+			) {
+				$this->refWalkCurlyBlock($tkns, $ptr);
+				continue;
+			}
+
+			if (ST_PARENTHESES_OPEN == $id) {
+				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
+				continue;
+			}
+
+			if (ST_BRACKET_OPEN == $id) {
+				$this->refWalkBlock($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE);
+				continue;
+			}
+
+			if (ST_SEMI_COLON == $id) {
+				return;
+			}
+		}
+		--$ptr;
+	}
+
+	protected function refSkipIfTokenIsAny($tkns, &$ptr, $skipIds) {
+		$skipIds = array_flip($skipIds);
+		++$ptr;
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
+			$id = $tkns[$ptr][0];
+			if (!isset($skipIds[$id])) {
+				break;
+			}
+		}
+	}
+
+	protected function refWalkBackUsefulUntil($tkns, &$ptr, array $expectedId) {
+		$expectedId = array_flip($expectedId);
+		do {
+			$ptr = $this->walkLeft($tkns, $ptr, $this->ignoreFutileTokens);
+		} while (isset($expectedId[$tkns[$ptr][0]]));
+	}
+
+	protected function refWalkBlock($tkns, &$ptr, $start, $end) {
+		$count = 0;
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
+			$id = $tkns[$ptr][0];
+			if ($start == $id) {
+				++$count;
+			}
+			if ($end == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
+
+	protected function refWalkBlockReverse($tkns, &$ptr, $start, $end) {
+		$count = 0;
+		for (; $ptr >= 0; --$ptr) {
+			$id = $tkns[$ptr][0];
+			if ($start == $id) {
+				--$count;
+			}
+			if ($end == $id) {
+				++$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
+
+	protected function refWalkCurlyBlock($tkns, &$ptr) {
+		$count = 0;
+		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
+			$id = $tkns[$ptr][0];
+			if (ST_CURLY_OPEN == $id) {
+				++$count;
+			}
+			if (T_CURLY_OPEN == $id) {
+				++$count;
+			}
+			if (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+				++$count;
+			}
+			if (ST_CURLY_CLOSE == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
+
+	protected function refWalkCurlyBlockReverse($tkns, &$ptr) {
+		$count = 0;
+		for (; $ptr >= 0; --$ptr) {
+			$id = $tkns[$ptr][0];
+			if (ST_CURLY_OPEN == $id) {
+				--$count;
+			}
+			if (T_CURLY_OPEN == $id) {
+				--$count;
+			}
+			if (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+				--$count;
+			}
+			if (ST_CURLY_CLOSE == $id) {
+				++$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+		}
+	}
+
+	protected function refWalkUsefulUntil($tkns, &$ptr, $expectedId) {
+		do {
+			$ptr = $this->walkRight($tkns, $ptr, $this->ignoreFutileTokens);
+		} while ($expectedId != $tkns[$ptr][0]);
+	}
+
 	protected function render($tkns = null) {
 		if (null == $tkns) {
 			$tkns = $this->tkns;
@@ -469,36 +712,6 @@ abstract class FormatterPass {
 		return $str;
 	}
 
-	private function resolveIgnoreList($ignoreList = []) {
-		if (!empty($ignoreList)) {
-			return array_flip($ignoreList);
-		}
-		return [T_WHITESPACE => true];
-	}
-
-	private function resolveTokenMatch($tkns, $idx, $token) {
-		if (!isset($tkns[$idx])) {
-			return false;
-		}
-
-		$foundToken = $tkns[$idx];
-		return $this->resolveFoundToken($foundToken, $token);
-	}
-
-	private function resolveFoundToken($foundToken, $token) {
-		if ($foundToken === $token) {
-			return true;
-		} elseif (is_array($token) && isset($foundToken[1]) && in_array($foundToken[0], $token)) {
-			return true;
-		} elseif (is_array($token) && !isset($foundToken[1]) && in_array($foundToken, $token)) {
-			return true;
-		} elseif (isset($foundToken[1]) && $foundToken[0] == $token) {
-			return true;
-		}
-
-		return false;
-	}
-
 	protected function rightToken($ignoreList = []) {
 		$i = $this->rightTokenIdx($ignoreList);
 
@@ -517,17 +730,17 @@ abstract class FormatterPass {
 		return $this->tokenIs('right', $token, $ignoreList);
 	}
 
-	protected function rightTokenSubsetIsAtIdx($tkns, $idx, $token, $ignoreList = []) {
-		$idx = $this->rightTokenSubsetAtIdx($tkns, $idx, $ignoreList);
-
-		return $this->resolveTokenMatch($tkns, $idx, $token);
-	}
-
 	protected function rightTokenSubsetAtIdx($tkns, $idx, $ignoreList = []) {
 		$ignoreList = $this->resolveIgnoreList($ignoreList);
 		$idx = $this->walkRight($tkns, $idx, $ignoreList);
 
 		return $idx;
+	}
+
+	protected function rightTokenSubsetIsAtIdx($tkns, $idx, $token, $ignoreList = []) {
+		$idx = $this->rightTokenSubsetAtIdx($tkns, $idx, $ignoreList);
+
+		return $this->resolveTokenMatch($tkns, $idx, $token);
 	}
 
 	protected function rightUsefulToken() {
@@ -700,6 +913,22 @@ abstract class FormatterPass {
 		return $ret;
 	}
 
+	protected function walkAndAccumulateStopAtAny(&$tkns, $tknids) {
+		$tknids = array_flip($tknids);
+		$ret = '';
+		$id = null;
+		while (list($index, $token) = each($tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			if (isset($tknids[$id])) {
+				prev($tkns);
+				break;
+			}
+			$ret .= $text;
+		}
+		return [$ret, $id];
+	}
+
 	protected function walkAndAccumulateUntil(&$tkns, $tknid) {
 		$ret = '';
 		while (list($index, $token) = each($tkns)) {
@@ -725,20 +954,48 @@ abstract class FormatterPass {
 		return [$ret, $id];
 	}
 
-	protected function walkAndAccumulateStopAtAny(&$tkns, $tknids) {
-		$tknids = array_flip($tknids);
-		$ret = '';
-		$id = null;
-		while (list($index, $token) = each($tkns)) {
+	protected function walkUntil($tknid) {
+		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
-			if (isset($tknids[$id])) {
-				prev($tkns);
-				break;
+			if ($id == $tknid) {
+				return [$id, $text];
 			}
-			$ret .= $text;
 		}
-		return [$ret, $id];
+	}
+
+	private function calculateCacheKey($direction, $ignoreList) {
+		return $direction . "\x2" . implode('', $ignoreList);
+	}
+
+	private function resolveFoundToken($foundToken, $token) {
+		if ($foundToken === $token) {
+			return true;
+		} elseif (is_array($token) && isset($foundToken[1]) && in_array($foundToken[0], $token)) {
+			return true;
+		} elseif (is_array($token) && !isset($foundToken[1]) && in_array($foundToken, $token)) {
+			return true;
+		} elseif (isset($foundToken[1]) && $foundToken[0] == $token) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private function resolveIgnoreList($ignoreList = []) {
+		if (!empty($ignoreList)) {
+			return array_flip($ignoreList);
+		}
+		return [T_WHITESPACE => true];
+	}
+
+	private function resolveTokenMatch($tkns, $idx, $token) {
+		if (!isset($tkns[$idx])) {
+			return false;
+		}
+
+		$foundToken = $tkns[$idx];
+		return $this->resolveFoundToken($foundToken, $token);
 	}
 
 	private function walkLeft($tkns, $idx, $ignoreList) {
@@ -754,286 +1011,30 @@ abstract class FormatterPass {
 		return $i;
 	}
 
-	protected function walkUntil($tknid) {
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			if ($id == $tknid) {
-				return [$id, $text];
-			}
-		}
-	}
-
-	protected function refWalkUsefulUntil($tkns, &$ptr, $expectedId) {
-		do {
-			$ptr = $this->walkRight($tkns, $ptr, $this->ignoreFutileTokens);
-		} while ($expectedId != $tkns[$ptr][0]);
-	}
-
-	protected function refWalkBackUsefulUntil($tkns, &$ptr, array $expectedId) {
-		$expectedId = array_flip($expectedId);
-		do {
-			$ptr = $this->walkLeft($tkns, $ptr, $this->ignoreFutileTokens);
-		} while (isset($expectedId[$tkns[$ptr][0]]));
-	}
-
-	protected function refWalkBlock($tkns, &$ptr, $start, $end) {
-		$count = 0;
-		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
-			$id = $tkns[$ptr][0];
-			if ($start == $id) {
-				++$count;
-			}
-			if ($end == $id) {
-				--$count;
-			}
-			if (0 == $count) {
-				break;
-			}
-		}
-	}
-
-	protected function refWalkCurlyBlock($tkns, &$ptr) {
-		$count = 0;
-		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
-			$id = $tkns[$ptr][0];
-			if (ST_CURLY_OPEN == $id) {
-				++$count;
-			}
-			if (T_CURLY_OPEN == $id) {
-				++$count;
-			}
-			if (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
-				++$count;
-			}
-			if (ST_CURLY_CLOSE == $id) {
-				--$count;
-			}
-			if (0 == $count) {
-				break;
-			}
-		}
-	}
-
-	protected function refWalkBlockReverse($tkns, &$ptr, $start, $end) {
-		$count = 0;
-		for (; $ptr >= 0; --$ptr) {
-			$id = $tkns[$ptr][0];
-			if ($start == $id) {
-				--$count;
-			}
-			if ($end == $id) {
-				++$count;
-			}
-			if (0 == $count) {
-				break;
-			}
-		}
-	}
-
-	protected function refWalkCurlyBlockReverse($tkns, &$ptr) {
-		$count = 0;
-		for (; $ptr >= 0; --$ptr) {
-			$id = $tkns[$ptr][0];
-			if (ST_CURLY_OPEN == $id) {
-				--$count;
-			}
-			if (T_CURLY_OPEN == $id) {
-				--$count;
-			}
-			if (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
-				--$count;
-			}
-			if (ST_CURLY_CLOSE == $id) {
-				++$count;
-			}
-			if (0 == $count) {
-				break;
-			}
-		}
-	}
-
-	protected function refSkipIfTokenIsAny($tkns, &$ptr, $skipIds) {
-		$skipIds = array_flip($skipIds);
-		++$ptr;
-		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
-			$id = $tkns[$ptr][0];
-			if (!isset($skipIds[$id])) {
-				break;
-			}
-		}
-	}
-
-	protected function refSkipBlocks($tkns, &$ptr) {
-		for ($sizeOfTkns = sizeof($tkns); $ptr < $sizeOfTkns; ++$ptr) {
-			$id = $tkns[$ptr][0];
-
-			if (T_CLOSE_TAG == $id) {
-				return;
-			}
-
-			if (T_DO == $id) {
-				$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
-				$this->refWalkCurlyBlock($tkns, $ptr);
-				$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
-				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-				continue;
-			}
-
-			if (T_WHILE == $id) {
-				$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
-				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-				if ($this->rightTokenSubsetIsAtIdx(
-					$tkns,
-					$ptr,
-					ST_CURLY_OPEN,
-					$this->ignoreFutileTokens
-				)) {
-					$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
-					$this->refWalkCurlyBlock($tkns, $ptr);
-					return;
-				}
-			}
-
-			if (T_FOR == $id || T_FOREACH == $id || T_SWITCH == $id) {
-				$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
-				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-				$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
-				$this->refWalkCurlyBlock($tkns, $ptr);
-				return;
-			}
-
-			if (T_TRY == $id) {
-				$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
-				$this->refWalkCurlyBlock($tkns, $ptr);
-				while (
-					$this->rightTokenSubsetIsAtIdx(
-						$tkns,
-						$ptr,
-						T_CATCH,
-						$this->ignoreFutileTokens
-					)
-				) {
-					$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
-					$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-					$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
-					$this->refWalkCurlyBlock($tkns, $ptr);
-				}
-				if ($this->rightTokenSubsetIsAtIdx(
-					$tkns,
-					$ptr,
-					T_FINALLY,
-					$this->ignoreFutileTokens
-				)) {
-					$this->refWalkUsefulUntil($tkns, $ptr, T_FINALLY);
-					$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
-					$this->refWalkCurlyBlock($tkns, $ptr);
-				}
-				return;
-			}
-
-			if (T_IF == $id) {
-				$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
-				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-				$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
-				$this->refWalkCurlyBlock($tkns, $ptr);
-				while (true) {
-					if (
-						$this->rightTokenSubsetIsAtIdx(
-							$tkns,
-							$ptr,
-							T_ELSEIF,
-							$this->ignoreFutileTokens
-						)
-					) {
-						$this->refWalkUsefulUntil($tkns, $ptr, ST_PARENTHESES_OPEN);
-						$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-						$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
-						$this->refWalkCurlyBlock($tkns, $ptr);
-						continue;
-					} elseif (
-						$this->rightTokenSubsetIsAtIdx(
-							$tkns,
-							$ptr,
-							T_ELSE,
-							$this->ignoreFutileTokens
-						)
-					) {
-						$this->refWalkUsefulUntil($tkns, $ptr, ST_CURLY_OPEN);
-						$this->refWalkCurlyBlock($tkns, $ptr);
-						break;
-					}
-					break;
-				}
-				return;
-			}
-
-			if (
-				ST_CURLY_OPEN == $id ||
-				T_CURLY_OPEN == $id ||
-				T_DOLLAR_OPEN_CURLY_BRACES == $id
-			) {
-				$this->refWalkCurlyBlock($tkns, $ptr);
-				continue;
-			}
-
-			if (ST_PARENTHESES_OPEN == $id) {
-				$this->refWalkBlock($tkns, $ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE);
-				continue;
-			}
-
-			if (ST_BRACKET_OPEN == $id) {
-				$this->refWalkBlock($tkns, $ptr, ST_BRACKET_OPEN, ST_BRACKET_CLOSE);
-				continue;
-			}
-
-			if (ST_SEMI_COLON == $id) {
-				return;
-			}
-		}
-		--$ptr;
-	}
-
-	protected function refInsert(&$tkns, &$ptr, $item) {
-		array_splice($tkns, $ptr, 0, [$item]);
-		++$ptr;
-	}
 }
 
 	final class RefactorPass extends FormatterPass {
+
 	private $from;
+
 	private $to;
+
 	public function __construct($from, $to) {
 		$this->setFrom($from);
 		$this->setTo($to);
 	}
-	private function setFrom($from) {
-		$tkns = token_get_all('<?php ' . $from);
-		array_shift($tkns);
-		$tkns = array_map(function ($v) {
-			return $this->getToken($v);
-		}, $tkns);
-		$this->from = $tkns;
-		return $this;
+
+	public function calculateBuffer($fromStr, $toStr, $skipCall, $buffer) {
+		if (strpos($toStr, '/*skip*/')) {
+			return str_replace(explode($skipCall, $fromStr), explode('/*skip*/', $toStr), $buffer);
+		}
+		return str_replace($fromStr, $toStr, $buffer);
 	}
-	private function getFrom() {
-		return $this->from;
-	}
-	private function setTo($to) {
-		$tkns = token_get_all('<?php ' . $to);
-		array_shift($tkns);
-		$tkns = array_map(function ($v) {
-			return $this->getToken($v);
-		}, $tkns);
-		$this->to = $tkns;
-		return $this;
-	}
-	private function getTo() {
-		return $this->to;
-	}
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
 		$from = $this->getFrom();
 		$fromSize = sizeof($from);
@@ -1108,12 +1109,34 @@ abstract class FormatterPass {
 		return $this->code;
 	}
 
-	public function calculateBuffer($fromStr, $toStr, $skipCall, $buffer) {
-		if (strpos($toStr, '/*skip*/')) {
-			return str_replace(explode($skipCall, $fromStr), explode('/*skip*/', $toStr), $buffer);
-		}
-		return str_replace($fromStr, $toStr, $buffer);
+	private function getFrom() {
+		return $this->from;
 	}
+
+	private function getTo() {
+		return $this->to;
+	}
+
+	private function setFrom($from) {
+		$tkns = token_get_all('<?php ' . $from);
+		array_shift($tkns);
+		$tkns = array_map(function ($v) {
+			return $this->getToken($v);
+		}, $tkns);
+		$this->from = $tkns;
+		return $this;
+	}
+
+	private function setTo($to) {
+		$tkns = token_get_all('<?php ' . $to);
+		array_shift($tkns);
+		$tkns = array_map(function ($v) {
+			return $this->getToken($v);
+		}, $tkns);
+		$this->to = $tkns;
+		return $this;
+	}
+
 }
 
 	final class CodeFormatter {

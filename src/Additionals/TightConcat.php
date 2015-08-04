@@ -1,5 +1,6 @@
 <?php
 final class TightConcat extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_CONCAT])) {
 			return true;
@@ -54,4 +55,5 @@ $a = 'a'. 1 .'b';
 ?>
 EOT;
 	}
+
 }

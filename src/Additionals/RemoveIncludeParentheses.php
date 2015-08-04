@@ -35,7 +35,7 @@ final class RemoveIncludeParentheses extends AdditionalPass {
 				if (!$this->rightTokenIs(ST_PARENTHESES_OPEN)) {
 					break;
 				}
-				$parenCount++;
+				++$parenCount;
 				$this->walkUntil(ST_PARENTHESES_OPEN);
 				break;
 			default:

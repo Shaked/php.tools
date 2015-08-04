@@ -1,5 +1,6 @@
 <?php
 final class StripNewlineAfterCurlyOpen extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_CURLY_OPEN])) {
 			return true;
@@ -7,6 +8,7 @@ final class StripNewlineAfterCurlyOpen extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -61,4 +63,5 @@ for ($a = 0; $a < 10; $a++){
 ?>
 EOT;
 	}
+
 }

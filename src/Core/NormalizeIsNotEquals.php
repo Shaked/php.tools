@@ -1,5 +1,6 @@
 <?php
 final class NormalizeIsNotEquals extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_IS_NOT_EQUAL])) {
 			return true;
@@ -7,6 +8,7 @@ final class NormalizeIsNotEquals extends FormatterPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -23,4 +25,5 @@ final class NormalizeIsNotEquals extends FormatterPass {
 
 		return $this->code;
 	}
+
 }

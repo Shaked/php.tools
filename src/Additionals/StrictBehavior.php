@@ -3,6 +3,7 @@
  * From PHP-CS-Fixer
  */
 final class StrictBehavior extends AdditionalPass {
+
 	private static $functions = [
 		'array_keys' => 3,
 		'array_search' => 3,
@@ -99,4 +100,5 @@ mb_detect_encoding($arr, 'UTF8', true);
 ?>
 EOT;
 	}
+
 }

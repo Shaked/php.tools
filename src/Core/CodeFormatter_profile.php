@@ -3,13 +3,10 @@
  * @codeCoverageIgnore
  */
 final class CodeFormatter extends BaseCodeFormatter {
-	private $timings = [];
 
 	private $currentTiming = null;
 
-	public function beforePass($source, $className) {
-		$this->currentTiming = microtime(true);
-	}
+	private $timings = [];
 
 	public function afterExecutedPass($source, $className) {
 		$cn = get_class($className);
@@ -26,4 +23,9 @@ final class CodeFormatter extends BaseCodeFormatter {
 		}
 		echo tabwriter($lines);
 	}
+
+	public function beforePass($source, $className) {
+		$this->currentTiming = microtime(true);
+	}
+
 }

@@ -1,5 +1,6 @@
 <?php
 final class ReturnNull extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_RETURN])) {
 			return true;
@@ -7,6 +8,7 @@ final class ReturnNull extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -88,4 +90,5 @@ function a(){
 ?>
 EOT;
 	}
+
 }

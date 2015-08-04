@@ -1,5 +1,6 @@
 <?php
 final class RestoreComments extends FormatterPass {
+
 	// Injected by CodeFormatter.php
 	public $commentStack = [];
 
@@ -13,6 +14,7 @@ final class RestoreComments extends FormatterPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$commentStack = array_reverse($this->commentStack);
 		$this->tkns = token_get_all($source);
@@ -28,4 +30,5 @@ final class RestoreComments extends FormatterPass {
 		}
 		return $this->renderLight($this->tkns);
 	}
+
 }

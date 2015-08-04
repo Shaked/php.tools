@@ -1,5 +1,6 @@
 <?php
 final class ConvertOpenTagWithEcho extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_OPEN_TAG_WITH_ECHO])) {
 			return true;
@@ -42,4 +43,5 @@ final class ConvertOpenTagWithEcho extends AdditionalPass {
 <?php echo "Hello World"?>
 EOT;
 	}
+
 }

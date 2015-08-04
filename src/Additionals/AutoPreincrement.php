@@ -1,5 +1,6 @@
 <?php
 class AutoPreincrement extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_INC]) || isset($foundTokens[T_DEC])) {
 			return true;
@@ -53,6 +54,30 @@ class AutoPreincrement extends AdditionalPass {
 		return $this->render();
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Automatically convert postincrement to preincrement.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+$a++;
+$b--;
+func($a++);
+
+++$a;
+--$b;
+func($a++);
+?>
+EOT;
+	}
+
 	private function findVariableLeftEdge() {
 		$this->skipBlocks();
 
@@ -100,27 +125,4 @@ class AutoPreincrement extends AdditionalPass {
 		} while (!(ST_DOLLAR == $id || T_VARIABLE == $id));
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Automatically convert postincrement to preincrement.';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-$a++;
-$b--;
-func($a++);
-
-++$a;
---$b;
-func($a++);
-?>
-EOT;
-	}
 }

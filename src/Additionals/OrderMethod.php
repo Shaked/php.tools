@@ -1,7 +1,78 @@
 <?php
 class OrderMethod extends AdditionalPass {
-	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
+
 	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
+
+	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
+
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_CLASS], $foundTokens[T_FUNCTION])) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+
+		// It scans for classes body and organizes functions internally.
+		$return = '';
+		$classBlock = '';
+		$curlyCount = 0;
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+			case T_CLASS:
+				$return = $text;
+				$return .= $this->walkAndAccumulateUntil($this->tkns, ST_CURLY_OPEN);
+				$classBlock = $this->walkAndAccumulateCurlyBlock($this->tkns);
+				$return .= str_replace(
+					self::OPENER_PLACEHOLDER,
+					'',
+					static::orderMethods(self::OPENER_PLACEHOLDER . $classBlock)
+				);
+				$this->appendCode($return);
+				break;
+			default:
+				$this->appendCode($text);
+				break;
+			}
+		}
+		return $this->code;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Sort methods within class in alphabetic order.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+class A {
+	function b(){}
+	function c(){}
+	function a(){}
+}
+?>
+to
+<?php
+class A {
+	function a(){}
+	function b(){}
+	function c(){}
+}
+?>
+EOT;
+	}
 
 	public function orderMethods($source) {
 		$tokens = token_get_all($source);
@@ -102,72 +173,4 @@ class OrderMethod extends AdditionalPass {
 		return $return;
 	}
 
-	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_CLASS], $foundTokens[T_FUNCTION])) {
-			return true;
-		}
-
-		return false;
-	}
-
-	public function format($source) {
-		$this->tkns = token_get_all($source);
-
-		// It scans for classes body and organizes functions internally.
-		$return = '';
-		$classBlock = '';
-		$curlyCount = 0;
-
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-			case T_CLASS:
-				$return = $text;
-				$return .= $this->walkAndAccumulateUntil($this->tkns, ST_CURLY_OPEN);
-				$classBlock = $this->walkAndAccumulateCurlyBlock($this->tkns);
-				$return .= str_replace(
-					self::OPENER_PLACEHOLDER,
-					'',
-					static::orderMethods(self::OPENER_PLACEHOLDER . $classBlock)
-				);
-				$this->appendCode($return);
-				break;
-			default:
-				$this->appendCode($text);
-				break;
-			}
-		}
-		return $this->code;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Sort methods within class in alphabetic order.';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-class A {
-	function b(){}
-	function c(){}
-	function a(){}
-}
-?>
-to
-<?php
-class A {
-	function a(){}
-	function b(){}
-	function c(){}
-}
-?>
-EOT;
-	}
 }

@@ -1,5 +1,6 @@
 <?php
 final class AllmanStyleBraces extends AdditionalPass {
+
 	const OTHER_BLOCK = '';
 
 	public function candidate($source, $foundTokens) {
@@ -185,4 +186,5 @@ if ($a)
 ?>
 EOT;
 	}
+
 }

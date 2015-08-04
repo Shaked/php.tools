@@ -1,5 +1,6 @@
 <?php
 final class MergeNamespaceWithOpenTag extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
@@ -7,6 +8,7 @@ final class MergeNamespaceWithOpenTag extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -31,6 +33,7 @@ final class MergeNamespaceWithOpenTag extends AdditionalPass {
 		}
 		return $this->code;
 	}
+
 	/**
 	 * @codeCoverageIgnore
 	 */
@@ -53,4 +56,5 @@ namespace A;
 ?>
 EOT;
 	}
+
 }

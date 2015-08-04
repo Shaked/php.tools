@@ -1,5 +1,6 @@
 <?php
 final class NamespaceMergeWithOpenTag extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
@@ -31,4 +32,5 @@ final class NamespaceMergeWithOpenTag extends FormatterPass {
 		}
 		return $this->code;
 	}
+
 }

@@ -3,8 +3,11 @@
  * From PHP-CS-Fixer
  */
 final class ShortArray extends AdditionalPass {
+
 	const FOUND_ARRAY = 'array';
+
 	const FOUND_PARENTHESES = 'paren';
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_ARRAY])) {
 			return true;
@@ -12,6 +15,7 @@ final class ShortArray extends AdditionalPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -68,4 +72,5 @@ echo [];
 ?>
 EOT;
 	}
+
 }

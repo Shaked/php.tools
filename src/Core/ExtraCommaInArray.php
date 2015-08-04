@@ -1,5 +1,6 @@
 <?php
 final class ExtraCommaInArray extends FormatterPass {
+
 	const ST_SHORT_ARRAY_OPEN = 'SHORT_ARRAY_OPEN';
 
 	public function candidate($source, $foundTokens) {
@@ -87,4 +88,5 @@ final class ExtraCommaInArray extends FormatterPass {
 		}
 		return $this->renderLight();
 	}
+
 }

@@ -1,5 +1,6 @@
 <?php
 final class NoSpaceAfterPHPDocBlocks extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DOC_COMMENT])) {
 			return true;
@@ -7,6 +8,7 @@ final class NoSpaceAfterPHPDocBlocks extends FormatterPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -56,4 +58,5 @@ function a($myInt){
 ?>
 EOT;
 	}
+
 }

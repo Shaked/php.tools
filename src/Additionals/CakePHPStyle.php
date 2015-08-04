@@ -1,5 +1,6 @@
 <?php
 final class CakePHPStyle extends AdditionalPass {
+
 	private $foundTokens;
 
 	public function candidate($source, $foundTokens) {
@@ -22,98 +23,47 @@ final class CakePHPStyle extends AdditionalPass {
 		$source = $this->resizeSpaces($source);
 		return $source;
 	}
-	private function resizeSpaces($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-			case T_COMMENT:
-			case T_DOC_COMMENT:
-				if (!$this->hasLnBefore() && $this->leftTokenIs(ST_CURLY_OPEN)) {
-					$this->rtrimAndAppendCode($this->getSpace() . $text);
-					break;
-				} elseif ($this->rightUsefulTokenIs(T_CONSTANT_ENCAPSED_STRING)) {
-					$this->appendCode($text . $this->getSpace());
-					break;
-				}
-				$this->appendCode($text);
-				break;
-			case T_CLOSE_TAG:
-				if (!$this->hasLnBefore()) {
-					$this->rtrimAndAppendCode($this->getSpace() . $text);
-					break;
-				}
-				$this->appendCode($text);
-				break;
-			default:
-				$this->appendCode($text);
-				break;
-			}
-		}
-		return $this->code;
-	}
-	private function mergeEqualsWithReference($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-			// Otherwise, just print me
-			case ST_REFERENCE:
-				if ($this->leftUsefulTokenIs(ST_EQUAL)) {
-					$this->rtrimAndAppendCode($text . $this->getSpace());
-					break;
-				}
 
-			default:
-				$this->appendCode($text);
-			}
-		}
-		return $this->code;
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Applies CakePHP Coding Style';
 	}
-	private function removeSpaceAfterCasts($source) {
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-			case T_ARRAY_CAST:
-			case T_BOOL_CAST:
-			case T_DOUBLE_CAST:
-			case T_INT_CAST:
-			case T_OBJECT_CAST:
-			case T_STRING_CAST:
-			case T_UNSET_CAST:
-			case T_STRING:
-			case T_VARIABLE:
-			case ST_PARENTHESES_OPEN:
-				if (
-					$this->leftUsefulTokenIs([
-						T_ARRAY_CAST,
-						T_BOOL_CAST,
-						T_DOUBLE_CAST,
-						T_INT_CAST,
-						T_OBJECT_CAST,
-						T_STRING_CAST,
-						T_UNSET_CAST,
-					])
-				) {
-					$this->rtrimAndAppendCode($text);
-					break;
-				}
-				$this->appendCode($text);
-				break;
-			default:
-				$this->appendCode($text);
-				break;
-			}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+namespace A;
+
+class A {
+	private $__a;
+	protected $_b;
+	public $c;
+
+	public function b() {
+		if($a) {
+			noop();
+		} else {
+			noop();
 		}
-		return $this->code;
 	}
+
+	protected function _c() {
+		if($a) {
+			noop();
+		} else {
+			noop();
+		}
+	}
+}
+?>
+EOT;
+	}
+
 	private function addUnderscoresBeforeName($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -188,43 +138,99 @@ final class CakePHPStyle extends AdditionalPass {
 		return $this->code;
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Applies CakePHP Coding Style';
-	}
+	private function mergeEqualsWithReference($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+			// Otherwise, just print me
+			case ST_REFERENCE:
+				if ($this->leftUsefulTokenIs(ST_EQUAL)) {
+					$this->rtrimAndAppendCode($text . $this->getSpace());
+					break;
+				}
 
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-namespace A;
-
-class A {
-	private $__a;
-	protected $_b;
-	public $c;
-
-	public function b() {
-		if($a) {
-			noop();
-		} else {
-			noop();
+			default:
+				$this->appendCode($text);
+			}
 		}
+		return $this->code;
 	}
 
-	protected function _c() {
-		if($a) {
-			noop();
-		} else {
-			noop();
+	private function removeSpaceAfterCasts($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+			case T_ARRAY_CAST:
+			case T_BOOL_CAST:
+			case T_DOUBLE_CAST:
+			case T_INT_CAST:
+			case T_OBJECT_CAST:
+			case T_STRING_CAST:
+			case T_UNSET_CAST:
+			case T_STRING:
+			case T_VARIABLE:
+			case ST_PARENTHESES_OPEN:
+				if (
+					$this->leftUsefulTokenIs([
+						T_ARRAY_CAST,
+						T_BOOL_CAST,
+						T_DOUBLE_CAST,
+						T_INT_CAST,
+						T_OBJECT_CAST,
+						T_STRING_CAST,
+						T_UNSET_CAST,
+					])
+				) {
+					$this->rtrimAndAppendCode($text);
+					break;
+				}
+				$this->appendCode($text);
+				break;
+			default:
+				$this->appendCode($text);
+				break;
+			}
 		}
+		return $this->code;
 	}
-}
-?>
-EOT;
+
+	private function resizeSpaces($source) {
+		$this->tkns = token_get_all($source);
+		$this->code = '';
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+			case T_COMMENT:
+			case T_DOC_COMMENT:
+				if (!$this->hasLnBefore() && $this->leftTokenIs(ST_CURLY_OPEN)) {
+					$this->rtrimAndAppendCode($this->getSpace() . $text);
+					break;
+				} elseif ($this->rightUsefulTokenIs(T_CONSTANT_ENCAPSED_STRING)) {
+					$this->appendCode($text . $this->getSpace());
+					break;
+				}
+				$this->appendCode($text);
+				break;
+			case T_CLOSE_TAG:
+				if (!$this->hasLnBefore()) {
+					$this->rtrimAndAppendCode($this->getSpace() . $text);
+					break;
+				}
+				$this->appendCode($text);
+				break;
+			default:
+				$this->appendCode($text);
+				break;
+			}
+		}
+		return $this->code;
 	}
+
 }

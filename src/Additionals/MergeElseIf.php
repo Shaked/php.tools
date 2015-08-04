@@ -3,6 +3,7 @@
  * From PHP-CS-Fixer
  */
 final class MergeElseIf extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_ELSE]) || isset($foundTokens[T_ELSEIF])) {
 			return true;
@@ -64,4 +65,5 @@ if($a){
 ?>
 EOT;
 	}
+
 }

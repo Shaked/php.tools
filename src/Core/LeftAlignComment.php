@@ -1,6 +1,8 @@
 <?php
 final class LeftAlignComment extends FormatterPass {
+
 	const NON_INDENTABLE_COMMENT = "/*\x2 COMMENT \x3*/";
+
 	public function candidate($source, $foundTokens) {
 		if (
 			isset($foundTokens[T_COMMENT]) ||
@@ -64,4 +66,5 @@ final class LeftAlignComment extends FormatterPass {
 		}
 		return $this->code;
 	}
+
 }

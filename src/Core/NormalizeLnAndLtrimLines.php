@@ -1,8 +1,10 @@
 <?php
 final class NormalizeLnAndLtrimLines extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
 		$source = str_replace(["\r\n", "\n\r", "\r", "\n"], $this->newLine, $source);
 		$source = preg_replace('/\h+$/mu', '', $source);
@@ -61,4 +63,5 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 
 		return $this->code;
 	}
+
 }

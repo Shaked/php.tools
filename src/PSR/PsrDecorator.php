@@ -1,5 +1,6 @@
 <?php
 final class PsrDecorator {
+
 	public static function PSR1(CodeFormatter $fmt) {
 		$fmt->enablePass('PSR1OpenTags');
 		$fmt->enablePass('PSR1BOMMark');
@@ -25,4 +26,5 @@ final class PsrDecorator {
 		self::PSR1Naming($fmt);
 		self::PSR2($fmt);
 	}
+
 }

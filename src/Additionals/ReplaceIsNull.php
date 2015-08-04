@@ -1,8 +1,10 @@
 <?php
 final class ReplaceIsNull extends AdditionalPass {
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -47,4 +49,5 @@ null === $a;
 ?>
 EOT;
 	}
+
 }

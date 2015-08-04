@@ -1,5 +1,6 @@
 <?php
 final class PSR2LnAfterNamespace extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;
@@ -7,6 +8,7 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 
 		return false;
 	}
+
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 		$this->code = '';
@@ -47,4 +49,5 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 
 		return $this->code;
 	}
+
 }

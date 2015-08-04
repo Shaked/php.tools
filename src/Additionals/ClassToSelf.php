@@ -1,5 +1,6 @@
 <?php
 class ClassToSelf extends AdditionalPass {
+
 	const PLACEHOLDER = 'self';
 
 	public function candidate($source, $foundTokens) {
@@ -44,33 +45,6 @@ class ClassToSelf extends AdditionalPass {
 		return $this->render();
 	}
 
-	private function convertToPlaceholder($name, $start, $end) {
-		for ($i = $start; $i < $end; ++$i) {
-			list($id, $text) = $this->getToken($this->tkns[$i]);
-
-			if (T_FUNCTION == $id && $this->rightTokenSubsetIsAtIdx($this->tkns, $i, [ST_REFERENCE, ST_PARENTHESES_OPEN])) {
-				$this->refWalkUsefulUntil($this->tkns, $i, ST_CURLY_OPEN);
-				$this->refWalkCurlyBlock($this->tkns, $i);
-				continue;
-			}
-
-			if (
-				!(T_STRING == $id && strtolower($text) == strtolower($name)) ||
-				$this->leftTokenSubsetIsAtIdx($this->tkns, $i, T_NS_SEPARATOR) ||
-				$this->rightTokenSubsetIsAtIdx($this->tkns, $i, T_NS_SEPARATOR)
-			) {
-				continue;
-			}
-
-			if (
-				$this->leftTokenSubsetIsAtIdx($this->tkns, $i, [T_INSTANCEOF, T_NEW]) ||
-				$this->rightTokenSubsetIsAtIdx($this->tkns, $i, T_DOUBLE_COLON)
-			) {
-				$this->tkns[$i] = [T_STRING, self::PLACEHOLDER];
-			}
-		}
-	}
-
 	/**
 	 * @codeCoverageIgnore
 	 */
@@ -102,4 +76,32 @@ class A {
 ?>
 EOT;
 	}
+
+	private function convertToPlaceholder($name, $start, $end) {
+		for ($i = $start; $i < $end; ++$i) {
+			list($id, $text) = $this->getToken($this->tkns[$i]);
+
+			if (T_FUNCTION == $id && $this->rightTokenSubsetIsAtIdx($this->tkns, $i, [ST_REFERENCE, ST_PARENTHESES_OPEN])) {
+				$this->refWalkUsefulUntil($this->tkns, $i, ST_CURLY_OPEN);
+				$this->refWalkCurlyBlock($this->tkns, $i);
+				continue;
+			}
+
+			if (
+				!(T_STRING == $id && strtolower($text) == strtolower($name)) ||
+				$this->leftTokenSubsetIsAtIdx($this->tkns, $i, T_NS_SEPARATOR) ||
+				$this->rightTokenSubsetIsAtIdx($this->tkns, $i, T_NS_SEPARATOR)
+			) {
+				continue;
+			}
+
+			if (
+				$this->leftTokenSubsetIsAtIdx($this->tkns, $i, [T_INSTANCEOF, T_NEW]) ||
+				$this->rightTokenSubsetIsAtIdx($this->tkns, $i, T_DOUBLE_COLON)
+			) {
+				$this->tkns[$i] = [T_STRING, self::PLACEHOLDER];
+			}
+		}
+	}
+
 }

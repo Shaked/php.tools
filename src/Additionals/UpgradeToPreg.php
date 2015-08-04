@@ -3,6 +3,7 @@
 From PHP-CS-Fixer by Matteo Beccati
  */
 final class UpgradeToPreg extends AdditionalPass {
+
 	private static $conversionTable = [
 		'ereg' => [
 			'to' => 'preg_match',

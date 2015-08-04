@@ -1,5 +1,53 @@
 <?php
 final class OrganizeClass extends OrderMethod {
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Organize class structure (beta).';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+// From
+class A {
+	public function d(){}
+	protected function b(){}
+	private $a = "";
+	private function c(){}
+	public function a(){}
+	public $b = "";
+	const B = 0;
+	const A = 0;
+}
+
+// To
+class A {
+	const A = 0;
+
+	const B = 0;
+
+	public $b = "";
+
+	private $a = "";
+
+	public function a(){}
+
+	public function d(){}
+
+	protected function b(){}
+
+	private function c(){}
+}
+?>
+EOT;
+	}
+
 	public function orderMethods($source) {
 		$tokens = token_get_all($source);
 
@@ -156,50 +204,4 @@ final class OrganizeClass extends OrderMethod {
 		return $final . $this->newLine . ST_CURLY_CLOSE;
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Organize class structure (beta).';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-// From
-class A {
-	public function d(){}
-	protected function b(){}
-	private $a = "";
-	private function c(){}
-	public function a(){}
-	public $b = "";
-	const B = 0;
-	const A = 0;
-}
-
-// To
-class A {
-	const A = 0;
-
-	const B = 0;
-
-	public $b = "";
-
-	private $a = "";
-
-	public function a(){}
-
-	public function d(){}
-
-	protected function b(){}
-
-	private function c(){}
-}
-?>
-EOT;
-	}
 }

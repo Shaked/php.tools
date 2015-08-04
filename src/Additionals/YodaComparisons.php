@@ -1,10 +1,16 @@
 <?php
 final class YodaComparisons extends AdditionalPass {
-	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
-	const CHAIN_LITERAL = 'CHAIN_LITERAL';
+
 	const CHAIN_FUNC = 'CHAIN_FUNC';
+
+	const CHAIN_LITERAL = 'CHAIN_LITERAL';
+
 	const CHAIN_STRING = 'CHAIN_STRING';
+
+	const CHAIN_VARIABLE = 'CHAIN_VARIABLE';
+
 	const PARENTHESES_BLOCK = 'PARENTHESES_BLOCK';
+
 	public function candidate($source, $foundTokens) {
 		if (
 			isset($foundTokens[T_IS_EQUAL]) ||
@@ -20,6 +26,32 @@ final class YodaComparisons extends AdditionalPass {
 
 	public function format($source) {
 		return $this->yodise($source);
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Execute Yoda Comparisons.';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+<?php
+if($a == 1){
+
+}
+?>
+to
+<?php
+if(1 == $a){
+
+}
+?>
+EOT;
 	}
 
 	protected function yodise($source) {
@@ -89,50 +121,6 @@ final class YodaComparisons extends AdditionalPass {
 			}
 		}
 		return $this->render($tkns);
-	}
-
-	private function isPureVariable($id) {
-		return self::CHAIN_VARIABLE == $id || T_VARIABLE == $id || T_INC == $id || T_DEC == $id || ST_EXCLAMATION == $id || T_COMMENT == $id || T_DOC_COMMENT == $id || T_WHITESPACE == $id;
-	}
-
-	private function isLowerPrecedence($id) {
-		switch ($id) {
-		case ST_REFERENCE:
-		case ST_BITWISE_XOR:
-		case ST_BITWISE_OR:
-		case T_BOOLEAN_AND:
-		case T_BOOLEAN_OR:
-		case ST_QUESTION:
-		case ST_COLON:
-		case ST_EQUAL:
-		case T_PLUS_EQUAL:
-		case T_MINUS_EQUAL:
-		case T_MUL_EQUAL:
-		case T_POW_EQUAL:
-		case T_DIV_EQUAL:
-		case T_CONCAT_EQUAL:
-		case T_MOD_EQUAL:
-		case T_AND_EQUAL:
-		case T_OR_EQUAL:
-		case T_XOR_EQUAL:
-		case T_SL_EQUAL:
-		case T_SR_EQUAL:
-		case T_DOUBLE_ARROW:
-		case T_LOGICAL_AND:
-		case T_LOGICAL_XOR:
-		case T_LOGICAL_OR:
-		case ST_COMMA:
-		case ST_SEMI_COLON:
-		case T_RETURN:
-		case T_THROW:
-		case T_GOTO:
-		case T_CASE:
-		case T_COMMENT:
-		case T_DOC_COMMENT:
-		case T_OPEN_TAG:
-			return true;
-		}
-		return false;
 	}
 
 	private function aggregateVariables($source) {
@@ -220,29 +208,48 @@ final class YodaComparisons extends AdditionalPass {
 		return $tkns;
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Execute Yoda Comparisons.';
+	private function isLowerPrecedence($id) {
+		switch ($id) {
+		case ST_REFERENCE:
+		case ST_BITWISE_XOR:
+		case ST_BITWISE_OR:
+		case T_BOOLEAN_AND:
+		case T_BOOLEAN_OR:
+		case ST_QUESTION:
+		case ST_COLON:
+		case ST_EQUAL:
+		case T_PLUS_EQUAL:
+		case T_MINUS_EQUAL:
+		case T_MUL_EQUAL:
+		case T_POW_EQUAL:
+		case T_DIV_EQUAL:
+		case T_CONCAT_EQUAL:
+		case T_MOD_EQUAL:
+		case T_AND_EQUAL:
+		case T_OR_EQUAL:
+		case T_XOR_EQUAL:
+		case T_SL_EQUAL:
+		case T_SR_EQUAL:
+		case T_DOUBLE_ARROW:
+		case T_LOGICAL_AND:
+		case T_LOGICAL_XOR:
+		case T_LOGICAL_OR:
+		case ST_COMMA:
+		case ST_SEMI_COLON:
+		case T_RETURN:
+		case T_THROW:
+		case T_GOTO:
+		case T_CASE:
+		case T_COMMENT:
+		case T_DOC_COMMENT:
+		case T_OPEN_TAG:
+			return true;
+		}
+		return false;
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-if($a == 1){
-
-}
-?>
-to
-<?php
-if(1 == $a){
-
-}
-?>
-EOT;
+	private function isPureVariable($id) {
+		return self::CHAIN_VARIABLE == $id || T_VARIABLE == $id || T_INC == $id || T_DEC == $id || ST_EXCLAMATION == $id || T_COMMENT == $id || T_DOC_COMMENT == $id || T_WHITESPACE == $id;
 	}
+
 }

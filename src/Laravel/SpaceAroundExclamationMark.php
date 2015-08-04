@@ -1,5 +1,6 @@
 <?php
 final class SpaceAroundExclamationMark extends FormatterPass {
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_EXCLAMATION])) {
 			return true;
@@ -26,4 +27,5 @@ final class SpaceAroundExclamationMark extends FormatterPass {
 
 		return $this->code;
 	}
+
 }

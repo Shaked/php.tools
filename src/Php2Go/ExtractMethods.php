@@ -1,5 +1,6 @@
 <?php
 class ExtractMethods extends FormatterPass {
+
 	private $functionStack = [];
 
 	public function candidate($source, $foundTokens) {
@@ -44,4 +45,5 @@ class ExtractMethods extends FormatterPass {
 	private function extractMethodsFrom($className, $startPtr, $endPtr) {
 		echo $className, ' ', $startPtr, ' <-> ', $endPtr;
 	}
+
 }

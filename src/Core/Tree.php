@@ -1,43 +1,61 @@
 <?php
 final class Tree extends FormatterPass {
+
 	public function candidate($source, $tokens) {
 		return true;
 	}
+
+	public function consumeBlock(&$tkns, $start, $end) {
+		$count = 1;
+		$block = [];
+		while (list(, $token) = each($tkns)) {
+			list($id, $text) = $this->getToken($token);
+
+			if ($start == $id) {
+				++$count;
+			}
+			if ($end == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+			$block[] = [$id, $text];
+		}
+
+		return $block;
+	}
+
+	public function consumeCurlyBlock(&$tkns) {
+		$count = 1;
+		$block = [];
+		while (list(, $token) = each($tkns)) {
+			list($id, $text) = $this->getToken($token);
+
+			if (ST_CURLY_OPEN == $id) {
+				++$count;
+			}
+			if (T_CURLY_OPEN == $id) {
+				++$count;
+			}
+			if (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
+				++$count;
+			}
+			if (ST_CURLY_CLOSE == $id) {
+				--$count;
+			}
+			if (0 == $count) {
+				break;
+			}
+			$block[] = [$id, $text];
+		}
+		return $block;
+	}
+
 	public function format($code) {
 		$tokens = token_get_all($code);
 		$tree = $this->parseTree($tokens);
 		return $this->visit($tree);
-	}
-	public function visit($tree) {
-		$str = '';
-
-		foreach ($tree as $token) {
-			list($id, $text) = $this->getToken($token);
-
-			if (ST_PARENTHESES_BLOCK == $id || ST_BRACKET_BLOCK == $id || ST_CURLY_BLOCK == $id) {
-				array_shift($token);
-				$open = array_shift($token); // get rid of this array_unshift -- too sloww
-				$close = array_pop($token);
-				$block = $this->visit($token);
-				$block = str_replace("\n", "\n\t", $block);
-				$block = (
-					$open .
-					rtrim($block) .
-					(
-						("\t" == substr($block, -1) || ' ' == substr($block, -1))
-						? "\n"
-						: ''
-					) .
-					$close
-				);
-				$str .= $block;
-				continue;
-			}
-
-			$str .= $text;
-		}
-
-		return $str;
 	}
 
 	public function parseTree($tokens) {
@@ -103,51 +121,36 @@ final class Tree extends FormatterPass {
 		return $tree;
 	}
 
-	public function consumeBlock(&$tkns, $start, $end) {
-		$count = 1;
-		$block = [];
-		while (list(, $token) = each($tkns)) {
+	public function visit($tree) {
+		$str = '';
+
+		foreach ($tree as $token) {
 			list($id, $text) = $this->getToken($token);
 
-			if ($start == $id) {
-				++$count;
+			if (ST_PARENTHESES_BLOCK == $id || ST_BRACKET_BLOCK == $id || ST_CURLY_BLOCK == $id) {
+				array_shift($token);
+				$open = array_shift($token); // get rid of this array_unshift -- too sloww
+				$close = array_pop($token);
+				$block = $this->visit($token);
+				$block = str_replace("\n", "\n\t", $block);
+				$block = (
+					$open .
+					rtrim($block) .
+					(
+						("\t" == substr($block, -1) || ' ' == substr($block, -1))
+						? "\n"
+						: ''
+					) .
+					$close
+				);
+				$str .= $block;
+				continue;
 			}
-			if ($end == $id) {
-				--$count;
-			}
-			if (0 == $count) {
-				break;
-			}
-			$block[] = [$id, $text];
+
+			$str .= $text;
 		}
 
-		return $block;
-	}
-
-	public function consumeCurlyBlock(&$tkns) {
-		$count = 1;
-		$block = [];
-		while (list(, $token) = each($tkns)) {
-			list($id, $text) = $this->getToken($token);
-
-			if (ST_CURLY_OPEN == $id) {
-				++$count;
-			}
-			if (T_CURLY_OPEN == $id) {
-				++$count;
-			}
-			if (T_DOLLAR_OPEN_CURLY_BRACES == $id) {
-				++$count;
-			}
-			if (ST_CURLY_CLOSE == $id) {
-				--$count;
-			}
-			if (0 == $count) {
-				break;
-			}
-			$block[] = [$id, $text];
-		}
-		return $block;
+		return $str;
 	}
 
 }
