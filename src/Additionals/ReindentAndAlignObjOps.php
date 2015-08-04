@@ -234,6 +234,9 @@ class ReindentAndAlignObjOps extends AdditionalPass {
 					}
 				}
 				$this->appendCode($text);
+				if ($this->leftUsefulTokenIs([T_OBJECT_OPERATOR]) && $this->hasLn($text)) {
+					$this->appendCode($this->getIndent(+1));
+				}
 				break;
 
 			case ST_COMMA:
@@ -248,6 +251,9 @@ class ReindentAndAlignObjOps extends AdditionalPass {
 
 			case T_WHITESPACE:
 				$this->appendCode($text);
+				if ($this->leftUsefulTokenIs([T_OBJECT_OPERATOR]) && $this->hasLn($text)) {
+					$this->appendCode($this->getIndent(+1));
+				}
 				break;
 
 			default:

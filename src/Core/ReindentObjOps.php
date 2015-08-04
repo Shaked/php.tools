@@ -146,6 +146,9 @@ final class ReindentObjOps extends FormatterPass {
 					$this->appendCode($this->getIndent(+1));
 				}
 				$this->appendCode($text);
+				if ($this->leftUsefulTokenIs([T_OBJECT_OPERATOR]) && $this->hasLn($text)) {
+					$this->appendCode($this->getIndent(+1));
+				}
 				break;
 
 			case ST_COMMA:
@@ -159,6 +162,9 @@ final class ReindentObjOps extends FormatterPass {
 
 			case T_WHITESPACE:
 				$this->appendCode($text);
+				if ($this->leftUsefulTokenIs([T_OBJECT_OPERATOR]) && $this->hasLn($text)) {
+					$this->appendCode($this->getIndent(+1));
+				}
 				break;
 
 			default:

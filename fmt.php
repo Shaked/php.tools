@@ -2447,7 +2447,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "12.0.0");
+	define("VERSION", "12.0.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -5459,6 +5459,9 @@ final class AutoImportPass extends FormatterPass {
 					$this->appendCode($this->getIndent(+1));
 				}
 				$this->appendCode($text);
+				if ($this->leftUsefulTokenIs([T_OBJECT_OPERATOR]) && $this->hasLn($text)) {
+					$this->appendCode($this->getIndent(+1));
+				}
 				break;
 
 			case ST_COMMA:
@@ -5472,6 +5475,9 @@ final class AutoImportPass extends FormatterPass {
 
 			case T_WHITESPACE:
 				$this->appendCode($text);
+				if ($this->leftUsefulTokenIs([T_OBJECT_OPERATOR]) && $this->hasLn($text)) {
+					$this->appendCode($this->getIndent(+1));
+				}
 				break;
 
 			default:
@@ -11060,6 +11066,9 @@ EOT;
 					}
 				}
 				$this->appendCode($text);
+				if ($this->leftUsefulTokenIs([T_OBJECT_OPERATOR]) && $this->hasLn($text)) {
+					$this->appendCode($this->getIndent(+1));
+				}
 				break;
 
 			case ST_COMMA:
@@ -11074,6 +11083,9 @@ EOT;
 
 			case T_WHITESPACE:
 				$this->appendCode($text);
+				if ($this->leftUsefulTokenIs([T_OBJECT_OPERATOR]) && $this->hasLn($text)) {
+					$this->appendCode($this->getIndent(+1));
+				}
 				break;
 
 			default:
