@@ -48,58 +48,58 @@ class Build extends FormatterPass {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
-				case T_NAMESPACE:
-					if ($this->rightUsefulTokenIs(T_STRING)) {
-						list($rId, $rText) = $this->rightUsefulToken();
-						if ('Extern' == $rText) {
-							$this->walkUntil(ST_CURLY_OPEN);
-							$curlyStack[] = T_NAMESPACE;
-							continue;
-						}
-					}
-					$this->appendCode($text);
-					break;
-
-				case ST_CURLY_OPEN:
-				case T_CURLY_OPEN:
-				case T_DOLLAR_OPEN_CURLY_BRACES:
-					$curlyStack[] = $id;
-					$this->appendCode($text);
-					break;
-
-				case ST_CURLY_CLOSE;
-					$foundId = array_pop($curlyStack);
-					if (T_NAMESPACE == $foundId) {
+			case T_NAMESPACE:
+				if ($this->rightUsefulTokenIs(T_STRING)) {
+					list($rId, $rText) = $this->rightUsefulToken();
+					if ('Extern' == $rText) {
+						$this->walkUntil(ST_CURLY_OPEN);
+						$curlyStack[] = T_NAMESPACE;
 						continue;
 					}
-					$this->appendCode($text);
-					break;
+				}
+				$this->appendCode($text);
+				break;
 
-				case T_REQUIRE:
-					list($id, $text) = $this->walkUntil(T_CONSTANT_ENCAPSED_STRING);
-					$fn = str_replace(['"', "'"], '', $text);
-					if (!empty($suffix)) {
-						$fn = str_replace('.php', '_' . $suffix . '.php', $fn);
-					}
+			case ST_CURLY_OPEN:
+			case T_CURLY_OPEN:
+			case T_DOLLAR_OPEN_CURLY_BRACES:
+				$curlyStack[] = $id;
+				$this->appendCode($text);
+				break;
 
-					$source = file_get_contents(str_replace(['"', "'"], '', $fn));
-					$source = (new EncapsulateNamespaces())->format($source);
-					$included = token_get_all($source);
-					if (T_OPEN_TAG == $included[0][0]) {
-						unset($included[0]);
+			case ST_CURLY_CLOSE;
+				$foundId = array_pop($curlyStack);
+				if (T_NAMESPACE == $foundId) {
+					continue;
+				}
+				$this->appendCode($text);
+				break;
+
+			case T_REQUIRE:
+				list($id, $text) = $this->walkUntil(T_CONSTANT_ENCAPSED_STRING);
+				$fn = str_replace(['"', "'"], '', $text);
+				if (!empty($suffix)) {
+					$fn = str_replace('.php', '_' . $suffix . '.php', $fn);
+				}
+
+				$source = file_get_contents(str_replace(['"', "'"], '', $fn));
+				$source = (new EncapsulateNamespaces())->format($source);
+				$included = token_get_all($source);
+				if (T_OPEN_TAG == $included[0][0]) {
+					unset($included[0]);
+				}
+				while (list(, $token) = each($included)) {
+					list($id, $text) = $this->getToken($token);
+					if (T_REQUIRE == $token || T_REQUIRE_ONCE == $token || T_INCLUDE == $token || T_INCLUDE_ONCE == $token) {
+						fwrite(STDERR, 'found ' . $text . '. Include files must not have include files.');
+						exit(-1);
 					}
-					while (list(, $token) = each($included)) {
-						list($id, $text) = $this->getToken($token);
-						if (T_REQUIRE == $token || T_REQUIRE_ONCE == $token || T_INCLUDE == $token || T_INCLUDE_ONCE == $token) {
-							fwrite(STDERR, 'found ' . $text . '. Include files must not have include files.');
-							exit(-1);
-						}
-						$this->appendCode($text);
-					}
-					$this->walkUntil(ST_SEMI_COLON);
-					break;
-				default:
 					$this->appendCode($text);
+				}
+				$this->walkUntil(ST_SEMI_COLON);
+				break;
+			default:
+				$this->appendCode($text);
 			}
 		}
 		return $this->code;
@@ -130,7 +130,7 @@ for ($i = 0; $i < $workers; ++$i) {
 	}, $pass, $chn, $chn_done);
 }
 
-$targets = ['fmt', 'refactor', 'php.tools'];
+$targets = ['fmt', 'refactor'];
 foreach ($targets as $target) {
 	$chn->in($target);
 }
@@ -166,5 +166,3 @@ foreach ($targets as $target) {
 		}
 	}
 }
-echo 'moving ', '..' . DIRECTORY_SEPARATOR . 'php.tools.php', ' to ..' . DIRECTORY_SEPARATOR . 'php.tools', PHP_EOL;
-rename('..' . DIRECTORY_SEPARATOR . 'php.tools.php', '..' . DIRECTORY_SEPARATOR . 'php.tools');

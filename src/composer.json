@@ -4,7 +4,7 @@
     "description": "A script to automatically fix K&R and PSR-1/2 Coding Standard.",
     "license": "BSD-3-Clause",
     "keywords": ["language syntax", "formatter", "formatting", "psr1", "psr2", "coding", "style"],
-    "bin": ["fmt.php","refactor.php","php.tools"],
+    "bin": ["fmt.phar","fmt.php","refactor.php","php.tools"],
     "authors": [
         {
             "name": "Carlos C",
@@ -24,10 +24,5 @@
         "ext-xdebug": "*",
         "dericofilho/csp": "2.0.*",
         "satooshi/php-coveralls": "dev-master"
-    },
-    "suggest": {
-        "phpunit/phpunit": "Execute tests using 'php.tools test'",
-        "phpdocumentor/phpdocumentor": "Document generation using 'php.tools doc'",
-        "exuberant/ctags": "For PHP target ctags generation"
     }
 }
