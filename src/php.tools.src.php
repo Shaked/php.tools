@@ -385,6 +385,13 @@ if (false !== $fmtBin && isset($argv[1]) && 'fmt' == $argv[1]) {
 	}
 }
 
+if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+	fwrite(STDERR, "\e[01;31m");
+}
+fwrite(STDERR, 'Warning: php.tools CLI is deprecated. Only the formatter (fmt.phar and fmt.php) will be available as of the next major release.' . PHP_EOL . PHP_EOL);
+if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+	fwrite(STDERR, "\e[0m");
+}
 array_shift($argv);
 if (!empty($WATCH)) {
 	$currentTime = 0;
