@@ -4,7 +4,7 @@
     "description": "Library to partially enable CSP-like concurrency model in PHP",
     "license": "MIT",
     "keywords": ["CSP", "concurrency"],
-    "homepage": "https://github.com/dericofilho/php.csp",
+    "homepage": "https://github.com/ccirello/php.csp",
     "authors": [
         {
             "name": "Carlos C",
@@ -12,8 +12,8 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/dericofilho/php.csp/issues",
-        "source": "https://github.com/dericofilho/php.csp"
+        "issues": "https://github.com/ccirello/php.csp/issues",
+        "source": "https://github.com/ccirello/php.csp"
     },
     "require":{
         "php": ">=5.4.0"

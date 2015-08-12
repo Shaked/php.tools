@@ -2146,21 +2146,23 @@ namespace {
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-define('PHP_INT_LENGTH', strlen(sprintf("%u", PHP_INT_MAX)));
+define('PHP_INT_LENGTH', strlen(sprintf('%u', PHP_INT_MAX)));
 function cofunc(callable $fn) {
 	$pid = pcntl_fork();
 	if (-1 == $pid) {
 		trigger_error('could not fork', E_ERROR);
-	} elseif ($pid) {
-		// I am the parent
-	} else {
-		$params = [];
-		if (func_num_args() > 1) {
-			$params = array_slice(func_get_args(), 1);
-		}
-		call_user_func_array($fn, $params);
-		die();
+		return;
 	}
+	if ($pid) {
+		return;
+	}
+	pcntl_signal(SIGCHLD, SIG_IGN);
+	$params = [];
+	if (func_num_args() > 1) {
+		$params = array_slice(func_get_args(), 1);
+	}
+	call_user_func_array($fn, $params);
+	die();
 }
 
 class CSP_Channel {
@@ -2179,9 +2181,11 @@ class CSP_Channel {
 		]);
 
 	}
+
 	public function msg_count() {
 		return $this->msg_count;
 	}
+
 	public function close() {
 		$this->closed = true;
 		do {
@@ -2191,6 +2195,7 @@ class CSP_Channel {
 		msg_remove_queue($this->ipc);
 		file_exists($this->ipc_fn) && @unlink($this->ipc_fn);
 	}
+
 	public function in($msg) {
 		if ($this->closed || !msg_queue_exists($this->key)) {
 			return;
@@ -2201,6 +2206,7 @@ class CSP_Channel {
 		@msg_send($this->ipc, 1, $shm->key(), false, true, $error);
 		++$this->msg_count;
 	}
+
 	public function non_blocking_in($msg) {
 		if ($this->closed || !msg_queue_exists($this->key)) {
 			return self::CLOSED;
@@ -2225,6 +2231,7 @@ class CSP_Channel {
 		} while (true);
 		return true;
 	}
+
 	public function out() {
 		if ($this->closed || !msg_queue_exists($this->key)) {
 			return;
@@ -2238,6 +2245,7 @@ class CSP_Channel {
 		$ret = $shm->fetch();
 		return $ret;
 	}
+
 	public function non_blocking_out() {
 		if ($this->closed || !msg_queue_exists($this->key)) {
 			return [self::CLOSED, null];
@@ -2268,19 +2276,23 @@ class Message {
 		}
 		$this->key = $key;
 	}
+
 	public function store($msg) {
 		shm_put_var($this->shm, 1, $msg);
 		shm_detach($this->shm);
 	}
+
 	public function key() {
 		return sprintf('%0' . PHP_INT_LENGTH . 'd', (int) $this->key);
 	}
+
 	public function fetch() {
 		$ret = shm_get_var($this->shm, 1);
 		$this->destroy();
 		return $ret;
 
 	}
+
 	public function destroy() {
 		if (shm_has_var($this->shm, 1)) {
 			shm_remove_var($this->shm, 1);
@@ -2451,7 +2463,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "12.1.0");
+	define("VERSION", "12.1.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(

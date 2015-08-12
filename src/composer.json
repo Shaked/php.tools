@@ -22,7 +22,7 @@
     "require-dev": {
         "phpunit/php-code-coverage": "2.0.*",
         "ext-xdebug": "*",
-        "dericofilho/csp": "1.1.*",
+        "dericofilho/csp": "2.0.*",
         "satooshi/php-coveralls": "dev-master"
     },
     "suggest": {

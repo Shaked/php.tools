@@ -1,46 +1,5 @@
 [
     {
-        "name": "dericofilho/csp",
-        "version": "1.1.0",
-        "version_normalized": "1.1.0.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/dericofilho/php.csp.git",
-            "reference": "ab26888b75685da15b41fa13fc4c59d4c94a6f5c"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/dericofilho/php.csp/zipball/ab26888b75685da15b41fa13fc4c59d4c94a6f5c",
-            "reference": "ab26888b75685da15b41fa13fc4c59d4c94a6f5c",
-            "shasum": ""
-        },
-        "require": {
-            "php": ">=5.4.0"
-        },
-        "require-dev": {
-            "ext-pcntl": "*"
-        },
-        "time": "2014-12-18 13:03:12",
-        "type": "library",
-        "installation-source": "dist",
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "Carlos C",
-                "email": "carlos.cirello.nl@gmail.com"
-            }
-        ],
-        "description": "Library to partially enable CSP-like concurrency model in PHP",
-        "homepage": "https://github.com/dericofilho/php.csp",
-        "keywords": [
-            "concurrency",
-            "csp"
-        ]
-    },
-    {
         "name": "psr/log",
         "version": "1.0.0",
         "version_normalized": "1.0.0.0",
@@ -873,5 +832,46 @@
         ],
         "description": "Symfony EventDispatcher Component",
         "homepage": "https://symfony.com"
+    },
+    {
+        "name": "dericofilho/csp",
+        "version": "2.0.0",
+        "version_normalized": "2.0.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/ccirello/php.csp.git",
+            "reference": "da9e2ba8539159603d7dd580e533dfef28a7a053"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/ccirello/php.csp/zipball/da9e2ba8539159603d7dd580e533dfef28a7a053",
+            "reference": "da9e2ba8539159603d7dd580e533dfef28a7a053",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.4.0"
+        },
+        "require-dev": {
+            "ext-pcntl": "*"
+        },
+        "time": "2015-08-12 08:51:41",
+        "type": "library",
+        "installation-source": "dist",
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Carlos C",
+                "email": "carlos.cirello.nl@gmail.com"
+            }
+        ],
+        "description": "Library to partially enable CSP-like concurrency model in PHP",
+        "homepage": "https://github.com/ccirello/php.csp",
+        "keywords": [
+            "concurrency",
+            "csp"
+        ]
     }
 ]
