@@ -8,6 +8,8 @@ abstract class BaseCodeFormatter {
 
 	private $hasAfterFormat = false;
 
+	private $hasBeforeFormat = false;
+
 	private $hasBeforePass = false;
 
 	private $passes = [
@@ -166,6 +168,7 @@ abstract class BaseCodeFormatter {
 		$this->hasAfterExecutedPass = method_exists($this, 'afterExecutedPass');
 		$this->hasAfterFormat = method_exists($this, 'afterFormat');
 		$this->hasBeforePass = method_exists($this, 'beforePass');
+		$this->hasBeforeFormat = method_exists($this, 'beforeFormat');
 	}
 
 	public function disablePass($pass) {
