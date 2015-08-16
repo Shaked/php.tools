@@ -3573,6 +3573,8 @@ abstract class BaseCodeFormatter {
 
 	private $hasAfterFormat = false;
 
+	private $hasBeforeFormat = false;
+
 	private $hasBeforePass = false;
 
 	private $passes = [
@@ -3731,6 +3733,7 @@ abstract class BaseCodeFormatter {
 		$this->hasAfterExecutedPass = method_exists($this, 'afterExecutedPass');
 		$this->hasAfterFormat = method_exists($this, 'afterFormat');
 		$this->hasBeforePass = method_exists($this, 'beforePass');
+		$this->hasBeforeFormat = method_exists($this, 'beforeFormat');
 	}
 
 	public function disablePass($pass) {
@@ -3757,16 +3760,8 @@ abstract class BaseCodeFormatter {
 			},
 			array_filter($this->passes)
 		);
-		$foundTokens = [];
-		$commentStack = [];
-		$tkns = token_get_all($source);
-		foreach ($tkns as $token) {
-			list($id, $text) = $this->getToken($token);
-			$foundTokens[$id] = $id;
-			if (T_COMMENT === $id) {
-				$commentStack[] = [$id, $text];
-			}
-		}
+		list($commentStack, $foundTokens) = $this->getCommentStack($source);
+		$this->hasBeforeFormat && $this->beforeFormat($source);
 		while (($pass = array_pop($passes))) {
 			$this->hasBeforePass && $this->beforePass($source, $pass);
 			if ($pass->candidate($source, $foundTokens)) {
@@ -3791,6 +3786,20 @@ abstract class BaseCodeFormatter {
 			$ret = $token;
 		}
 		return $ret;
+	}
+
+	private function getCommentStack($source) {
+		$foundTokens = [];
+		$commentStack = [];
+		$tkns = token_get_all($source);
+		foreach ($tkns as $token) {
+			list($id, $text) = $this->getToken($token);
+			$foundTokens[$id] = $id;
+			if (T_COMMENT === $id) {
+				$commentStack[] = [$id, $text];
+			}
+		}
+		return [$commentStack, $foundTokens];
 	}
 
 }
@@ -3827,6 +3836,7 @@ final class CodeFormatter extends BaseCodeFormatter {
 	public function afterExecutedPass($source, $className) {
 		$cn = get_class($className);
 		$this->timings[$cn] = microtime(true) - $this->currentTiming;
+		echo $cn, ':', (memory_get_usage() / 1024 / 1024), "\t", (memory_get_peak_usage() / 1024 / 1024), PHP_EOL;
 	}
 
 	public function afterFormat($source) {
@@ -3842,6 +3852,10 @@ final class CodeFormatter extends BaseCodeFormatter {
 
 	public function beforePass($source, $className) {
 		$this->currentTiming = microtime(true);
+	}
+
+	public function beforeFormat($source) {
+		echo 'before:', (memory_get_usage() / 1024 / 1024), "\t", (memory_get_peak_usage() / 1024 / 1024), PHP_EOL;
 	}
 
 }
