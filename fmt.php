@@ -2463,7 +2463,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "13.0.1");
+	define("VERSION", "13.0.2");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -10683,7 +10683,7 @@ EOT;
 			$final .= $text . $this->newLine . $this->newLine;
 		}
 
-		return $final . $this->newLine . ST_CURLY_CLOSE;
+		return rtrim($final) . $this->newLine . ST_CURLY_CLOSE;
 	}
 
 }

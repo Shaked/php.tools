@@ -220,7 +220,7 @@ EOT;
 			$final .= $text . $this->newLine . $this->newLine;
 		}
 
-		return $final . $this->newLine . ST_CURLY_CLOSE;
+		return rtrim($final) . $this->newLine . ST_CURLY_CLOSE;
 	}
 
 }

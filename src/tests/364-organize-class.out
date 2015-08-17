@@ -66,5 +66,4 @@ class A {
 	private function a() {
 
 	}
-
 }
