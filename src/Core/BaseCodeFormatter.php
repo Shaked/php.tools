@@ -236,5 +236,4 @@ abstract class BaseCodeFormatter {
 		}
 		return [$commentStack, $foundTokens];
 	}
-
 }

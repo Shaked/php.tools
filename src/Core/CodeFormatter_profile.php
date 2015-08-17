@@ -25,12 +25,11 @@ final class CodeFormatter extends BaseCodeFormatter {
 		echo tabwriter($lines);
 	}
 
-	public function beforePass($source, $className) {
-		$this->currentTiming = microtime(true);
-	}
-
 	public function beforeFormat($source) {
 		echo 'before:', (memory_get_usage() / 1024 / 1024), "\t", (memory_get_peak_usage() / 1024 / 1024), PHP_EOL;
 	}
 
+	public function beforePass($source, $className) {
+		$this->currentTiming = microtime(true);
+	}
 }

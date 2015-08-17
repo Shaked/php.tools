@@ -57,5 +57,4 @@ final class StripExtraCommaInList extends FormatterPass {
 		}
 		return $this->renderLight();
 	}
-
 }

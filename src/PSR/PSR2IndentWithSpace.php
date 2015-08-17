@@ -33,5 +33,4 @@ final class PSR2IndentWithSpace extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

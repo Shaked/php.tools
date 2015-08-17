@@ -100,5 +100,4 @@ mb_detect_encoding($arr, 'UTF8', true);
 ?>
 EOT;
 	}
-
 }

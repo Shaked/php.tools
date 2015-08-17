@@ -78,5 +78,4 @@ final class ReindentColonBlocks extends FormatterPass {
 			$this->setIndent(+1);
 		}
 	}
-
 }

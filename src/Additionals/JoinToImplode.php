@@ -24,5 +24,4 @@ $a = implode(',', $arr);
 ?>
 EOT;
 	}
-
 }

@@ -119,5 +119,4 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 
 		return $this->code;
 	}
-
 }

@@ -88,5 +88,4 @@ final class ExtraCommaInArray extends FormatterPass {
 		}
 		return $this->renderLight();
 	}
-
 }

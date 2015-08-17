@@ -32,5 +32,4 @@ final class NamespaceMergeWithOpenTag extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

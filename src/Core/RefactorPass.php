@@ -122,5 +122,4 @@ final class RefactorPass extends FormatterPass {
 		$this->to = $tkns;
 		return $this;
 	}
-
 }

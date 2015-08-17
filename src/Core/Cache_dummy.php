@@ -11,5 +11,4 @@ final class Cache implements Cacher {
 	}
 
 	public function upsert($target, $filename, $content) {}
-
 }

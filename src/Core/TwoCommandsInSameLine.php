@@ -59,5 +59,4 @@ final class TwoCommandsInSameLine extends FormatterPass {
 
 		return $this->code;
 	}
-
 }

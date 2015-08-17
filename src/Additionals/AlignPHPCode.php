@@ -100,5 +100,4 @@ final class AlignPHPCode extends AdditionalPass {
 </div>
 EOT;
 	}
-
 }

@@ -44,5 +44,4 @@ final class MergeDoubleArrowAndArray extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

@@ -59,5 +59,4 @@ function a() {}
 ?>
 EOT;
 	}
-
 }

@@ -63,5 +63,4 @@ final class NormalizeLnAndLtrimLines extends FormatterPass {
 
 		return $this->code;
 	}
-
 }

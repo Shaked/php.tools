@@ -33,5 +33,4 @@ class UpdateVisibility extends FormatterPass {
 
 		return $this->code;
 	}
-
 }

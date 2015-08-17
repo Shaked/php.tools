@@ -64,5 +64,4 @@ $a = new SomeClass();
 ?>
 EOT;
 	}
-
 }

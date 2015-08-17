@@ -81,5 +81,4 @@ final class PSR2CurlyOpenNextLine extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

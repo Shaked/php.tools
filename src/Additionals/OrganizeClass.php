@@ -222,5 +222,4 @@ EOT;
 
 		return rtrim($final) . $this->newLine . ST_CURLY_CLOSE;
 	}
-
 }

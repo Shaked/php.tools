@@ -126,5 +126,4 @@ final class Reindent extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

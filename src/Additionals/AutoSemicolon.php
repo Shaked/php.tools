@@ -268,5 +268,4 @@ $a = new SomeClass();
 ?>
 EOT;
 	}
-
 }

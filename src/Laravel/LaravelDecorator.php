@@ -15,5 +15,4 @@ final class LaravelDecorator {
 		$fmt->enablePass('AlignEqualsByConsecutiveBlocks');
 		$fmt->enablePass('EliminateDuplicatedEmptyLines');
 	}
-
 }

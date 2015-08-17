@@ -35,5 +35,4 @@ final class PSR1ClassConstants extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

@@ -150,5 +150,4 @@ EOT;
 		}
 		return array_unique($variableList);
 	}
-
 }

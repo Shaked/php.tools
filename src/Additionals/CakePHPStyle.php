@@ -232,5 +232,4 @@ EOT;
 		}
 		return $this->code;
 	}
-
 }

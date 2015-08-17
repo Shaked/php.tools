@@ -148,5 +148,4 @@ $var = preg_split("/[A-Z]/Di", $var);
 
 		return key($delim);
 	}
-
 }

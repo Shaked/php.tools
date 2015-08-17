@@ -31,5 +31,4 @@ final class NonDocBlockMinorCleanUp extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

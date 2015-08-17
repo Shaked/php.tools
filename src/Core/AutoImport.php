@@ -267,5 +267,4 @@ final class AutoImportPass extends FormatterPass {
 		}
 		return $aliasCount;
 	}
-
 }

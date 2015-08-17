@@ -83,5 +83,4 @@ final class PSR2AlignObjOp extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

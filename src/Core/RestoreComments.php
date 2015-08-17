@@ -30,5 +30,4 @@ final class RestoreComments extends FormatterPass {
 		}
 		return $this->renderLight($this->tkns);
 	}
-
 }

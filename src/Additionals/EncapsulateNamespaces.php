@@ -70,5 +70,4 @@ namespace NS1 {
 ?>
 EOT;
 	}
-
 }

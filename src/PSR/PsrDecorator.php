@@ -26,5 +26,4 @@ final class PsrDecorator {
 		self::PSR1Naming($fmt);
 		self::PSR2($fmt);
 	}
-
 }

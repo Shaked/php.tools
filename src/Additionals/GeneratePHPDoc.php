@@ -170,5 +170,4 @@ EOT;
 		$str .= ' */' . $this->newLine;
 		return $str;
 	}
-
 }

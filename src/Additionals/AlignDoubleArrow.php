@@ -179,5 +179,4 @@ EOT;
 	private function substrCount($code, $placeholder) {
 		return call_user_func($this->substrCountFunc, $code, $placeholder);
 	}
-
 }

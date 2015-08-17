@@ -48,5 +48,4 @@ final class PSR1OpenTags extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

@@ -65,5 +65,4 @@ final class PSR1MethodNames extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

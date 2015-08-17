@@ -49,5 +49,4 @@ final class PSR2LnAfterNamespace extends FormatterPass {
 
 		return $this->code;
 	}
-
 }

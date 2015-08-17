@@ -50,5 +50,4 @@ final class EliminateDuplicatedEmptyLines extends FormatterPass {
 		return $ret;
 
 	}
-
 }

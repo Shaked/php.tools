@@ -79,5 +79,4 @@ final class WordWrap extends AdditionalPass {
 	public function getExample() {
 		return '';
 	}
-
 }

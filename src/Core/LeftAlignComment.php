@@ -66,5 +66,4 @@ final class LeftAlignComment extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

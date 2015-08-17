@@ -137,5 +137,4 @@ final class ConstructorPass extends FormatterPass {
 		$str = '$this->set_' . (str_replace('$', '', $var)) . '(' . $var . ');' . $this->newLine;
 		return $str;
 	}
-
 }

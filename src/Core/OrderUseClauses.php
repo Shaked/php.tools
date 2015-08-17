@@ -346,5 +346,4 @@ final class OrderUseClauses extends FormatterPass {
 
 		return $return;
 	}
-
 }

@@ -45,5 +45,4 @@ class ExtractMethods extends FormatterPass {
 	private function extractMethodsFrom($className, $startPtr, $endPtr) {
 		echo $className, ' ', $startPtr, ' <-> ', $endPtr;
 	}
-
 }

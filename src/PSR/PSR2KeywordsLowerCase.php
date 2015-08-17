@@ -82,5 +82,4 @@ final class PSR2KeywordsLowerCase extends FormatterPass {
 
 		return $this->code;
 	}
-
 }

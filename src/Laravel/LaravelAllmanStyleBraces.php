@@ -155,5 +155,4 @@ final class LaravelAllmanStyleBraces extends FormatterPass {
 
 		return $this->code;
 	}
-
 }

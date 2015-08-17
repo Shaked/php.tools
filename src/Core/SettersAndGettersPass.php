@@ -166,5 +166,4 @@ final class SettersAndGettersPass extends FormatterPass {
 		}
 		each($this->tkns);
 	}
-
 }

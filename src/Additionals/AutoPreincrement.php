@@ -124,5 +124,4 @@ EOT;
 			$id = $this->tkns[$this->ptr][0];
 		} while (!(ST_DOLLAR == $id || T_VARIABLE == $id));
 	}
-
 }

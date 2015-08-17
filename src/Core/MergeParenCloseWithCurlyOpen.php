@@ -64,5 +64,4 @@ final class MergeParenCloseWithCurlyOpen extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

@@ -31,5 +31,4 @@ final class NoSpaceBetweenFunctionAndBracket extends FormatterPass {
 
 		return $this->code;
 	}
-
 }

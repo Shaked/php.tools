@@ -937,5 +937,4 @@ abstract class FormatterPass {
 		while (++$i < $tknsSize && isset($ignoreList[$tkns[$i][0]]));
 		return $i;
 	}
-
 }

@@ -73,5 +73,4 @@ final class Cache implements Cacher {
 	private function setDb($db) {
 		$this->db = $db;
 	}
-
 }

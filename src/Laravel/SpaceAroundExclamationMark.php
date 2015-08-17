@@ -27,5 +27,4 @@ final class SpaceAroundExclamationMark extends FormatterPass {
 
 		return $this->code;
 	}
-
 }

@@ -88,5 +88,4 @@ final class AddMissingCurlyBraces extends FormatterPass {
 		$this->refInsert($this->tkns, $this->ptr, [ST_CURLY_CLOSE, ST_CURLY_CLOSE]);
 		$this->refInsert($this->tkns, $this->ptr, [T_WHITESPACE, $this->newLine]);
 	}
-
 }

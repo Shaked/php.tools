@@ -152,5 +152,4 @@ final class Tree extends FormatterPass {
 
 		return $str;
 	}
-
 }

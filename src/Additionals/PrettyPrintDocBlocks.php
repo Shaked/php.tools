@@ -266,5 +266,4 @@ EOT;
 
 		return $docBlock;
 	}
-
 }

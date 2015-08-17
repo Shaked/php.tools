@@ -65,5 +65,4 @@ final class LeftWordWrap extends AdditionalPass {
 	public function getExample() {
 		return '';
 	}
-
 }

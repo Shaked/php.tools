@@ -76,5 +76,4 @@ class TranslateNativeCalls extends FormatterPass {
 
 		$this->touchedEmptyNs = !$this->leftUsefulTokenIs(T_STRING);
 	}
-
 }

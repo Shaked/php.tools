@@ -7,5 +7,4 @@ final class Php2GoDecorator {
 		$fmt->enablePass('UpdateVisibility');
 		$fmt->enablePass('ExtractMethods');
 	}
-
 }

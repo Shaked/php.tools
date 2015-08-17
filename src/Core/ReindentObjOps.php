@@ -271,5 +271,4 @@ final class ReindentObjOps extends FormatterPass {
 		}
 		return false;
 	}
-
 }

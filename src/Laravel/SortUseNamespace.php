@@ -24,5 +24,4 @@ final class SortUseNameSpace extends FormatterPass {
 	public function format($source) {
 		return $this->pass->format($source);
 	}
-
 }

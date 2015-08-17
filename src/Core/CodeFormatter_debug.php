@@ -14,5 +14,4 @@ final class CodeFormatter extends BaseCodeFormatter {
 			readline();
 		}
 	}
-
 }

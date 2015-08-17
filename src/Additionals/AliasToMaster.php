@@ -116,5 +116,4 @@ EOT;
 
 		$this->touchedEmptyNs = !$this->leftUsefulTokenIs(T_STRING);
 	}
-
 }

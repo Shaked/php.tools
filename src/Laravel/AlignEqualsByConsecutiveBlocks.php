@@ -112,5 +112,4 @@ final class AlignEqualsByConsecutiveBlocks extends FormatterPass {
 		$processed[($seen - 1)] = $tokensLine;
 		return $processed;
 	}
-
 }

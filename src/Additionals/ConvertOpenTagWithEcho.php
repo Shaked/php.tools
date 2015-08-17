@@ -43,5 +43,4 @@ final class ConvertOpenTagWithEcho extends AdditionalPass {
 <?php echo "Hello World"?>
 EOT;
 	}
-
 }

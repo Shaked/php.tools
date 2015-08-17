@@ -155,5 +155,4 @@ final class PSR2ModifierVisibilityStaticOrder extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

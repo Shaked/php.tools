@@ -10,5 +10,4 @@ final class PSR1BOMMark extends FormatterPass {
 	public function format($source) {
 		return substr($source, 3);
 	}
-
 }

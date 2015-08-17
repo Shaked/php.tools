@@ -48,5 +48,4 @@ final class MergeCurlyCloseAndDoWhile extends FormatterPass {
 		}
 		return $this->code;
 	}
-
 }

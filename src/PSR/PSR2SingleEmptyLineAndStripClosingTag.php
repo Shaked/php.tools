@@ -29,5 +29,4 @@ final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
 
 		return rtrim($this->render()) . $this->newLine;
 	}
-
 }
