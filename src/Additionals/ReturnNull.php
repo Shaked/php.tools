@@ -1,6 +1,5 @@
 <?php
 final class ReturnNull extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_RETURN])) {
 			return true;

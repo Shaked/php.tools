@@ -1,6 +1,5 @@
 <?php
 final class DoubleToSingleQuote extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_CONSTANT_ENCAPSED_STRING])) {
 			return true;

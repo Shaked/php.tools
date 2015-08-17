@@ -1,6 +1,5 @@
 <?php
 final class StripNewlineAfterCurlyOpen extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_CURLY_OPEN])) {
 			return true;

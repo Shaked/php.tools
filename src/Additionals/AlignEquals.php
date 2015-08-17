@@ -1,6 +1,5 @@
 <?php
 final class AlignEquals extends AdditionalPass {
-
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
 
 	public function candidate($source, $foundTokens) {

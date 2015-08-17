@@ -1,6 +1,5 @@
 <?php
 final class LaravelDecorator {
-
 	public static function decorate(CodeFormatter &$fmt) {
 		$fmt->disablePass('AlignEquals');
 		$fmt->disablePass('AlignDoubleArrow');

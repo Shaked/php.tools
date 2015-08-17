@@ -1,6 +1,5 @@
 <?php
 final class RestoreComments extends FormatterPass {
-
 	// Injected by CodeFormatter.php
 	public $commentStack = [];
 

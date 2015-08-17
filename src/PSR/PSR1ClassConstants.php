@@ -1,6 +1,5 @@
 <?php
 final class PSR1ClassConstants extends FormatterPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_CONST]) || isset($foundTokens[T_STRING])) {
 			return true;

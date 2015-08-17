@@ -1,6 +1,5 @@
 <?php
 final class OrderUseClauses extends FormatterPass {
-
 	const BLANK_LINE_AFTER_USE_BLOCK = true;
 
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERBY \x3*/";

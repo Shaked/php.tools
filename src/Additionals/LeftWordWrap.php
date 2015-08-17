@@ -1,6 +1,5 @@
 <?php
 final class LeftWordWrap extends AdditionalPass {
-
 	const PLACEHOLDER_WORDWRAP = "\x2 WORDWRAP \x3";
 
 	private static $length = 80;

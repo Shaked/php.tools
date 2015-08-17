@@ -1,6 +1,5 @@
 <?php
 final class ConstructorPass extends FormatterPass {
-
 	const TYPE_CAMEL_CASE = 'camel';
 
 	const TYPE_GOLANG = 'golang';

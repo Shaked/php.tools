@@ -1,6 +1,5 @@
 <?php
 final class ReindentSwitchBlocks extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_SWITCH])) {
 			return true;

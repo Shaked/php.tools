@@ -1,6 +1,5 @@
 <?php
 final class ResizeSpaces extends FormatterPass {
-
 	public function candidate($source, $foundTokens) {
 		$tkns = token_get_all($source);
 

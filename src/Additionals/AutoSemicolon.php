@@ -1,6 +1,5 @@
 <?php
 final class AutoSemicolon extends AdditionalPass {
-
 	const ST_CLOSURE = 'CLOSURE';
 
 	public function candidate($source, $foundTokens) {

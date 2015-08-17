@@ -77,7 +77,6 @@ define('ST_CURLY_BLOCK', 'ST_CURLY_BLOCK');
 //tokens, following the concept of bottom-up it works as a platform on which
 //other passes can be built on.
 abstract class FormatterPass {
-
 	protected $cache = [];
 
 	protected $code = '';
@@ -1010,11 +1009,9 @@ abstract class FormatterPass {
 		while (++$i < $tknsSize && isset($ignoreList[$tkns[$i][0]]));
 		return $i;
 	}
-
 }
 
 	final class RefactorPass extends FormatterPass {
-
 	private $from;
 
 	private $to;
@@ -1136,7 +1133,6 @@ abstract class FormatterPass {
 		$this->to = $tkns;
 		return $this;
 	}
-
 }
 
 	final class CodeFormatter {

@@ -1,6 +1,5 @@
 <?php
 final class OrganizeClass extends OrderMethod {
-
 	/**
 	 * @codeCoverageIgnore
 	 */
@@ -193,7 +192,7 @@ EOT;
 		ksort($attributeList);
 		ksort($functionList);
 
-		$final = $this->newLine;
+		$final = '';
 		if (!empty($useStack)) {
 			$final .= $useStack . $this->newLine;
 		}
@@ -220,6 +219,6 @@ EOT;
 			$final .= $text . $this->newLine . $this->newLine;
 		}
 
-		return rtrim($final) . $this->newLine . ST_CURLY_CLOSE;
+		return $this->newLine . ' ' . trim($final) . $this->newLine . ST_CURLY_CLOSE;
 	}
 }

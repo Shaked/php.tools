@@ -4,7 +4,6 @@
 //tokens, following the concept of bottom-up it works as a platform on which
 //other passes can be built on.
 abstract class FormatterPass {
-
 	protected $cache = [];
 
 	protected $code = '';

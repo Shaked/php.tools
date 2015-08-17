@@ -1,6 +1,5 @@
 <?php
 final class YodaComparisons extends AdditionalPass {
-
 	const CHAIN_FUNC = 'CHAIN_FUNC';
 
 	const CHAIN_LITERAL = 'CHAIN_LITERAL';

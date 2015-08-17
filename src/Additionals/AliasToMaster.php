@@ -1,6 +1,5 @@
 <?php
 class AliasToMaster extends AdditionalPass {
-
 	protected static $aliasList = [
 		'chop' => 'rtrim',
 		'close' => 'closedir',

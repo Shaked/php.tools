@@ -1,6 +1,5 @@
 <?php
 final class PSR2EmptyFunction extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_FUNCTION])) {
 			return true;

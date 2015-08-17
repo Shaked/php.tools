@@ -1,6 +1,5 @@
 <?php
 final class RefactorPass extends FormatterPass {
-
 	private $from;
 
 	private $to;

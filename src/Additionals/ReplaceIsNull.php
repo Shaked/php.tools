@@ -1,6 +1,5 @@
 <?php
 final class ReplaceIsNull extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 		return true;
 	}

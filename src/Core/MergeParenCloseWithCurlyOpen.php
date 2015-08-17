@@ -1,6 +1,5 @@
 <?php
 final class MergeParenCloseWithCurlyOpen extends FormatterPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_CURLY_OPEN]) || isset($foundTokens[T_ELSE]) || isset($foundTokens[T_ELSEIF])) {
 			return true;

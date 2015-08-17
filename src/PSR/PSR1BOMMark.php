@@ -1,6 +1,5 @@
 <?php
 final class PSR1BOMMark extends FormatterPass {
-
 	const BOM = "\xef\xbb\xbf";
 
 	public function candidate($source, $foundTokens) {

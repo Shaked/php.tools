@@ -1,6 +1,5 @@
 <?php
 final class LaravelAllmanStyleBraces extends FormatterPass {
-
 	const OTHER_BLOCK = '';
 
 	public function candidate($source, $foundTokens) {

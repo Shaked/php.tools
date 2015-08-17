@@ -1,6 +1,5 @@
 <?php
 final class AlignDoubleSlashComments extends AdditionalPass {
-
 	const ALIGNABLE_COMMENT = "\x2 COMMENT%d \x3";
 
 	/**

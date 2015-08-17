@@ -3,7 +3,6 @@
  * From PHP-CS-Fixer
  */
 final class ShortArray extends AdditionalPass {
-
 	const FOUND_ARRAY = 'array';
 
 	const FOUND_PARENTHESES = 'paren';

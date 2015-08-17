@@ -3,7 +3,6 @@
  * @codeCoverageIgnore
  */
 final class Cache implements Cacher {
-
 	private $db;
 
 	private $noop = false;

@@ -1,6 +1,5 @@
 <?php
 class ClassToSelf extends AdditionalPass {
-
 	const PLACEHOLDER = 'self';
 
 	public function candidate($source, $foundTokens) {

@@ -1,6 +1,5 @@
 <?php
 final class AlignPHPCode extends AdditionalPass {
-
 	const PLACEHOLDER_STRING = "\x2 CONSTANT_STRING_%d \x3";
 
 	public function candidate($source, $foundTokens) {

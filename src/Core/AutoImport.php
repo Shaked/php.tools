@@ -3,7 +3,6 @@
  * @codeCoverageIgnore
  */
 final class AutoImportPass extends FormatterPass {
-
 	const AUTOIMPORT_PLACEHOLDER = "/*\x2 AUTOIMPORT \x3*/";
 
 	const OPENER_PLACEHOLDER = "<?php /*\x2 AUTOIMPORTNS \x3*/";

@@ -3,7 +3,6 @@
  * @codeCoverageIgnore
  */
 abstract class BaseCodeFormatter {
-
 	private $hasAfterExecutedPass = false;
 
 	private $hasAfterFormat = false;

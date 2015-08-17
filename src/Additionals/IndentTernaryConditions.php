@@ -1,6 +1,5 @@
 <?php
 final class IndentTernaryConditions extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[ST_QUESTION])) {
 			return true;

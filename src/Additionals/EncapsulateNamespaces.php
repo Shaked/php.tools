@@ -1,6 +1,5 @@
 <?php
 final class EncapsulateNamespaces extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_NAMESPACE])) {
 			return true;

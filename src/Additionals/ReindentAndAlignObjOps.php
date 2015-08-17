@@ -1,6 +1,5 @@
 <?php
 class ReindentAndAlignObjOps extends AdditionalPass {
-
 	const ALIGNABLE_OBJOP = "\x2 OBJOP%d.%d.%d \x3";
 
 	const ALIGN_WITH_INDENT = 1;

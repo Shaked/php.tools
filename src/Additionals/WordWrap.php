@@ -1,6 +1,5 @@
 <?php
 final class WordWrap extends AdditionalPass {
-
 	const ALIGNABLE_WORDWRAP = "\x2 WORDWRAP \x3";
 
 	private static $length = 80;

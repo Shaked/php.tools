@@ -1,6 +1,5 @@
 <?php
 final class EliminateDuplicatedEmptyLines extends FormatterPass {
-
 	const EMPTY_LINE = "\x2 EMPTYLINE \x3";
 
 	public function candidate($source, $foundTokens) {

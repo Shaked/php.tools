@@ -1,6 +1,5 @@
 <?php
 class AutoPreincrement extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_INC]) || isset($foundTokens[T_DEC])) {
 			return true;

@@ -1,6 +1,5 @@
 <?php
 final class NonDocBlockMinorCleanUp extends FormatterPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_COMMENT])) {
 			return true;

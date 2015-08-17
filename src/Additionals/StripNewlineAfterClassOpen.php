@@ -3,7 +3,6 @@
  * From PHP-CS-Fixer
  */
 final class StripNewlineAfterClassOpen extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_CLASS]) || isset($foundTokens[T_TRAIT])) {
 			return true;

@@ -3,7 +3,6 @@
  * @codeCoverageIgnore
  */
 final class CodeFormatter extends BaseCodeFormatter {
-
 	private $currentTiming = null;
 
 	private $timings = [];

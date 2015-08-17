@@ -2,7 +2,6 @@
 //passes:OrganizeClass
 
 class A {
-
 	/**
 	 * something about this other constant
 	 */

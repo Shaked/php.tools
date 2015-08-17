@@ -1,6 +1,5 @@
 <?php
 final class RTrim extends FormatterPass {
-
 	public function candidate($source, $foundTokens) {
 		return true;
 	}

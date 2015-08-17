@@ -1,6 +1,5 @@
 <?php
 final class PSR2IndentWithSpace extends FormatterPass {
-
 	private $size = 4;
 
 	public function __construct($size = null) {

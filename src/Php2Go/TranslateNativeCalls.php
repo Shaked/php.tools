@@ -1,6 +1,5 @@
 <?php
 class TranslateNativeCalls extends FormatterPass {
-
 	protected static $aliasList = [
 		'sprintf' => 'fmt::Sprintf',
 	];

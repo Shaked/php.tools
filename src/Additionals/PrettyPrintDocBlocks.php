@@ -1,6 +1,5 @@
 <?php
 final class PrettyPrintDocBlocks extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DOC_COMMENT])) {
 			return true;

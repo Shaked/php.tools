@@ -1,6 +1,5 @@
 <?php
 final class ReindentObjOps extends FormatterPass {
-
 	const ALIGN_WITH_INDENT = 1;
 
 	public function candidate($source, $foundTokens) {

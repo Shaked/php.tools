@@ -1,6 +1,5 @@
 <?php
 final class MildAutoPreincrement extends AutoPreincrement {
-
 	/**
 	 * @codeCoverageIgnore
 	 */

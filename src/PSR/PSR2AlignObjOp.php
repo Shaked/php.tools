@@ -1,6 +1,5 @@
 <?php
 final class PSR2AlignObjOp extends FormatterPass {
-
 	const ALIGNABLE_TOKEN = "\x2 OBJOP%d \x3";
 
 	public function candidate($source, $foundTokens) {

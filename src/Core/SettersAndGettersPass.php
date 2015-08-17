@@ -1,6 +1,5 @@
 <?php
 final class SettersAndGettersPass extends FormatterPass {
-
 	const PLACEHOLDER = "/*SETTERSANDGETTERSPLACEHOLDER%s\x3*/";
 
 	const PLACEHOLDER_REGEX = '/(;\n\/\*SETTERSANDGETTERSPLACEHOLDER).*(\*\/)/';

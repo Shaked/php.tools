@@ -1,6 +1,5 @@
 <?php
 final class ClassToStatic extends ClassToSelf {
-
 	const PLACEHOLDER = 'static';
 
 	/**

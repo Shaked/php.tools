@@ -1,6 +1,5 @@
 <?php
 final class StripSpaces extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_WHITESPACE]) || isset($foundTokens[T_COMMENT])) {
 			return true;

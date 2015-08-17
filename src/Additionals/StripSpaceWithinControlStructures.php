@@ -1,6 +1,5 @@
 <?php
 final class StripSpaceWithinControlStructures extends AdditionalPass {
-
 	public function candidate($source, $foundTokens) {
 
 		if (

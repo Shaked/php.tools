@@ -1,6 +1,5 @@
 <?php
 final class PSR2MultilineFunctionParams extends AdditionalPass {
-
 	const LINE_BREAK = "\x2 LN \x3";
 
 	public function candidate($source, $foundTokens) {

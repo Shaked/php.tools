@@ -1,6 +1,5 @@
 <?php
 final class Tree extends FormatterPass {
-
 	public function candidate($source, $tokens) {
 		return true;
 	}

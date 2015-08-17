@@ -1,6 +1,5 @@
 <?php
 final class OrderMethodAndVisibility extends OrderMethod {
-
 	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
 
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";

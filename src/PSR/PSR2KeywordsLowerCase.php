@@ -1,6 +1,5 @@
 <?php
 final class PSR2KeywordsLowerCase extends FormatterPass {
-
 	private static $reservedWords = [
 		'__halt_compiler' => 1,
 		'abstract' => 1, 'and' => 1, 'array' => 1, 'as' => 1,

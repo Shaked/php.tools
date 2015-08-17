@@ -1,7 +1,6 @@
 <?php
 
 class SplitCurlyCloseAndTokens extends FormatterPass {
-
 	public function candidate($source, $foundTokens) {
 		if (!isset($foundTokens[ST_CURLY_CLOSE])) {
 			return false;

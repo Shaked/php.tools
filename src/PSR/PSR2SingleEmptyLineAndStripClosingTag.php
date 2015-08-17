@@ -1,6 +1,5 @@
 <?php
 final class PSR2SingleEmptyLineAndStripClosingTag extends FormatterPass {
-
 	public function candidate($source, $foundTokens) {
 		return true;
 	}

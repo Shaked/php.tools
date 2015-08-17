@@ -1,6 +1,5 @@
 <?php
 final class SortUseNameSpace extends FormatterPass {
-
 	private $pass = null;
 
 	public function __construct() {
