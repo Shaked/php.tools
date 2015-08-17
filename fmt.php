@@ -2463,7 +2463,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "13.0.0");
+	define("VERSION", "13.0.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -9676,7 +9676,7 @@ EOT;
 		if (empty($paramStack) && empty($returnStack)) {
 			return '';
 		}
-		$str = '/**' . $this->newLine;
+		$str = ' /**' . $this->newLine;
 		foreach ($paramStack as $param) {
 			$str .= rtrim(' * @param ' . $param['type']) . ' ' . $param['name'] . $this->newLine;
 		}
