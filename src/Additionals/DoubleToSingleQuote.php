@@ -49,7 +49,7 @@ EOT;
 		$text[0] = '\'';
 		$lastByte = strlen($text) - 1;
 		$text[$lastByte] = '\'';
-		$text = str_replace('\"', '"', $text);
+		$text = str_replace(['\$', '\"'], ['$', '"'], $text);
 		return $text;
 	}
 
@@ -58,7 +58,7 @@ EOT;
 			T_CONSTANT_ENCAPSED_STRING == $id &&
 			'"' == $text[0] &&
 			false === strpos($text, '\'') &&
-			!preg_match('/(?<!\\\\)(?:\\\\{2})*\\\\(?!["\\\\])/', $text)
+			!preg_match('/(?<!\\\\)(?:\\\\{2})*\\\\(?!["$\\\\])/', $text)
 		);
 	}
 }
