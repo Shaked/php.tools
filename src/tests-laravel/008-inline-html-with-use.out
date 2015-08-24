@@ -12,11 +12,11 @@ use Illuminate\Config\FileLoader;
 
 Class CamelOne {
 	use Illuminate\Http\Response;
-	use Illuminate\Routing\RoutingServiceProvider;
 	use Illuminate\Support\Contracts\ResponsePreparerInterface;
+	use Illuminate\Routing\RoutingServiceProvider;
 
-	use Illuminate\Support\Facades\Facade;
 	use Symfony\Component\HttpFoundation\Request;
+	use Illuminate\Support\Facades\Facade;
 
 	use Closure\Two;
 }

@@ -34,7 +34,6 @@ final class OrderUseClauses extends FormatterPass {
 
 	public function format($source = '') {
 		$source = $this->sortWithinNamespaces($source);
-		$source = $this->sortWithinClasses($source);
 
 		return $source;
 	}
@@ -127,12 +126,16 @@ final class OrderUseClauses extends FormatterPass {
 
 				} elseif (ST_CURLY_OPEN == $foundToken) {
 					next($tokens);
-					$tmp = 'use ' . ltrim($useTokens) . $foundToken . $this->walkAndAccumulateCurlyBlock($tokens);
+					$base = $this->newLine . 'use ' . ltrim($useTokens);
 
-					$useStack[$groupCount][] = $tmp;
-					$newTokens[] = new SurrogateToken();
-
+					do {
+						list($groupText, $groupFoundToken) = $this->walkAndAccumulateStopAtAny($tokens, [ST_COMMA, ST_CURLY_CLOSE]);
+						$useStack[$groupCount][] = $base . trim($groupText) . ';';
+						$newTokens[] = new SurrogateToken();
+						next($tokens);
+					} while (ST_COMMA == $groupFoundToken);
 					$foundComma = false;
+					$this->walkAndAccumulateUntil($tokens, ST_SEMI_COLON);
 				}
 				continue;
 			}
@@ -198,61 +201,6 @@ final class OrderUseClauses extends FormatterPass {
 
 		foreach ($unusedImport as $v) {
 			$return = str_ireplace($aliasList[$v] . $this->newLine, null, $return);
-		}
-
-		return $return;
-	}
-
-	private function sortWithinClasses($source) {
-		$tokens = token_get_all($source);
-		$return = '';
-		while (list($index, $token) = each($tokens)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-			case T_TRAIT:
-			case T_CLASS:
-				$return .= $text;
-				$touchedTUse = false;
-				$return .= $this->walkAndAccumulateStopAt($tokens, ST_CURLY_OPEN);
-
-				$classBlock = '';
-				$curlyCount = 0;
-				while (list($index, $token) = each($tokens)) {
-					list($id, $text) = $this->getToken($token);
-					$this->ptr = $index;
-					$classBlock .= $text;
-
-					if (T_USE === $id) {
-						$touchedTUse = true;
-					}
-
-					if (ST_CURLY_OPEN == $id || T_CURLY_OPEN == $id || T_DOLLAR_OPEN_CURLY_BRACES == $id) {
-						++$curlyCount;
-					} elseif (ST_CURLY_CLOSE == $id) {
-						--$curlyCount;
-					}
-
-					if (0 == $curlyCount) {
-						break;
-					}
-				}
-
-				if (!$touchedTUse) {
-					$return .= $classBlock;
-					break;
-				}
-
-				$return .= str_replace(
-					self::OPENER_PLACEHOLDER,
-					'',
-					$this->sortUseClauses(self::OPENER_PLACEHOLDER . $classBlock, !self::SPLIT_COMMA, !self::REMOVE_UNUSED, !self::STRIP_BLANK_LINES, !self::BLANK_LINE_AFTER_USE_BLOCK)
-				);
-
-				break;
-			default:
-				$return .= $text;
-			}
 		}
 
 		return $return;

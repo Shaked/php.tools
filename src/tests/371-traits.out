@@ -1,6 +1,7 @@
 <?php
 //passes:Default,OrganizeClass
 class A {
+	use SomeTrait;
 	use SomeTrait2, SomeTrait3 {
 		SomeTrait3::smallTalk insteadof SomeTrait2;
 		SomeTrait2::bigTalk insteadof SomeTrait3;
@@ -10,7 +11,6 @@ class A {
 		SomeTrait6::smallTalk insteadof SomeTrait5;
 		SomeTrait5::bigTalk insteadof SomeTrait6;
 	}
-	use SomeTrait;
 
 	// some trait4
 	// some trait5,6

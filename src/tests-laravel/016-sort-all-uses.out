@@ -5,12 +5,12 @@ use Illuminate\Config\FileLoader;
 use Illuminate\Config\FileEnvironmentVariablesLoader;
 
 class oneOne {
-	use Closure;
 	use Illuminate\Http\Response;
-	use Illuminate\Support\Facades\Facade;
-	use Symfony\Component\HttpFoundation\Request;
-	use Illuminate\Routing\RoutingServiceProvider;
 	use Illuminate\Support\Contracts\ResponsePreparerInterface;
+	use Illuminate\Routing\RoutingServiceProvider;
+	use Symfony\Component\HttpFoundation\Request;
+	use Illuminate\Support\Facades\Facade;
+	use Closure;
 
 	public function __construct()
 	{
