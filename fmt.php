@@ -2459,7 +2459,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "13.0.5");
+	define("VERSION", "13.0.6");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -11362,6 +11362,22 @@ EOT;
 			$this->ptr = $index;
 
 			switch ($id) {
+			case ST_QUOTE:
+				$this->appendCode($text);
+				$this->printUntilTheEndOfString();
+				break;
+			case T_CLOSE_TAG:
+				$this->appendCode($text);
+				$this->printUntil(T_OPEN_TAG);
+				break;
+			case T_START_HEREDOC:
+				$this->appendCode($text);
+				$this->printUntil(T_END_HEREDOC);
+				break;
+			case T_CONSTANT_ENCAPSED_STRING:
+				$this->appendCode($text);
+				break;
+
 			case T_SWITCH:
 				$touchedSwitch = true;
 				$this->appendCode($text);
