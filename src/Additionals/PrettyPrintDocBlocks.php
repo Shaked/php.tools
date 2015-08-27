@@ -1,5 +1,7 @@
 <?php
 final class PrettyPrintDocBlocks extends AdditionalPass {
+	const EMPTY_LINE = "\x2 EMPTYLINE \x3";
+
 	public function candidate($source, $foundTokens) {
 		if (isset($foundTokens[T_DOC_COMMENT])) {
 			return true;
@@ -154,18 +156,24 @@ EOT;
 			return $weightA - $weightB;
 		});
 
+		$seqdetect = 0;
 		// Filter empty lines before '@' block
-		foreach ($lines as $idx => $line) {
-			if (
-				'@' == $lines[$idx][0] &&
-				$idx - 1 > 0 &&
-				$idx - 2 > 0 &&
-				isset($lines[$idx - 2]) &&
-				empty(substr($lines[$idx - 1], 0, -2)) &&
-				empty(substr($lines[$idx - 2], 0, -2))
-			) {
-				unset($lines[$idx - 1]);
+		reset($lines);
+		while (list($idx, $line) = each($lines)) {
+			$weight = substr(strrchr($line, ':'), 1);
+			$line = substr($line, 0, -1 * (strlen($line) - strrpos($line, ':')));
+			if ($weight != $seqdetect) {
+				prev($lines);
 				break;
+			}
+
+			$seqdetect++;
+		}
+		while (list($idx, $line) = each($lines)) {
+			$weight = substr(strrchr($line, ':'), 1);
+			$line = substr($line, 0, -1 * (strlen($line) - strrpos($line, ':')));
+			if (empty($line)) {
+				unset($lines[$idx]);
 			}
 		}
 
