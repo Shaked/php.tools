@@ -18,6 +18,7 @@ final class PsrDecorator {
 		$fmt->enablePass('PSR2CurlyOpenNextLine');
 		$fmt->enablePass('PSR2ModifierVisibilityStaticOrder');
 		$fmt->enablePass('PSR2SingleEmptyLineAndStripClosingTag');
+		$fmt->enablePass('ReindentSwitchBlocks');
 	}
 
 	public static function decorate(CodeFormatter $fmt) {

@@ -2459,7 +2459,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "13.1.0");
+	define("VERSION", "13.2.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -7191,6 +7191,7 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 		$fmt->enablePass('PSR2CurlyOpenNextLine');
 		$fmt->enablePass('PSR2ModifierVisibilityStaticOrder');
 		$fmt->enablePass('PSR2SingleEmptyLineAndStripClosingTag');
+		$fmt->enablePass('ReindentSwitchBlocks');
 	}
 
 	public static function decorate(CodeFormatter $fmt) {
