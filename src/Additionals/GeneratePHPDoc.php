@@ -21,6 +21,13 @@ final class GeneratePHPDoc extends AdditionalPass {
 			case T_DOC_COMMENT:
 				$touchedDocComment = true;
 				break;
+
+			case T_CLASS:
+				if ($touchedDocComment) {
+					$touchedDocComment = false;
+				}
+				break;
+
 			case T_FINAL:
 			case T_ABSTRACT:
 			case T_PUBLIC:
