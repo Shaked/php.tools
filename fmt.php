@@ -2459,7 +2459,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "13.3.0");
+	define("VERSION", "13.4.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -5156,7 +5156,7 @@ final class AutoImportPass extends FormatterPass {
 
 			case T_CLOSE_TAG:
 				$this->appendCode($text);
-				$this->printUntil(T_OPEN_TAG);
+				$this->printUntilAny([T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO]);
 				break;
 
 			case T_START_HEREDOC:

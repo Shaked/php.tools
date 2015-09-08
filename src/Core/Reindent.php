@@ -47,7 +47,7 @@ final class Reindent extends FormatterPass {
 
 			case T_CLOSE_TAG:
 				$this->appendCode($text);
-				$this->printUntil(T_OPEN_TAG);
+				$this->printUntilAny([T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO]);
 				break;
 
 			case T_START_HEREDOC:
