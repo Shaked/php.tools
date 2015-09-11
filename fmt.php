@@ -2459,7 +2459,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "13.4.0");
+	define("VERSION", "13.5.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -5634,7 +5634,7 @@ final class AutoImportPass extends FormatterPass {
 				if (
 					$this->leftMemoUsefulTokenIs([T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
 					&&
-					$this->rightUsefulTokenIs([T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE])
+					$this->rightUsefulTokenIs([T_INC, T_DEC, T_LNUMBER, T_DNUMBER, T_VARIABLE, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, T_STRING, T_ARRAY, T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST, ST_BRACKET_CLOSE, ST_BRACKET_OPEN])
 				) {
 					$this->appendCode(' ' . $text . ' ');
 					break;
