@@ -1,14 +1,3 @@
-## Notice
-
-I am stepping down as main maintainer for this plugin. I shall keep occasional
-updates both for this plugin and its engine. But, I call the community of users
-to support both with Pull Requests and answering at Issue Tracker.
-
-I am ready to support anyone willing to step up to become contributor of these
-projects. Just ping @ccirello in Issue Tracker.
-
-------
-
 php.tools
 =========
 
