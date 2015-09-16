@@ -123,7 +123,7 @@ foreach ($cases as $caseIn) {
 						$fmt->enablePass('TwoCommandsInSameLine');
 						$fmt->enablePass('RemoveIncludeParentheses');
 						$fmt->enablePass('NormalizeIsNotEquals');
-						$fmt->enablePass('OrderUseClauses');
+						$fmt->enablePass('OrderAndRemoveUseClauses');
 						$fmt->enablePass('AddMissingCurlyBraces');
 						$fmt->enablePass('ExtraCommaInArray');
 						$fmt->enablePass('NormalizeLnAndLtrimLines');
@@ -151,7 +151,7 @@ foreach ($cases as $caseIn) {
 		$fmt->enablePass('TwoCommandsInSameLine');
 		$fmt->enablePass('RemoveIncludeParentheses');
 		$fmt->enablePass('NormalizeIsNotEquals');
-		$fmt->enablePass('OrderUseClauses');
+		$fmt->enablePass('OrderAndRemoveUseClauses');
 		$fmt->enablePass('AddMissingCurlyBraces');
 		$fmt->enablePass('ExtraCommaInArray');
 		$fmt->enablePass('NormalizeLnAndLtrimLines');
@@ -219,7 +219,7 @@ if (!$bailOut) {
 						$fmt->enablePass('TwoCommandsInSameLine');
 						$fmt->enablePass('RemoveIncludeParentheses');
 						$fmt->enablePass('NormalizeIsNotEquals');
-						$fmt->enablePass('OrderUseClauses');
+						$fmt->enablePass('OrderAndRemoveUseClauses');
 						$fmt->enablePass('AddMissingCurlyBraces');
 						$fmt->enablePass('ExtraCommaInArray');
 						$fmt->enablePass('NormalizeLnAndLtrimLines');
@@ -248,7 +248,7 @@ if (!$bailOut) {
 			$fmt->enablePass('TwoCommandsInSameLine');
 			$fmt->enablePass('RemoveIncludeParentheses');
 			$fmt->enablePass('NormalizeIsNotEquals');
-			$fmt->enablePass('OrderUseClauses');
+			$fmt->enablePass('OrderAndRemoveUseClauses');
 			$fmt->enablePass('AddMissingCurlyBraces');
 			$fmt->enablePass('ExtraCommaInArray');
 			$fmt->enablePass('NormalizeLnAndLtrimLines');
@@ -323,7 +323,7 @@ if (!$bailOut) {
 			$fmt->enablePass('TwoCommandsInSameLine');
 			$fmt->enablePass('RemoveIncludeParentheses');
 			$fmt->enablePass('NormalizeIsNotEquals');
-			$fmt->enablePass('OrderUseClauses');
+			$fmt->enablePass('OrderAndRemoveUseClauses');
 			$fmt->enablePass('AddMissingCurlyBraces');
 			$fmt->enablePass('ExtraCommaInArray');
 			$fmt->enablePass('NormalizeLnAndLtrimLines');
@@ -394,7 +394,7 @@ if (!$bailOut) {
 						$fmt->enablePass('TwoCommandsInSameLine');
 						$fmt->enablePass('RemoveIncludeParentheses');
 						$fmt->enablePass('NormalizeIsNotEquals');
-						$fmt->enablePass('OrderUseClauses');
+						$fmt->enablePass('OrderAndRemoveUseClauses');
 						$fmt->enablePass('AddMissingCurlyBraces');
 						$fmt->enablePass('ExtraCommaInArray');
 						$fmt->enablePass('NormalizeLnAndLtrimLines');
@@ -423,7 +423,7 @@ if (!$bailOut) {
 			$fmt->enablePass('TwoCommandsInSameLine');
 			$fmt->enablePass('RemoveIncludeParentheses');
 			$fmt->enablePass('NormalizeIsNotEquals');
-			$fmt->enablePass('OrderUseClauses');
+			$fmt->enablePass('OrderAndRemoveUseClauses');
 			$fmt->enablePass('AddMissingCurlyBraces');
 			$fmt->enablePass('ExtraCommaInArray');
 			$fmt->enablePass('NormalizeLnAndLtrimLines');

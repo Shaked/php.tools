@@ -69,7 +69,6 @@ namespace {
 	require 'Core/MergeParenCloseWithCurlyOpen.php';
 	require 'Core/NormalizeIsNotEquals.php';
 	require 'Core/NormalizeLnAndLtrimLines.php';
-	require 'Core/OrderUseClauses.php';
 	require 'Core/Reindent.php';
 	require 'Core/ReindentColonBlocks.php';
 	require 'Core/ReindentObjOps.php';
@@ -125,6 +124,8 @@ namespace {
 	require 'Additionals/NoSpaceAfterPHPDocBlocks.php';
 	require 'Additionals/OrderMethod.php';
 	require 'Additionals/OrderMethodAndVisibility.php';
+	require 'Additionals/OrderAndRemoveUseClauses.php';
+	require 'Additionals/OnlyOrderUseClauses.php';
 	require 'Additionals/OrganizeClass.php';
 	require 'Additionals/PrettyPrintDocBlocks.php';
 	require 'Additionals/PSR2EmptyFunction.php';

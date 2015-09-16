@@ -1,5 +1,5 @@
 <?php
-final class OrderUseClauses extends FormatterPass {
+class OrderAndRemoveUseClauses extends AdditionalPass {
 	const BLANK_LINE_AFTER_USE_BLOCK = true;
 
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERBY \x3*/";
@@ -38,14 +38,41 @@ final class OrderUseClauses extends FormatterPass {
 		return $source;
 	}
 
-	private function calculateAlias($use) {
-		if (false !== stripos($use, ' as ')) {
-			return substr(strstr($use, ' as '), strlen(' as '), -1);
-		}
-		return basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDescription() {
+		return 'Order use block and remove unused imports.';
 	}
 
-	private function sortUseClauses($source, $splitComma, $removeUnused, $stripBlankLines, $blanklineAfterUseBlock) {
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getExample() {
+		return <<<'EOT'
+// From
+use C;
+use B;
+
+class D {
+	function f() {
+		new B();
+	}
+}
+
+
+// To
+use B;
+
+class D {
+	function f() {
+		new B();
+	}
+}
+EOT;
+	}
+
+	protected function sortUseClauses($source, $splitComma, $removeUnused, $stripBlankLines, $blanklineAfterUseBlock) {
 		$tokens = token_get_all($source);
 
 		// It scans for T_USE blocks (thus skiping "function () use ()")
@@ -204,6 +231,13 @@ final class OrderUseClauses extends FormatterPass {
 		}
 
 		return $return;
+	}
+
+	private function calculateAlias($use) {
+		if (false !== stripos($use, ' as ')) {
+			return substr(strstr($use, ' as '), strlen(' as '), -1);
+		}
+		return basename(str_replace('\\', '/', trim(substr($use, strlen('use'), -1))));
 	}
 
 	private function sortWithinNamespaces($source) {

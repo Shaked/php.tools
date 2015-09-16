@@ -106,7 +106,8 @@ abstract class BaseCodeFormatter {
 		'ExtraCommaInArray' => false,
 		'SmartLnAfterCurlyOpen' => false,
 		'AddMissingCurlyBraces' => false,
-		'OrderUseClauses' => false,
+		'OnlyOrderUseClauses' => false,
+		'OrderAndRemoveUseClauses' => false,
 		'AutoImportPass' => false,
 		'ConstructorPass' => false,
 		'SettersAndGettersPass' => false,
@@ -142,6 +143,8 @@ abstract class BaseCodeFormatter {
 		'AllmanStyleBraces' => 'PSR2CurlyOpenNextLine',
 		'AlignGroupDoubleArrow' => 'AlignDoubleArrow',
 		'AlignDoubleArrow' => 'AlignGroupDoubleArrow',
+		'OnlyOrderUseClauses' => 'OrderAndRemoveUseClauses',
+		'OrderAndRemoveUseClauses' => 'OnlyOrderUseClauses',
 	];
 
 	public function __construct() {
@@ -154,7 +157,7 @@ abstract class BaseCodeFormatter {
 		$this->passes['MergeParenCloseWithCurlyOpen'] = new MergeParenCloseWithCurlyOpen();
 		$this->passes['NormalizeIsNotEquals'] = new NormalizeIsNotEquals();
 		$this->passes['NormalizeLnAndLtrimLines'] = new NormalizeLnAndLtrimLines();
-		$this->passes['OrderUseClauses'] = new OrderUseClauses();
+		$this->passes['OrderAndRemoveUseClauses'] = new OrderAndRemoveUseClauses();
 		$this->passes['Reindent'] = new Reindent();
 		$this->passes['ReindentColonBlocks'] = new ReindentColonBlocks();
 		$this->passes['ReindentObjOps'] = new ReindentObjOps();

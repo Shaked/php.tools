@@ -13,7 +13,7 @@ final class SortUseNameSpace extends FormatterPass {
 			});
 			return $useStack;
 		};
-		$this->pass = new OrderUseClauses($sortFunction);
+		$this->pass = new OrderAndRemoveUseClauses($sortFunction);
 	}
 
 	public function candidate($source, $foundTokens) {
