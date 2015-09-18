@@ -418,7 +418,9 @@ if (isset($opts['i'])) {
 			++$fileCount;
 			fwrite(STDERR, '.');
 			file_put_contents($file . '-tmp', $fmt->formatCode(file_get_contents($file)));
+			$oldchmod = fileperms($file);
 			rename($file . '-tmp', $file);
+			chmod($file, $oldchmod);
 		} elseif (is_dir($arg)) {
 			fwrite(STDERR, $arg . PHP_EOL);
 
@@ -466,7 +468,9 @@ if (isset($opts['i'])) {
 							}
 							file_put_contents($file . '-tmp', $fmtCode);
 							$backup && rename($file, $file . '~');
+							$oldchmod = fileperms($file);
 							rename($file . '-tmp', $file);
+							chmod($file, $oldchmod);
 						}
 						$chn_done->in([$cacheHitCount, $cache_miss_count]);
 					}, $fmt, $backup, $cache_fn, $chn, $chn_done, $lintBefore);
@@ -516,7 +520,9 @@ if (isset($opts['i'])) {
 					}
 					file_put_contents($file . '-tmp', $fmtCode);
 					$backup && rename($file, $file . '~');
+					$oldchmod = fileperms($file);
 					rename($file . '-tmp', $file);
+					chmod($file, $oldchmod);
 				}
 
 			}
