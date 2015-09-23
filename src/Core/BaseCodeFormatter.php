@@ -74,7 +74,6 @@ abstract class BaseCodeFormatter {
 
 		'PSR1ClassConstants' => false,
 		'PSR1BOMMark' => false,
-		'PSR1OpenTags' => false,
 
 		'EliminateDuplicatedEmptyLines' => false,
 		'IndentTernaryConditions' => false,
@@ -132,9 +131,10 @@ abstract class BaseCodeFormatter {
 		'ClassToStatic' => false,
 		'PSR2MultilineFunctionParams' => false,
 		'SpaceAroundControlStructures' => false,
-		'AutoSemicolon' => false,
 
 		'OrganizeClass' => false,
+		'AutoSemicolon' => false,
+		'PSR1OpenTags' => false,
 	];
 
 	private $shortcircuit = [

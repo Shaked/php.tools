@@ -32,7 +32,8 @@ final class PSR1OpenTags extends FormatterPass {
 			case T_DOC_COMMENT:
 				if (
 					$this->rightUsefulTokenIs([T_CLOSE_TAG]) &&
-					!$this->leftUsefulTokenIs([ST_SEMI_COLON])
+					!$this->leftUsefulTokenIs([ST_SEMI_COLON]) &&
+					!$this->leftUsefulTokenIs([T_OPEN_TAG])
 				) {
 					$touchedComment = true;
 					$this->rtrimAndappendCode(ST_SEMI_COLON . ' ');

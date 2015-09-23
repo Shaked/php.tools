@@ -2459,7 +2459,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "14.1.0");
+	define("VERSION", "14.2.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -3631,7 +3631,6 @@ abstract class BaseCodeFormatter {
 
 		'PSR1ClassConstants' => false,
 		'PSR1BOMMark' => false,
-		'PSR1OpenTags' => false,
 
 		'EliminateDuplicatedEmptyLines' => false,
 		'IndentTernaryConditions' => false,
@@ -3689,9 +3688,10 @@ abstract class BaseCodeFormatter {
 		'ClassToStatic' => false,
 		'PSR2MultilineFunctionParams' => false,
 		'SpaceAroundControlStructures' => false,
-		'AutoSemicolon' => false,
 
 		'OrganizeClass' => false,
+		'AutoSemicolon' => false,
+		'PSR1OpenTags' => false,
 	];
 
 	private $shortcircuit = [
@@ -6339,7 +6339,8 @@ class SplitCurlyCloseAndTokens extends FormatterPass {
 			case T_DOC_COMMENT:
 				if (
 					$this->rightUsefulTokenIs([T_CLOSE_TAG]) &&
-					!$this->leftUsefulTokenIs([ST_SEMI_COLON])
+					!$this->leftUsefulTokenIs([ST_SEMI_COLON]) &&
+					!$this->leftUsefulTokenIs([T_OPEN_TAG])
 				) {
 					$touchedComment = true;
 					$this->rtrimAndappendCode(ST_SEMI_COLON . ' ');
