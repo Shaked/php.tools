@@ -26,6 +26,7 @@ class ReindentAndAlignObjOps extends AdditionalPass {
 		$printedPlaceholder = [];
 		$maxContextCounter = [];
 		$touchedParenOpen = false;
+		$touchedFunction = false;
 
 		while (list($index, $token) = each($this->tkns)) {
 			list($id, $text) = $this->getToken($token);
@@ -71,6 +72,7 @@ class ReindentAndAlignObjOps extends AdditionalPass {
 
 			case T_FUNCTION:
 				$this->appendCode($text);
+				$touchedFunction = true;
 				break;
 
 			case T_VARIABLE:
@@ -85,6 +87,27 @@ class ReindentAndAlignObjOps extends AdditionalPass {
 					$touchCounter[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
 					$alignType[$levelCounter][$levelEntranceCounter[$levelCounter]] = 0;
 					$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]] = 0;
+				}
+				break;
+
+			case ST_CURLY_OPEN:
+			case T_CURLY_OPEN:
+			case T_DOLLAR_OPEN_CURLY_BRACES:
+				$this->appendCode($text);
+				$curlyOpenType = $id;
+				if ($touchedFunction) {
+					$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
+					$touchedFunction = false;
+					$curlyOpenType = T_FUNCTION;
+				}
+				$touchedCurlyBlock[] = $curlyOpenType;
+				break;
+
+			case ST_CURLY_CLOSE:
+				$this->appendCode($text);
+				$curlyOpenType = array_pop($touchedCurlyBlock);
+				if (T_FUNCTION == $curlyOpenType) {
+					--$levelCounter;
 				}
 				break;
 
@@ -150,8 +173,8 @@ class ReindentAndAlignObjOps extends AdditionalPass {
 						$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]
 					);
 					$this->appendCode($placeholder . $text);
-					$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, ST_EQUAL, $this->newLine]);
-					if (ST_SEMI_COLON == $foundToken || ST_EQUAL == $foundToken) {
+					$foundToken = $this->printUntilAny([ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE, ST_SEMI_COLON, ST_EQUAL, $this->newLine, ST_COMMA]);
+					if (ST_SEMI_COLON == $foundToken || ST_EQUAL == $foundToken || ST_COMMA == $foundToken) {
 						$this->incrementCounters($levelCounter, $levelEntranceCounter, $contextCounter, $maxContextCounter, $touchCounter, $alignType, $printedPlaceholder);
 					} elseif (ST_PARENTHESES_OPEN == $foundToken) {
 						if (!$this->hasLnInBlock($this->tkns, $this->ptr, ST_PARENTHESES_OPEN, ST_PARENTHESES_CLOSE)) {
@@ -210,7 +233,8 @@ class ReindentAndAlignObjOps extends AdditionalPass {
 					isset($alignType[$levelCounter]) &&
 					isset($levelEntranceCounter[$levelCounter]) &&
 					isset($alignType[$levelCounter][$levelEntranceCounter[$levelCounter]]) &&
-					($this->hasLnBefore() || $this->hasLnLeftToken())
+					($this->hasLnBefore() || $this->hasLnLeftToken()) &&
+					!$this->leftUsefulTokenIs(ST_CURLY_CLOSE)
 				) {
 					if (self::ALIGN_WITH_SPACES == $alignType[$levelCounter][$levelEntranceCounter[$levelCounter]]) {
 						++$printedPlaceholder[$levelCounter][$levelEntranceCounter[$levelCounter]][$contextCounter[$levelCounter][$levelEntranceCounter[$levelCounter]]];
@@ -300,6 +324,7 @@ class ReindentAndAlignObjOps extends AdditionalPass {
 			}
 		}
 		$this->code = preg_replace('/' . str_replace('%d', '.*', preg_quote(self::ALIGNABLE_OBJOP)) . '/', '', $this->code);
+
 		return $this->code;
 	}
 
