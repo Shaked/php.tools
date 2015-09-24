@@ -2,6 +2,8 @@
 final class AlignEquals extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
 
+	const OPEN_TAG = "<?php /*\x2 EQUAL OPEN TAG\x3*/";
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -24,6 +26,16 @@ final class AlignEquals extends AdditionalPass {
 				++$contextCounter;
 				$this->appendCode($text);
 				break;
+
+			case ST_CURLY_OPEN:
+				$this->appendCode($text);
+				$block = $this->walkAndAccumulateCurlyBlock($this->tkns);
+				$aligner = new self();
+				$this->appendCode(
+					str_replace(self::OPEN_TAG, '', $aligner->format(self::OPEN_TAG . $block))
+				);
+				break;
+
 			case ST_PARENTHESES_OPEN:
 				++$parenCount;
 				$this->appendCode($text);

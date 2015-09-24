@@ -2459,7 +2459,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "14.4.0");
+	define("VERSION", "14.5.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -7358,6 +7358,8 @@ EOT;
 	final class AlignEquals extends AdditionalPass {
 	const ALIGNABLE_EQUAL = "\x2 EQUAL%d \x3";
 
+	const OPEN_TAG = "<?php /*\x2 EQUAL OPEN TAG\x3*/";
+
 	public function candidate($source, $foundTokens) {
 		return true;
 	}
@@ -7380,6 +7382,16 @@ EOT;
 				++$contextCounter;
 				$this->appendCode($text);
 				break;
+
+			case ST_CURLY_OPEN:
+				$this->appendCode($text);
+				$block = $this->walkAndAccumulateCurlyBlock($this->tkns);
+				$aligner = new self();
+				$this->appendCode(
+					str_replace(self::OPEN_TAG, '', $aligner->format(self::OPEN_TAG . $block))
+				);
+				break;
+
 			case ST_PARENTHESES_OPEN:
 				++$parenCount;
 				$this->appendCode($text);
