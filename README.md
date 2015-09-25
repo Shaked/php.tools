@@ -15,7 +15,7 @@ php.tools
 * [Sublime Text 2/3](https://github.com/phpfmt/sublime-phpfmt)
 * [Vim](https://github.com/phpfmt/vim-phpfmt)
 * [PHPStorm](https://github.com/phpfmt/php.tools/blob/master/PHPStorm.md)
-* [Atom](https://github.com/Dgame/atom-php-fmt)
+* [Atom](https://github.com/Dgame/atom-php-fmt) - (engine not included, must download here)
 
 ## Usage
 
