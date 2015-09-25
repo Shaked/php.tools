@@ -7,7 +7,6 @@ php.tools
 [![Throughput Graph](https://graphs.waffle.io/phpfmt/php.tools/throughput.svg)](https://waffle.io/phpfmt/php.tools/metrics)
 
 ## Requirements
-- Git
 - PHP >= 5.6.0 to run the formatter. Note that the formatter can parse even a PHP file version 4 in case needed.
 
 ## Plugins
