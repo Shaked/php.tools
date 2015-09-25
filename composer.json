@@ -5,7 +5,7 @@
     "license": "BSD-3-Clause",
     "keywords": ["language syntax", "formatter", "formatting", "psr1", "psr2", "coding", "style"],
     "homepage": "https://github.com/phpfmt/php.tools",
-    "bin": ["fmt.php","fmt.phar","refactor.php","php.tools","aphpfmt"],
+    "bin": ["fmt.php","fmt.phar","refactor.php","aphpfmt"],
     "authors": [
         {
             "name": "Carlos C",

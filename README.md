@@ -20,20 +20,43 @@ php.tools
 
 ## Usage
 
-```
-    php ./php.tools [watch [command]]
-	ctags - generate ctags
-	test - execute PHPUnit
-	cover - execute PHPUnit with cover output
-	doc - execute phpDocumentor
-	watch ctags - execute PHPUnit, but keeps watching for file changes to trigger ctags generator
-	watch test - execute PHPUnit, but keeps watching for file changes to trigger the test automatically
-	watch cover - execute PHPUnit with cover output, but keeps watching for file changes to trigger the test automatically
-	watch doc - execute phpDocumentor, but keeps watching for file changes to trigger the generation automatically
-	fmt [filename] - format filename according to project formatting rules
-	fmt all - format all files according to project formatting rules
-	fmt clean - remove all backup files - *~
-	watch fmt [all|filename] - watch for changes and format according to project formatting rules
+```ShellSession
+$ php fmt.phar filename.php
+
+$ php fmt.phar --help
+Usage: fmt.phar [-hv] [-o=FILENAME] [--config=FILENAME] [--cache[=FILENAME]] [options] <target>
+  --cache[=FILENAME]                cache file. Default: .php.tools.cache
+  --cakephp                         Apply CakePHP coding style
+  --config=FILENAME                 configuration file. Default: .php.tools.ini
+  --constructor=type                analyse classes for attributes and generate constructor - camel, snake, golang
+  --enable_auto_align               disable auto align of ST_EQUAL and T_DOUBLE_ARROW
+  --exclude=pass1,passN,...         disable specific passes
+  --help-pass                       show specific information for one pass
+  --ignore=PATTERN-1,PATTERN-N,...  ignore file names whose names contain any PATTERN-N
+  --indent_with_space=SIZE          use spaces instead of tabs for indentation. Default 4
+  --laravel                         Apply Laravel coding style (deprecated)
+  --lint-before                     lint files before pretty printing (PHP must be declared in %PATH%/$PATH)
+  --list                            list possible transformations
+  --list-simple                     list possible transformations - greppable
+  --no-backup                       no backup file (original.php~)
+  --passes=pass1,passN,...          call specific compiler pass
+  --profile=NAME                    use one of profiles present in configuration file
+  --psr                             activate PSR1 and PSR2 styles
+  --psr1                            activate PSR1 style
+  --psr1-naming                     activate PSR1 style - Section 3 and 4.3 - Class and method names case.
+  --psr2                            activate PSR2 style
+  --selfupdate                      self-update fmt.phar from Github
+  --setters_and_getters=type        analyse classes for attributes and generate setters and getters - camel, snake, golang
+  --smart_linebreak_after_curly     convert multistatement blocks into multiline blocks
+  --version                         version
+  --visibility_order                fixes visibiliy order for method in classes - PSR-2 4.2
+  --yoda                            yoda-style comparisons
+  -h, --help                        this help message
+  -o=-                              output the formatted code to standard output
+  -o=file                           output the formatted code to "file"
+  -v                                verbose
+
+If <target> is "-", it reads from stdin
 ```
 
 # What does the Code Formatter do?
