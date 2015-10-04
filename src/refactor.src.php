@@ -17,11 +17,14 @@ namespace {
 	require 'Core/RefactorPass.php';
 
 	final class CodeFormatter {
-		private $passes = [];
 		private $debug = false;
+
+		private $passes = [];
+
 		public function __construct($debug = false) {
 			$this->debug = (bool) $debug;
 		}
+
 		public function addPass(FormatterPass $pass) {
 			$this->passes[] = $pass;
 		}

@@ -37,6 +37,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 				if (!$this->leftTokenIs([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
 					$touchedVisibility = true;
 					$visibilityIdx = $this->ptr;
+					$touchedDocComment = false;
 				}
 				break;
 			case T_FUNCTION:

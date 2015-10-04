@@ -167,7 +167,7 @@ EOT;
 				break;
 			}
 
-			$seqdetect++;
+			++$seqdetect;
 		}
 		while (list($idx, $line) = each($lines)) {
 			$weight = substr(strrchr($line, ':'), 1);

@@ -9096,6 +9096,7 @@ EOT;
 				if (!$this->leftTokenIs([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
 					$touchedVisibility = true;
 					$visibilityIdx = $this->ptr;
+					$touchedDocComment = false;
 				}
 				break;
 			case T_FUNCTION:
@@ -10754,7 +10755,7 @@ EOT;
 				break;
 			}
 
-			$seqdetect++;
+			++$seqdetect;
 		}
 		while (list($idx, $line) = each($lines)) {
 			$weight = substr(strrchr($line, ':'), 1);
