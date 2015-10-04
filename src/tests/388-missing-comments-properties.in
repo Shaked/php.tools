@@ -2,35 +2,31 @@
 //passes: GeneratePHPDoc
 
 class Test {
-	/**
-	 * @var mixed
-	 */
 	private $a;
-	/**
-	 * @var int
-	 */
 	private $b = 1;
-
+	private $c = "c";
+	private $d = [
+		1,
+		2,
+		3,
+	];
 	/**
-	 * @param $a
-	 * @param $b
+	 * @var float
 	 */
+	private $f = 1.25;
+
+	var $e = 10;
+
 	public function __construct(array $a, $b) {
 		$this->a = $a;
 		$this->b = $b;
 	}
 
-	/**
-	 * @return mixed
-	 */
-	public function getA() {
+	public function getA(){
 		return $this->a;
 	}
 
-	/**
-	 * @return mixed
-	 */
-	public function getB() {
+	public function getB(){
 		return $this->b;
 	}
 }

@@ -10,6 +10,27 @@ class Test {
 	 * @var int
 	 */
 	private $b = 1;
+	/**
+	 * @var string
+	 */
+	private $c = "c";
+	/**
+	 * @var array
+	 */
+	private $d = [
+		1,
+		2,
+		3,
+	];
+	/**
+	 * @var float
+	 */
+	private $f = 1.25;
+
+	/**
+	 * @var int
+	 */
+	var $e = 10;
 
 	/**
 	 * @param $a

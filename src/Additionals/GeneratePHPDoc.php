@@ -1,7 +1,7 @@
 <?php
 final class GeneratePHPDoc extends AdditionalPass {
 	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_FUNCTION])) {
+		if (isset($foundTokens[T_FUNCTION]) || isset($foundTokens[T_PUBLIC]) || isset($foundTokens[T_PROTECTED]) || isset($foundTokens[T_PRIVATE]) || isset($foundTokens[T_STATIC]) || isset($foundTokens[T_VAR])) {
 			return true;
 		}
 
@@ -34,11 +34,41 @@ final class GeneratePHPDoc extends AdditionalPass {
 			case T_PROTECTED:
 			case T_PRIVATE:
 			case T_STATIC:
-				if (!$this->leftTokenIs([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT])) {
+			case T_VAR:
+				if (!$this->leftTokenIs([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT, T_VAR])) {
 					$touchedVisibility = true;
 					$visibilityIdx = $this->ptr;
-					$touchedDocComment = false;
 				}
+
+				break;
+			case T_VARIABLE:
+				if ($touchedDocComment) {
+					$touchedDocComment = false;
+					break;
+				}
+				if (!$touchedVisibility) {
+					break;
+				}
+				$origIdx = $visibilityIdx;
+
+				$type = 'mixed';
+				if ($this->rightTokenIs([ST_EQUAL])) {
+					$this->walkUntil(ST_EQUAL);
+					if ($this->rightTokenIs([T_ARRAY, ST_BRACKET_OPEN])) {
+						$type = 'array';
+					} elseif ($this->rightTokenIs([T_LNUMBER])) {
+						$type = 'int';
+					} elseif ($this->rightTokenIs([T_DNUMBER])) {
+						$type = 'float';
+					} elseif ($this->rightTokenIs([T_CONSTANT_ENCAPSED_STRING])) {
+						$type = 'string';
+					}
+				}
+
+				$propToken = &$this->tkns[$origIdx];
+				$propToken[1] = $this->renderPropertyDocBlock($type) . $propToken[1];
+				$touchedVisibility = false;
+
 				break;
 			case T_FUNCTION:
 				if ($touchedDocComment) {
@@ -118,7 +148,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 				}
 
 				$funcToken = &$this->tkns[$origIdx];
-				$funcToken[1] = $this->renderDocBlock($paramStack, $returnStack) . $funcToken[1];
+				$funcToken[1] = $this->renderFunctionDocBlock($paramStack, $returnStack) . $funcToken[1];
 				$touchedVisibility = false;
 			}
 		}
@@ -163,7 +193,7 @@ class A {
 EOT;
 	}
 
-	private function renderDocBlock(array $paramStack, $returnStack) {
+	private function renderFunctionDocBlock(array $paramStack, $returnStack) {
 		if (empty($paramStack) && empty($returnStack)) {
 			return '';
 		}
@@ -176,5 +206,14 @@ EOT;
 		}
 		$str .= ' */' . $this->newLine;
 		return $str;
+	}
+
+	private function renderPropertyDocBlock($type) {
+		return sprintf(' /**%s* @var %s%s */%s',
+			$this->newLine,
+			$type,
+			$this->newLine,
+			$this->newLine
+		);
 	}
 }

@@ -3,7 +3,7 @@
 
 class Test {
 	/**
-	 * @var array
+	 * @var mixed
 	 */
 	private $a;
 	/**
