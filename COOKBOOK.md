@@ -13,7 +13,7 @@ Try to get acquainted with the `FormatterPass` class, which holds all the calls 
 
 ## Assumptions
 
-* Forked dericofilho/php.tools into your own Github Account.
+* Forked phpfmt/php.tools into your own Github Account.
 * Cloned your forked repository locally.
 * Installed php 5.6 or newer
 

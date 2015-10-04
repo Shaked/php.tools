@@ -2,7 +2,7 @@ php.tools is possible because these people helped. Star them.
 
 ## Maintainers
 
-* https://github.com/dericofilho
+* https://github.com/ccirello
 * https://github.com/Shaked
 
 ## Contributors

@@ -2459,7 +2459,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "14.6.0");
+	define("VERSION", "14.6.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -2522,7 +2522,7 @@ function selfupdate($argv, $inPhar) {
 	$context = stream_context_create($opts);
 
 	// current release
-	$releases = json_decode(file_get_contents('https://api.github.com/repos/dericofilho/php.tools/tags', false, $context), true);
+	$releases = json_decode(file_get_contents('https://api.github.com/repos/phpfmt/php.tools/tags', false, $context), true);
 	$commit = json_decode(file_get_contents($releases[0]['commit']['url'], false, $context), true);
 	$files = json_decode(file_get_contents($commit['commit']['tree']['url'], false, $context), true);
 	foreach ($files['tree'] as $file) {
@@ -2550,6 +2550,7 @@ function selfupdate($argv, $inPhar) {
 	fwrite(STDERR, 'Up-to-date!' . PHP_EOL);
 	exit(0);
 }
+
 
 	//Copyright (c) 2014, Carlos C
 //All rights reserved.
