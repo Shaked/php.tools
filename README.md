@@ -1,6 +1,8 @@
 php.tools
 =========
 
+If you need help, check this project [Google Group](https://groups.google.com/forum/#!forum/phpfmt).
+
 ## Build statuses
 - Master: [![Build Status](https://travis-ci.org/phpfmt/php.tools.svg?branch=master)](https://travis-ci.org/phpfmt/php.tools)
 
