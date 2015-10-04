@@ -2459,7 +2459,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "14.5.1");
+	define("VERSION", "14.6.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -8287,6 +8287,8 @@ EOT;
 						T_LOGICAL_XOR,
 						T_OBJECT_OPERATOR,
 						T_POW,
+
+						ST_QUESTION,
 					]) ||
 					$this->rightTokenIs([
 						T_COMMENT,

@@ -205,6 +205,8 @@ final class AutoSemicolon extends AdditionalPass {
 						T_LOGICAL_XOR,
 						T_OBJECT_OPERATOR,
 						T_POW,
+
+						ST_QUESTION,
 					]) ||
 					$this->rightTokenIs([
 						T_COMMENT,
