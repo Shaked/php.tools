@@ -33,7 +33,7 @@ class Test {
 	var $e = 10;
 
 	/**
-	 * @param $a
+	 * @param array $a
 	 * @param $b
 	 */
 	public function __construct(array $a, $b) {
