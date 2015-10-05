@@ -106,7 +106,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 						continue;
 					}
 					if (T_VARIABLE == $id) {
-						if ($this->rightTokenIs([ST_EQUAL]) && $this->walkUntil(ST_EQUAL) && $this->rightTokenIs([T_ARRAY])) {
+						if ($this->leftTokenIs([T_ARRAY]) || $this->rightTokenIs([ST_EQUAL]) && $this->walkUntil(ST_EQUAL) && $this->rightTokenIs([T_ARRAY])) {
 							$tmp['type'] = 'array';
 						}
 						$tmp['name'] = $text;

@@ -1,0 +1,31 @@
+<?php
+//passes: GeneratePHPDoc
+class Tools {
+
+}
+
+class Test {
+	/**
+	 * @var float
+	 */
+	private $f = 1.25;
+
+	/**
+	 * @param \Traversable $t
+	 * @param Tools $k
+	 * @param array $a
+	 * @param $b
+	 */
+	public function __construct(\Traversable $t, Tools $k, array $a, $b) {
+		$this->a = $a;
+		$this->b = $b;
+	}
+
+	/**
+	 * @param $t
+	 * @return mixed
+	 */
+	public function getF($t) {
+		return $this->f . $t;
+	}
+}
