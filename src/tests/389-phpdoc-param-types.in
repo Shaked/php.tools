@@ -1,7 +1,13 @@
 <?php
 //passes: GeneratePHPDoc
 class Tools {
-
+	/**
+	 * Create a new command instance.
+	 *
+	 * @return void
+	 */
+	public function __construct($x) {
+	}
 }
 
 class Test {
