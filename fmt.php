@@ -9104,6 +9104,9 @@ EOT;
 
 				break;
 			case T_VARIABLE:
+				if (!$this->leftTokenIs([T_FINAL, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_ABSTRACT, T_VAR])) {
+					break;
+				}
 				if ($touchedDocComment) {
 					$touchedDocComment = false;
 					break;
