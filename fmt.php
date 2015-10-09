@@ -2459,7 +2459,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "14.7.1");
+	define("VERSION", "14.8.0");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -9761,7 +9761,7 @@ EOT;
 	 * @codeCoverageIgnore
 	 */
 	public function getDescription() {
-		return 'Sort methods within class in alphabetic order.';
+		return 'Sort methods within class in alphabetic order. Deprecated: use OrganizeClass.';
 	}
 
 	/**
@@ -9896,7 +9896,7 @@ EOT;
 	 * @codeCoverageIgnore
 	 */
 	public function getDescription() {
-		return 'Sort methods within class in alphabetic and visibility order .';
+		return 'Sort methods within class in alphabetic and visibility order. Deprecated: use OrganizeClass.';
 	}
 
 	/**

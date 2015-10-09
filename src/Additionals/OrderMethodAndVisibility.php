@@ -8,7 +8,7 @@ final class OrderMethodAndVisibility extends OrderMethod {
 	 * @codeCoverageIgnore
 	 */
 	public function getDescription() {
-		return 'Sort methods within class in alphabetic and visibility order .';
+		return 'Sort methods within class in alphabetic and visibility order. Deprecated: use OrganizeClass.';
 	}
 
 	/**

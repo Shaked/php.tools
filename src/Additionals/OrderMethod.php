@@ -47,7 +47,7 @@ class OrderMethod extends AdditionalPass {
 	 * @codeCoverageIgnore
 	 */
 	public function getDescription() {
-		return 'Sort methods within class in alphabetic order.';
+		return 'Sort methods within class in alphabetic order. Deprecated: use OrganizeClass.';
 	}
 
 	/**
