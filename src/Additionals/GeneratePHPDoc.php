@@ -120,7 +120,7 @@ final class GeneratePHPDoc extends AdditionalPass {
 				}
 
 				$returnStack = '';
-				if (!$this->leftUsefulTokenIs(ST_SEMI_COLON)) {
+				if (!$this->rightUsefulTokenIs(ST_SEMI_COLON)) {
 					$this->walkUntil(ST_CURLY_OPEN);
 					$count = 1;
 					while (list($index, $token) = each($this->tkns)) {
