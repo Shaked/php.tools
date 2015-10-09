@@ -5,7 +5,11 @@ class OrganizeClass extends AdditionalPass {
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
 
 	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_CLASS], $foundTokens[T_FUNCTION])) {
+		if (
+			isset($foundTokens[T_CLASS])
+			|| isset($foundTokens[T_TRAIT])
+			|| isset($foundTokens[T_INTERFACE])
+		) {
 			return true;
 		}
 
@@ -15,7 +19,7 @@ class OrganizeClass extends AdditionalPass {
 	public function format($source) {
 		$this->tkns = token_get_all($source);
 
-		// It scans for classes body and organizes functions internally.
+		// It scans for classes/interfaces/traits bodies and organizes functions internally.
 		$return = '';
 		$classBlock = '';
 
@@ -24,6 +28,8 @@ class OrganizeClass extends AdditionalPass {
 			$this->ptr = $index;
 			switch ($id) {
 			case T_CLASS:
+			case T_INTERFACE:
+			case T_TRAIT:
 				$return = $text;
 				$return .= $this->walkAndAccumulateUntil($this->tkns, ST_CURLY_OPEN);
 				$classBlock = $this->walkAndAccumulateCurlyBlock($this->tkns);
@@ -47,7 +53,7 @@ class OrganizeClass extends AdditionalPass {
 	 * @codeCoverageIgnore
 	 */
 	public function getDescription() {
-		return 'Organize class structure (beta).';
+		return 'Organize class, interface and trait structure.';
 	}
 
 	/**
