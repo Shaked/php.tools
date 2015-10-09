@@ -25,7 +25,6 @@ abstract class BaseCodeFormatter {
 
 		'AlignPHPCode' => false,
 		'ConvertOpenTagWithEcho' => false,
-		'RestoreComments' => false,
 		'UpgradeToPreg' => false,
 		'DocBlockToComment' => false,
 		'LongArray' => false,
@@ -33,8 +32,6 @@ abstract class BaseCodeFormatter {
 		'StripExtraCommaInArray' => false,
 		'NoSpaceAfterPHPDocBlocks' => false,
 		'RemoveUseLeadingSlash' => false,
-		'OrderMethodAndVisibility' => false,
-		'OrderMethod' => false,
 		'ShortArray' => false,
 		'MergeElseIf' => false,
 		'AutoPreincrement' => false,
@@ -132,6 +129,8 @@ abstract class BaseCodeFormatter {
 		'PSR2MultilineFunctionParams' => false,
 		'SpaceAroundControlStructures' => false,
 
+		'OrderMethodAndVisibility' => false,
+		'OrderMethod' => false,
 		'OrganizeClass' => false,
 		'AutoSemicolon' => false,
 		'PSR1OpenTags' => false,

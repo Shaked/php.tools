@@ -2459,7 +2459,8 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "14.8.0");
+	define('VERSION', '15.0.0');
+
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -3583,7 +3584,6 @@ abstract class BaseCodeFormatter {
 
 		'AlignPHPCode' => false,
 		'ConvertOpenTagWithEcho' => false,
-		'RestoreComments' => false,
 		'UpgradeToPreg' => false,
 		'DocBlockToComment' => false,
 		'LongArray' => false,
@@ -3591,8 +3591,6 @@ abstract class BaseCodeFormatter {
 		'StripExtraCommaInArray' => false,
 		'NoSpaceAfterPHPDocBlocks' => false,
 		'RemoveUseLeadingSlash' => false,
-		'OrderMethodAndVisibility' => false,
-		'OrderMethod' => false,
 		'ShortArray' => false,
 		'MergeElseIf' => false,
 		'AutoPreincrement' => false,
@@ -3690,6 +3688,8 @@ abstract class BaseCodeFormatter {
 		'PSR2MultilineFunctionParams' => false,
 		'SpaceAroundControlStructures' => false,
 
+		'OrderMethodAndVisibility' => false,
+		'OrderMethod' => false,
 		'OrganizeClass' => false,
 		'AutoSemicolon' => false,
 		'PSR1OpenTags' => false,
@@ -5693,37 +5693,6 @@ final class AutoImportPass extends FormatterPass {
 	}
 }
 
-	final class RestoreComments extends FormatterPass {
-	// Injected by CodeFormatter.php
-	public $commentStack = [];
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function candidate($source, $foundTokens) {
-		if (isset($foundTokens[T_COMMENT])) {
-			return true;
-		}
-
-		return false;
-	}
-
-	public function format($source) {
-		$commentStack = array_reverse($this->commentStack);
-		$this->tkns = token_get_all($source);
-		$this->code = '';
-		while (list($index, $token) = each($this->tkns)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			$this->tkns[$this->ptr] = [$id, $text];
-			if (T_COMMENT == $id) {
-				$comment = array_pop($commentStack);
-				$this->tkns[$this->ptr] = $comment;
-			}
-		}
-		return $this->renderLight($this->tkns);
-	}
-}
 	final class RTrim extends FormatterPass {
 	public function candidate($source, $foundTokens) {
 		return true;
@@ -9713,7 +9682,7 @@ function a($myInt){
 EOT;
 	}
 }
-	class OrderMethod extends AdditionalPass {
+	class OrganizeClass extends AdditionalPass {
 	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
 
 	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
@@ -9761,7 +9730,7 @@ EOT;
 	 * @codeCoverageIgnore
 	 */
 	public function getDescription() {
-		return 'Sort methods within class in alphabetic order. Deprecated: use OrganizeClass.';
+		return 'Organize class structure (beta).';
 	}
 
 	/**
@@ -9770,154 +9739,34 @@ EOT;
 	public function getExample() {
 		return <<<'EOT'
 <?php
-class A {
-	function b(){}
-	function c(){}
-	function a(){}
-}
-?>
-to
-<?php
-class A {
-	function a(){}
-	function b(){}
-	function c(){}
-}
-?>
-EOT;
-	}
-
-	public function orderMethods($source) {
-		$tokens = token_get_all($source);
-
-		// It takes classes' body, and looks for methods and sorts them
-		$return = '';
-		$functionList = [];
-		$curlyCount = null;
-		$touchedMethod = false;
-		$functionName = '';
-		$touchedDocComment = false;
-		$docCommentStack = '';
-
-		while (list($index, $token) = each($tokens)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-			case T_DOC_COMMENT:
-				if (!$touchedDocComment) {
-					$touchedDocComment = true;
-					$docCommentStack = '';
-				}
-				$docCommentStack .= $text;
-				break;
-
-			case T_VARIABLE:
-			case T_STRING:
-				if ($touchedDocComment) {
-					$touchedDocComment = false;
-					$return .= $docCommentStack;
-				}
-				$return .= $text;
-				break;
-
-			case T_ABSTRACT:
-			case T_STATIC:
-			case T_PRIVATE:
-			case T_PROTECTED:
-			case T_PUBLIC:
-				$stack = '';
-				if ($touchedDocComment) {
-					$touchedDocComment = false;
-					$stack .= $docCommentStack;
-				}
-				$stack .= $text;
-				$curlyCount = null;
-				$touchedMethod = false;
-				$functionName = '';
-				while (list($index, $token) = each($tokens)) {
-					list($id, $text) = $this->getToken($token);
-					$this->ptr = $index;
-
-					$stack .= $text;
-					if (T_FUNCTION == $id) {
-						$touchedMethod = true;
-					}
-					if (T_VARIABLE == $id && !$touchedMethod) {
-						break;
-					}
-					if (T_STRING == $id && $touchedMethod && empty($functionName)) {
-						$functionName = $text;
-					}
-
-					if (null === $curlyCount && ST_SEMI_COLON == $id) {
-						break;
-					}
-
-					if (ST_CURLY_OPEN == $id) {
-						++$curlyCount;
-					}
-					if (ST_CURLY_CLOSE == $id) {
-						--$curlyCount;
-					}
-					if (0 === $curlyCount) {
-						break;
-					}
-				}
-				$appendWith = $stack;
-				if ($touchedMethod) {
-					$functionList[$functionName] = $stack;
-					$appendWith = self::METHOD_REPLACEMENT_PLACEHOLDER;
-				}
-				$return .= $appendWith;
-				break;
-			default:
-				if ($touchedDocComment) {
-					$docCommentStack .= $text;
-					break;
-				}
-				$return .= $text;
-				break;
-			}
-		}
-		ksort($functionList);
-		foreach ($functionList as $functionBody) {
-			$return = preg_replace('/' . self::METHOD_REPLACEMENT_PLACEHOLDER . '/', $functionBody, $return, 1);
-		}
-		return $return;
-	}
-}
-
-	final class OrderMethodAndVisibility extends OrderMethod {
-	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
-
-	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Sort methods within class in alphabetic and visibility order. Deprecated: use OrganizeClass.';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
+// From
 class A {
 	public function d(){}
 	protected function b(){}
+	private $a = "";
 	private function c(){}
 	public function a(){}
+	public $b = "";
+	const B = 0;
+	const A = 0;
 }
-?>
-to
-<?php
+
+// To
 class A {
+	const A = 0;
+
+	const B = 0;
+
+	public $b = "";
+
+	private $a = "";
+
 	public function a(){}
+
 	public function d(){}
+
 	protected function b(){}
+
 	private function c(){}
 }
 ?>
@@ -9927,113 +9776,183 @@ EOT;
 	public function orderMethods($source) {
 		$tokens = token_get_all($source);
 
-		// It takes classes' body, and looks for methods and sorts them
-		$return = '';
-		$functionList = [];
-		$curlyCount = null;
-		$touchedMethod = false;
-		$functionName = '';
-		$touchedDocComment = false;
+		// It takes classes' body, and looks for methods, constants
+		// and attributes, and recreates an organized class out of them.
+		$attributeList = [];
+		$commentStack = [];
+		$constList = [];
 		$docCommentStack = '';
+		$functionList = [];
+		$touchedDocComment = false;
+		$useStack = '';
 
 		while (list($index, $token) = each($tokens)) {
 			list($id, $text) = $this->getToken($token);
 			$this->ptr = $index;
 			switch ($id) {
+			case T_USE:
+				if ($touchedDocComment) {
+					$touchedDocComment = false;
+					$useStack .= $docCommentStack;
+				}
+				$useStack .= $text;
+				list($foundText, $foundId) = $this->walkAndAccumulateUntilAny($tokens, [ST_CURLY_OPEN, ST_SEMI_COLON]);
+				$useStack .= $foundText;
+				if (ST_CURLY_OPEN == $foundId) {
+					$useStack .= $this->walkAndAccumulateCurlyBlock($tokens);
+				}
+				$useStack .= $this->newLine;
+				break;
+
+			case T_COMMENT:
+				if (strpos($text, "\x2") === false) {
+					if ($this->rightTokenSubsetIsAtIdx($tokens, $this->ptr, [
+						T_ABSTRACT,
+						T_FUNCTION,
+						T_PRIVATE,
+						T_PROTECTED,
+						T_PUBLIC,
+						T_STATIC,
+					], $this->ignoreFutileTokens)) {
+						if (!$touchedDocComment) {
+							$touchedDocComment = true;
+							$docCommentStack = ' ';
+						}
+						$docCommentStack .= $text;
+						break;
+					}
+					$commentStack[] = $text;
+				}
+				break;
+
 			case T_DOC_COMMENT:
 				if (!$touchedDocComment) {
 					$touchedDocComment = true;
-					$docCommentStack = '';
+					$docCommentStack = ' ';
 				}
 				$docCommentStack .= $text;
 				break;
 
-			case T_VARIABLE:
-			case T_STRING:
-				if ($touchedDocComment) {
-					$touchedDocComment = false;
-					$return .= $docCommentStack;
-				}
-				$return .= $text;
-				break;
-
-			case T_ABSTRACT:
-			case T_STATIC:
-			case T_PRIVATE:
-			case T_PROTECTED:
-			case T_PUBLIC:
+			case T_CONST:
 				$stack = '';
 				if ($touchedDocComment) {
 					$touchedDocComment = false;
 					$stack .= $docCommentStack;
 				}
 				$stack .= $text;
-				$curlyCount = null;
+				$constName = $this->walkAndAccumulateUntil($tokens, T_STRING);
+				$stack .= $constName;
+				$stack .= $this->walkAndAccumulateUntil($tokens, ST_SEMI_COLON);
+				$constList[$constName] = $stack;
+				break;
+
+			case T_ABSTRACT:
+			case T_FUNCTION:
+			case T_PRIVATE:
+			case T_PROTECTED:
+			case T_PUBLIC:
+			case T_STATIC:
+			case T_VARIABLE:
+				$stack = '';
+				if ($touchedDocComment) {
+					$touchedDocComment = false;
+					$stack .= $docCommentStack;
+				}
 				$touchedMethod = false;
+				$touchedAttribute = false;
 				$functionName = '';
+				$attributeName = '';
 				$visibilityLevel = 0;
-				if (T_PROTECTED == $id) {
-					$visibilityLevel = 1;
-				} elseif (T_PRIVATE == $id) {
-					$visibilityLevel = 2;
-				}
-				while (list($index, $token) = each($tokens)) {
-					list($id, $text) = $this->getToken($token);
-					$this->ptr = $index;
 
-					$stack .= $text;
-					if (T_PROTECTED == $id) {
+				$searchFor = [
+					T_ABSTRACT,
+					T_FUNCTION,
+					T_PRIVATE,
+					T_PROTECTED,
+					T_PUBLIC,
+					T_STATIC,
+					T_STRING,
+					T_VARIABLE,
+				];
+				prev($tokens);
+
+				do {
+					list($foundText, $foundId) = $this->walkAndAccumulateUntilAny($tokens, $searchFor);
+					if (T_PROTECTED == $foundId) {
 						$visibilityLevel = 1;
-					} elseif (T_PRIVATE == $id) {
+					} elseif (T_PRIVATE == $foundId) {
 						$visibilityLevel = 2;
-					}
-
-					if (T_FUNCTION == $id) {
+					} elseif (T_FUNCTION == $foundId) {
 						$touchedMethod = true;
+					} elseif (T_VARIABLE == $foundId) {
+						$touchedAttribute = true;
+						$attributeName = $foundText;
+					} elseif (T_STRING == $foundId && $touchedMethod) {
+						$functionName = $foundText;
 					}
-					if (T_VARIABLE == $id && !$touchedMethod) {
-						break;
-					}
-					if (T_STRING == $id && $touchedMethod && empty($functionName)) {
-						$functionName = $text;
-					}
+					$stack .= $foundText;
+				} while (empty($functionName) && empty($attributeName));
 
-					if (null === $curlyCount && ST_SEMI_COLON == $id) {
-						break;
-					}
-
-					if (ST_CURLY_OPEN == $id) {
-						++$curlyCount;
-					}
-					if (ST_CURLY_CLOSE == $id) {
-						--$curlyCount;
-					}
-					if (0 === $curlyCount) {
-						break;
-					}
-				}
-				$appendWith = $stack;
 				if ($touchedMethod) {
+					list($foundText, $foundId) = $this->walkAndAccumulateUntilAny($tokens, [ST_CURLY_OPEN, ST_SEMI_COLON]);
+					$stack .= $foundText;
+					if (ST_CURLY_OPEN == $foundId) {
+						$stack .= $this->walkAndAccumulateCurlyBlock($tokens);
+					}
 					$functionList[$visibilityLevel . ':' . $functionName] = $stack;
-					$appendWith = self::METHOD_REPLACEMENT_PLACEHOLDER;
+				} elseif ($touchedAttribute) {
+					$stack .= $this->walkAndAccumulateUntil($tokens, ST_SEMI_COLON);
+					$attributeList[$visibilityLevel . ':' . $attributeName] = $stack;
 				}
-				$return .= $appendWith;
 				break;
+
 			default:
 				if ($touchedDocComment) {
 					$docCommentStack .= $text;
 					break;
 				}
-				$return .= $text;
 				break;
 			}
 		}
+		ksort($constList);
+		ksort($attributeList);
 		ksort($functionList);
-		foreach ($functionList as $functionBody) {
-			$return = preg_replace('/' . self::METHOD_REPLACEMENT_PLACEHOLDER . '/', $functionBody, $return, 1);
+
+		$final = '';
+		if (!empty($useStack)) {
+			$final .= $useStack . $this->newLine;
 		}
-		return $return;
+
+		foreach ($commentStack as $text) {
+			$final .= ' ' . $text;
+			if ($this->substrCountTrailing($text, "\n") === 0) {
+				$final .= $this->newLine;
+			}
+		}
+
+		$final .= $this->newLine;
+		foreach ($constList as $text) {
+			$final .= $text . $this->newLine . $this->newLine;
+		}
+
+		$final .= $this->newLine;
+		foreach ($attributeList as $text) {
+			$final .= $text . $this->newLine . $this->newLine;
+		}
+
+		$final .= $this->newLine;
+		foreach ($functionList as $text) {
+			$final .= $text . $this->newLine . $this->newLine;
+		}
+
+		return $this->newLine . ' ' . trim($final) . $this->newLine . ST_CURLY_CLOSE;
 	}
+}
+
+	final class OrderMethod extends OrganizeClass {
+}
+
+	final class OrderMethodAndVisibility extends OrganizeClass {
 }
 
 	class OrderAndRemoveUseClauses extends AdditionalPass {
@@ -10405,230 +10324,6 @@ EOT;
 	protected function sortUseClauses($source, $splitComma, $removeUnused, $stripBlankLines, $blanklineAfterUseBlock) {
 		$removeUnused = false;
 		return parent::sortUseClauses($source, $splitComma, $removeUnused, $stripBlankLines, $blanklineAfterUseBlock);
-	}
-}
-
-	final class OrganizeClass extends OrderMethod {
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDescription() {
-		return 'Organize class structure (beta).';
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getExample() {
-		return <<<'EOT'
-<?php
-// From
-class A {
-	public function d(){}
-	protected function b(){}
-	private $a = "";
-	private function c(){}
-	public function a(){}
-	public $b = "";
-	const B = 0;
-	const A = 0;
-}
-
-// To
-class A {
-	const A = 0;
-
-	const B = 0;
-
-	public $b = "";
-
-	private $a = "";
-
-	public function a(){}
-
-	public function d(){}
-
-	protected function b(){}
-
-	private function c(){}
-}
-?>
-EOT;
-	}
-
-	public function orderMethods($source) {
-		$tokens = token_get_all($source);
-
-		// It takes classes' body, and looks for methods, constants
-		// and attributes, and recreates an organized class out of them.
-		$attributeList = [];
-		$commentStack = [];
-		$constList = [];
-		$docCommentStack = '';
-		$functionList = [];
-		$touchedDocComment = false;
-		$useStack = '';
-
-		while (list($index, $token) = each($tokens)) {
-			list($id, $text) = $this->getToken($token);
-			$this->ptr = $index;
-			switch ($id) {
-			case T_USE:
-				if ($touchedDocComment) {
-					$touchedDocComment = false;
-					$useStack .= $docCommentStack;
-				}
-				$useStack .= $text;
-				list($foundText, $foundId) = $this->walkAndAccumulateUntilAny($tokens, [ST_CURLY_OPEN, ST_SEMI_COLON]);
-				$useStack .= $foundText;
-				if (ST_CURLY_OPEN == $foundId) {
-					$useStack .= $this->walkAndAccumulateCurlyBlock($tokens);
-				}
-				$useStack .= $this->newLine;
-				break;
-
-			case T_COMMENT:
-				if (strpos($text, "\x2") === false) {
-					if ($this->rightTokenSubsetIsAtIdx($tokens, $this->ptr, [
-						T_ABSTRACT,
-						T_FUNCTION,
-						T_PRIVATE,
-						T_PROTECTED,
-						T_PUBLIC,
-						T_STATIC,
-					], $this->ignoreFutileTokens)) {
-						if (!$touchedDocComment) {
-							$touchedDocComment = true;
-							$docCommentStack = ' ';
-						}
-						$docCommentStack .= $text;
-						break;
-					}
-					$commentStack[] = $text;
-				}
-				break;
-
-			case T_DOC_COMMENT:
-				if (!$touchedDocComment) {
-					$touchedDocComment = true;
-					$docCommentStack = ' ';
-				}
-				$docCommentStack .= $text;
-				break;
-
-			case T_CONST:
-				$stack = '';
-				if ($touchedDocComment) {
-					$touchedDocComment = false;
-					$stack .= $docCommentStack;
-				}
-				$stack .= $text;
-				$constName = $this->walkAndAccumulateUntil($tokens, T_STRING);
-				$stack .= $constName;
-				$stack .= $this->walkAndAccumulateUntil($tokens, ST_SEMI_COLON);
-				$constList[$constName] = $stack;
-				break;
-
-			case T_ABSTRACT:
-			case T_FUNCTION:
-			case T_PRIVATE:
-			case T_PROTECTED:
-			case T_PUBLIC:
-			case T_STATIC:
-			case T_VARIABLE:
-				$stack = '';
-				if ($touchedDocComment) {
-					$touchedDocComment = false;
-					$stack .= $docCommentStack;
-				}
-				$touchedMethod = false;
-				$touchedAttribute = false;
-				$functionName = '';
-				$attributeName = '';
-				$visibilityLevel = 0;
-
-				$searchFor = [
-					T_ABSTRACT,
-					T_FUNCTION,
-					T_PRIVATE,
-					T_PROTECTED,
-					T_PUBLIC,
-					T_STATIC,
-					T_STRING,
-					T_VARIABLE,
-				];
-				prev($tokens);
-
-				do {
-					list($foundText, $foundId) = $this->walkAndAccumulateUntilAny($tokens, $searchFor);
-					if (T_PROTECTED == $foundId) {
-						$visibilityLevel = 1;
-					} elseif (T_PRIVATE == $foundId) {
-						$visibilityLevel = 2;
-					} elseif (T_FUNCTION == $foundId) {
-						$touchedMethod = true;
-					} elseif (T_VARIABLE == $foundId) {
-						$touchedAttribute = true;
-						$attributeName = $foundText;
-					} elseif (T_STRING == $foundId && $touchedMethod) {
-						$functionName = $foundText;
-					}
-					$stack .= $foundText;
-				} while (empty($functionName) && empty($attributeName));
-
-				if ($touchedMethod) {
-					list($foundText, $foundId) = $this->walkAndAccumulateUntilAny($tokens, [ST_CURLY_OPEN, ST_SEMI_COLON]);
-					$stack .= $foundText;
-					if (ST_CURLY_OPEN == $foundId) {
-						$stack .= $this->walkAndAccumulateCurlyBlock($tokens);
-					}
-					$functionList[$visibilityLevel . ':' . $functionName] = $stack;
-				} elseif ($touchedAttribute) {
-					$stack .= $this->walkAndAccumulateUntil($tokens, ST_SEMI_COLON);
-					$attributeList[$visibilityLevel . ':' . $attributeName] = $stack;
-				}
-				break;
-
-			default:
-				if ($touchedDocComment) {
-					$docCommentStack .= $text;
-					break;
-				}
-				break;
-			}
-		}
-		ksort($constList);
-		ksort($attributeList);
-		ksort($functionList);
-
-		$final = '';
-		if (!empty($useStack)) {
-			$final .= $useStack . $this->newLine;
-		}
-
-		foreach ($commentStack as $text) {
-			$final .= ' ' . $text;
-			if ($this->substrCountTrailing($text, "\n") === 0) {
-				$final .= $this->newLine;
-			}
-		}
-
-		$final .= $this->newLine;
-		foreach ($constList as $text) {
-			$final .= $text . $this->newLine . $this->newLine;
-		}
-
-		$final .= $this->newLine;
-		foreach ($attributeList as $text) {
-			$final .= $text . $this->newLine . $this->newLine;
-		}
-
-		$final .= $this->newLine;
-		foreach ($functionList as $text) {
-			$final .= $text . $this->newLine . $this->newLine;
-		}
-
-		return $this->newLine . ' ' . trim($final) . $this->newLine . ST_CURLY_CLOSE;
 	}
 }
 

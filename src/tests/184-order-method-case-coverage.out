@@ -3,6 +3,7 @@
 
 abstract class A {
 	abstract public function b();
+
 	public function setA($a) {
 		$this->a = $a;
 	}

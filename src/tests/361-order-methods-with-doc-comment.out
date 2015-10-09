@@ -2,6 +2,7 @@
 //passes:OrderMethod
 
 class A {
+	/* $a */
 
 	/**
 	 * @param $a
@@ -11,8 +12,6 @@ class A {
 
 	}
 
-	/* $a */
-
 	/**
 	 * @param $b
 	 * @param $c
@@ -20,5 +19,4 @@ class A {
 	public function b($b, $c) {
 
 	}
-
 }

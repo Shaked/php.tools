@@ -1,5 +1,48 @@
 <?php
-final class OrganizeClass extends OrderMethod {
+class OrganizeClass extends AdditionalPass {
+	const METHOD_REPLACEMENT_PLACEHOLDER = "\x2 METHODPLACEHOLDER \x3";
+
+	const OPENER_PLACEHOLDER = "<?php /*\x2 ORDERMETHOD \x3*/";
+
+	public function candidate($source, $foundTokens) {
+		if (isset($foundTokens[T_CLASS], $foundTokens[T_FUNCTION])) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public function format($source) {
+		$this->tkns = token_get_all($source);
+
+		// It scans for classes body and organizes functions internally.
+		$return = '';
+		$classBlock = '';
+
+		while (list($index, $token) = each($this->tkns)) {
+			list($id, $text) = $this->getToken($token);
+			$this->ptr = $index;
+			switch ($id) {
+			case T_CLASS:
+				$return = $text;
+				$return .= $this->walkAndAccumulateUntil($this->tkns, ST_CURLY_OPEN);
+				$classBlock = $this->walkAndAccumulateCurlyBlock($this->tkns);
+				$return .= str_replace(
+					self::OPENER_PLACEHOLDER,
+					'',
+					static::orderMethods(self::OPENER_PLACEHOLDER . $classBlock)
+				);
+				$this->appendCode($return);
+				break;
+			default:
+				$this->appendCode($text);
+				break;
+			}
+		}
+
+		return $this->code;
+	}
+
 	/**
 	 * @codeCoverageIgnore
 	 */

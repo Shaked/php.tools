@@ -73,7 +73,6 @@ namespace {
 	require 'Core/ReindentColonBlocks.php';
 	require 'Core/ReindentObjOps.php';
 	require 'Core/ResizeSpaces.php';
-	require 'Core/RestoreComments.php';
 	require 'Core/RTrim.php';
 	require 'Core/SettersAndGettersPass.php';
 	require 'Core/SplitCurlyCloseAndTokens.php';
@@ -122,11 +121,11 @@ namespace {
 	require 'Additionals/MergeNamespaceWithOpenTag.php';
 	require 'Additionals/MildAutoPreincrement.php';
 	require 'Additionals/NoSpaceAfterPHPDocBlocks.php';
+	require 'Additionals/OrganizeClass.php';
 	require 'Additionals/OrderMethod.php';
 	require 'Additionals/OrderMethodAndVisibility.php';
 	require 'Additionals/OrderAndRemoveUseClauses.php';
 	require 'Additionals/OnlyOrderUseClauses.php';
-	require 'Additionals/OrganizeClass.php';
 	require 'Additionals/PrettyPrintDocBlocks.php';
 	require 'Additionals/PSR2EmptyFunction.php';
 	require 'Additionals/PSR2MultilineFunctionParams.php';

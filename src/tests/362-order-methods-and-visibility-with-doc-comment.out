@@ -2,6 +2,7 @@
 //passes:OrderMethodAndVisibility
 
 class A {
+	/* $a */
 
 	/**
 	 * @param $a
@@ -11,8 +12,6 @@ class A {
 
 	}
 
-	/* $a */
-
 	/**
 	 * @param $b
 	 * @param $c
@@ -20,5 +19,4 @@ class A {
 	private function a($b, $c) {
 
 	}
-
 }
