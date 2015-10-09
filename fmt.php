@@ -2459,7 +2459,7 @@ final class Cache implements Cacher {
 
 	}
 
-	define("VERSION", "15.1.0");
+	define("VERSION", "15.1.1");
 	
 function extractFromArgv($argv, $item) {
 	return array_values(
@@ -3754,14 +3754,11 @@ abstract class BaseCodeFormatter {
 			},
 			array_filter($this->passes)
 		);
-		list($commentStack, $foundTokens) = $this->getCommentStack($source);
+		$foundTokens = $this->getFoundTokens($source);
 		$this->hasBeforeFormat && $this->beforeFormat($source);
 		while (($pass = array_pop($passes))) {
 			$this->hasBeforePass && $this->beforePass($source, $pass);
 			if ($pass->candidate($source, $foundTokens)) {
-				if (isset($pass->commentStack)) {
-					$pass->commentStack = $commentStack;
-				}
 				$source = $pass->format($source);
 				$this->hasAfterExecutedPass && $this->afterExecutedPass($source, $pass);
 			}
@@ -3782,18 +3779,14 @@ abstract class BaseCodeFormatter {
 		return $ret;
 	}
 
-	private function getCommentStack($source) {
+	private function getFoundTokens($source) {
 		$foundTokens = [];
-		$commentStack = [];
 		$tkns = token_get_all($source);
 		foreach ($tkns as $token) {
 			list($id, $text) = $this->getToken($token);
 			$foundTokens[$id] = $id;
-			if (T_COMMENT === $id) {
-				$commentStack[] = [$id, $text];
-			}
 		}
-		return [$commentStack, $foundTokens];
+		return $foundTokens;
 	}
 }
 
